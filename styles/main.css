@@ -96,7 +96,8 @@ h1,
 
 @media screen and (max-width: 576px) {
   .container .right {
-    height: 130vh;
+    margin-top: 20vh;
+    height: 100vh;
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
@@ -112,6 +113,10 @@ h1,
 @media screen and (max-width: 576px) {
   .container .right .mainInfo {
     text-align: center;
+  }
+  .icon-list {
+    padding-top: 30px;
+    padding-bottom: 30px;
   }
 }
 
