@@ -1,4 +1,4 @@
-var yourDate = "2024-01-01" // Your date here
+var yourDate = "2024-08-01" // Your date here
 ! function (e) {
     var t = {};
 
