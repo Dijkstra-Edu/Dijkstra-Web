@@ -17,6 +17,7 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
+  IconTransformPoint,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -32,6 +33,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useSession } from "next-auth/react";
 
 const data = {
   user: {
@@ -59,6 +61,11 @@ const data = {
       title: "Learning Hub",
       url: "/learning-hub",
       icon: IconChartBar,
+    },
+    {
+      title: "Discussion Forum",
+      url: "/discussions",
+      icon: IconTransformPoint,
     },
     {
       title: "Pin Board",
@@ -156,15 +163,23 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session, status } = useSession();
+
+  if (status === "authenticated") {
+    data.user.name = session.user.name || "No name";
+    data.user.email = session.user.email || "No email";
+    data.user.avatar = session.user.avatar_url || session.user.image || ""; // your extended avatar_url or fallback
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <a href="#" className="flex items-center gap-2">
-                <img src="/splash-icon.png" alt="Logo" className="h-12 w-auto" />
-                <span className="text-base font-semibold">Dijkstra</span>
-              </a>
+              <img src="/splash-icon.png" alt="Logo" className="h-12 w-auto" />
+              <span className="text-base font-semibold">Dijkstra</span>
+            </a>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

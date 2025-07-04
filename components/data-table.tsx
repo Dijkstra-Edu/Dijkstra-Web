@@ -341,7 +341,8 @@ export function DataTable({
 }: {
   data: z.infer<typeof schema>[]
 }) {
-  const [data, setData] = React.useState(() => initialData)
+  console.log("DataTable rendered with data:", initialData)
+  const [data, setData] = React.useState(initialData)
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})

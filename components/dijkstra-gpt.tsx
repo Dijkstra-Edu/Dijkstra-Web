@@ -68,7 +68,7 @@ export default function ChatInterface() {
   }
 
   const examplePrompts = [
-    "How do I start coding in Python?",
+    "I'm lost. How do I get started with coding to get a job in tech?",
     "What are the steps I can take to become a Computer Science Engineer?",
     "How do I approach a coding interview?",
     "What are some good resources for learning algorithms?",
