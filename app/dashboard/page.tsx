@@ -9,6 +9,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileData } from "@/components/profile-data";
 
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
@@ -56,26 +58,48 @@ export default function Page() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader title="Dashboard" />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
+        <div className="@container/main flex flex-1 flex-row">
+          <div className="flex-[3] flex flex-col py-4 gap-4">
+            <Tabs defaultValue="stats" className="px-4 lg:px-6">
+              <TabsList>
+                <TabsTrigger value="stats">Stats</TabsTrigger>
+                <TabsTrigger value="readme">Readme</TabsTrigger>
+                <TabsTrigger value="resume">Resume</TabsTrigger>
+                <TabsTrigger value="cv">CV</TabsTrigger>
+                <TabsTrigger value="achievments">Achievements</TabsTrigger>
+              </TabsList>
+              <TabsContent value="stats" className="space-y-4">
+                {/* gap-2 py-4 md:gap-6 md:py-6 */}
+                <SectionCards />
                 <ChartAreaInteractive />
-              </div>
-
-              {loading ? (
-                <div className="space-y-2 px-4">
-                  {/* You can customize skeleton height and width */}
-                  <Skeleton className="h-6 w-1/3" />
-                  <Skeleton className="h-8" />
-                  <Skeleton className="h-48" />
-                  <Skeleton className="h-10" />
-                </div>
-              ) : (
-                <DataTable data={data} />
-              )}
-            </div>
+                {loading ? (
+                  <div className="space-y-2 px-4">
+                    {/* You can customize skeleton height and width */}
+                    <Skeleton className="h-6 w-1/3" />
+                    <Skeleton className="h-8" />
+                    <Skeleton className="h-48" />
+                    <Skeleton className="h-10" />
+                  </div>
+                ) : (
+                  <DataTable data={data} />
+                )}
+              </TabsContent>
+              <TabsContent value="readme">
+                Change your password here.
+              </TabsContent>
+              <TabsContent value="resume">
+                Make changes to your account here.
+              </TabsContent>
+              <TabsContent value="cv">Change your password here.</TabsContent>
+              <TabsContent value="achievments">
+                Make changes to your account here.
+              </TabsContent>
+            </Tabs>
+          </div>
+          <div className="flex-[1] flex flex-col py-4">
+            {" "}
+            {/*  md:gap-6 md:py-6 */}
+            <ProfileData />
           </div>
         </div>
       </SidebarInset>
