@@ -36,6 +36,7 @@ import { TeamVisualization } from "./interactive/team-visualization";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { IconBrandGithub } from "@tabler/icons-react";
 
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function LandingPage() {
 
   const headerClass =
     scrollY > 50
-      ? "py-4 bg-black/80 backdrop-blur-md border-b border-gray-800/50"
+      ? "py-4 bg-black/80 backdrop-blur-md border-gray-800/50"
       : "py-6 bg-transparent";
 
   return (
@@ -81,13 +82,13 @@ export default function LandingPage() {
             </a>
           </motion.div>
           <nav className="hidden md:flex items-center gap-8">
-            {["Features", "Products", "About", "Testimonials"].map(
+            {["Mission", "Features", "Products", "About", "Testimonials"].map(
               (item, i) => (
                 <motion.div
                   key={item}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
                 >
                   <Link
                     href={`#${item.toLowerCase()}`}
@@ -106,31 +107,28 @@ export default function LandingPage() {
           >
             <div className="flex items-center gap-4">
               <Button
-                variant="default"
-                className="hidden md:flex border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer"
+                className="bg-black hover:bg-neutral-900 border
+             dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
+             h-9 px-4 py-2"
+                onClick={() => window.open("https://github.com/Dijkstra-Edu", "_blank")}
+              >
+                <IconBrandGithub className="h-5 w-5" />
+              </Button>
+              <Button
+                className="bg-black hover:bg-neutral-900 border
+                 dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
+                 h-9 px-4 py-2"
                 onClick={() => router.push("/login")}
               >
                 Login
               </Button>
               <Button
-                variant="outline"
-                className="hidden md:flex border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer"
+                className="bg-black hover:bg-neutral-900 border
+                 dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
+                 h-9 px-4 py-2"
                 onClick={() => router.push("/dashboard")}
               >
                 Get Started
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="hidden md:flex border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-                <span className="sr-only">Toggle Theme</span>
               </Button>
             </div>
             <Button
@@ -226,12 +224,71 @@ export default function LandingPage() {
               </Button>
             </motion.div>
           </div>
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="relative w-full max-w-5xl mx-auto"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur-3xl" />
+              <div className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800/50 rounded-lg overflow-hidden shadow-2xl">
+                <Image
+                  src="/dashboard.png"
+                  alt="Hero Image"
+                  width={1200}
+                  height={1200}
+                  className="max-w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
+      {/* Dijkstra's Mission */}
+      {/* - For Student By Students Banner */}
+
+      {/* How Does this work? */}
+      {/* 
+      - One stop spot to track your progress across all platforms - Preparation has become quite crazy, this is a one stop solution for it all.
+      - Complete Tasks, improve your profile, and see yourself level up in terms of skills for jobs
+      - Based on tasks completed, you will be able to better guage the potential for you landing a job, an internship or a project.
+      - If you don't have any experience, that's alright! Go through the Crash course on how to learn and compelte projects, and then start contributing to Dijkstra's codebase! (We'll give you a certificate for the same! Leverage your experience contributing to open source here for other opportunities!)
+      - Give back to the community by writing articles, pushing code, thereby improving your credibility to the tech world.
+      */}
+
       {/* Features Section */}
-      <section id="features" className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(120,50,255,0.15),transparent_50%)]" />
+      {/* 
+      - Dashboard - A single place to track progress on Github, Leetcode, etc, along with your resume and CV updates, articles and blogs, and more!
+      - Learning Center - Not the most conventional learning center, but a place that teaches you how to learn, how to build projects, and ton of resources (all open source and free!)
+        - Community - A place to connect with other students, share your progress, and get help from mentors.
+        - Projects - A place to find projects to work on, contribute to open source, and build your portfolio.
+        - Articles - A place to read and write articles, share your knowledge, and learn from others.
+        - Mentorship - A place to connect with mentors, get guidance, and improve your skills.
+        - Dijkstra GPT - A place to get help from AI, ask questions, and get answers.
+        - Opportunities - A place to find internships, jobs, and projects (All based on your rank and skills gained through the platform)
+
+      */}
+
+      {/* Open Source, GitHub based, Community facing work */}
+
+      {/* Our Members have gone on to work in the following companies */}
+
+      {/* Testimonials */}
+
+      {/* Ready to Get Started? Onboarding */}
+
+      {/* Contact Us */}
+
+      {/* About Us */}
+
+      {/* Features Section */}
+      <section
+        id="features"
+        className="py-24 bg-white relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
@@ -241,7 +298,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
                 Powerful Features
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
@@ -314,7 +371,7 @@ export default function LandingPage() {
 
       {/* Products Section */}
       <section id="products" className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(120,50,255,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
@@ -485,7 +542,7 @@ export default function LandingPage() {
 
       {/* About Section */}
       <section id="about" className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(120,50,255,0.15),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(5, 177, 5,0.1),transparent_60%)]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 px-[300px] gap-8 md:gap-12 items-center">
@@ -557,7 +614,7 @@ export default function LandingPage() {
         id="testimonials"
         className="py-24 relative overflow-hidden px-[300px]"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(120,50,255,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
@@ -640,11 +697,11 @@ export default function LandingPage() {
       {/* Contact Section */}
       <section
         id="contact"
-        className="py-24 relative overflow-hidden px-[300px]"
+        className="py-24 relative overflow-hidden px-[300px] bg-white"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(120,50,255,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(5, 177, 5,0.9),transparent_50%)]" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 relative z-10 bg-w">
           <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -653,7 +710,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
                 Ready to Get Started?
               </h2>
               <p className="text-gray-300 mb-8 text-lg">
@@ -731,7 +788,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="py-16 border-t border-gray-800/50 px-[300px] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(120,50,255,0.1),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(5, 177, 5,0.1),transparent_70%)]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -744,10 +801,7 @@ export default function LandingPage() {
                   <span className="font-bold text-xl">Dijkstra</span>
                 </a>
               </div>
-              <p className="text-gray-400 mb-6">
-                Empowering innovation through technology. We build tools that
-                help businesses thrive in the digital age.
-              </p>
+              <p className="text-gray-400 mb-6">For Students, By Students.</p>
               <div className="flex space-x-4">
                 <a
                   href="#"
@@ -765,12 +819,12 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <h4 className="font-bold text-lg mb-6">Products</h4>
+              <h4 className="font-bold text-lg mb-6">Get Started</h4>
               <ul className="space-y-4">
                 {[
-                  "Cloud Platform",
-                  "Analytics",
-                  "Security",
+                  "Onboarding",
+                  "Dashboard",
+                  "Opportunities",
                   "API",
                   "Documentation",
                 ].map((item) => (
@@ -787,9 +841,9 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <h4 className="font-bold text-lg mb-6">Company</h4>
+              <h4 className="font-bold text-lg mb-6">Organization</h4>
               <ul className="space-y-4">
-                {["About", "Careers", "Blog", "Press", "Partners"].map(
+                {["Mission", "About Us", "Blog", "Press", "Partners"].map(
                   (item) => (
                     <li key={item}>
                       <a

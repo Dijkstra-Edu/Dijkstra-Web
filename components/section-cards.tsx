@@ -107,7 +107,7 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Tasks For the Day</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            $1,250.00
+            17/21 Completed
           </CardTitle>
           <CardAction>
             {/* <Badge variant="outline">

@@ -164,3 +164,21 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--sidebar);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 14px;
+  border: 3px solid var(--primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tertiary);
+}

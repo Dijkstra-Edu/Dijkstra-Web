@@ -43,8 +43,6 @@ export default function Page() {
   }
 
   const { data: session, status } = useSession();
-  console.log("Session data:", session);
-  console.log("Session status:", status);
 
   return (
     <SidebarProvider

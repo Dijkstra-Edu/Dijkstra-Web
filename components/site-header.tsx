@@ -19,7 +19,6 @@ import {
   IconMoon,
 } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
 
 export function SiteHeader({ title }: { title: string }) {
   /*
@@ -189,9 +188,9 @@ export function SiteHeader({ title }: { title: string }) {
           >
             <div>
               {theme === "dark" ? (
-                <IconSun className="h-5 w-5" />
-              ) : (
                 <IconMoon className="h-5 w-5" />
+              ) : (
+                <IconSun className="h-5 w-5" />
               )}
             </div>
           </Button>

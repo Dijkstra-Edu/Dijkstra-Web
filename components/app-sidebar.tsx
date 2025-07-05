@@ -34,6 +34,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 const data = {
   user: {
@@ -176,10 +177,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <a href="#" className="flex items-center gap-2">
-              <img src="/splash-icon.png" alt="Logo" className="h-12 w-auto" />
+            <Link href="/" className="flex items-center gap-2">
+              <img src="/icon.png" alt="Logo" className="h-12 w-auto" />
               <span className="text-base font-semibold">Dijkstra</span>
-            </a>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
