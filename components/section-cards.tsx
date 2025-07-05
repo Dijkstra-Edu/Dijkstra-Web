@@ -63,7 +63,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const chartData2 = [{ data: "leetcode", easy: 60, medium: 270, hard: 90 }];
+const chartData2 = [{ data: "leetcode", easy: 60, medium: 70, hard: 90 }];
 const chartConfig2 = {
   easy: {
     label: "Easy",

@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.dribbble.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatar.vercel.sh",
+      },
     ],
   },
 };
