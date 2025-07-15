@@ -30,6 +30,12 @@ import {
   Terminal,
   Lightbulb,
   Hourglass,
+  Brain,
+  LayoutDashboard,
+  Handshake,
+  BookOpen,
+  FolderKanban,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
@@ -51,7 +57,11 @@ import { TeamVisualization } from "./interactive/team-visualization";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { IconBrandGithub } from "@tabler/icons-react";
+import {
+  IconBrandDiscord,
+  IconBrandGithub,
+  IconBrandLinkedin,
+} from "@tabler/icons-react";
 
 import {
   Card,
@@ -61,6 +71,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { addWeeks, format } from "date-fns";
+import Masonry from "./masonry";
 
 type TimelineSubItem = {
   title: string;
@@ -129,6 +140,93 @@ const TimelineItem = ({
     </div>
   </div>
 );
+
+const items = [
+  {
+    id: "1",
+    img: "https://picsum.photos/id/1015/600/900?grayscale",
+    url: "https://example.com/one",
+    height: 400,
+  },
+  {
+    id: "2",
+    img: "https://picsum.photos/id/1011/600/750?grayscale",
+    url: "https://example.com/two",
+    height: 250,
+  },
+  {
+    id: "3",
+    img: "https://picsum.photos/id/1020/600/800?grayscale",
+    url: "https://example.com/three",
+    height: 600,
+  },
+  {
+    id: "4",
+    img: "https://picsum.photos/id/1018/600/660?grayscale",
+    url: "https://example.com/four",
+    height: 260,
+  },
+  {
+    id: "5",
+    img: "https://picsum.photos/id/1016/600/520?grayscale",
+    url: "https://example.com/five",
+    height: 120,
+  },
+  {
+    id: "6",
+    img: "https://picsum.photos/id/1025/600/850?grayscale",
+    url: "https://example.com/six",
+    height: 850,
+  },
+  {
+    id: "7",
+    img: "https://picsum.photos/id/1031/600/720?grayscale",
+    url: "https://example.com/seven",
+    height: 720,
+  },
+  {
+    id: "8",
+    img: "https://picsum.photos/id/1035/600/680?grayscale",
+    url: "https://example.com/eight",
+    height: 200,
+  },
+  {
+    id: "9",
+    img: "https://picsum.photos/id/1040/600/950?grayscale",
+    url: "https://example.com/nine",
+    height: 350,
+  },
+  {
+    id: "10",
+    img: "https://picsum.photos/id/1043/600/600?grayscale",
+    url: "https://example.com/ten",
+    height: 300,
+  },
+  {
+    id: "11",
+    img: "https://picsum.photos/id/1050/600/780?grayscale",
+    url: "https://example.com/eleven",
+    height: 350,
+  },
+  {
+    id: "12",
+    img: "https://picsum.photos/id/1055/600/640?grayscale",
+    url: "https://example.com/twelve",
+    height: 240,
+  },
+  {
+    id: "13",
+    img: "https://picsum.photos/id/1060/600/820?grayscale",
+    url: "https://example.com/thirteen",
+    height: 320,
+  },
+  {
+    id: "14",
+    img: "https://picsum.photos/id/1065/600/590?grayscale",
+    url: "https://example.com/fourteen",
+    height: 290,
+  },
+];
 
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -209,25 +307,26 @@ export default function LandingPage() {
         date={startDate}
       />
       <TimelineItem
-          title="1) Learning to Code"
-          description="Get started with the fundamentals of Coding. Start by learning the basics, building up to knowledge for both projects, as well as technical interviews."
-          icon={Code}
-          content={
-            <p>
-              <Clock className="inline mr-2" />
-              This can take anywhere between 4-8 weeks.
-            </p>
-          }
-          cumulativeTime="6 weeks"
-          date={calculateDate(6)}
-        />
+        title="1) Learning to Code"
+        description="Get started with the fundamentals of Coding. Start by learning the basics, building up to knowledge for both projects, as well as technical interviews."
+        icon={Code}
+        content={
+          <p>
+            <Clock className="inline mr-2" />
+            This can take anywhere between 4-8 weeks.
+          </p>
+        }
+        cumulativeTime="6 weeks"
+        date={calculateDate(6)}
+      />
       <TimelineItem
         title="2) Gaining Value from Learning to Code"
         description="Now the fun begins! Start by building simple projects, while progressing in your understanding of logic through DSA."
         icon={FileSearch}
         content={
           <p>
-            <Clock className="inline mr-2" />Can take anywhere between 1-2 months.
+            <Clock className="inline mr-2" />
+            Can take anywhere between 1-2 months.
           </p>
         }
         subItems={[
@@ -236,7 +335,9 @@ export default function LandingPage() {
             content: (
               <p>
                 <Clock className="inline mr-2" />
-                Depends on the length of projects. Anywhere from 3 hours to a week. The expectation is to complete multiple projects to better understand how to use code practically.
+                Depends on the length of projects. Anywhere from 3 hours to a
+                week. The expectation is to complete multiple projects to better
+                understand how to use code practically.
               </p>
             ),
           },
@@ -245,7 +346,9 @@ export default function LandingPage() {
             content: (
               <p>
                 <Clock className="inline mr-2" />
-                Understanding DSA goes a long way in being able to code what you think in an effective manner! This can take a while, potentially a month of serious study
+                Understanding DSA goes a long way in being able to code what you
+                think in an effective manner! This can take a while, potentially
+                a month of serious study
               </p>
             ),
           },
@@ -345,22 +448,24 @@ export default function LandingPage() {
         content={
           <>
             <p className="mb-2">
-              <Clock className="inline mr-2" />Keep working on Leetcode and DSA, preferrably company specific problems.
+              <Clock className="inline mr-2" />
+              Keep working on Leetcode and DSA, preferrably company specific
+              problems.
             </p>
             <p className="mb-2">
               <FileSearch className="inline mr-2" />
               Have your Resume, CV and your story in order.
             </p>
             <p className="mb-2">
-              <Clock className="inline mr-2" />Mock Interviews with members from the community
+              <Clock className="inline mr-2" />
+              Mock Interviews with members from the community
             </p>
             <p>
               <AlertCircle className="inline mr-2" />
-              Brush up on general knoweldge. Everything on your Resume is fair game!
+              Brush up on general knoweldge. Everything on your Resume is fair
+              game!
             </p>
-            <p className="mt-4 text-sm text-muted-foreground">
-              
-            </p>
+            <p className="mt-4 text-sm text-muted-foreground"></p>
           </>
         }
         cumulativeTime={`${previousWeeks + 4} weeks`}
@@ -543,8 +648,10 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.6 }}
             >
               <Button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-gradient-to-r from-white to-white hover:from-purple-700 hover:to-blue-700 text-black px-4 sm:px-8 py-4 sm:py-6 rounded-full text-sm sm:text-lg font-medium shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 transition-all duration-300"
+                onClick={() => {
+                  router.push("/dashboard");
+                }}
+                className="bg-gradient-to-r from-white to-white hover:from-green-700 hover:to-gray-700 text-black px-4 sm:px-8 py-4 sm:py-6 rounded-full text-sm sm:text-lg font-medium shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 transition-all duration-300 cursor-pointer"
               >
                 Get Started Now
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -676,14 +783,14 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
-                  <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-6 rounded-xl border border-gray-800/50 hover:border-purple-500/50 transition-colors backdrop-blur-sm">
-                    <div className="mb-4 p-3 bg-gray-800/30 rounded-lg inline-block">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                    <p className="text-gray-400">{feature.description}</p>
+                <div className="h-full bg-gradient-to-b from-white to-white p-6 rounded-xl border border-green-800/50 hover:border-green-500/50 transition-colors backdrop-blur-sm">
+                  <div className="mb-4 p-3  rounded-lg inline-block">
+                    {feature.icon}
                   </div>
+                  <h3 className="text-xl font-bold mb-2 text-black">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-400">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -701,7 +808,7 @@ export default function LandingPage() {
       */}
       <section
         id="features"
-        className="py-24 bg-white relative overflow-hidden"
+        className="py-12 bg-white relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
@@ -747,6 +854,32 @@ export default function LandingPage() {
             {renderAbsoluteBeginners()}
             {renderUniversityandExperienced()}
           </div>
+
+          <div className="mt-16">
+            <h3 className="text-center text-gray-600 text-sm uppercase mb-6 tracking-wider">
+              Our Members have gone on to work in the following companies:
+            </h3>
+            <div className="flex justify-center items-center gap-10 flex-wrap">
+              {[
+                "/logos/CERN.png",
+                "/logos/microsoft.png",
+                "/logos/hsbc.png",
+                "/logos/hyperface.png",
+                "/logos/balkan.jpeg",
+                "/logos/HP.png",
+                "/logos/phillips.png",
+                "/logos/pwc.png",
+                "/logos/signify.png",
+              ].map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={`Company logo ${idx + 1}`}
+                  className="h-18 w-auto filter grayscale hover:grayscale-0 transition duration-300 ease-in-out"
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -764,7 +897,7 @@ export default function LandingPage() {
       */}
       {/* Features Section */}
       <section id="features" className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(120,50,255,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(4,131,4,0.15),transparent_50%)]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
@@ -774,9 +907,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                Powerful Features
-              </h2>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">Features</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
                 Our platform offers a comprehensive suite of tools designed to
                 enhance your productivity and streamline your workflow.
@@ -787,32 +918,32 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 px-[300px] lg:grid-cols-3 gap-8">
             {[
               {
-                icon: <Code className="h-10 w-10 text-purple-500" />,
-                title: "Advanced API",
+                icon: <Brain className="h-10 w-10 text-purple-500" />,
+                title: "Dijkstra GPT",
                 description:
                   "Integrate seamlessly with our robust API designed for developers with comprehensive documentation and examples.",
               },
               {
-                icon: <Globe className="h-10 w-10 text-blue-500" />,
-                title: "Global CDN",
+                icon: <Trophy className="h-10 w-10 text-blue-500" />,
+                title: "Ranking & Tracking",
                 description:
                   "Lightning-fast content delivery across our worldwide network with 99.9% uptime guarantee.",
               },
               {
-                icon: <CheckCircle className="h-10 w-10 text-green-500" />,
-                title: "Reliable Security",
+                icon: <BookOpen className="h-10 w-10 text-green-500" />,
+                title: "Learning Center",
                 description:
                   "Enterprise-grade security with end-to-end encryption and compliance with industry standards.",
               },
               {
-                icon: <Cpu className="h-10 w-10 text-red-500" />,
-                title: "AI-Powered",
+                icon: <FolderKanban className="h-10 w-10 text-red-500" />,
+                title: "Projects Hub",
                 description:
                   "Leverage the power of artificial intelligence to optimize your workflow and gain valuable insights.",
               },
               {
-                icon: <MessageSquare className="h-10 w-10 text-yellow-500" />,
-                title: "24/7 Support",
+                icon: <Handshake className="h-10 w-10 text-yellow-500" />,
+                title: "Mentorship",
                 description:
                   "Our dedicated team is always available to assist you with any issues through multiple channels.",
               },
@@ -831,7 +962,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
-                  <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-6 rounded-xl border border-gray-800/50 hover:border-purple-500/50 transition-colors backdrop-blur-sm">
+                  <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-6 rounded-xl border border-gray-800/50 hover:border-green-500/50 transition-colors backdrop-blur-sm">
                     <div className="mb-4 p-3 bg-gray-800/30 rounded-lg inline-block">
                       {feature.icon}
                     </div>
@@ -889,10 +1020,11 @@ export default function LandingPage() {
                 transition={{ duration: 0.8 }}
                 className="space-y-6"
               >
-                <h3 className="text-3xl font-bold">TechNova Cloud</h3>
+                <h3 className="text-3xl font-bold">Dijkstra GPT</h3>
                 <p className="text-gray-300 text-lg">
-                  A scalable cloud platform that adapts to your needs. Deploy
-                  applications with ease and manage resources efficiently.
+                  Our in-house AI Model, trained on data pertaining to Software
+                  Engineering prep. Consider it that senior in UNiversity who
+                  could advise you on a thing or two XD
                 </p>
                 <ul className="space-y-3">
                   {[
@@ -902,12 +1034,12 @@ export default function LandingPage() {
                     "99.9% uptime SLA",
                   ].map((feature, i) => (
                     <li key={i} className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-purple-500" />
+                      <CheckCircle className="h-5 w-5 text-green-500" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                <Button className="bg-gradient-to-r from-green-600 to-gray-600 hover:from-gray-700 hover:to-green-700">
                   Learn More
                 </Button>
               </motion.div>
@@ -918,9 +1050,16 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
               >
-                <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 p-1 rounded-lg">
-                  <div className="relative h-[300px] md:h-[400px] w-full rounded-lg overflow-hidden">
-                    <CloudPlatform />
+                <div className="bg-gradient-to-br from-green-500/20 to-gray-500/20 p-1 rounded-lg">
+                  <div className="relative h-[300px] md:h-auto w-full rounded-lg overflow-hidden">
+                    {/* <CloudPlatform /> */}
+                    <Image
+                      src="/dijkstra-gpt.png"
+                      alt="Hero Image"
+                      width={1200}
+                      height={1200}
+                      className="max-w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
                 </div>
               </motion.div>
@@ -936,12 +1075,11 @@ export default function LandingPage() {
                 className="order-1 md:order-last space-y-4 md:space-y-6"
               >
                 <h3 className="text-2xl md:text-3xl font-bold">
-                  TechNova Analytics
+                  Dijkstra Analytics & Tracking
                 </h3>
                 <p className="text-gray-300 text-base md:text-lg">
-                  Gain valuable insights from your data with our powerful
-                  analytics platform. Make data-driven decisions with
-                  confidence.
+                  Gain valuable insights across all your platforms, be it
+                  Leetcode, GitHub to research, all in one place.
                 </p>
                 <ul className="space-y-2 md:space-y-3">
                   {[
@@ -951,12 +1089,12 @@ export default function LandingPage() {
                     "Data visualization",
                   ].map((feature, i) => (
                     <li key={i} className="flex items-center gap-2 md:gap-3">
-                      <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-purple-500 flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500 flex-shrink-0" />
                       <span className="text-sm md:text-base">{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                <Button className="bg-gradient-to-r from-green-600 to-gray-600 hover:from-green-700 hover:to-gray-700">
                   Learn More
                 </Button>
               </motion.div>
@@ -968,9 +1106,16 @@ export default function LandingPage() {
                 transition={{ duration: 0.8 }}
                 className="order-2 md:order-first"
               >
-                <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 p-1 rounded-lg">
-                  <div className="relative h-[300px] md:h-[400px] w-full rounded-lg overflow-hidden">
-                    <AnalyticsPlatform />
+                <div className="bg-gradient-to-br from-green-500/20 to-gray-500/20 p-1 rounded-lg">
+                  <div className="relative h-[300px] md:h-auto w-full rounded-lg overflow-hidden">
+                    {/* <AnalyticsPlatform /> */}
+                    <Image
+                      src="/dashboard.png"
+                      alt="Hero Image"
+                      width={1200}
+                      height={1200}
+                      className="max-w-full h-auto rounded-lg shadow-lg"
+                    />
                   </div>
                 </div>
               </motion.div>
@@ -986,11 +1131,11 @@ export default function LandingPage() {
                 className="space-y-4 md:space-y-6 order-1 md:order-1"
               >
                 <h3 className="text-2xl md:text-3xl font-bold">
-                  TechNova Security
+                  Dijkstra Mobile
                 </h3>
                 <p className="text-gray-300 text-base md:text-lg">
-                  Protect your digital assets with our comprehensive security
-                  solution. Stay ahead of threats with advanced protection.
+                  Bring the tracking to your mobile too! With our Community
+                  developed Mobile Applications.
                 </p>
                 <ul className="space-y-2 md:space-y-3">
                   {[
@@ -1000,12 +1145,12 @@ export default function LandingPage() {
                     "24/7 security operations",
                   ].map((feature, i) => (
                     <li key={i} className="flex items-center gap-2 md:gap-3">
-                      <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-purple-500 flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500 flex-shrink-0" />
                       <span className="text-sm md:text-base">{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                <Button className="bg-gradient-to-r from-green-600 to-gray-600 hover:from-green-700 hover:to-gray-700">
                   Learn More
                 </Button>
               </motion.div>
@@ -1017,82 +1162,36 @@ export default function LandingPage() {
                 transition={{ duration: 0.8 }}
                 className="order-2 md:order-2"
               >
-                <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 p-1 rounded-lg">
+                <div className="bg-gradient-to-br from-green-500/20 to-gray-500/20 p-1 rounded-lg">
                   <div className="relative h-[300px] md:h-[400px] w-full rounded-lg overflow-hidden">
-                    <SecurityPlatform />
+                    {/* <SecurityPlatform /> */}
+                    <div className="flex items-center justify-center h-full gap-4">
+                      <Image
+                        src="/mobile1.png"
+                        alt="Hero Image 1"
+                        width={150}
+                        height={300}
+                        className="rounded-lg shadow-lg object-contain"
+                      />
+                      <Image
+                        src="/mobile2.jpeg"
+                        alt="Hero Image 2"
+                        width={150}
+                        height={300}
+                        className="rounded-lg shadow-lg object-contain"
+                      />
+                      <Image
+                        src="/mobile3.jpeg"
+                        alt="Hero Image 3"
+                        width={150}
+                        height={300}
+                        className="rounded-lg shadow-lg object-contain"
+                      />
+                    </div>
                   </div>
                 </div>
               </motion.div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(5, 177, 5,0.1),transparent_60%)]" />
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid md:grid-cols-2 px-[300px] gap-8 md:gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="order-1 md:order-1"
-            >
-              <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold mb-4 md:mb-6">
-                About Our Mission
-              </h2>
-              <p className="text-gray-300 mb-4 md:mb-6 text-sm sm:text-base md:text-lg">
-                Founded in 2023, TechNova was created with a singular vision: to
-                democratize access to cutting-edge technology. We believe that
-                powerful tools should be accessible to everyone, regardless of
-                technical expertise.
-              </p>
-              <p className="text-gray-300 mb-4 md:mb-6 text-sm sm:text-base md:text-lg">
-                Our team of passionate engineers and designers work tirelessly
-                to create intuitive, powerful solutions that solve real-world
-                problems and empower our users to achieve more.
-              </p>
-              <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-6 md:mb-8">
-                <div className="bg-gray-800/50 backdrop-blur-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base">
-                  <span className="text-purple-400 font-medium">50+</span> Team
-                  Members
-                </div>
-                <div className="bg-gray-800/50 backdrop-blur-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base">
-                  <span className="text-purple-400 font-medium">10k+</span>{" "}
-                  Customers
-                </div>
-                <div className="bg-gray-800/50 backdrop-blur-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base">
-                  <span className="text-purple-400 font-medium">99.9%</span>{" "}
-                  Uptime
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="border-purple-500 text-purple-500 hover:bg-purple-950 text-sm sm:text-base"
-              >
-                Learn More About Us
-              </Button>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="order-2 md:order-2"
-            >
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur-xl" />
-                <div className="relative rounded-lg overflow-hidden">
-                  <div className="w-full h-[300px] md:h-[400px]">
-                    <TeamVisualization />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
@@ -1113,11 +1212,10 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                What Our Clients Say
+                What Our Members Say
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                Don't just take our word for it. Here's what our clients have to
-                say about their experience with TechNova.
+                What members of our community have to say:
               </p>
             </motion.div>
           </div>
@@ -1182,6 +1280,121 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Current Members Section */}
+      <section id="about" className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(5, 177, 5,0.1),transparent_60%)]" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid md:grid-cols-2 px-[300px] gap-8 md:gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="order-1 md:order-1"
+            >
+              <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold mb-4 md:mb-6">
+                Current Members
+              </h2>
+              <p className="text-gray-300 mb-4 md:mb-6 text-sm sm:text-base md:text-lg">
+                Founded in 2023, Dijkstra was created with a singular vision: to
+                democratize access to cutting-edge technology. We believe that
+                powerful tools should be accessible to everyone, regardless of
+                technical expertise.
+              </p>
+              <p className="text-gray-300 mb-4 md:mb-6 text-sm sm:text-base md:text-lg">
+                Our team of passionate engineers and designers work tirelessly
+                to create intuitive, powerful solutions that solve real-world
+                problems and empower our users to achieve more.
+              </p>
+              <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-6 md:mb-8">
+                <div className="bg-gray-800/50 backdrop-blur-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base">
+                  <span className="text-green-400 font-medium">50+</span> Team
+                  Members
+                </div>
+                <div className="bg-gray-800/50 backdrop-blur-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base">
+                  <span className="text-green-400 font-medium">10k+</span>{" "}
+                  Customers
+                </div>
+                <div className="bg-gray-800/50 backdrop-blur-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-xs sm:text-sm md:text-base">
+                  <span className="text-green-400 font-medium">99.9%</span>{" "}
+                  Uptime
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="border-green-500 text-green-500 hover:bg-green-600 text-sm sm:text-base cursor-pointer"
+              >
+                Learn More About Us
+              </Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="order-2 md:order-2"
+            >
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-green-500/20 to-gray-500/20 rounded-lg blur-xl" />
+                <div className="relative rounded-lg overflow-hidden">
+                  <div className="w-full h-[300px] md:h-[400px]">
+                    <TeamVisualization />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="features"
+        className="py-16 bg-white relative overflow-hidden h-[80vh]"
+      >
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="relative">
+            <Masonry
+              items={items}
+              ease="power3.out"
+              duration={0.6}
+              stagger={0.05}
+              animateFrom="bottom"
+              scaleOnHover={true}
+              hoverScale={0.95}
+              blurToFocus={true}
+              colorShiftOnHover={false}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className=" bg-white relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
+                Our Mission
+              </h2>
+              <p className="text-gray-700 max-w-2xl mx-auto">
+                Dijkstra is a one stop, open source, free for all platform for
+                aspiring Software Engineers to prepare and crack jobs,
+                especially in today's day and age.
+                {/* button to redirect to Dijkstra's Mission as well as About Us */}
+                <br />
+                Dijkstra works on the following principles:
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section */}
       <section
         id="contact"
@@ -1199,7 +1412,7 @@ export default function LandingPage() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
-                Ready to Get Started?
+                So, Ready to Get Started?
               </h2>
               <p className="text-gray-300 mb-8 text-lg">
                 Join thousands of satisfied users who have already transformed
@@ -1295,13 +1508,19 @@ export default function LandingPage() {
                   href="#"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  <Twitter className="h-5 w-5" />
+                  <IconBrandGithub className="h-5 w-5" />
                 </a>
                 <a
                   href="#"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  <Github className="h-5 w-5" />
+                  <IconBrandDiscord className="h-5 w-5" />
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <IconBrandLinkedin className="h-5 w-5" />
                 </a>
               </div>
             </div>
