@@ -77,7 +77,7 @@ export default function ChatInterface() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
       {/* Header */}
       <div className="flex-shrink-0 text-center pt-4 pb-8">
         {/* Logo & tagline */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -14,7 +14,22 @@ import {
   Moon,
   Sun,
   Twitter,
+  Clock,
+  XCircle,
+  FileSearch,
+  Building,
+  AlertCircle,
+  Calendar,
   X,
+  Eye,
+  BrainCircuit,
+  Target,
+  Users,
+  Workflow,
+  LogIn,
+  Terminal,
+  Lightbulb,
+  Hourglass,
 } from "lucide-react";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
@@ -38,6 +53,83 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { IconBrandGithub } from "@tabler/icons-react";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { addWeeks, format } from "date-fns";
+
+type TimelineSubItem = {
+  title: string;
+  content: React.ReactNode;
+};
+
+type TimelineItemProps = {
+  title: string;
+  description: string;
+  content: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
+  isLast?: boolean;
+  cumulativeTime?: string;
+  date?: Date | null;
+  subItems?: TimelineSubItem[];
+};
+
+const TimelineItem = ({
+  title,
+  description,
+  content,
+  icon: Icon,
+  isLast = false,
+  cumulativeTime,
+  date,
+  subItems = [],
+}: TimelineItemProps) => (
+  <div className="flex">
+    <div className="flex flex-col items-center mr-4">
+      <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-primary bg-background">
+        <Icon className="w-5 h-5 text-primary" />
+      </div>
+      {!isLast && <div className="w-0.5 h-full bg-primary mt-2"></div>}
+    </div>
+    <div className="flex-1 mb-6">
+      <Card className="mb-2">
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {content}
+          {date && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              <Calendar className="inline mr-2" />
+              Estimated date: {format(date, "dd MMM yyyy")}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+      {subItems.map((item, index) => (
+        <Card key={index} className="ml-8 mt-2 border-dashed">
+          <CardHeader>
+            <CardTitle className="text-sm">{item.title}</CardTitle>
+          </CardHeader>
+          <CardContent>{item.content}</CardContent>
+        </Card>
+      ))}
+      {cumulativeTime && (
+        <div className="mt-2 text-right">
+          <span className="bg-muted px-2 py-1 rounded text-sm font-semibold text-black">
+            {cumulativeTime}
+          </span>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -58,8 +150,241 @@ export default function LandingPage() {
 
   const headerClass =
     scrollY > 50
-      ? "py-4 bg-black/80 backdrop-blur-md border-gray-800/50"
+      ? "py-4 bg-black/90 backdrop-blur-md border-gray-800/50"
       : "py-6 bg-transparent";
+
+  const NUM_ROWS = 14;
+  const SEGMENTS_PER_ROW = 4;
+  const SAFE_ZONE_VERTICAL = [40, 60]; // % from top
+  const SAFE_ZONE_HORIZONTAL = [30, 70]; // % from left
+
+  const segments = useMemo(() => {
+    const allSegments = [];
+
+    for (let row = 0; row < NUM_ROWS; row++) {
+      const top = (row / NUM_ROWS) * 100;
+
+      for (let i = 0; i < SEGMENTS_PER_ROW; i++) {
+        const width = 5 + Math.random() * 15; // width between 5% and 20%
+        const left = Math.random() * (100 - width); // ensure it doesn't overflow
+
+        // Skip if the row intersects the vertical center zone
+        const inVerticalSafeZone =
+          top > SAFE_ZONE_VERTICAL[0] && top < SAFE_ZONE_VERTICAL[1];
+        const inHorizontalSafeZone =
+          left < SAFE_ZONE_HORIZONTAL[1] &&
+          left + width > SAFE_ZONE_HORIZONTAL[0];
+
+        if (inVerticalSafeZone && inHorizontalSafeZone) continue;
+
+        allSegments.push({ top, left, width });
+      }
+    }
+
+    return allSegments;
+  }, []);
+
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+
+  const calculateDate = (weeks: number) => {
+    return startDate ? addWeeks(startDate, weeks) : null;
+  };
+
+  const renderAbsoluteBeginners = () => (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold mt-6 mb-4 text-black">
+        Path 1: Absolute Beginners
+      </h2>
+      <TimelineItem
+        title="0) Onboarding with Dijkstra"
+        description="Get started by Setting up everything you need, From important sites to code editors. Time taken depends on your knoweldge of Git (or) other version control systems."
+        icon={LogIn}
+        content={
+          <p>
+            <Clock className="inline mr-2" />
+            Takes anywhere between 30mins to 3 hours to get up and running.
+          </p>
+        }
+        cumulativeTime="Start"
+        date={startDate}
+      />
+      <TimelineItem
+          title="1) Learning to Code"
+          description="Get started with the fundamentals of Coding. Start by learning the basics, building up to knowledge for both projects, as well as technical interviews."
+          icon={Code}
+          content={
+            <p>
+              <Clock className="inline mr-2" />
+              This can take anywhere between 4-8 weeks.
+            </p>
+          }
+          cumulativeTime="6 weeks"
+          date={calculateDate(6)}
+        />
+      <TimelineItem
+        title="2) Gaining Value from Learning to Code"
+        description="Now the fun begins! Start by building simple projects, while progressing in your understanding of logic through DSA."
+        icon={FileSearch}
+        content={
+          <p>
+            <Clock className="inline mr-2" />Can take anywhere between 1-2 months.
+          </p>
+        }
+        subItems={[
+          {
+            title: "Start working on Projects",
+            content: (
+              <p>
+                <Clock className="inline mr-2" />
+                Depends on the length of projects. Anywhere from 3 hours to a week. The expectation is to complete multiple projects to better understand how to use code practically.
+              </p>
+            ),
+          },
+          {
+            title: "Getting started with DSA and Leetcode",
+            content: (
+              <p>
+                <Clock className="inline mr-2" />
+                Understanding DSA goes a long way in being able to code what you think in an effective manner! This can take a while, potentially a month of serious study
+              </p>
+            ),
+          },
+        ]}
+        cumulativeTime="8 weeks"
+        date={calculateDate(8)}
+      />
+      {renderFinalSteps(2)}
+    </div>
+  );
+
+  const renderUniversityandExperienced = () => (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold mt-6 mb-4 text-black">
+        Path 2: For University and Experienced Students
+      </h2>
+      <TimelineItem
+        title="0) Onboarding with Dijkstra"
+        description="Get started by Setting up everything you need, From important sites to code editors. Time taken depends on your knoweldge of Git (or) other version control systems."
+        icon={LogIn}
+        content={
+          <p>
+            <Clock className="inline mr-2" />
+            Takes anywhere between 30mins to 3 hours to get up and running.
+          </p>
+        }
+        cumulativeTime="Start"
+        date={startDate}
+      />
+      <TimelineItem
+        title="1) Getting Started with Leetcode"
+        description="Start by improving your DSA skills by practicing 2 problems a day."
+        icon={Terminal}
+        content={
+          <p>
+            <Clock className="inline mr-2" />
+            Takes anywhere between 30mins to 3 hours to get up and running.
+          </p>
+        }
+        cumulativeTime="6 weeks"
+        date={calculateDate(6)}
+      />
+      <TimelineItem
+        title="Property Offered to Landcom"
+        description="Landcom considers the property"
+        icon={Building}
+        content={
+          <p>
+            <Clock className="inline mr-2" />
+            Landcom: 2 weeks to confirm interest
+          </p>
+        }
+        cumulativeTime="8 weeks"
+        date={calculateDate(8)}
+      />
+      <TimelineItem
+        title="Landcom Confirms Interest"
+        description="Landcom decides to proceed"
+        icon={CheckCircle}
+        content={<p>Landcom confirms interest in acquiring the property</p>}
+        cumulativeTime="10 weeks"
+        date={calculateDate(10)}
+      />
+      <TimelineItem
+        title="Landcom Due Diligence"
+        description="Landcom conducts due diligence"
+        icon={FileSearch}
+        content={
+          <p>
+            <Clock className="inline mr-2" />2 months for due diligence
+          </p>
+        }
+        subItems={[
+          {
+            title: "Information Requests",
+            content: (
+              <p>
+                <Clock className="inline mr-2" />
+                Land-owning agencies: 5 business days to respond to requests
+              </p>
+            ),
+          },
+        ]}
+        cumulativeTime="18 weeks"
+        date={calculateDate(18)}
+      />
+      {renderFinalSteps(0)}
+    </div>
+  );
+
+  const renderFinalSteps = (previousWeeks: number) => (
+    <>
+      <TimelineItem
+        title="Start Applying to S-tier Opportunities"
+        description="These could be top of the line industry opportunities, research positions, or partner companies."
+        icon={Lightbulb}
+        content={
+          <>
+            <p className="mb-2">
+              <Clock className="inline mr-2" />Keep working on Leetcode and DSA, preferrably company specific problems.
+            </p>
+            <p className="mb-2">
+              <FileSearch className="inline mr-2" />
+              Have your Resume, CV and your story in order.
+            </p>
+            <p className="mb-2">
+              <Clock className="inline mr-2" />Mock Interviews with members from the community
+            </p>
+            <p>
+              <AlertCircle className="inline mr-2" />
+              Brush up on general knoweldge. Everything on your Resume is fair game!
+            </p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              
+            </p>
+          </>
+        }
+        cumulativeTime={`${previousWeeks + 4} weeks`}
+        date={calculateDate(previousWeeks + 4)}
+      />
+      <TimelineItem
+        title="Prepare to Slow down work @Dijkstra"
+        description="You've done it! You've achieved a top tier job, hopefully one that's well compensated. All the Hardwork has paid off! Around here you are moved away from development within Dijkstra to focus on your new chapter."
+        icon={Hourglass}
+        content={<p>Final decision on property acquisition</p>}
+        cumulativeTime={`${previousWeeks + 4} weeks`}
+        date={calculateDate(previousWeeks + 4)}
+      />
+      <TimelineItem
+        title="Mentoring + Management @Dijkstra"
+        description="You have the option to continue to work at Dijkstra as a Mentor or as a Technical Lead in Dijkstra's various projects. This could be experience that you can use to leverage better opportunities in your own career. The other option would be to step down into a community member role, a Passive, but lifelong member of the Dijkstra community :)"
+        icon={CheckCircle}
+        isLast={true}
+        content={<p>Final decision on property acquisition</p>}
+        cumulativeTime={`♾ weeks`}
+        date={calculateDate(previousWeeks + 54)}
+      />
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
@@ -71,7 +396,7 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
             className="flex items-center gap-2"
           >
             {/* <Cpu className="h-6 w-6 text-purple-500" />
@@ -110,7 +435,9 @@ export default function LandingPage() {
                 className="bg-black hover:bg-neutral-900 border
              dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
              h-9 px-4 py-2"
-                onClick={() => window.open("https://github.com/Dijkstra-Edu", "_blank")}
+                onClick={() =>
+                  window.open("https://github.com/Dijkstra-Edu", "_blank")
+                }
               >
                 <IconBrandGithub className="h-5 w-5" />
               </Button>
@@ -247,43 +574,34 @@ export default function LandingPage() {
       </section>
 
       {/* Dijkstra's Mission */}
-      {/* - For Student By Students Banner */}
+      <section className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-white">
+        {/* Background Segments */}
+        <div className="absolute inset-0 z-0">
+          {segments.map((seg, i) => (
+            <div
+              key={i}
+              className="absolute h-[2px] bg-gray-500/70 rounded-full"
+              style={{
+                top: `${seg.top}%`,
+                left: `${seg.left}%`,
+                width: `${seg.width}%`,
+              }}
+            />
+          ))}
+        </div>
 
-      {/* How Does this work? */}
-      {/* 
-      - One stop spot to track your progress across all platforms - Preparation has become quite crazy, this is a one stop solution for it all.
-      - Complete Tasks, improve your profile, and see yourself level up in terms of skills for jobs
-      - Based on tasks completed, you will be able to better guage the potential for you landing a job, an internship or a project.
-      - If you don't have any experience, that's alright! Go through the Crash course on how to learn and compelte projects, and then start contributing to Dijkstra's codebase! (We'll give you a certificate for the same! Leverage your experience contributing to open source here for other opportunities!)
-      - Give back to the community by writing articles, pushing code, thereby improving your credibility to the tech world.
-      */}
+        {/* Banner Text */}
+        <div className="relative z-10 text-center px-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-black mb-3 tracking-tight">
+            For Students, By Students
+          </h1>
+          <p className="text-green-600 text-lg sm:text-xl md:text-2xl font-semibold tracking-wide">
+            Dijkstra
+          </p>
+        </div>
+      </section>
 
-      {/* Features Section */}
-      {/* 
-      - Dashboard - A single place to track progress on Github, Leetcode, etc, along with your resume and CV updates, articles and blogs, and more!
-      - Learning Center - Not the most conventional learning center, but a place that teaches you how to learn, how to build projects, and ton of resources (all open source and free!)
-        - Community - A place to connect with other students, share your progress, and get help from mentors.
-        - Projects - A place to find projects to work on, contribute to open source, and build your portfolio.
-        - Articles - A place to read and write articles, share your knowledge, and learn from others.
-        - Mentorship - A place to connect with mentors, get guidance, and improve your skills.
-        - Dijkstra GPT - A place to get help from AI, ask questions, and get answers.
-        - Opportunities - A place to find internships, jobs, and projects (All based on your rank and skills gained through the platform)
-
-      */}
-
-      {/* Open Source, GitHub based, Community facing work */}
-
-      {/* Our Members have gone on to work in the following companies */}
-
-      {/* Testimonials */}
-
-      {/* Ready to Get Started? Onboarding */}
-
-      {/* Contact Us */}
-
-      {/* About Us */}
-
-      {/* Features Section */}
+      {/* What is Dijkstra */}
       <section
         id="features"
         className="py-24 bg-white relative overflow-hidden"
@@ -299,6 +617,164 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
+                So what's Dijkstra?
+              </h2>
+              <p className="text-gray-700 max-w-2xl mx-auto">
+                Dijkstra is a one stop, open source, free for all platform for
+                aspiring Software Engineers to prepare and crack jobs,
+                especially in today's day and age.
+                {/* button to redirect to Dijkstra's Mission as well as About Us */}
+                <br />
+                Dijkstra works on the following principles:
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="grid md:grid-cols-2 px-[300px] lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <Eye className="h-10 w-10 text-purple-500" />,
+                title: "Visibility",
+                description:
+                  "Track your progress across all platforms, be it GitHub, LinkedIn, Leetcode, Codeforces, etc; and see yourself level up in terms of skills (validated by Proof of Work) for jobs around the world.",
+              },
+              {
+                icon: <BrainCircuit className="h-10 w-10 text-blue-500" />,
+                title: "Develop Skills",
+                description:
+                  "Improve your DSA, Software Engineering, Systems Design hollistically through a variety of tasks within Dijkstra. Everything from simple code pushes, sharing new approaches, writing articles, to mentoring and leading projects. You're here to develop yourself into a Globally competitive Software Developer.",
+              },
+              {
+                icon: <CheckCircle className="h-10 w-10 text-green-500" />,
+                title: "Proof of Work",
+                description:
+                  "Dijkstra is a platform to keep track of your overall development, that comes down to proof of work on various spaces, be in Leetcode to GitHub, the onus is on YOU to develop yourself. We just help gamify the experience of gaining visiblity and understanding on how to plan your journey out.",
+              },
+              {
+                icon: <Target className="h-10 w-10 text-red-500" />,
+                title: "Killing two Birds with one stone",
+                description:
+                  "Turns out most things are inter-related! What's on your resume is technically on your LinkedIn. A project could double up as a Research Paper at a Conference. Dijkstra helps you plan things out to achieve more with what you do.",
+              },
+              {
+                icon: <Users className="h-10 w-10 text-yellow-500" />,
+                title: "Community",
+                description:
+                  "Give back to the community by writing articles, pushing code, thereby improving your credibility to the tech world.",
+              },
+              {
+                icon: <Workflow className="h-10 w-10 text-gray-400" />,
+                title: "One thing Leads to Another",
+                description:
+                  "Everything you do Leads to another. The skills you gain at an internship? It's leverage for your next job. The articles and papers you put out? That potentially increases your chances at a research lab. Whatever you do needs to lead to something bigger and better.",
+              },
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
+                  <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-6 rounded-xl border border-gray-800/50 hover:border-purple-500/50 transition-colors backdrop-blur-sm">
+                    <div className="mb-4 p-3 bg-gray-800/30 rounded-lg inline-block">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                    <p className="text-gray-400">{feature.description}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How Does this work? */}
+      {/* 
+      - One stop spot to track your progress across all platforms - Preparation has become quite crazy, this is a one stop solution for it all.
+      - Complete Tasks, improve your profile, and see yourself level up in terms of skills for jobs
+      - Based on tasks completed, you will be able to better guage the potential for you landing a job, an internship or a project.
+      - If you don't have any experience, that's alright! Go through the Crash course on how to learn and compelte projects, and then start contributing to Dijkstra's codebase! (We'll give you a certificate for the same! Leverage your experience contributing to open source here for other opportunities!)
+      - Give back to the community by writing articles, pushing code, thereby improving your credibility to the tech world.
+      */}
+      <section
+        id="features"
+        className="py-24 bg-white relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
+                So how does this work?
+              </h2>
+              <p className="text-gray-700 max-w-2xl mx-auto">
+                Dijkstra helps you track progress and prepare towards CS roles.
+                This is mainly aimed towards aspiring Software Engineers still
+                in University. It can still be used by anyone who would like to
+                break into tech!
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="flex justify-center mb-6">
+            <div>
+              <label
+                htmlFor="start-date"
+                className="block text-sm font-medium text-gray-700 mb-2 text-center"
+              >
+                On starting Today:
+              </label>
+              <Input
+                type="date"
+                id="start-date"
+                value={startDate ? startDate.toISOString().split("T")[0] : ""}
+                onChange={(e) => setStartDate(new Date(e.target.value))}
+                className="w-full max-w-xs text-gray-700"
+              />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 px-[300px] gap-8">
+            {renderAbsoluteBeginners()}
+            {renderUniversityandExperienced()}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      {/* 
+      - Dashboard - A single place to track progress on Github, Leetcode, etc, along with your resume and CV updates, articles and blogs, and more!
+      - Learning Center - Not the most conventional learning center, but a place that teaches you how to learn, how to build projects, and ton of resources (all open source and free!)
+        - Community - A place to connect with other students, share your progress, and get help from mentors.
+        - Projects - A place to find projects to work on, contribute to open source, and build your portfolio.
+        - Articles - A place to read and write articles, share your knowledge, and learn from others.
+        - Mentorship - A place to connect with mentors, get guidance, and improve your skills.
+        - Dijkstra GPT - A place to get help from AI, ask questions, and get answers.
+        - Opportunities - A place to find internships, jobs, and projects (All based on your rank and skills gained through the platform)
+
+      */}
+      {/* Features Section */}
+      <section id="features" className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(120,50,255,0.15),transparent_50%)]" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">
                 Powerful Features
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
@@ -308,7 +784,7 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          <div className="grid md:grid-cols-2 px-[300px]  lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 px-[300px] lg:grid-cols-3 gap-8">
             {[
               {
                 icon: <Code className="h-10 w-10 text-purple-500" />,
@@ -369,6 +845,18 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Open Source, GitHub based, Community facing work */}
+
+      {/* Our Members have gone on to work in the following companies */}
+
+      {/* Testimonials */}
+
+      {/* Ready to Get Started? Onboarding */}
+
+      {/* Contact Us */}
+
+      {/* About Us */}
+
       {/* Products Section */}
       <section id="products" className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(5, 177, 5,0.1),transparent_50%)]" />
@@ -382,7 +870,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
             >
               <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                Our Products
+                The DIjkstra Platform Suite
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
                 Explore our suite of innovative products designed to transform
