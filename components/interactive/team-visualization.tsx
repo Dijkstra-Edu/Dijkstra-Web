@@ -74,7 +74,7 @@ export function TeamVisualization() {
       <div className="flex justify-between items-center mb-3 md:mb-6">
         <div className="flex items-center gap-1 md:gap-2">
           <Users className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
-          <h3 className="font-medium text-xs sm:text-sm md:text-base">TechNova Team</h3>
+          <h3 className="font-medium text-xs sm:text-sm md:text-base">Dijkstra's Member List</h3>
         </div>
         <div className="text-[8px] sm:text-xs text-gray-400">{isVerySmall ? "60+" : "60+ Team Members"}</div>
       </div>

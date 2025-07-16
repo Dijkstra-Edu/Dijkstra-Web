@@ -19,6 +19,8 @@ import {
   IconMoon,
 } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
+import { Bell } from "lucide-react";
+import ActionSearchBar from "./action-search-bar";
 
 export function SiteHeader({ title }: { title: string }) {
   /*
@@ -37,6 +39,7 @@ export function SiteHeader({ title }: { title: string }) {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
         <h1 className="text-base font-medium">{title}</h1>
+        {/* <ActionSearchBar /> */}
         <div className="ml-auto flex items-center gap-2">
           <Button
             variant="secondary"
@@ -194,6 +197,23 @@ export function SiteHeader({ title }: { title: string }) {
               )}
             </div>
           </Button>
+          <Button
+            variant="secondary"
+            asChild
+            size="sm"
+            className="hidden sm:flex"
+          >
+            <a
+              href="https://your-notification-link.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative flex items-center dark:text-foreground"
+            >
+              <Bell className="h-5 w-5" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+            </a>
+          </Button>
+
           <Separator
             orientation="vertical"
             className="mx-2 data-[orientation=vertical]:h-4"

@@ -1383,12 +1383,10 @@ export default function LandingPage() {
                 Our Mission
               </h2>
               <p className="text-gray-700 max-w-2xl mx-auto">
-                Dijkstra is a one stop, open source, free for all platform for
-                aspiring Software Engineers to prepare and crack jobs,
-                especially in today's day and age.
+                IIt's 2025, and entry level roles have become nothing short of a bloodbath. Loads of students left without jobs, a natural saturation of the field, AI taking over roles... Quite a lot happening at once. We at Dijkstra firmly believe that it is possible to still land well compensated jobs in the field of tech, irrespective of everything happening in the world today.
                 {/* button to redirect to Dijkstra's Mission as well as About Us */}
                 <br />
-                Dijkstra works on the following principles:
+                We want you to get back to your roots, and to systematically approach preapring for Software Engineering; ACTIVELY, not PASSIVELY.
               </p>
             </motion.div>
           </div>
