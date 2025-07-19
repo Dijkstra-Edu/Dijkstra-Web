@@ -6,16 +6,9 @@ import {
   ArrowRight,
   CheckCircle,
   Code,
-  Cpu,
   Github,
-  Globe,
   Menu,
-  MessageSquare,
-  Moon,
-  Sun,
-  Twitter,
   Clock,
-  XCircle,
   FileSearch,
   Building,
   AlertCircle,
@@ -31,7 +24,6 @@ import {
   Lightbulb,
   Hourglass,
   Brain,
-  LayoutDashboard,
   Handshake,
   BookOpen,
   FolderKanban,
@@ -72,6 +64,8 @@ import {
 } from "@/components/ui/card";
 import { addWeeks, format } from "date-fns";
 import Masonry from "./masonry";
+import ContactForm from "./contact-form";
+import { items } from './data/masonry'; // adjust the path as needed
 
 type TimelineSubItem = {
   title: string;
@@ -141,93 +135,6 @@ const TimelineItem = ({
   </div>
 );
 
-const items = [
-  {
-    id: "1",
-    img: "https://picsum.photos/id/1015/600/900?grayscale",
-    url: "https://example.com/one",
-    height: 400,
-  },
-  {
-    id: "2",
-    img: "https://picsum.photos/id/1011/600/750?grayscale",
-    url: "https://example.com/two",
-    height: 250,
-  },
-  {
-    id: "3",
-    img: "https://picsum.photos/id/1020/600/800?grayscale",
-    url: "https://example.com/three",
-    height: 600,
-  },
-  {
-    id: "4",
-    img: "https://picsum.photos/id/1018/600/660?grayscale",
-    url: "https://example.com/four",
-    height: 260,
-  },
-  {
-    id: "5",
-    img: "https://picsum.photos/id/1016/600/520?grayscale",
-    url: "https://example.com/five",
-    height: 120,
-  },
-  {
-    id: "6",
-    img: "https://picsum.photos/id/1025/600/850?grayscale",
-    url: "https://example.com/six",
-    height: 850,
-  },
-  {
-    id: "7",
-    img: "https://picsum.photos/id/1031/600/720?grayscale",
-    url: "https://example.com/seven",
-    height: 720,
-  },
-  {
-    id: "8",
-    img: "https://picsum.photos/id/1035/600/680?grayscale",
-    url: "https://example.com/eight",
-    height: 200,
-  },
-  {
-    id: "9",
-    img: "https://picsum.photos/id/1040/600/950?grayscale",
-    url: "https://example.com/nine",
-    height: 350,
-  },
-  {
-    id: "10",
-    img: "https://picsum.photos/id/1043/600/600?grayscale",
-    url: "https://example.com/ten",
-    height: 300,
-  },
-  {
-    id: "11",
-    img: "https://picsum.photos/id/1050/600/780?grayscale",
-    url: "https://example.com/eleven",
-    height: 350,
-  },
-  {
-    id: "12",
-    img: "https://picsum.photos/id/1055/600/640?grayscale",
-    url: "https://example.com/twelve",
-    height: 240,
-  },
-  {
-    id: "13",
-    img: "https://picsum.photos/id/1060/600/820?grayscale",
-    url: "https://example.com/thirteen",
-    height: 320,
-  },
-  {
-    id: "14",
-    img: "https://picsum.photos/id/1065/600/590?grayscale",
-    url: "https://example.com/fourteen",
-    height: 290,
-  },
-];
-
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -236,6 +143,8 @@ export default function LandingPage() {
   const isVerySmall = useMediaQuery("(max-width: 500px)");
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1383,10 +1292,17 @@ export default function LandingPage() {
                 Our Mission
               </h2>
               <p className="text-gray-700 max-w-2xl mx-auto">
-                IIt's 2025, and entry level roles have become nothing short of a bloodbath. Loads of students left without jobs, a natural saturation of the field, AI taking over roles... Quite a lot happening at once. We at Dijkstra firmly believe that it is possible to still land well compensated jobs in the field of tech, irrespective of everything happening in the world today.
+                IIt's 2025, and entry level roles have become nothing short of a
+                bloodbath. Loads of students left without jobs, a natural
+                saturation of the field, AI taking over roles... Quite a lot
+                happening at once. We at Dijkstra firmly believe that it is
+                possible to still land well compensated jobs in the field of
+                tech, irrespective of everything happening in the world today.
                 {/* button to redirect to Dijkstra's Mission as well as About Us */}
                 <br />
-                We want you to get back to your roots, and to systematically approach preapring for Software Engineering; ACTIVELY, not PASSIVELY.
+                We want you to get back to your roots, and to systematically
+                approach preapring for Software Engineering; ACTIVELY, not
+                PASSIVELY.
               </p>
             </motion.div>
           </div>
@@ -1407,15 +1323,34 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="text-center mb-12"
+              className="text-center mb-32"
             >
               <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
                 So, Ready to Get Started?
               </h2>
               <p className="text-gray-300 mb-8 text-lg">
-                Join thousands of satisfied users who have already transformed
-                their workflow with TechNova.
+                If you are a new user, please click the <b>Get Started</b>{" "}
+                button below, and get ready to be onboarded!
               </p>
+
+              <div className="">
+                {/* <Button
+                  className="bg-black hover:bg-neutral-900 border
+                 dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
+                 h-9 px-4 py-2"
+                  onClick={() => router.push("/login")}
+                >
+                  Login
+                </Button> */}
+                <Button
+                  className="bg-white hover:bg-gray-100 border
+                 dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
+                 h-9 px-10 py-8"
+                  onClick={() => router.push("/dashboard")}
+                >
+                  Get Started!
+                </Button>
+              </div>
             </motion.div>
 
             <motion.div
@@ -1424,62 +1359,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <div className="bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
-                <div className="bg-gradient-to-b from-gray-900 to-gray-950 p-8 rounded-xl border border-gray-800/50 backdrop-blur-sm">
-                  <h3 className="text-2xl font-bold mb-6">Contact Us</h3>
-                  <form className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name" className="text-gray-300">
-                          Name
-                        </Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          placeholder="Enter your name"
-                          className="bg-gray-800/50 border-gray-700 focus:border-purple-500 h-12"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="text-gray-300">
-                          Email
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="Enter your email"
-                          className="bg-gray-800/50 border-gray-700 focus:border-purple-500 h-12"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="subject" className="text-gray-300">
-                        Subject
-                      </Label>
-                      <Input
-                        id="subject"
-                        type="text"
-                        placeholder="Enter subject"
-                        className="bg-gray-800/50 border-gray-700 focus:border-purple-500 h-12"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="message" className="text-gray-300">
-                        Message
-                      </Label>
-                      <textarea
-                        id="message"
-                        rows={4}
-                        placeholder="Enter your message"
-                        className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                      ></textarea>
-                    </div>
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 h-12 text-base">
-                      Send Message
-                    </Button>
-                  </form>
-                </div>
-              </div>
+              <ContactForm />
             </motion.div>
           </div>
         </div>

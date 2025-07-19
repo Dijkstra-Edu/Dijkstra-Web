@@ -235,24 +235,26 @@ const Masonry: React.FC<MasonryProps> = ({
   return (
     <div ref={containerRef} className="relative px-[50px] w-full h-full">
       {grid.map((item) => (
-        <div
-          key={item.id}
-          data-key={item.id}
-          className="absolute box-content"
-          style={{ willChange: "transform, width, height, opacity" }}
-          onClick={() => window.open(item.url, "_blank", "noopener")}
-          onMouseEnter={(e) => handleMouseEnter(item.id, e.currentTarget)}
-          onMouseLeave={(e) => handleMouseLeave(item.id, e.currentTarget)}
-        >
+        <a href={item.url} target="_blank" rel="noopener noreferrer">
           <div
-            className="relative w-full h-full bg-cover bg-center rounded-[10px] shadow-[0px_10px_50px_-10px_rgba(0,0,0,0.2)] uppercase text-[10px] leading-[10px]"
-            style={{ backgroundImage: `url(${item.img})` }}
+            key={item.id}
+            data-key={item.id}
+            className="absolute box-content cursor-pointer"
+            style={{ willChange: "transform, width, height, opacity" }}
+            // onClick={() => window.open(item.url, "_blank")}
+            onMouseEnter={(e) => handleMouseEnter(item.id, e.currentTarget)}
+            onMouseLeave={(e) => handleMouseLeave(item.id, e.currentTarget)}
           >
-            {colorShiftOnHover && (
-              <div className="color-overlay absolute inset-0 rounded-[10px] bg-gradient-to-tr from-pink-500/50 to-sky-500/50 opacity-0 pointer-events-none" />
-            )}
+            <div
+              className="relative w-full h-full bg-cover bg-center grayscale rounded-[10px] shadow-[0px_10px_50px_-10px_rgba(0,0,0,0.2)] uppercase text-[10px] leading-[10px]"
+              style={{ backgroundImage: `url(${item.img})` }}
+            >
+              {colorShiftOnHover && (
+                <div className="color-overlay absolute inset-0 rounded-[10px] bg-gradient-to-tr from-pink-500/50 to-sky-500/50 opacity-0 pointer-events-none" />
+              )}
+            </div>
           </div>
-        </div>
+        </a>
       ))}
     </div>
   );

@@ -179,9 +179,35 @@ export default function Homepage() {
           {/* Left sidebar */}
           <div className="col-span-12 md:col-span-3 lg:col-span-2">
             {/* <ProfileData /> */}
-            <Card className="@container/card bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs border-slate-700">
+            <Card className="@container/card bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs">
               <CardContent className="p-4">
-                <nav className="space-y-2">
+                <div className="">
+                  <div className="text-xs text-black mb-3 font-semibold uppercase tracking-wide">
+                    Your Rank
+                  </div>
+                  <div className="space-y-4">
+                    <StatItem
+                      label="Study Streak"
+                      value={studyStreak}
+                      unit="days"
+                      color="green"
+                    />
+                    <StatItem
+                      label="Problems Solved"
+                      value={problemsSolved}
+                      unit=""
+                      color="blue"
+                    />
+                    <StatItem
+                      label="Global Rank"
+                      value={currentRank}
+                      unit=""
+                      color="purple"
+                    />
+                  </div>
+                </div>
+
+                <nav className="space-y-2 mt-8 pt-6 border-t border-slate-700">
                   <NavItem icon={Target} label="Dashboard" active />
                   <NavItem icon={Code} label="Practice" />
                   <NavItem icon={BookOpen} label="Learn" />
