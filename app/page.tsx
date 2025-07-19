@@ -1,7 +1,5 @@
-export default function HomePage() {
-    return (
-        <main>
-            <h1>Hello World</h1>
-        </main>
-    );
+import LandingPage from "@/components/landing-page"
+
+export default function Home() {
+   return <LandingPage />
 }

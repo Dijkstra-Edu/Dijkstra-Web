@@ -28,8 +28,17 @@ export const authOptions: NextAuthOptions = {
       email: profile.email,
       image: profile.avatar_url,
       followers: extendedProfile.followers,
+      following: extendedProfile.following,
       public_repos: extendedProfile.public_repos,
       avatar_url: extendedProfile.avatar_url,
+      bio: extendedProfile.bio,
+      company: extendedProfile.company,
+      location: extendedProfile.location,
+      blog: extendedProfile.blog,
+      created_at: extendedProfile.created_at,
+      updated_at: extendedProfile.updated_at,
+      organization: extendedProfile.organizations_url,
+      hireable: extendedProfile.hireable,
     };
   },
     }),
@@ -44,25 +53,45 @@ export const authOptions: NextAuthOptions = {
   if (session.user) {
     session.user.id = token.id;
     session.user.login = token.login;
-    session.user.followers = token.followers;
-    session.user.public_repos = token.public_repos;
     session.user.avatar_url = token.avatar_url;
+    session.user.bio = token.bio;
+    session.user.followers = token.followers;
+    session.user.following = token.following;
+    session.user.public_repos = token.public_repos;
+    session.user.company = token.company;
+    session.user.location = token.location;
+    session.user.blog = token.blog;
+    session.user.created_at = token.created_at;
+    session.user.updated_at = token.updated_at;
+    session.user.organization = token.organization;
+    session.user.hireable = token.hireable;
   }
+  console.log("Session callback:", session);
   return session;
 },
-  async jwt({ token, user, account, profile }) {
+async jwt({ token, profile }) {
   if (profile) {
     return {
       ...token,
-      id: Number(profile.id), // Ensure id is number
+      id: Number(profile.id),
       login: profile.login,
-      followers: profile.followers,
-      public_repos: profile.public_repos,
       avatar_url: profile.avatar_url,
+      bio: profile.bio,
+      followers: profile.followers,
+      following: profile.following,
+      public_repos: profile.public_repos,
+      company: profile.company,
+      location: profile.location,
+      blog: profile.blog,
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
+      organization: profile.organization,
+      hireable: profile.hireable,
     };
   }
   return token;
-},
+}
+
 },
   pages: {
     signIn: "/login",

@@ -1,0 +1,86 @@
+export const items = [
+  {
+    id: "1",
+    img: "https://cdn.statcdn.com/Infographic/images/normal/29421.jpeg?grayscale",
+    url: "https://www.statista.com/chart/29421/number-of-workers-laid-off-worldwide-in-the-tech-startup-sector-since-jan-2022/",
+    height: 400,
+  },
+  {
+    id: "2",
+    img: "https://trak.in/stories/wp-content/uploads/2025/04/837324-52904-cgeocoqdlt-1488730829-2-1.jpeg",
+    url: "https://www.google.com/url?sa=i&url=https%3A%2F%2Ftrak.in%2Fstories%2Frecord-tech-layoffs-27000-techies-fired-by-100-firms-in-2025%2F&psig=AOvVaw3WQ9JJxwtuDewzeC1Rwl3J&ust=1752829943065000&source=images&cd=vfe&opi=89978449&ved=0CBkQ3YkBahcKEwjAvM7ExsOOAxUAAAAAHQAAAAAQGA",
+    height: 250,
+  },
+  {
+    id: "3",
+    img: "https://picsum.photos/id/1020/600/800?grayscale",
+    url: "https://example.com/three",
+    height: 600,
+  },
+  {
+    id: "4",
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqAcrObT1H1c7LHIjWqoAq1nx2N2Fwb3e2waPHJpzRNmHOGpX3Ic43kPmRUhmKpPZgHAM&usqp=CAU",
+    url: "https://www.google.com/imgres?imgurl=https%3A%2F%2Fi.ytimg.com%2Fvi%2FyldrjxQvYjk%2Fmaxresdefault.jpg&tbnid=eh7EOUZBzyA2RM&vet=10CAoQ1JoKKARqFwoTCMC8zsTGw44DFQAAAAAdAAAAABAb..i&imgrefurl=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DyldrjxQvYjk&docid=wFLvD-DDqj5koM&w=1280&h=720&itg=1&q=tech%20layoffs%20india&ved=0CAoQ1JoKKARqFwoTCMC8zsTGw44DFQAAAAAdAAAAABAb",
+    height: 260,
+  },
+  {
+    id: "5",
+    img: "https://picsum.photos/id/1016/600/520?grayscale",
+    url: "https://example.com/five",
+    height: 120,
+  },
+  {
+    id: "6",
+    img: "https://picsum.photos/id/1025/600/850?grayscale",
+    url: "https://example.com/six",
+    height: 850,
+  },
+  {
+    id: "7",
+    img: "https://akm-img-a-in.tosshub.com/indiatoday/styles/medium_crop_simple/public/2023-02/budget-crash-a.jpg?VersionId=qWz8iPlDHvgFOzcxbuEgoMX_7puzo7.z&size=750:*",
+    url: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.indiatoday.in%2Fmagazine%2Fcover-story%2Fstory%2F20230213-system-crash-massive-layoff-wave-in-global-tech-industry-2330169-2023-02-03&psig=AOvVaw3WQ9JJxwtuDewzeC1Rwl3J&ust=1752829943065000&source=images&cd=vfe&opi=89978449&ved=0CBkQ3YkBahcKEwjAvM7ExsOOAxUAAAAAHQAAAAAQCw",
+    height: 720,
+  },
+  {
+    id: "8",
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxcEcty7Vu0muk3ZgSbz6wQWiTL3shXs5_GpEV89sfoNKWA9JMHHcmeCifv4eg-z3_FKM&usqp=CAU",
+    url: "https://www.google.com/imgres?imgurl=https%3A%2F%2Fi.ytimg.com%2Fvi%2FvsSodO46NPY%2Fhq720.jpg%3Fsqp%3D-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD%26rs%3DAOn4CLDeOvWol0WwqmndvhVLJfganSwGUw&tbnid=5q3wobKM9MdRRM&vet=10CBYQ1JoKKAlqFwoTCMC8zsTGw44DFQAAAAAdAAAAABAb..i&imgrefurl=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DvsSodO46NPY&docid=skjS7j2zYsU-0M&w=686&h=386&itg=1&q=tech%20layoffs%20india&ved=0CBYQ1JoKKAlqFwoTCMC8zsTGw44DFQAAAAAdAAAAABAb",
+    height: 200,
+  },
+  {
+    id: "9",
+    img: "https://picsum.photos/id/1040/600/950?grayscale",
+    url: "https://example.com/nine",
+    height: 350,
+  },
+  {
+    id: "10",
+    img: "https://i.ytimg.com/vi/asidIeipS40/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLD8TpN-7AgIP3fGXQ8U_-hTZwcYGQ",
+    url: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DasidIeipS40&psig=AOvVaw1dURIvQe8sWISI_gDsN_dc&ust=1752830047461000&source=images&cd=vfe&opi=89978449&ved=0CBcQ3YkBahcKEwjoiLydx8OOAxUAAAAAHQAAAAAQAw",
+    height: 300,
+  },
+  {
+    id: "11",
+    img: "https://picsum.photos/id/1050/600/780?grayscale",
+    url: "https://example.com/eleven",
+    height: 350,
+  },
+  {
+    id: "12",
+    img: "https://picsum.photos/id/1055/600/640?grayscale",
+    url: "https://example.com/twelve",
+    height: 240,
+  },
+  {
+    id: "13",
+    img: "https://picsum.photos/id/1060/600/820?grayscale",
+    url: "https://example.com/thirteen",
+    height: 320,
+  },
+  {
+    id: "14",
+    img: "https://picsum.photos/id/1065/600/590?grayscale",
+    url: "https://example.com/fourteen",
+    height: 290,
+  },
+];

@@ -122,11 +122,81 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
-@layer base {
+/* @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
   }
+} */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
+
+.animate-in {
+  animation: animate-in 0.5s ease-out;
+}
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: black;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #048304;
+  border-radius: 14px;
+  border: 2px solid #048304;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #005500;
+}
+
+/* .landing-scroll *::-webkit-scrollbar {
+  width: 8px;
+}
+
+.landing-scroll *::-webkit-scrollbar-track {
+  background: var(--sidebar);
+}
+
+.landing-scroll *::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 14px;
+  border: 3px solid var(--primary);
+}
+
+.landing-scroll *::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tertiary);
+} */

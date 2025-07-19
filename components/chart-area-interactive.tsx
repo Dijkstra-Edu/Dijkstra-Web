@@ -33,110 +33,125 @@ import {
 export const description = "An interactive area chart"
 
 const chartData = [
-  { date: "2024-04-01", desktop: 222, mobile: 150 },
-  { date: "2024-04-02", desktop: 97, mobile: 180 },
-  { date: "2024-04-03", desktop: 167, mobile: 120 },
-  { date: "2024-04-04", desktop: 242, mobile: 260 },
-  { date: "2024-04-05", desktop: 373, mobile: 290 },
-  { date: "2024-04-06", desktop: 301, mobile: 340 },
-  { date: "2024-04-07", desktop: 245, mobile: 180 },
-  { date: "2024-04-08", desktop: 409, mobile: 320 },
-  { date: "2024-04-09", desktop: 59, mobile: 110 },
-  { date: "2024-04-10", desktop: 261, mobile: 190 },
-  { date: "2024-04-11", desktop: 327, mobile: 350 },
-  { date: "2024-04-12", desktop: 292, mobile: 210 },
-  { date: "2024-04-13", desktop: 342, mobile: 380 },
-  { date: "2024-04-14", desktop: 137, mobile: 220 },
-  { date: "2024-04-15", desktop: 120, mobile: 170 },
-  { date: "2024-04-16", desktop: 138, mobile: 190 },
-  { date: "2024-04-17", desktop: 446, mobile: 360 },
-  { date: "2024-04-18", desktop: 364, mobile: 410 },
-  { date: "2024-04-19", desktop: 243, mobile: 180 },
-  { date: "2024-04-20", desktop: 89, mobile: 150 },
-  { date: "2024-04-21", desktop: 137, mobile: 200 },
-  { date: "2024-04-22", desktop: 224, mobile: 170 },
-  { date: "2024-04-23", desktop: 138, mobile: 230 },
-  { date: "2024-04-24", desktop: 387, mobile: 290 },
-  { date: "2024-04-25", desktop: 215, mobile: 250 },
-  { date: "2024-04-26", desktop: 75, mobile: 130 },
-  { date: "2024-04-27", desktop: 383, mobile: 420 },
-  { date: "2024-04-28", desktop: 122, mobile: 180 },
-  { date: "2024-04-29", desktop: 315, mobile: 240 },
-  { date: "2024-04-30", desktop: 454, mobile: 380 },
-  { date: "2024-05-01", desktop: 165, mobile: 220 },
-  { date: "2024-05-02", desktop: 293, mobile: 310 },
-  { date: "2024-05-03", desktop: 247, mobile: 190 },
-  { date: "2024-05-04", desktop: 385, mobile: 420 },
-  { date: "2024-05-05", desktop: 481, mobile: 390 },
-  { date: "2024-05-06", desktop: 498, mobile: 520 },
-  { date: "2024-05-07", desktop: 388, mobile: 300 },
-  { date: "2024-05-08", desktop: 149, mobile: 210 },
-  { date: "2024-05-09", desktop: 227, mobile: 180 },
-  { date: "2024-05-10", desktop: 293, mobile: 330 },
-  { date: "2024-05-11", desktop: 335, mobile: 270 },
-  { date: "2024-05-12", desktop: 197, mobile: 240 },
-  { date: "2024-05-13", desktop: 197, mobile: 160 },
-  { date: "2024-05-14", desktop: 448, mobile: 490 },
-  { date: "2024-05-15", desktop: 473, mobile: 380 },
-  { date: "2024-05-16", desktop: 338, mobile: 400 },
-  { date: "2024-05-17", desktop: 499, mobile: 420 },
-  { date: "2024-05-18", desktop: 315, mobile: 350 },
-  { date: "2024-05-19", desktop: 235, mobile: 180 },
-  { date: "2024-05-20", desktop: 177, mobile: 230 },
-  { date: "2024-05-21", desktop: 82, mobile: 140 },
-  { date: "2024-05-22", desktop: 81, mobile: 120 },
-  { date: "2024-05-23", desktop: 252, mobile: 290 },
-  { date: "2024-05-24", desktop: 294, mobile: 220 },
-  { date: "2024-05-25", desktop: 201, mobile: 250 },
-  { date: "2024-05-26", desktop: 213, mobile: 170 },
-  { date: "2024-05-27", desktop: 420, mobile: 460 },
-  { date: "2024-05-28", desktop: 233, mobile: 190 },
-  { date: "2024-05-29", desktop: 78, mobile: 130 },
-  { date: "2024-05-30", desktop: 340, mobile: 280 },
-  { date: "2024-05-31", desktop: 178, mobile: 230 },
-  { date: "2024-06-01", desktop: 178, mobile: 200 },
-  { date: "2024-06-02", desktop: 470, mobile: 410 },
-  { date: "2024-06-03", desktop: 103, mobile: 160 },
-  { date: "2024-06-04", desktop: 439, mobile: 380 },
-  { date: "2024-06-05", desktop: 88, mobile: 140 },
-  { date: "2024-06-06", desktop: 294, mobile: 250 },
-  { date: "2024-06-07", desktop: 323, mobile: 370 },
-  { date: "2024-06-08", desktop: 385, mobile: 320 },
-  { date: "2024-06-09", desktop: 438, mobile: 480 },
-  { date: "2024-06-10", desktop: 155, mobile: 200 },
-  { date: "2024-06-11", desktop: 92, mobile: 150 },
-  { date: "2024-06-12", desktop: 492, mobile: 420 },
-  { date: "2024-06-13", desktop: 81, mobile: 130 },
-  { date: "2024-06-14", desktop: 426, mobile: 380 },
-  { date: "2024-06-15", desktop: 307, mobile: 350 },
-  { date: "2024-06-16", desktop: 371, mobile: 310 },
-  { date: "2024-06-17", desktop: 475, mobile: 520 },
-  { date: "2024-06-18", desktop: 107, mobile: 170 },
-  { date: "2024-06-19", desktop: 341, mobile: 290 },
-  { date: "2024-06-20", desktop: 408, mobile: 450 },
-  { date: "2024-06-21", desktop: 169, mobile: 210 },
-  { date: "2024-06-22", desktop: 317, mobile: 270 },
-  { date: "2024-06-23", desktop: 480, mobile: 530 },
-  { date: "2024-06-24", desktop: 132, mobile: 180 },
-  { date: "2024-06-25", desktop: 141, mobile: 190 },
-  { date: "2024-06-26", desktop: 434, mobile: 380 },
-  { date: "2024-06-27", desktop: 448, mobile: 490 },
-  { date: "2024-06-28", desktop: 149, mobile: 200 },
-  { date: "2024-06-29", desktop: 103, mobile: 160 },
-  { date: "2024-06-30", desktop: 446, mobile: 400 },
-]
-
+  { date: "2024-04-01", Github: 222, Leetcode: 150, LinkedIn: 7, Projects: 102, Learning: 15, Resume: 3 },
+  { date: "2024-04-02", Github: 97, Leetcode: 180, LinkedIn: 5, Projects: 87, Learning: 22, Resume: 2 },
+  { date: "2024-04-03", Github: 167, Leetcode: 120, LinkedIn: 8, Projects: 45, Learning: 18, Resume: 4 },
+  { date: "2024-04-04", Github: 242, Leetcode: 260, LinkedIn: 6, Projects: 132, Learning: 25, Resume: 1 },
+  { date: "2024-04-05", Github: 373, Leetcode: 290, LinkedIn: 9, Projects: 148, Learning: 12, Resume: 5 },
+  { date: "2024-04-06", Github: 301, Leetcode: 340, LinkedIn: 4, Projects: 92, Learning: 28, Resume: 3 },
+  { date: "2024-04-07", Github: 245, Leetcode: 180, LinkedIn: 7, Projects: 67, Learning: 14, Resume: 2 },
+  { date: "2024-04-08", Github: 409, Leetcode: 320, LinkedIn: 10, Projects: 143, Learning: 19, Resume: 6 },
+  { date: "2024-04-09", Github: 59, Leetcode: 110, LinkedIn: 3, Projects: 38, Learning: 8, Resume: 1 },
+  { date: "2024-04-10", Github: 261, Leetcode: 190, LinkedIn: 6, Projects: 121, Learning: 17, Resume: 4 },
+  { date: "2024-04-11", Github: 327, Leetcode: 350, LinkedIn: 8, Projects: 149, Learning: 23, Resume: 2 },
+  { date: "2024-04-12", Github: 292, Leetcode: 210, LinkedIn: 5, Projects: 88, Learning: 11, Resume: 3 },
+  { date: "2024-04-13", Github: 342, Leetcode: 380, LinkedIn: 7, Projects: 137, Learning: 27, Resume: 5 },
+  { date: "2024-04-14", Github: 137, Leetcode: 220, LinkedIn: 4, Projects: 52, Learning: 9, Resume: 2 },
+  { date: "2024-04-15", Github: 120, Leetcode: 170, LinkedIn: 6, Projects: 43, Learning: 13, Resume: 1 },
+  { date: "2024-04-16", Github: 138, Leetcode: 190, LinkedIn: 9, Projects: 76, Learning: 21, Resume: 4 },
+  { date: "2024-04-17", Github: 446, Leetcode: 360, LinkedIn: 7, Projects: 142, Learning: 29, Resume: 3 },
+  { date: "2024-04-18", Github: 364, Leetcode: 410, LinkedIn: 5, Projects: 128, Learning: 16, Resume: 2 },
+  { date: "2024-04-19", Github: 243, Leetcode: 180, LinkedIn: 8, Projects: 94, Learning: 24, Resume: 6 },
+  { date: "2024-04-20", Github: 89, Leetcode: 150, LinkedIn: 3, Projects: 37, Learning: 7, Resume: 1 },
+  { date: "2024-04-21", Github: 137, Leetcode: 200, LinkedIn: 6, Projects: 83, Learning: 20, Resume: 3 },
+  { date: "2024-04-22", Github: 224, Leetcode: 170, LinkedIn: 9, Projects: 116, Learning: 14, Resume: 5 },
+  { date: "2024-04-23", Github: 138, Leetcode: 230, LinkedIn: 4, Projects: 49, Learning: 10, Resume: 2 },
+  { date: "2024-04-24", Github: 387, Leetcode: 290, LinkedIn: 7, Projects: 139, Learning: 26, Resume: 4 },
+  { date: "2024-04-25", Github: 215, Leetcode: 250, LinkedIn: 10, Projects: 107, Learning: 18, Resume: 1 },
+  { date: "2024-04-26", Github: 75, Leetcode: 130, LinkedIn: 2, Projects: 29, Learning: 5, Resume: 3 },
+  { date: "2024-04-27", Github: 383, Leetcode: 420, LinkedIn: 8, Projects: 146, Learning: 30, Resume: 6 },
+  { date: "2024-04-28", Github: 122, Leetcode: 180, LinkedIn: 5, Projects: 63, Learning: 12, Resume: 2 },
+  { date: "2024-04-29", Github: 315, Leetcode: 240, LinkedIn: 7, Projects: 118, Learning: 22, Resume: 4 },
+  { date: "2024-04-30", Github: 454, Leetcode: 380, LinkedIn: 9, Projects: 147, Learning: 17, Resume: 3 },
+  { date: "2024-05-01", Github: 165, Leetcode: 220, LinkedIn: 4, Projects: 71, Learning: 11, Resume: 1 },
+  { date: "2024-05-02", Github: 293, Leetcode: 310, LinkedIn: 6, Projects: 124, Learning: 25, Resume: 5 },
+  { date: "2024-05-03", Github: 247, Leetcode: 190, LinkedIn: 8, Projects: 97, Learning: 19, Resume: 2 },
+  { date: "2024-05-04", Github: 385, Leetcode: 420, LinkedIn: 7, Projects: 141, Learning: 28, Resume: 4 },
+  { date: "2024-05-05", Github: 481, Leetcode: 390, LinkedIn: 10, Projects: 149, Learning: 15, Resume: 3 },
+  { date: "2024-05-06", Github: 498, Leetcode: 520, LinkedIn: 6, Projects: 135, Learning: 23, Resume: 1 },
+  { date: "2024-05-07", Github: 388, Leetcode: 300, LinkedIn: 9, Projects: 112, Learning: 16, Resume: 5 },
+  { date: "2024-05-08", Github: 149, Leetcode: 210, LinkedIn: 3, Projects: 58, Learning: 8, Resume: 2 },
+  { date: "2024-05-09", Github: 227, Leetcode: 180, LinkedIn: 7, Projects: 103, Learning: 21, Resume: 4 },
+  { date: "2024-05-10", Github: 293, Leetcode: 330, LinkedIn: 5, Projects: 126, Learning: 14, Resume: 3 },
+  { date: "2024-05-11", Github: 335, Leetcode: 270, LinkedIn: 8, Projects: 91, Learning: 27, Resume: 6 },
+  { date: "2024-05-12", Github: 197, Leetcode: 240, LinkedIn: 4, Projects: 64, Learning: 10, Resume: 2 },
+  { date: "2024-05-13", Github: 197, Leetcode: 160, LinkedIn: 6, Projects: 42, Learning: 13, Resume: 1 },
+  { date: "2024-05-14", Github: 448, Leetcode: 490, LinkedIn: 9, Projects: 148, Learning: 29, Resume: 5 },
+  { date: "2024-05-15", Github: 473, Leetcode: 380, LinkedIn: 7, Projects: 133, Learning: 18, Resume: 3 },
+  { date: "2024-05-16", Github: 338, Leetcode: 400, LinkedIn: 10, Projects: 122, Learning: 24, Resume: 4 },
+  { date: "2024-05-17", Github: 499, Leetcode: 420, LinkedIn: 5, Projects: 145, Learning: 16, Resume: 2 },
+  { date: "2024-05-18", Github: 315, Leetcode: 350, LinkedIn: 8, Projects: 108, Learning: 20, Resume: 6 },
+  { date: "2024-05-19", Github: 235, Leetcode: 180, LinkedIn: 3, Projects: 76, Learning: 9, Resume: 1 },
+  { date: "2024-05-20", Github: 177, Leetcode: 230, LinkedIn: 7, Projects: 95, Learning: 22, Resume: 4 },
+  { date: "2024-05-21", Github: 82, Leetcode: 140, LinkedIn: 2, Projects: 31, Learning: 6, Resume: 3 },
+  { date: "2024-05-22", Github: 81, Leetcode: 120, LinkedIn: 5, Projects: 47, Learning: 11, Resume: 2 },
+  { date: "2024-05-23", Github: 252, Leetcode: 290, LinkedIn: 9, Projects: 119, Learning: 25, Resume: 5 },
+  { date: "2024-05-24", Github: 294, Leetcode: 220, LinkedIn: 6, Projects: 104, Learning: 17, Resume: 1 },
+  { date: "2024-05-25", Github: 201, Leetcode: 250, LinkedIn: 8, Projects: 93, Learning: 19, Resume: 3 },
+  { date: "2024-05-26", Github: 213, Leetcode: 170, LinkedIn: 4, Projects: 56, Learning: 12, Resume: 2 },
+  { date: "2024-05-27", Github: 420, Leetcode: 460, LinkedIn: 10, Projects: 144, Learning: 30, Resume: 6 },
+  { date: "2024-05-28", Github: 233, Leetcode: 190, LinkedIn: 7, Projects: 101, Learning: 21, Resume: 4 },
+  { date: "2024-05-29", Github: 78, Leetcode: 130, LinkedIn: 3, Projects: 39, Learning: 7, Resume: 1 },
+  { date: "2024-05-30", Github: 340, Leetcode: 280, LinkedIn: 9, Projects: 127, Learning: 26, Resume: 5 },
+  { date: "2024-05-31", Github: 178, Leetcode: 230, LinkedIn: 5, Projects: 82, Learning: 14, Resume: 3 },
+  { date: "2024-06-01", Github: 178, Leetcode: 200, LinkedIn: 8, Projects: 109, Learning: 23, Resume: 2 },
+  { date: "2024-06-02", Github: 470, Leetcode: 410, LinkedIn: 6, Projects: 136, Learning: 18, Resume: 4 },
+  { date: "2024-06-03", Github: 103, Leetcode: 160, LinkedIn: 4, Projects: 44, Learning: 9, Resume: 1 },
+  { date: "2024-06-04", Github: 439, Leetcode: 380, LinkedIn: 7, Projects: 131, Learning: 27, Resume: 5 },
+  { date: "2024-06-05", Github: 88, Leetcode: 140, LinkedIn: 2, Projects: 33, Learning: 5, Resume: 3 },
+  { date: "2024-06-06", Github: 294, Leetcode: 250, LinkedIn: 9, Projects: 117, Learning: 20, Resume: 2 },
+  { date: "2024-06-07", Github: 323, Leetcode: 370, LinkedIn: 5, Projects: 125, Learning: 15, Resume: 4 },
+  { date: "2024-06-08", Github: 385, Leetcode: 320, LinkedIn: 10, Projects: 142, Learning: 28, Resume: 6 },
+  { date: "2024-06-09", Github: 438, Leetcode: 480, LinkedIn: 7, Projects: 147, Learning: 19, Resume: 3 },
+  { date: "2024-06-10", Github: 155, Leetcode: 200, LinkedIn: 4, Projects: 68, Learning: 11, Resume: 1 },
+  { date: "2024-06-11", Github: 92, Leetcode: 150, LinkedIn: 6, Projects: 51, Learning: 16, Resume: 5 },
+  { date: "2024-06-12", Github: 492, Leetcode: 420, LinkedIn: 8, Projects: 149, Learning: 29, Resume: 2 },
+  { date: "2024-06-13", Github: 81, Leetcode: 130, LinkedIn: 3, Projects: 36, Learning: 8, Resume: 4 },
+  { date: "2024-06-14", Github: 426, Leetcode: 380, LinkedIn: 9, Projects: 138, Learning: 24, Resume: 3 },
+  { date: "2024-06-15", Github: 307, Leetcode: 350, LinkedIn: 5, Projects: 113, Learning: 17, Resume: 1 },
+  { date: "2024-06-16", Github: 371, Leetcode: 310, LinkedIn: 7, Projects: 106, Learning: 22, Resume: 5 },
+  { date: "2024-06-17", Github: 475, Leetcode: 520, LinkedIn: 10, Projects: 150, Learning: 30, Resume: 6 },
+  { date: "2024-06-18", Github: 107, Leetcode: 170, LinkedIn: 4, Projects: 53, Learning: 10, Resume: 2 },
+  { date: "2024-06-19", Github: 341, Leetcode: 290, LinkedIn: 8, Projects: 121, Learning: 25, Resume: 4 },
+  { date: "2024-06-20", Github: 408, Leetcode: 450, LinkedIn: 6, Projects: 134, Learning: 16, Resume: 3 },
+  { date: "2024-06-21", Github: 169, Leetcode: 210, LinkedIn: 9, Projects: 98, Learning: 21, Resume: 1 },
+  { date: "2024-06-22", Github: 317, Leetcode: 270, LinkedIn: 5, Projects: 111, Learning: 13, Resume: 5 },
+  { date: "2024-06-23", Github: 480, Leetcode: 530, LinkedIn: 7, Projects: 146, Learning: 27, Resume: 2 },
+  { date: "2024-06-24", Github: 132, Leetcode: 180, LinkedIn: 3, Projects: 62, Learning: 9, Resume: 4 },
+  { date: "2024-06-25", Github: 141, Leetcode: 190, LinkedIn: 6, Projects: 84, Learning: 20, Resume: 3 },
+  { date: "2024-06-26", Github: 434, Leetcode: 380, LinkedIn: 8, Projects: 129, Learning: 23, Resume: 1 },
+  { date: "2024-06-27", Github: 448, Leetcode: 490, LinkedIn: 10, Projects: 148, Learning: 28, Resume: 6 },
+  { date: "2024-06-28", Github: 149, Leetcode: 200, LinkedIn: 5, Projects: 77, Learning: 12, Resume: 2 },
+  { date: "2024-06-29", Github: 103, Leetcode: 160, LinkedIn: 7, Projects: 54, Learning: 18, Resume: 4 },
+  { date: "2024-06-30", Github: 446, Leetcode: 400, LinkedIn: 9, Projects: 139, Learning: 26, Resume: 3 }
+];
 const chartConfig = {
   visitors: {
     label: "Visitors",
   },
-  desktop: {
-    label: "Desktop",
+  Github: {
+    label: "Github",
     color: "var(--primary)",
   },
-  mobile: {
-    label: "Mobile",
+  Leetcode: {
+    label: "Leetcode",
     color: "var(--primary)",
+  },
+  LinkedIn: {
+    label: "LinkedIn",
+    color: "var(--secondary)",
+  },
+  Projects: {
+    label: "Projects",
+    color: "var(--accent)",
+  },
+  Learning: {
+    label: "Learning",
+    color: "var(--muted)",
+  },
+  Resume: {
+    label: "Resume",
+    color: "var(--destructive)",
   },
 } satisfies ChartConfig
 
@@ -167,7 +182,7 @@ export function ChartAreaInteractive() {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Total Visitors</CardTitle>
+        <CardTitle>All Activity</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
             Total for the last 3 months
@@ -215,27 +230,51 @@ export function ChartAreaInteractive() {
         >
           <AreaChart data={filteredData}>
             <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillGithub" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-desktop)"
+                  stopColor="var(--color-github)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-desktop)"
+                  stopColor="var(--color-github)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillLeetcode" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--color-leetcode)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--color-leetcode)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+              <linearGradient id="fillLinkedIn" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-linkedin)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-linkedin)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+              <linearGradient id="fillProjects" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-projects)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-projects)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -271,17 +310,31 @@ export function ChartAreaInteractive() {
               }
             />
             <Area
-              dataKey="mobile"
+              dataKey="Leetcode"
               type="natural"
-              fill="url(#fillMobile)"
-              stroke="var(--color-mobile)"
+              fill="url(#fillLeetcode)"
+              stroke="var(--color-leetcode)"
               stackId="a"
             />
             <Area
-              dataKey="desktop"
+              dataKey="Github"
               type="natural"
-              fill="url(#fillDesktop)"
-              stroke="var(--color-desktop)"
+              fill="url(#fillGithub)"
+              stroke="var(--color-github)"
+              stackId="a"
+            />
+            <Area
+              dataKey="LinkedIn"
+              type="natural"
+              fill="url(#fillLinkedIn)"
+              stroke="var(--color-linkedin)"
+              stackId="a"
+            />
+            <Area
+              dataKey="Projects"
+              type="natural"
+              fill="url(#fillProjects)"
+              stroke="var(--color-projects)"
               stackId="a"
             />
           </AreaChart>
