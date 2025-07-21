@@ -1260,7 +1260,7 @@ export default function LandingPage() {
 
       <section
         id="features"
-        className="py-16 bg-white relative overflow-hidden h-[80vh]"
+        className="py-16 bg-white relative overflow-hidden h-[100vh]"
       >
         <div className="container mx-auto px-4 relative z-10">
           <div className="relative">
