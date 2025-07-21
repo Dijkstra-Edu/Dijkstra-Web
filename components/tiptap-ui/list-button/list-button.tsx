@@ -23,7 +23,7 @@ export type ListType = "bulletList" | "orderedList" | "taskList"
 export interface ListOption {
   label: string
   type: ListType
-  icon: React.ElementType
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement> & { className?: string }>
 }
 
 export interface ListButtonProps extends Omit<ButtonProps, "type"> {

@@ -19,8 +19,6 @@ import {
 } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
-export const description = "A radial chart with a custom shape";
-
 const chartData = [
   { browser: "easy", visitors: 66, fill: "green" },
   { browser: "hard", visitors: 200, fill: "yellow" },
