@@ -65,7 +65,7 @@ import {
 import { addWeeks, format } from "date-fns";
 import Masonry from "./masonry";
 import ContactForm from "./contact-form";
-import { items } from './data/masonry'; // adjust the path as needed
+import { items } from '../data/masonry'; // adjust the path as needed
 
 type TimelineSubItem = {
   title: string;
