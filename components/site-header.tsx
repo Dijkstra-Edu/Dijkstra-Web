@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,8 +21,15 @@ import {
   IconMoon,
 } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
-import { Bell } from "lucide-react";
+import { Bell, Notebook, Sheet } from "lucide-react";
 import ActionSearchBar from "./action-search-bar";
+import {
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "./ui/sheet";
 
 export function SiteHeader({ title }: { title: string }) {
   /*
@@ -174,16 +181,14 @@ export function SiteHeader({ title }: { title: string }) {
             orientation="vertical"
             className="mx-2 data-[orientation=vertical]:h-4"
           />
-          <Button
+          {/* <Button
             variant="secondary"
-            asChild
             size="sm"
             className="hidden sm:flex"
+            onClick={onNotebookClick}
           >
-            <a href="" target="_blank" className="dark:text-foreground">
-              <IconNotebook className="h-4 w-4" />
-            </a>
-          </Button>
+            <IconNotebook className="h-4 w-4" />
+          </Button> */}
           <Button
             variant="secondary"
             asChild

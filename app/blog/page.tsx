@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileData } from "@/components/profile-data";
 import Readme from "@/components/readme";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
@@ -54,7 +55,7 @@ export default function Page() {
       <SidebarInset className="h-[calc(100vh-20px)] flex flex-col overflow-hidden">
         {/* Sticky header */}
         <div className="sticky top-0 z-10 bg-background">
-          <SiteHeader title="Learning Hub" />
+          <SiteHeader title="Blogs and Articles" />
         </div>
 
         {/* Scrollable content */}
@@ -64,6 +65,16 @@ export default function Page() {
           </div>
         </div>
       </SidebarInset>
+
+      <Sheet open={showNotebook} onOpenChange={setShowNotebook}>
+        <SheetContent side="right">
+          <SheetHeader>
+            <SheetTitle>Notebook</SheetTitle>
+            <SheetDescription>Your notes go here.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">Notebook content...</div>
+        </SheetContent>
+      </Sheet>
     </SidebarProvider>
   );
 }

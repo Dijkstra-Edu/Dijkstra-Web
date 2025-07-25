@@ -1,22 +1,4 @@
-export interface Fellowship {
-  id: string
-  title: string
-  organization: string
-  organizationLogo: string
-  location: string
-  locationType: "remote" | "onsite" | "hybrid"
-  duration: string
-  stipend: string
-  applicationDeadline: string
-  startDate: string
-  description: string
-  featured: boolean
-  highlight: "new" | "trending" | "competitive" | "popular" | undefined
-  benefits: string[]
-  category: string
-  requirements: string[]
-  technologies: string[]
-}
+import { Fellowship } from "@/types";
 
 export const fellowships: Fellowship[] = [
   // Google Summer of Code
@@ -24,7 +6,8 @@ export const fellowships: Fellowship[] = [
     id: "gsoc-2024",
     title: "Google Summer of Code 2024",
     organization: "Google",
-    organizationLogo: "https://cdn.worldvectorlogo.com/logos/google-2015.svg",
+    organizationLogo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTg9U6Bmi1rYLZjOMmaDjeQsjawxdtIo44Fvg&s",
+    heroImage: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjElEttasnAcLCu_M46a2XSKi9jSq5d-mJaNNsBifzUyrATXgOn6KeFfzWPFK8RfuUXpj6OpRR7okkaV8U9uS4-Xf_9SuMzPMCedGrdJREzYVmk94vq1GBWDfPel-w9iZzNszvlZU_gOnlV0bNjdLRrf0y6U_9qQqLrrGjKjlaZEVjSkcrchiFP1PbsBp0/s1600/GSoC%20Banner.png",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -45,6 +28,7 @@ export const fellowships: Fellowship[] = [
     title: "Season of Docs 2024",
     organization: "Google",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/google-2015.svg",
+    heroImage: "https://opensource.googleblog.com/wp-content/uploads/2024/02/season-of-docs-2024-hero.jpg",
     location: "Remote",
     locationType: "remote",
     duration: "3-5 months",
@@ -66,6 +50,7 @@ export const fellowships: Fellowship[] = [
     title: "MLH Fellowship - Fall 2024",
     organization: "Major League Hacking",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/mlh-logo.svg",
+    heroImage: "https://fellowship.mlh.io/assets/mlh-fall-2024-hero.svg",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -86,6 +71,7 @@ export const fellowships: Fellowship[] = [
     title: "MLH Fellowship - Spring 2024",
     organization: "Major League Hacking",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/mlh-logo.svg",
+    heroImage: "https://fellowship.mlh.io/assets/mlh-spring-2024-hero.svg",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -107,6 +93,7 @@ export const fellowships: Fellowship[] = [
     title: "Linux Foundation Mentorship Program",
     organization: "Linux Foundation",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/linux-tux.svg",
+    heroImage: "https://training.linuxfoundation.org/wp-content/uploads/2023/10/mentorship-2024-hero.jpg",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -127,6 +114,7 @@ export const fellowships: Fellowship[] = [
     title: "Hyperledger Mentorship Program",
     organization: "Linux Foundation",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/hyperledger.svg",
+    heroImage: "https://www.hyperledger.org/wp-content/uploads/2022/05/hyperledger-foundations-banner.jpg",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -148,6 +136,7 @@ export const fellowships: Fellowship[] = [
     title: "CNCF Mentoring Program",
     organization: "Cloud Native Computing Foundation",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/cncf.svg",
+    heroImage: "https://www.cncf.io/wp-content/uploads/2024/01/cncf-mentoring-2024-hero.jpg",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -168,6 +157,7 @@ export const fellowships: Fellowship[] = [
     title: "Kubernetes Mentoring Program",
     organization: "CNCF",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/kubernetes.svg",
+    heroImage: "https://kubernetes.io/images/k8s_hero.png",
     location: "Remote",
     locationType: "remote",
     duration: "3 months",
@@ -189,6 +179,7 @@ export const fellowships: Fellowship[] = [
     title: "Julia Summer of Code 2024",
     organization: "Julia Language",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/julia-programming-language.svg",
+    heroImage: "https://julialang.org/assets/img/jsoc/jsoc-2024-banner.png",
     location: "Remote",
     locationType: "remote",
     duration: "10-12 weeks",
@@ -214,6 +205,7 @@ export const fellowships: Fellowship[] = [
     title: "Julia Machine Learning Fellowship",
     organization: "Julia Language",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/julia-programming-language.svg",
+    heroImage: "https://julialang.org/assets/img/fellowship/julia-ml-2024-hero.png",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -235,6 +227,7 @@ export const fellowships: Fellowship[] = [
     title: "Outreachy Internship Program",
     organization: "Outreachy",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/outreachy.svg",
+    heroImage: "https://www.outreachy.org/static/img/outreachy-hero.jpg",
     location: "Remote",
     locationType: "remote",
     duration: "13 weeks",
@@ -255,6 +248,7 @@ export const fellowships: Fellowship[] = [
     title: "Apache Software Foundation Mentoring",
     organization: "Apache Software Foundation",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/apache.svg",
+    heroImage: "https://www.apache.org/img/asf_banner.jpg",
     location: "Remote",
     locationType: "remote",
     duration: "12 weeks",
@@ -270,4 +264,4 @@ export const fellowships: Fellowship[] = [
     requirements: ["Programming experience", "Interest in enterprise software", "Collaboration skills"],
     technologies: ["Java", "C++", "Python", "Scala", "Big data", "Web technologies"],
   },
-]
+];

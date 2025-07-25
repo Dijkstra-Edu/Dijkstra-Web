@@ -18,10 +18,31 @@ import {
   ExternalLinkIcon,
   EyeIcon,
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { projects } from "@/data/project-data"
+import { ScrollArea } from "../ui/scroll-area"
+import ProjectDetails from "../project-details"
 
 interface FeaturedProjectSliderProps {
   category?: string
+}
+
+const projectConfig = {
+  type: "project" as const,
+  heroImage: "/vscode-hero.webp",
+  heroImageAlt: "Visual Studio Code interface",
+  tabs: {
+    overview: true,
+    issues: true,
+    readme: true,
+  },
 }
 
 const FeaturedProjectSlider = React.forwardRef<CarouselApi, FeaturedProjectSliderProps>(
@@ -131,19 +152,31 @@ const FeaturedProjectSlider = React.forwardRef<CarouselApi, FeaturedProjectSlide
 
               return (
                 <CarouselItem key={project.id} className="pl-2 sm:basis-1/2 md:pl-4 lg:basis-1/4">
+                  <Dialog>
+                  <DialogTrigger asChild>
                   <Card className="flex h-full flex-col">
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
                         <div className="bg-card relative flex h-12 w-12 items-center justify-center rounded-md border">
                           <div className="absolute flex h-full w-full items-center justify-center">
                             {project.organizationLogo ? (
-                              <Image
-                                src={project.organizationLogo || "/placeholder.svg"}
-                                alt={project.organization}
-                                width={48}
-                                height={48}
-                                className="h-12 w-12 object-contain"
-                              />
+                              // <Image
+                              //   src={project.organizationLogo || "/placeholder.svg"}
+                              //   alt={project.organization}
+                              //   width={48}
+                              //   height={48}
+                              //   className="h-12 w-12 object-contain"
+                              // />
+                              <img
+                                  src={
+                                    project.organizationLogo ||
+                                    "/placeholder.svg"
+                                  }
+                                  alt={project.organization}
+                                  width={48}
+                                  height={48}
+                                  className="h-12 w-12 object-contain"
+                                />
                             ) : (
                               <CodeIcon className="text-muted-foreground h-6 w-6" />
                             )}
@@ -224,6 +257,19 @@ const FeaturedProjectSlider = React.forwardRef<CarouselApi, FeaturedProjectSlide
                       </Button>
                     </CardFooter>
                   </Card>
+
+                  </DialogTrigger>
+                  {/* <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] p-0 overflow-hidden"> */}
+                  <DialogContent className="!max-w-7xl max-h-[85vh] p-0 overflow-hidden">
+                    <DialogHeader className="sr-only">
+                      <DialogTitle>{project.title}</DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[85vh]">
+                      <ProjectDetails item={project} config={projectConfig} />
+                    </ScrollArea>
+                    {/* <ProjectDetails item={job} config={jobConfig} /> */}
+                  </DialogContent>
+                </Dialog>
                 </CarouselItem>
               )
             })}
