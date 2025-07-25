@@ -21,7 +21,8 @@ export default function Page() {
           <SiteHeader title="Home" />
         </div>
         <div className="flex-1 overflow-y-auto px-4 lg:px-6 landing-page">
-          <div className="@container/main flex flex-1 flex-row gap-4 py-2">
+          <div className="@container/main gap-4 py-2">
+                    {/* <div className="@container/main flex flex-1 flex-row gap-4 py-2"> */}
             <Homepage />
           </div>
         </div>

@@ -3,15 +3,15 @@
 import { FeedPostCard } from "./feed-post-card"
 import { FeedCarousel } from "./feed-carousel"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Users, Search, Video, ImageIcon, FileText, ChevronDown } from "lucide-react"
+import { Users, Search, Video, ImageIcon, FileText, ChevronDown, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
 // Dummy data for LinkedIn-style posts
-const posts = [
+const allPosts = [
   {
     id: "1",
     author: {
@@ -148,10 +148,216 @@ const posts = [
     reposts: 89,
     reactions: ["👍", "🔐", "⚠️"],
   },
+  {
+    id: "9",
+    author: {
+      name: "Michael Zhang",
+      title: "Full Stack Developer at Shopify",
+      avatar: "/placeholder.svg?height=40&width=40",
+      verified: false,
+    },
+    timeAgo: "18h",
+    content:
+      "Built my first GraphQL API with Apollo Server and I'm blown away by the developer experience! 🚀\n\nKey benefits I've noticed:\n• Type safety out of the box\n• Single endpoint for all data needs\n• Powerful query capabilities\n• Amazing tooling and introspection\n\nIf you haven't tried GraphQL yet, I highly recommend giving it a shot!\n\n#GraphQL #Apollo #WebDevelopment",
+    images: ["/placeholder.svg?height=300&width=500"],
+    likes: 76,
+    comments: 18,
+    reposts: 9,
+    reactions: ["👍", "🚀", "💡"],
+  },
+  {
+    id: "10",
+    author: {
+      name: "Anna Kowalski",
+      title: "UX Designer at Figma",
+      avatar: "/placeholder.svg?height=40&width=40",
+      verified: true,
+    },
+    timeAgo: "20h",
+    content:
+      "Design systems are not just about components - they're about creating a shared language! 🎨\n\nAfter working on design systems for 3 years, here are my key learnings:\n\n1. Start with principles, not components\n2. Document the 'why' behind every decision\n3. Make it easy to contribute and evolve\n4. Test with real projects early and often\n\nWhat's your biggest design system challenge?\n\n#DesignSystems #UX #Design",
+    images: [],
+    likes: 189,
+    comments: 34,
+    reposts: 21,
+    reactions: ["👍", "🎨", "💡"],
+  },
+  {
+    id: "11",
+    author: {
+      name: "James Wilson",
+      title: "Data Scientist at Spotify",
+      avatar: "/placeholder.svg?height=40&width=40",
+      verified: false,
+    },
+    timeAgo: "22h",
+    content:
+      "Just finished analyzing 10M+ music streaming patterns and the insights are fascinating! 🎵📊\n\nSome interesting findings:\n• Peak listening happens during commute hours\n• Genre preferences vary significantly by geography\n• Playlist creation spikes on Sunday evenings\n• Skip rates are highest in the first 30 seconds\n\nData tells such compelling stories about human behavior!\n\n#DataScience #Analytics #Music",
+    images: ["/placeholder.svg?height=300&width=500"],
+    likes: 267,
+    comments: 52,
+    reposts: 38,
+    reactions: ["👍", "📊", "🎵"],
+  },
+  {
+    id: "12",
+    author: {
+      name: "Rachel Green",
+      title: "Mobile Developer at Uber",
+      avatar: "/placeholder.svg?height=40&width=40",
+      verified: true,
+    },
+    timeAgo: "1d",
+    content:
+      "React Native vs Flutter - after building apps in both, here's my honest take 📱\n\nReact Native wins for:\n• Leveraging existing React knowledge\n• Mature ecosystem and community\n• Better integration with existing React web apps\n\nFlutter wins for:\n• Performance and smooth animations\n• Consistent UI across platforms\n• Excellent developer tooling\n\nBoth are great choices - pick based on your team's expertise!\n\n#ReactNative #Flutter #MobileDev",
+    images: [],
+    likes: 145,
+    comments: 67,
+    reposts: 29,
+    reactions: ["👍", "📱", "⚡"],
+  },
+  // Add more posts to simulate a larger dataset
+  {
+    id: "13",
+    author: {
+      name: "Tom Anderson",
+      title: "Backend Engineer at Discord",
+      avatar: "/placeholder.svg?height=40&width=40",
+      verified: false,
+    },
+    timeAgo: "1d",
+    content:
+      "Scaling WebSocket connections to handle 10M+ concurrent users taught me a lot about distributed systems! ⚡\n\nKey lessons learned:\n• Connection pooling is crucial\n• Load balancing WebSockets is tricky\n• Message queues are your best friend\n• Monitor everything, especially memory usage\n\nReal-time systems are complex but incredibly rewarding to build!\n\n#WebSockets #DistributedSystems #Scaling",
+    images: ["/placeholder.svg?height=300&width=500"],
+    likes: 198,
+    comments: 43,
+    reposts: 31,
+    reactions: ["👍", "⚡", "🔧"],
+  },
+  {
+    id: "14",
+    author: {
+      name: "Sophie Martinez",
+      title: "AI Engineer at Anthropic",
+      avatar: "/placeholder.svg?height=40&width=40",
+      verified: true,
+    },
+    timeAgo: "1d",
+    content:
+      "Working on responsible AI development has been the most meaningful work of my career 🤖✨\n\nSome principles we follow:\n• Transparency in model capabilities and limitations\n• Rigorous testing for bias and fairness\n• Clear documentation of training data\n• Ongoing monitoring of real-world impact\n\nAI is powerful - let's make sure we use it responsibly!\n\n#ResponsibleAI #MachineLearning #Ethics",
+    images: [],
+    likes: 324,
+    comments: 78,
+    reposts: 56,
+    reactions: ["👍", "🤖", "✨"],
+  },
+  {
+    id: "15",
+    author: {
+      name: "Kevin Liu",
+      title: "Cloud Architect at AWS",
+      avatar: "/placeholder.svg?height=40&width=40",
+      verified: false,
+    },
+    timeAgo: "1d",
+    content:
+      "Serverless architecture isn't just about cost savings - it's about developer productivity! ☁️\n\nBenefits I've seen in practice:\n• Faster time to market\n• Automatic scaling\n• Reduced operational overhead\n• Pay-per-use pricing model\n\nOf course, it's not perfect for every use case, but when it fits, it's magical!\n\n#Serverless #CloudComputing #AWS",
+    images: ["/placeholder.svg?height=300&width=500"],
+    likes: 156,
+    comments: 29,
+    reposts: 18,
+    reactions: ["👍", "☁️", "⚡"],
+  },
 ]
+
+// Simulate API call with delay
+const fetchPosts = async (page: number, limit = 8): Promise<typeof allPosts> => {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000))
+
+  const startIndex = page * limit
+  const endIndex = startIndex + limit
+
+  return allPosts.slice(startIndex, endIndex)
+}
 
 export function HomeFeed({ theme = "dark" }: { theme?: "light" | "dark" }) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [posts, setPosts] = useState<typeof allPosts>([])
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(0)
+  const [initialLoading, setInitialLoading] = useState(true)
+
+  const observerRef = useRef<HTMLDivElement>(null)
+
+  // Load initial posts
+  useEffect(() => {
+    const loadInitialPosts = async () => {
+      setInitialLoading(true)
+      try {
+        const initialPosts = await fetchPosts(0)
+        setPosts(initialPosts)
+        setPage(1)
+        if (initialPosts.length === 0) {
+          setHasMore(false)
+        }
+      } catch (error) {
+        console.error("Failed to load initial posts:", error)
+      } finally {
+        setInitialLoading(false)
+      }
+    }
+
+    loadInitialPosts()
+  }, [])
+
+  // Load more posts
+  const loadMorePosts = useCallback(async () => {
+    if (loading || !hasMore) return
+
+    setLoading(true)
+    try {
+      const newPosts = await fetchPosts(page)
+      if (newPosts.length === 0) {
+        setHasMore(false)
+      } else {
+        setPosts((prev) => [...prev, ...newPosts])
+        setPage((prev) => prev + 1)
+      }
+    } catch (error) {
+      console.error("Failed to load more posts:", error)
+    } finally {
+      setLoading(false)
+    }
+  }, [page, loading, hasMore])
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0]
+        if (target.isIntersecting && hasMore && !loading) {
+          loadMorePosts()
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "100px",
+      },
+    )
+
+    const currentObserverRef = observerRef.current
+    if (currentObserverRef) {
+      observer.observe(currentObserverRef)
+    }
+
+    return () => {
+      if (currentObserverRef) {
+        observer.unobserve(currentObserverRef)
+      }
+    }
+  }, [loadMorePosts, hasMore, loading])
 
   const filteredPosts = posts.filter(
     (post) =>
@@ -172,7 +378,7 @@ export function HomeFeed({ theme = "dark" }: { theme?: "light" | "dark" }) {
       })
 
       // Add carousel after every group (except the last one if it's incomplete)
-      if (i + postsPerGroup < filteredPosts.length) {
+      if (i + postsPerGroup < filteredPosts.length || (i + postsPerGroup >= filteredPosts.length && hasMore)) {
         elements.push(<FeedCarousel key={`carousel-${i}`} theme={theme} />)
       }
     }
@@ -180,12 +386,25 @@ export function HomeFeed({ theme = "dark" }: { theme?: "light" | "dark" }) {
     return elements
   }
 
+  if (initialLoading) {
+    return (
+      <Card className={cn("w-full backdrop-blur-sm bg-card/50 border-border")}>
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading posts...</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className={cn("backdrop-blur-sm bg-card/50 border-border")}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center text-foreground">
           <Users className="mr-2 h-5 w-5 text-primary" />
-          Dijkstra Information Feed
+          Professional Network
         </CardTitle>
 
         {/* Post creation section */}
@@ -245,17 +464,49 @@ export function HomeFeed({ theme = "dark" }: { theme?: "light" | "dark" }) {
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="">
         <div className="flex flex-col space-y-6">
           {filteredPosts.length > 0 ? (
-            renderPostsWithCarousel()
+            <>
+              {renderPostsWithCarousel()}
+
+              {/* Loading indicator */}
+              {loading && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <span className="text-muted-foreground">Loading more posts...</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Intersection observer target */}
+              <div ref={observerRef} className="h-4" />
+
+              {/* End of posts message */}
+              {!hasMore && !loading && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">You've reached the end of the feed!</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2 text-primary hover:text-primary/80"
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  >
+                    Back to top
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <div className={cn("text-center py-8", theme === "dark" ? "text-slate-400" : "text-muted-foreground")}>
-              No posts found matching your search.
+              {searchQuery ? "No posts found matching your search." : "No posts available."}
             </div>
           )}
         </div>
       </CardContent>
+
+      
     </Card>
   )
 }
