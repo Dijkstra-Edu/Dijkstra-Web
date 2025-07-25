@@ -1,31 +1,12 @@
-export interface Project {
-  id: string
-  title: string
-  organization: string
-  organizationLogo: string
-  repository: string
-  language: string
-  stars: number
-  forks: number
-  lastUpdated: string
-  description: string
-  featured: boolean
-  highlight: "new" | "trending" | "popular" | "good-first-issue" | undefined
-  topics: string[]
-  category: string
-  difficulty: "beginner" | "intermediate" | "advanced"
-  issuesCount: number
-  contributorsCount: number
-  license: string
-}
+import { Project } from "@/types";
 
 export const projects: Project[] = [
-  // Popular Open Source Projects
   {
     id: "react",
     title: "React",
     organization: "Facebook",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/react-2.svg",
+    heroImage: "https://media.licdn.com/dms/image/v2/D4E12AQGyOF9fEelBwg/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1714081223486?e=2147483647&v=beta&t=Jg2ItNwhJDk_mJf9xinbKeIbrQCwSZDVmTRAI6irhyA",
     repository: "facebook/react",
     language: "JavaScript",
     stars: 220000,
@@ -47,6 +28,7 @@ export const projects: Project[] = [
     title: "Kubernetes",
     organization: "Kubernetes",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/kubernetes.svg",
+    heroImage: "https://flatlogic.com/blog/bestreactos-react-2021/open-source-react-projects.jpg",
     repository: "kubernetes/kubernetes",
     language: "Go",
     stars: 105000,
@@ -68,6 +50,7 @@ export const projects: Project[] = [
     title: "TensorFlow",
     organization: "Google",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/tensorflow-2.svg",
+    heroImage: "https://blog.tensorflow.org/img/tf_homepage.png",
     repository: "tensorflow/tensorflow",
     language: "C++",
     stars: 180000,
@@ -89,6 +72,7 @@ export const projects: Project[] = [
     title: "Visual Studio Code",
     organization: "Microsoft",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/visual-studio-code-1.svg",
+    heroImage: "https://code.visualstudio.com/assets/home/home-screenshot-1.png",
     repository: "microsoft/vscode",
     language: "TypeScript",
     stars: 155000,
@@ -110,6 +94,7 @@ export const projects: Project[] = [
     title: "PyTorch",
     organization: "PyTorch",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/pytorch.svg",
+    heroImage: "https://pytorch.org/assets/images/pytorch-logo-stacked.png",
     repository: "pytorch/pytorch",
     language: "Python",
     stars: 75000,
@@ -131,6 +116,7 @@ export const projects: Project[] = [
     title: "Django",
     organization: "Django Software Foundation",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/django.svg",
+    heroImage: "https://static.djangoproject.com/img/logos/django-logo-negative.png",
     repository: "django/django",
     language: "Python",
     stars: 75000,
@@ -152,6 +138,7 @@ export const projects: Project[] = [
     title: "Node.js",
     organization: "Node.js Foundation",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/nodejs-1.svg",
+    heroImage: "https://nodejs.org/static/images/logos/nodejs-new-pantone-black.svg",
     repository: "nodejs/node",
     language: "JavaScript",
     stars: 102000,
@@ -173,6 +160,7 @@ export const projects: Project[] = [
     title: "Flutter",
     organization: "Google",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/flutter-logo.svg",
+    heroImage: "https://flutter.dev/assets/homepage/carousel/slide_1-bg-opaque-8e8d0c67aa530cd0966ac8b5c9dfb6c3254ce7ad1ccf58cb0e6fa4e12e9d9fa4.jpg",
     repository: "flutter/flutter",
     language: "Dart",
     stars: 160000,
@@ -194,6 +182,7 @@ export const projects: Project[] = [
     title: "Rust",
     organization: "Rust Foundation",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/rust.svg",
+    heroImage: "https://www.rust-lang.org/static/images/rust-logo-blk.svg",
     repository: "rust-lang/rust",
     language: "Rust",
     stars: 92000,
@@ -215,6 +204,7 @@ export const projects: Project[] = [
     title: "Vue.js",
     organization: "Vue.js",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/vue-9.svg",
+    heroImage: "https://vuejs.org/images/logo.png",
     repository: "vuejs/vue",
     language: "TypeScript",
     stars: 206000,
@@ -236,6 +226,7 @@ export const projects: Project[] = [
     title: "Docker",
     organization: "Docker",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/docker.svg",
+    heroImage: "https://www.docker.com/sites/default/files/d8/2019-07/Moby-logo.png",
     repository: "docker/docker-ce",
     language: "Go",
     stars: 25000,
@@ -257,6 +248,7 @@ export const projects: Project[] = [
     title: "Elasticsearch",
     organization: "Elastic",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/elasticsearch.svg",
+    heroImage: "https://www.elastic.co/static/images/press/elastic-logo-2.svg",
     repository: "elastic/elasticsearch",
     language: "Java",
     stars: 67000,
@@ -278,6 +270,7 @@ export const projects: Project[] = [
     title: "Angular",
     organization: "Google",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/angular-icon-1.svg",
+    heroImage: "https://angular.io/assets/images/logos/angular/angular.svg",
     repository: "angular/angular",
     language: "TypeScript",
     stars: 92000,
@@ -299,13 +292,14 @@ export const projects: Project[] = [
     title: "Redis",
     organization: "Redis",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/redis.svg",
+    heroImage: "https://redis.io/images/redis-white.png",
     repository: "redis/redis",
     language: "C",
     stars: 63000,
     forks: 23000,
     lastUpdated: "2024-01-14",
     description:
-      "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kind of values are supported.",
+      "Redis is an in-memory database that persists on disk. The data model is key-value, but many different kinds of values are supported.",
     featured: false,
     highlight: "popular",
     topics: ["c", "redis", "database", "cache", "in-memory"],
@@ -320,6 +314,7 @@ export const projects: Project[] = [
     title: "Homebrew",
     organization: "Homebrew",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/homebrew.svg",
+    heroImage: "https://brew.sh/assets/img/homebrew-logo.png",
     repository: "Homebrew/brew",
     language: "Ruby",
     stars: 38000,
@@ -341,6 +336,7 @@ export const projects: Project[] = [
     title: "Prometheus",
     organization: "Prometheus",
     organizationLogo: "https://cdn.worldvectorlogo.com/logos/prometheus.svg",
+    heroImage: "https://prometheus.io/assets/prometheus_logo_grey.svg",
     repository: "prometheus/prometheus",
     language: "Go",
     stars: 52000,
@@ -357,4 +353,4 @@ export const projects: Project[] = [
     contributorsCount: 890,
     license: "Apache-2.0",
   },
-]
+];

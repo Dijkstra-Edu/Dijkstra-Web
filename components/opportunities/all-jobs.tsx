@@ -43,7 +43,7 @@ import {
   UsersIcon,
   XIcon,
 } from "lucide-react";
-import Image from "next/image";
+// import Image from "next/image";
 import { jobPositions } from "@/data/job-data";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
@@ -550,14 +550,24 @@ function AllJobsContent() {
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
                         <div className="relative flex h-12 w-12 items-center justify-center rounded-md border bg-card">
-                          {job.companyLogo ? (
-                            <Image
-                              src={job.companyLogo || "/placeholder.svg"}
-                              alt={job.companyName}
-                              width={48}
-                              height={48}
-                              className="h-12 w-12 object-contain"
-                            />
+                          {job.organizationLogo ? (
+                            // <Image
+                            //   src={job.companyLogo || "/placeholder.svg"}
+                            //   alt={job.companyName}
+                            //   width={48}
+                            //   height={48}
+                            //   className="h-12 w-12 object-contain"
+                            // />
+                            <img
+                                  src={
+                                    job.organizationLogo ||
+                                    "/placeholder.svg"
+                                  }
+                                  alt={job.organization}
+                                  width={48}
+                                  height={48}
+                                  className="h-12 w-12 object-contain"
+                                />
                           ) : (
                             <BuildingIcon className="h-6 w-6 text-muted-foreground" />
                           )}

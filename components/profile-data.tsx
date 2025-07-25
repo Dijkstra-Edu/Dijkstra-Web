@@ -38,7 +38,7 @@ export function ProfileData() {
           <p className="text-sm text-muted-foreground">
             @
             <a
-              className="underline"
+              className="border-b-2"
               href={`https://github.com/` + session?.user.login}
             >
               {session?.user.login}

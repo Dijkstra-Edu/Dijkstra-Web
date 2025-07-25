@@ -12,6 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -46,8 +54,21 @@ import {
 import Image from "next/image";
 import { fellowships } from "@/data/fellowship-data";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { ScrollArea } from "../ui/scroll-area";
+import ProjectDetails from "../project-details";
 
 const FELLOWSHIPS_PER_PAGE = 12;
+
+const fellowshipConfig = {
+  type: "fellowship" as const,
+  heroImage: "/hero-meeting.png",
+  heroImageAlt: "Fellowship program",
+  tabs: {
+    overview: true,
+    requirements: true,
+    readme: true,
+  },
+};
 
 // Helper functions
 const formatDuration = (duration: string) => {
@@ -483,123 +504,162 @@ function AllFellowshipsContent() {
                   : null;
 
                 return (
-                  <Card key={fellowship.id} className="flex h-full flex-col">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div className="relative flex h-12 w-12 items-center justify-center rounded-md border bg-card">
-                          {fellowship.organizationLogo ? (
-                            <Image
-                              src={
-                                fellowship.organizationLogo ||
-                                "/placeholder.svg"
-                              }
-                              alt={fellowship.organization}
-                              width={48}
-                              height={48}
-                              className="h-12 w-12 object-contain"
-                            />
-                          ) : (
-                            <GraduationCapIcon className="h-6 w-6 text-muted-foreground" />
-                          )}
-                        </div>
-                        {highlightDetails && (
-                          <Badge
-                            variant="secondary"
-                            className={`flex items-center gap-1 ${highlightDetails.color}`}
-                          >
-                            {highlightDetails.icon}
-                            {highlightDetails.label}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="mt-3">
-                        <CardTitle className="line-clamp-2">
-                          {fellowship.title}
-                        </CardTitle>
-                        <div className="mt-1 flex items-center gap-1">
-                          <GraduationCapIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                          <CardDescription className="!mt-0">
-                            {fellowship.organization}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex flex-grow flex-col gap-3">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <ClockIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{fellowship.duration}</span>
-                          <Badge variant="outline" className="ml-auto text-xs">
-                            {fellowship.locationType.charAt(0).toUpperCase() +
-                              fellowship.locationType.slice(1)}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{fellowship.stipend}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">
-                            Deadline:{" "}
-                            {getDaysUntilDeadline(
-                              fellowship.applicationDeadline
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <AwardIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">
-                            Starts:{" "}
-                            {new Date(
-                              fellowship.startDate
-                            ).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-                        {fellowship.description}
-                      </p>
-
-                      <div className="mt-auto">
-                        <p className="mb-1.5 text-xs font-medium text-muted-foreground">
-                          Benefits:
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {fellowship.benefits
-                            .slice(0, 2)
-                            .map((benefit, index) => (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Card
+                        key={fellowship.id}
+                        className="flex h-full flex-col"
+                      >
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <div className="relative flex h-12 w-12 items-center justify-center rounded-md border bg-card">
+                              {fellowship.organizationLogo ? (
+                                // <Image
+                                //   src={
+                                //     fellowship.organizationLogo ||
+                                //     "/placeholder.svg"
+                                //   }
+                                //   alt={fellowship.organization}
+                                //   width={48}
+                                //   height={48}
+                                //   className="h-12 w-12 object-contain"
+                                // />
+                                <img
+                                  src={
+                                    fellowship.organizationLogo ||
+                                    "/placeholder.svg"
+                                  }
+                                  alt={fellowship.organization}
+                                  width={48}
+                                  height={48}
+                                  className="h-12 w-12 object-contain"
+                                />
+                              ) : (
+                                <GraduationCapIcon className="h-6 w-6 text-muted-foreground" />
+                              )}
+                            </div>
+                            {highlightDetails && (
                               <Badge
                                 variant="secondary"
-                                key={index}
-                                className="text-xs"
+                                className={`flex items-center gap-1 ${highlightDetails.color}`}
                               >
-                                {benefit}
+                                {highlightDetails.icon}
+                                {highlightDetails.label}
                               </Badge>
-                            ))}
-                          {fellowship.benefits.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{fellowship.benefits.length - 2} more
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex gap-3 pt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-1/2 bg-transparent"
-                      >
-                        <BookmarkIcon className="mr-1 h-4 w-4" />
-                        Save
-                      </Button>
-                      <Button size="sm" className="w-1/2">
-                        Apply Now
-                      </Button>
-                    </CardFooter>
-                  </Card>
+                            )}
+                          </div>
+                          <div className="mt-3">
+                            <CardTitle className="line-clamp-2">
+                              {fellowship.title}
+                            </CardTitle>
+                            <div className="mt-1 flex items-center gap-1">
+                              <GraduationCapIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                              <CardDescription className="!mt-0">
+                                {fellowship.organization}
+                              </CardDescription>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="flex flex-grow flex-col gap-3">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <ClockIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                {fellowship.duration}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className="ml-auto text-xs"
+                              >
+                                {fellowship.locationType
+                                  .charAt(0)
+                                  .toUpperCase() +
+                                  fellowship.locationType.slice(1)}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                {fellowship.stipend}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                Deadline:{" "}
+                                {getDaysUntilDeadline(
+                                  fellowship.applicationDeadline
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <AwardIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                Starts:{" "}
+                                {new Date(
+                                  fellowship.startDate
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                            {fellowship.description}
+                          </p>
+
+                          <div className="mt-auto">
+                            <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                              Benefits:
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {fellowship.benefits
+                                .slice(0, 2)
+                                .map((benefit, index) => (
+                                  <Badge
+                                    variant="secondary"
+                                    key={index}
+                                    className="text-xs"
+                                  >
+                                    {benefit}
+                                  </Badge>
+                                ))}
+                              {fellowship.benefits.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{fellowship.benefits.length - 2} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                        <CardFooter className="flex gap-3 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-1/2 bg-transparent"
+                          >
+                            <BookmarkIcon className="mr-1 h-4 w-4" />
+                            Save
+                          </Button>
+                          <Button size="sm" className="w-1/2">
+                            Apply Now
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    </DialogTrigger>
+                    {/* <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] p-0 overflow-hidden"> */}
+                    <DialogContent className="!max-w-7xl max-h-[85vh] p-0 overflow-hidden">
+                      <DialogHeader className="sr-only">
+                        <DialogTitle>{fellowship.title}</DialogTitle>
+                      </DialogHeader>
+                      <ScrollArea className="max-h-[85vh]">
+                        <ProjectDetails
+                          item={fellowship}
+                          config={fellowshipConfig}
+                        />
+                      </ScrollArea>
+                      {/* <ProjectDetails item={job} config={jobConfig} /> */}
+                    </DialogContent>
+                  </Dialog>
                 );
               })}
             </div>
@@ -685,7 +745,5 @@ function AllFellowshipsContent() {
 }
 
 export default function AllFellowshipsPage() {
-  return (
-    <AllFellowshipsContent />
-  );
+  return <AllFellowshipsContent />;
 }

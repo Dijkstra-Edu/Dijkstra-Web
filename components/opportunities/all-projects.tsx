@@ -488,15 +488,25 @@ function AllProjectsContent() {
                       <div className="flex items-start justify-between">
                         <div className="relative flex h-12 w-12 items-center justify-center rounded-md border bg-card">
                           {project.organizationLogo ? (
-                            <Image
-                              src={
-                                project.organizationLogo || "/placeholder.svg"
-                              }
-                              alt={project.organization}
-                              width={48}
-                              height={48}
-                              className="h-12 w-12 object-contain"
-                            />
+                            // <Image
+                            //   src={
+                            //     project.organizationLogo || "/placeholder.svg"
+                            //   }
+                            //   alt={project.organization}
+                            //   width={48}
+                            //   height={48}
+                            //   className="h-12 w-12 object-contain"
+                            // />
+                            <img
+                                  src={
+                                    project.organizationLogo ||
+                                    "/placeholder.svg"
+                                  }
+                                  alt={project.organization}
+                                  width={48}
+                                  height={48}
+                                  className="h-12 w-12 object-contain"
+                                />
                           ) : (
                             <CodeIcon className="h-6 w-6 text-muted-foreground" />
                           )}
