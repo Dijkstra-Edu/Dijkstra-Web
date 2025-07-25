@@ -65,16 +65,6 @@ export default function Page() {
           </div>
         </div>
       </SidebarInset>
-
-      <Sheet open={showNotebook} onOpenChange={setShowNotebook}>
-        <SheetContent side="right">
-          <SheetHeader>
-            <SheetTitle>Notebook</SheetTitle>
-            <SheetDescription>Your notes go here.</SheetDescription>
-          </SheetHeader>
-          <div className="mt-4">Notebook content...</div>
-        </SheetContent>
-      </Sheet>
     </SidebarProvider>
   );
 }
