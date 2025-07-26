@@ -1,4 +1,4 @@
-import { ResourceCard } from "../components/ResourceCard";
+import { ResourceCard } from "@/components/resource-card";
 
 interface ResourceItem {
   id: string;
@@ -27,4 +27,5 @@ export const ResourceSection = ({ title, resources }: ResourceSectionProps) => {
     </section>
   );
 };
+
 export default ResourceSection; 

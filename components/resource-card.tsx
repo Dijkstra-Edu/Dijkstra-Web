@@ -20,7 +20,6 @@ export const ResourceCard = ({
   icon,
   onDownload,
 }: ResourceCardProps) => {
-  // Direct color mapping with actual hex values
   const colorMap = {
     blue: '#3B82F6',
     purple: '#8B5CF6',
