@@ -6,7 +6,7 @@ interface ResourceCardProps {
   description: string;
   fileType: string;
   fileSize: string;
-  color: 'blue' | 'purple' | 'orange' | 'green' | 'red' | 'teal';
+  color: 'charcoal' | 'taupe' | 'slateBlue' | 'bronze';
   icon: React.ReactNode;
   onDownload?: () => void;
 }
@@ -21,29 +21,28 @@ export const ResourceCard = ({
   onDownload,
 }: ResourceCardProps) => {
   const colorMap = {
-    blue: '#3B82F6',
-    purple: '#8B5CF6',
-    orange: '#F97316',
-    green: '#10B981',
-    red: '#EF4444',
-    teal: '#14B8A6',
-  };
+  charcoal: '#2E2E2E',
+  taupe: '#4A3F35',
+  slateBlue: '#3D4F60',
+  bronze: '#665C54',
+};
+
 
   return (
-    <div className="bg-card rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg">
-      <div 
+    <div className="bg-[#0c1a0c]/90 border border-[#222e22] rounded-2xl overflow-hidden shadow-lg hover:shadow-green-500/30 transition-all duration-300 hover:scale-[1.03] backdrop-blur-sm">
+      <div
         className="h-32 flex items-center justify-center"
         style={{ backgroundColor: colorMap[color] }}
       >
-        <div className="text-white text-4xl">{icon}</div>
+        <div className="text-white text-4xl drop-shadow">{icon}</div>
       </div>
       <div className="p-6 space-y-4">
         <div>
-          <h3 className="text-xl font-semibold text-foreground mb-1">{title}</h3>
-          <p className="text-muted-foreground text-sm">{description}</p>
+          <h3 className="text-xl font-semibold text-[#EDEDED] font-inter mb-1">{title}</h3>
+          <p className="text-sm text-[#EDEDED] font-inter">{description}</p>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="text-muted-foreground text-sm">
+        <div className="flex items-center justify-between pt-2">
+          <div className="text-sm text-[#EDEDED] font-inter">
             <span className="font-medium">{fileType}</span>
             <span className="mx-1">•</span>
             <span>{fileSize}</span>
@@ -52,7 +51,7 @@ export const ResourceCard = ({
             variant="ghost"
             size="sm"
             onClick={onDownload}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-[#f3f4f6] hover:text-green-500 hover:bg-transparent focus-visible:ring-green-500 focus-visible:ring-2"
           >
             <Download className="w-4 h-4 mr-2" />
             Download
