@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileData } from "@/components/profile-data";
 import Readme from "@/components/readme";
+import Resume from "@/components/Resume and CV/resume";
 
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
@@ -87,7 +88,7 @@ export default function Page() {
                 </TabsContent>
                 <TabsContent value="portfolio">Make changes to your account here.</TabsContent>
                 <TabsContent value="readme"><Readme /></TabsContent>
-                <TabsContent value="resume">Make changes to your account here.</TabsContent>
+                <TabsContent value="resume"><Resume /></TabsContent>
                 <TabsContent value="cv">Change your password here.</TabsContent>
                 <TabsContent value="achievments">Make changes to your account here.</TabsContent>
               </Tabs>
