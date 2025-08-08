@@ -1,12 +1,13 @@
+"use client";
+
 import { useState } from "react";
 import { FileText, FileImage, BarChart3, Video } from "lucide-react";
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
-import { Modal } from "./modal";
 import { StackedProjectsTable } from "@/components/Resume and CV/stacked-projects-table";
+import AddResumeModal from "./AddResumeModal";
 
 const Resume = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
 
   // Demo resource arrays
   const resumesCreated = [
@@ -18,6 +19,7 @@ const Resume = () => {
       fileSize: "1.2 MB",
       color: "charcoal" as const,
       icon: <FileText />,
+      pdfUrl: "/pdfs/resume-template-1.pdf",
     },
     {
       id: "2",
@@ -27,6 +29,7 @@ const Resume = () => {
       fileSize: "8.5 MB",
       color: "taupe" as const,
       icon: <FileImage />,
+      pdfUrl: "/pdfs/resume-template-2.pdf",
     },
   ];
 
@@ -39,6 +42,7 @@ const Resume = () => {
       fileSize: "4.7 MB",
       color: "slateBlue" as const,
       icon: <BarChart3 />,
+      pdfUrl: "/pdfs/cv-template-1.pdf",
     },
     {
       id: "5",
@@ -48,6 +52,7 @@ const Resume = () => {
       fileSize: "22 MB",
       color: "bronze" as const,
       icon: <Video />,
+      pdfUrl: "/pdfs/cv-template-2.pdf",
     },
   ];
 
@@ -66,8 +71,7 @@ const Resume = () => {
     })),
   ];
 
-  const handleOpenModal = (title: string) => {
-    setModalTitle(title);
+  const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
@@ -83,20 +87,47 @@ const Resume = () => {
         <ResourceSection
           title="Resumes Templates"
           resources={resumesCreated}
-          onCreate={() => handleOpenModal("Resume")}
+          onCreate={handleOpenModal}
+          onDownload={(pdfUrl) => {
+            if (pdfUrl) {
+              const link = document.createElement('a');
+              link.href = pdfUrl;
+              const fileName = pdfUrl.split('/').pop() ?? 'resume.pdf';
+              link.download = fileName;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          }}
         />
         <ResourceSection
           title="CV's Templates"
           resources={cvsCreated}
-          onCreate={() => handleOpenModal("CV")}
+          onCreate={handleOpenModal}
+          onDownload={(pdfUrl) => {
+            if (pdfUrl) {
+              const link = document.createElement('a');
+              link.href = pdfUrl;
+              const fileName = pdfUrl.split('/').pop() ?? 'resume.pdf';
+              link.download = fileName;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          }}
         />
         <StackedProjectsTable projects={stackedProjects} />
-        {isModalOpen && (
-          <Modal title={modalTitle} onClose={() => setIsModalOpen(false)} />
-        )}
+        
+        {/* Use our new AddResumeModal component */}
+        <AddResumeModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+        />
       </div>
     </div>
   );
 };
 
 export default Resume;
+
+

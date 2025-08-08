@@ -13,11 +13,12 @@ interface ResourceItem {
 
 interface ResourceSectionProps {
   title: string;
-  resources: ResourceItem[];
+  resources: any[];
   onCreate: () => void;
+  onDownload?: (pdfUrl: string) => void;
 }
 
-export const ResourceSection = ({ title, resources, onCreate }: ResourceSectionProps) => {
+export const ResourceSection = ({ title, resources, onCreate, onDownload }: ResourceSectionProps) => {
   return (
     <section className="mb-16">
       <div className="flex items-center justify-between mb-8">
@@ -34,7 +35,7 @@ export const ResourceSection = ({ title, resources, onCreate }: ResourceSectionP
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {resources.map((resource) => (
-          <ResourceCard key={resource.id} {...resource} />
+          <ResourceCard key={resource.id} {...resource} onDownload={() => onDownload && onDownload(resource.pdfUrl)} />
         ))}
       </div>
     </section>
