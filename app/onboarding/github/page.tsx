@@ -102,7 +102,7 @@ function GitHubHelpContent() {
             className="flex items-center gap-2 text-foreground hover:bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl"
             asChild
           >
-            <a href={`/?step=${returnStep}`}>
+            <a href={`/onboarding/?step=${returnStep}`}>
               <ArrowLeft className="w-4 h-4" />
               Back to Onboarding
             </a>

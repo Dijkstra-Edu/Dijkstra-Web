@@ -5,13 +5,13 @@ import { motion } from "framer-motion"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 import {
-  Code,
+  GitBranch,
   ArrowLeft,
   CheckCircle,
   ExternalLink,
-  Download,
-  Palette,
   Terminal,
+  Download,
+  Settings,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -24,50 +24,50 @@ import BackgroundPaths from "@/components/kokonutui/background-paths"
 const steps = [
   {
     id: 1,
-    title: "Download and install VS Code",
-    description: "Get the world's most popular code editor",
-    image: "/images/vscode-step1.png",
-    link: "https://code.visualstudio.com",
+    title: "Download and install Git",
+    description: "Get Git installed on your operating system",
+    image: "/images/git-step1.png",
+    link: "https://git-scm.com/downloads",
     details:
-      "Visit code.visualstudio.com and download VS Code for your operating system. The installation is straightforward - just follow the setup wizard with default settings.",
+      "Visit git-scm.com/downloads and download the appropriate version for your operating system. Follow the installation wizard with default settings for the best experience.",
   },
   {
     id: 2,
-    title: "Install essential extensions",
-    description: "Supercharge your coding experience",
-    image: "/images/vscode-step2.png",
+    title: "Configure your identity",
+    description: "Set up your name and email for commits",
+    image: "/images/git-step2.png",
     details:
-      "Open the Extensions view (Ctrl+Shift+X) and install key extensions like Python, Prettier, GitLens, and Live Server. These will dramatically improve your development workflow.",
+      "Open your terminal or command prompt and run 'git config --global user.name \"Your Name\"' and 'git config --global user.email \"your.email@example.com\"' to set up your identity.",
   },
   {
     id: 3,
-    title: "Configure basic settings",
-    description: "Customize VS Code to your preferences",
-    image: "/images/vscode-step3.png",
+    title: "Learn basic commands",
+    description: "Master the essential Git commands",
+    image: "/images/git-step3.png",
     details:
-      "Access settings with Ctrl+, and configure auto-save, font size, theme, and other preferences. Set up auto-save to 'afterDelay' and choose a comfortable font size (14-16px recommended).",
+      "Familiarize yourself with basic commands like 'git init', 'git add', 'git commit', 'git status', and 'git log'. These are the foundation of version control with Git.",
   },
   {
     id: 4,
-    title: "Learn keyboard shortcuts",
-    description: "Master the most important shortcuts",
-    image: "/images/vscode-step4.png",
+    title: "Create your first repository",
+    description: "Initialize a new Git repository",
+    image: "/images/git-step4.png",
     details:
-      "Learn essential shortcuts like Ctrl+P (Quick Open), Ctrl+Shift+P (Command Palette), Ctrl+` (Terminal), and Ctrl+/ (Toggle Comment). These will make you much more efficient.",
+      "Create a new folder for your project, navigate to it in terminal, and run 'git init' to initialize a new Git repository. This creates a .git folder to track your changes.",
   },
   {
     id: 5,
-    title: "Set up integrated terminal",
-    description: "Use the built-in terminal effectively",
-    image: "/images/vscode-step5.png",
+    title: "Make your first commit",
+    description: "Save your first changes to Git history",
+    image: "/images/git-step5.png",
     details:
-      "Open the integrated terminal with Ctrl+` and configure it to use your preferred shell. You can run Git commands, install packages, and execute scripts without leaving VS Code.",
+      "Create a file, add it with 'git add filename', and commit it with 'git commit -m \"Initial commit\"'. Congratulations, you've made your first commit!",
   },
 ]
 
-function VSCodeHelpContent() {
+function GitHelpContent() {
   const searchParams = useSearchParams()
-  const returnStep = searchParams.get("step") || "3"
+  const returnStep = searchParams.get("step") || "2"
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
 
@@ -93,7 +93,7 @@ function VSCodeHelpContent() {
   const currentStepData = steps[currentStep]
 
   return (
-    <BackgroundPaths title="VS Code Setup Guide" showButton={false}>
+    <BackgroundPaths title="Git Setup Guide" showButton={false}>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -102,7 +102,7 @@ function VSCodeHelpContent() {
             className="flex items-center gap-2 text-foreground hover:bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl"
             asChild
           >
-            <a href={`/?step=${returnStep}`}>
+            <a href={`/onboarding/?step=${returnStep}`}>
               <ArrowLeft className="w-4 h-4" />
               Back to Onboarding
             </a>
@@ -117,12 +117,12 @@ function VSCodeHelpContent() {
           className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl"
         >
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Code className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+              <GitBranch className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">VS Code Setup Progress</h2>
-              <p className="text-muted-foreground">Set up your development environment</p>
+              <h2 className="text-xl font-bold text-foreground">Git Setup Progress</h2>
+              <p className="text-muted-foreground">Master version control fundamentals</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -185,7 +185,7 @@ function VSCodeHelpContent() {
                   alt={currentStepData.title}
                   className="w-full max-w-2xl h-64 object-cover rounded-lg shadow-lg border border-white/20"
                   onError={(e) => {
-                    e.currentTarget.src = `/placeholder.svg?height=300&width=600&text=VS+Code+Step+${currentStepData.id}+Screenshot`
+                    e.currentTarget.src = `/placeholder.svg?height=300&width=600&text=Git+Step+${currentStepData.id}+Screenshot`
                   }}
                 />
               </div>
@@ -254,10 +254,10 @@ function VSCodeHelpContent() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-primary/10 backdrop-blur-xl border border-primary/20 rounded-3xl p-6 text-center shadow-2xl"
           >
-            <h3 className="text-xl font-bold text-foreground mb-2">🎉 VS Code Mastery Achieved!</h3>
+            <h3 className="text-xl font-bold text-foreground mb-2">🎉 Git Mastery Unlocked!</h3>
             <p className="text-muted-foreground mb-4">
-              You've successfully set up VS Code with essential extensions and configurations! You're now ready to code
-              like a pro.
+              You've successfully set up Git and learned the basics! You're now ready to track changes and collaborate
+              on projects with confidence.
             </p>
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
               <a href={`/?step=${returnStep}`}>Continue Onboarding</a>
@@ -272,39 +272,39 @@ function VSCodeHelpContent() {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="space-y-8"
         >
-          {/* What is VS Code */}
+          {/* What is Git */}
           <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
-                <Code className="w-6 h-6" />
-                What is Visual Studio Code?
+                <GitBranch className="w-6 h-6" />
+                What is Git?
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-600 dark:text-gray-300">
-                Visual Studio Code (VS Code) is a free, powerful code editor developed by Microsoft. It's lightweight,
-                fast, and packed with features that make coding more enjoyable and productive.
+                Git is a distributed version control system that tracks changes in your code over time. It allows you to
+                save different versions of your project and collaborate with others.
               </p>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
+                  <Terminal className="w-5 h-5 text-orange-500 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium">Version Control</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Track changes in your code</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
                   <Download className="w-5 h-5 text-blue-500 mt-0.5" />
                   <div>
-                    <h4 className="font-medium">Free & Open Source</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Completely free to use</p>
+                    <h4 className="font-medium">Backup</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Never lose your work again</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
-                  <Palette className="w-5 h-5 text-purple-500 mt-0.5" />
+                  <Settings className="w-5 h-5 text-green-500 mt-0.5" />
                   <div>
-                    <h4 className="font-medium">Customizable</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Themes and extensions</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
-                  <Terminal className="w-5 h-5 text-green-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium">Integrated Terminal</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Built-in command line</p>
+                    <h4 className="font-medium">Collaboration</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Work with team members</p>
                   </div>
                 </div>
               </div>
@@ -314,8 +314,8 @@ function VSCodeHelpContent() {
           {/* Installation Guide */}
           <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
             <CardHeader>
-              <CardTitle>Installing VS Code</CardTitle>
-              <CardDescription>Download and install VS Code for your operating system</CardDescription>
+              <CardTitle>Installing Git</CardTitle>
+              <CardDescription>Choose your operating system and follow the installation steps</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Windows */}
@@ -329,14 +329,14 @@ function VSCodeHelpContent() {
                       1
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Download VS Code from{" "}
+                      Download Git from{" "}
                       <a
-                        href="https://code.visualstudio.com"
+                        href="https://git-scm.com/download/win"
                         className="text-blue-500 hover:underline"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        code.visualstudio.com
+                        git-scm.com/download/win
                       </a>
                     </p>
                   </div>
@@ -344,14 +344,14 @@ function VSCodeHelpContent() {
                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
                       2
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300">Run the installer (.exe file)</p>
+                    <p className="text-gray-600 dark:text-gray-300">Run the installer and follow the setup wizard</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
                       3
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Check "Add to PATH" during installation (recommended)
+                      Accept the default settings (recommended for beginners)
                     </p>
                   </div>
                 </div>
@@ -368,29 +368,32 @@ function VSCodeHelpContent() {
                       1
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Download VS Code from{" "}
-                      <a
-                        href="https://code.visualstudio.com"
-                        className="text-blue-500 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        code.visualstudio.com
-                      </a>
+                      Open Terminal and type:{" "}
+                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">git --version</code>
                     </p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
                       2
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300">Open the downloaded .zip file</p>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      If Git isn't installed, you'll be prompted to install Xcode Command Line Tools
+                    </p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
                       3
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Drag Visual Studio Code to your Applications folder
+                      Alternatively, download from{" "}
+                      <a
+                        href="https://git-scm.com/download/mac"
+                        className="text-blue-500 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        git-scm.com/download/mac
+                      </a>
                     </p>
                   </div>
                 </div>
@@ -407,7 +410,8 @@ function VSCodeHelpContent() {
                       1
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Download the .deb (Ubuntu/Debian) or .rpm (CentOS/RHEL) package
+                      Ubuntu/Debian:{" "}
+                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">sudo apt install git</code>
                     </p>
                   </div>
                   <div className="flex items-start space-x-3">
@@ -415,7 +419,8 @@ function VSCodeHelpContent() {
                       2
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Install using your package manager or download the snap package
+                      CentOS/RHEL:{" "}
+                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">sudo yum install git</code>
                     </p>
                   </div>
                   <div className="flex items-start space-x-3">
@@ -423,10 +428,8 @@ function VSCodeHelpContent() {
                       3
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Alternative:{" "}
-                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                        sudo snap install --classic code
-                      </code>
+                      Arch Linux:{" "}
+                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">sudo pacman -S git</code>
                     </p>
                   </div>
                 </div>
@@ -434,120 +437,71 @@ function VSCodeHelpContent() {
             </CardContent>
           </Card>
 
-          {/* Essential Extensions */}
+          {/* Initial Configuration */}
           <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
             <CardHeader>
-              <CardTitle>Essential Extensions</CardTitle>
-              <CardDescription>Must-have extensions to supercharge your development workflow</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                {[
-                  {
-                    name: "Python",
-                    description: "Official Python extension with IntelliSense, linting, and debugging",
-                    category: "Language Support",
-                  },
-                  {
-                    name: "Prettier",
-                    description: "Code formatter that keeps your code clean and consistent",
-                    category: "Formatting",
-                  },
-                  {
-                    name: "GitLens",
-                    description: "Enhance Git capabilities with blame annotations and history",
-                    category: "Version Control",
-                  },
-                  {
-                    name: "Live Server",
-                    description: "Launch a local development server with live reload for web projects",
-                    category: "Web Development",
-                  },
-                  {
-                    name: "Bracket Pair Colorizer",
-                    description: "Color matching brackets to make code more readable",
-                    category: "Productivity",
-                  },
-                  {
-                    name: "Material Theme",
-                    description: "Beautiful theme to make your editor look great",
-                    category: "Themes",
-                  },
-                ].map((extension, index) => (
-                  <div key={index} className="p-4 bg-white/5 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-gray-900 dark:text-white">{extension.name}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {extension.category}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{extension.description}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  💡 <strong>How to install:</strong> Open VS Code → Click Extensions icon (Ctrl+Shift+X) → Search for
-                  extension name → Click Install
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Basic Configuration */}
-          <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
-            <CardHeader>
-              <CardTitle>Basic Configuration</CardTitle>
-              <CardDescription>Customize VS Code for a better development experience</CardDescription>
+              <CardTitle>Initial Configuration</CardTitle>
+              <CardDescription>Set up your Git identity for commits</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                After installing Git, you need to configure it with your name and email address:
+              </p>
               <div className="space-y-4">
                 <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Auto Save</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    Go to File → Preferences → Settings → Search "auto save" → Set to "afterDelay"
-                  </p>
+                  <p className="text-sm font-medium mb-2">Set your name:</p>
+                  <code className="text-sm">git config --global user.name "Your Name"</code>
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Font Size</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    Press Ctrl+, → Search "font size" → Adjust to your preference (usually 14-16)
-                  </p>
+                  <p className="text-sm font-medium mb-2">Set your email:</p>
+                  <code className="text-sm">git config --global user.email "your.email@example.com"</code>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Theme</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    Press Ctrl+K, Ctrl+T → Choose a theme you like (Dark+ is the default)
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    💡 <strong>Tip:</strong> Use the same email address you used for your GitHub account
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Command Line Integration */}
+          {/* Basic Commands */}
           <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
             <CardHeader>
-              <CardTitle>Command Line Integration</CardTitle>
-              <CardDescription>Open VS Code from terminal</CardDescription>
+              <CardTitle>Essential Git Commands</CardTitle>
+              <CardDescription>Basic commands you'll use every day</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-300">Learn these useful commands to work more efficiently:</p>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">code .</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open current directory in VS Code</p>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                    <code className="text-sm font-mono">git init</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Initialize a new Git repository</p>
+                  </div>
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                    <code className="text-sm font-mono">git add .</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Stage all changes for commit</p>
+                  </div>
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                    <code className="text-sm font-mono">git commit -m "message"</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Commit staged changes</p>
+                  </div>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">code filename.py</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open specific file in VS Code</p>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">Ctrl+`</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open integrated terminal</p>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">Ctrl+Shift+P</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open command palette</p>
+                <div className="space-y-3">
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                    <code className="text-sm font-mono">git status</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Check repository status</p>
+                  </div>
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                    <code className="text-sm font-mono">git push</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Upload changes to remote repository</p>
+                  </div>
+                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                    <code className="text-sm font-mono">git pull</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      Download changes from remote repository
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -563,14 +517,13 @@ function VSCodeHelpContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-600 dark:text-gray-300">
-                Once you've installed VS Code and set it up with some basic extensions, you're ready to join our Discord
-                community!
+                Once you've installed and configured Git, you're ready to move on to setting up VS Code!
               </p>
               <div className="flex gap-4">
                 <Button className="flex-1" asChild>
-                  <a href="https://code.visualstudio.com" target="_blank" rel="noopener noreferrer">
+                  <a href="https://git-scm.com" target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="w-4 h-4 mr-2" />
-                    Download VS Code
+                    Download Git
                   </a>
                 </Button>
                 <Button variant="outline" className="flex-1 bg-transparent" asChild>
@@ -585,10 +538,10 @@ function VSCodeHelpContent() {
   )
 }
 
-export default function VSCodeHelpPage() {
+export default function GitHelpPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <VSCodeHelpContent />
+      <GitHelpContent />
     </Suspense>
   )
 }

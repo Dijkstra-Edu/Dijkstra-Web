@@ -84,12 +84,12 @@ export default function DiscordHelpPage() {
 
   const handleBackToOnboarding = () => {
     // Navigate back to the main onboarding page with the specific step
-    router.push(`/?step=${returnStep}`)
+    router.push(`/onboarding/?step=${returnStep}`)
   }
 
   const handleContinueOnboarding = () => {
     // Navigate back to the main onboarding page with the specific step
-    router.push(`/?step=${returnStep}`)
+    router.push(`/onboarding/?step=${returnStep}`)
   }
 
   const progress = (completedSteps.length / steps.length) * 100
