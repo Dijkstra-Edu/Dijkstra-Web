@@ -70,7 +70,7 @@ export function LoginForm({
       </div>
       <div className="text-center text-sm">
         Do not have GitHub (or) First Time User?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <a href="/onboarding" className="underline underline-offset-4">
           Sign up
         </a>
       </div>

@@ -64,6 +64,7 @@ export default function Page() {
               <Tabs defaultValue="stats">
                 <TabsList>
                   <TabsTrigger value="stats">Stats</TabsTrigger>
+                  <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
                   <TabsTrigger value="readme">Readme</TabsTrigger>
                   <TabsTrigger value="resume">Resume</TabsTrigger>
                   <TabsTrigger value="cv">CV</TabsTrigger>
@@ -84,7 +85,7 @@ export default function Page() {
                     <DataTable data={data} />
                   )}
                 </TabsContent>
-
+                <TabsContent value="portfolio">Make changes to your account here.</TabsContent>
                 <TabsContent value="readme"><Readme /></TabsContent>
                 <TabsContent value="resume">Make changes to your account here.</TabsContent>
                 <TabsContent value="cv">Change your password here.</TabsContent>

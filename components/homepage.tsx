@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import {
   BookOpen,
   Brain,
@@ -18,9 +18,6 @@ import {
   Calendar,
   Award,
   MessageCircle,
-  Search,
-  Bell,
-  Settings,
   ChevronRight,
   Lightbulb,
   Database,
@@ -29,9 +26,9 @@ import {
   Globe,
   BarChart3,
   Activity,
-  Moon,
-  Sun,
   type LucideIcon,
+  PieChart,
+  Flame,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -40,9 +37,15 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { InstagramFeed } from "./instagram-feed";
+import { HomeFeed } from "@/components/home-feed";
 import { useSession } from "next-auth/react";
-import { ProfileData } from "./profile-data";
+import { Pie, Label } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "./ui/chart";
 
 export default function Homepage() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
@@ -52,6 +55,14 @@ export default function Homepage() {
   const [problemsSolved, setProblemsSolved] = useState(247);
   const [currentRank, setCurrentRank] = useState(1847);
   const { data: session, status } = useSession();
+
+  // Mock user data instead of using useSession
+  const mockUser = {
+    login: session?.user.login,
+    name: session?.user.name,
+    email: session?.user.email,
+    image: session?.user.image,
+  };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -77,6 +88,25 @@ export default function Homepage() {
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
+
+  function formatOrdinal(rank: number) {
+    const j = rank % 10,
+      k = rank % 100;
+    let suffix = "th";
+    if (j === 1 && k !== 11) suffix = "st";
+    else if (j === 2 && k !== 12) suffix = "nd";
+    else if (j === 3 && k !== 13) suffix = "rd";
+
+    return (
+      <>
+        {rank}
+        <sup className="text-[0.6em] align-super">{suffix}</sup>
+      </>
+    );
+  }
+
+  const rank = 1285;
+  const total = 3435;
 
   // Animated background effect
   useEffect(() => {
@@ -178,48 +208,93 @@ export default function Homepage() {
         <div className="grid grid-cols-12 gap-6">
           {/* Left sidebar */}
           <div className="col-span-12 md:col-span-3 lg:col-span-2">
-            {/* <ProfileData /> */}
-            <Card className="@container/card bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs">
+            <Card
+              className="@container/card bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+              data-slot="card"
+            >
               <CardContent className="p-4">
+                {/* Profile Section */}
+                <div className="flex flex-col items-center mb-6">
+                  <Avatar className="h-24 w-24 mb-3">
+                    <AvatarImage
+                      src={mockUser.image || "/placeholder.svg"}
+                      alt={mockUser.name}
+                    />
+                    <AvatarFallback className="bg-secondary text-secondary-foreground text-lg">
+                      {mockUser.name?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    {mockUser.name}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    @<a className="border-b-2" href={`https://github.com/${mockUser.login}`}>{mockUser.login}</a>
+                  </p>
+                </div>
+
                 <div className="">
-                  <div className="text-xs text-black mb-3 font-semibold uppercase tracking-wide">
-                    Your Rank
+                  <div className="flex justify-center">
+                    <img
+                      src="/gold.png"
+                      alt="Dijkstra GPT logo"
+                      className="h-30 w-30"
+                    />
                   </div>
-                  <div className="space-y-4">
-                    <StatItem
-                      label="Study Streak"
-                      value={studyStreak}
-                      unit="days"
-                      color="green"
-                    />
-                    <StatItem
-                      label="Problems Solved"
-                      value={problemsSolved}
-                      unit=""
-                      color="blue"
-                    />
-                    <StatItem
-                      label="Global Rank"
-                      value={currentRank}
-                      unit=""
-                      color="purple"
-                    />
+
+                  <h2 className="text-center text-lg font-bold mb-6 text-yellow-500">
+                    GOLD 1
+                  </h2>
+
+                  <div className="flex justify-center items-center text-muted-foreground text-sm mb-2 gap-2">
+                    <Trophy className="h-4 w-4 text-yellow-400" />
+                    <span>
+                      <b>{formatOrdinal(rank)}</b> Rank out of <b>{total}</b>
+                    </span>
+                  </div>
+
+                  <div className="flex justify-center font-semibold items-center text-muted-foreground text-sm mb-6 gap-2">
+                    <Flame className="h-4 w-4 text-orange-500" />
+                    <span>26 Day Streak</span>
+                  </div>
+
+                  <div className="relative w-full mb-2">
+                    <Progress value={5435 / 100} className="h-1.5 bg-muted">
+                      <div
+                        className={`h-full rounded-full bg-yellow-400 w-[${
+                          5435 / 10000
+                        }%]`}
+                      />
+                    </Progress>
+
+                    {/* Bottom left "XP" */}
+                    <span className="absolute top-3 left-0 text-xs text-muted-foreground">
+                      XP
+                    </span>
+
+                    {/* Bottom right points text */}
+                    <span className="absolute top-3 right-0 text-xs text-muted-foreground">
+                      5435/10000
+                    </span>
                   </div>
                 </div>
 
-                <nav className="space-y-2 mt-8 pt-6 border-t border-slate-700">
-                  <NavItem icon={Target} label="Dashboard" active />
-                  <NavItem icon={Code} label="Practice" />
-                  <NavItem icon={BookOpen} label="Learn" />
+                <nav className="space-y-2 mt-8 pt-6 border-t border-border">
+                  <div className="text-xs text-foreground mb-3 font-semibold uppercase tracking-wide">
+                    Quick Links
+                  </div>
+                  
+                  <NavItem icon={Target} label="Home" active />
+                  <NavItem icon={Code} label="Resumes" />
+                  <NavItem icon={BookOpen} label="Projects" />
                   <NavItem icon={Trophy} label="Contests" />
                   <NavItem icon={Users} label="Community" />
-                  <NavItem icon={BarChart3} label="Progress" />
-                  <NavItem icon={Github} label="Projects" />
+                  {/* <NavItem icon={BarChart3} label="Progress" />
+                  <NavItem icon={Github} label="Projects" /> */}
                   <NavItem icon={MessageCircle} label="Discuss" />
                 </nav>
 
-                <div className="mt-8 pt-6 border-t border-slate-700">
-                  <div className="text-xs text-black mb-3 font-semibold uppercase tracking-wide">
+                <div className="mt-8 pt-6 border-t border-border">
+                  <div className="text-xs text-foreground mb-3 font-semibold uppercase tracking-wide">
                     Your Stats
                   </div>
                   <div className="space-y-4">
@@ -233,13 +308,13 @@ export default function Homepage() {
                       label="Problems Solved"
                       value={problemsSolved}
                       unit=""
-                      color="blue"
+                      color="yellow"
                     />
                     <StatItem
                       label="Global Rank"
                       value={currentRank}
                       unit=""
-                      color="purple"
+                      color="red"
                     />
                   </div>
                 </div>
@@ -251,14 +326,17 @@ export default function Homepage() {
           <div className="col-span-12 md:col-span-9 lg:col-span-7">
             <div className="grid gap-6">
               {/* Hero section */}
-              <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 overflow-hidden">
+              <Card
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 overflow-hidden"
+                data-slot="card"
+              >
                 <CardContent className="p-8 relative">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
 
                   <div className="relative z-10">
                     <h1 className="text-3xl font-bold mb-2">
-                      Welcome back, {session?.user.login}! 👋
+                      Welcome back, {mockUser.login}! 👋
                     </h1>
                     <p className="text-blue-100 mb-6">
                       Ready to level up your coding skills today?
@@ -310,17 +388,20 @@ export default function Homepage() {
               </div>
 
               {/* Learning paths and practice */}
-              <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-700">
+              <Card
+                className="bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+                data-slot="card"
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center text-slate-100">
-                      <Brain className="mr-2 h-5 w-5 text-blue-400" />
+                    <CardTitle className="flex items-center text-foreground">
+                      <Brain className="mr-2 h-5 w-5 text-purple-400" />
                       Learning Paths
                     </CardTitle>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-slate-300 hover:text-slate-100"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       View All
                       <ChevronRight className="ml-1 h-4 w-4" />
@@ -329,28 +410,28 @@ export default function Homepage() {
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="algorithms" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 bg-white">
+                    <TabsList className="grid w-full grid-cols-4 bg-neutral-100 dark:bg-neutral-800">
                       <TabsTrigger
                         value="algorithms"
-                        className="data-[state=active]:bg-slate-700 data-[state=active]:text-blue-400"
+                        className="data-[state=active]:bg-neutral-200 dark:data-[state=active]:bg-neutral-700 data-[state=active]:text-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
                       >
                         Algorithms
                       </TabsTrigger>
                       <TabsTrigger
                         value="datastructures"
-                        className="data-[state=active]:bg-slate-700 data-[state=active]:text-blue-400"
+                        className="data-[state=active]:bg-neutral-200 dark:data-[state=active]:bg-neutral-700 data-[state=active]:text-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
                       >
                         Data Structures
                       </TabsTrigger>
                       <TabsTrigger
                         value="system"
-                        className="data-[state=active]:bg-slate-700 data-[state=active]:text-blue-400"
+                        className="data-[state=active]:bg-neutral-200 dark:data-[state=active]:bg-neutral-700 data-[state=active]:text-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
                       >
                         System Design
                       </TabsTrigger>
                       <TabsTrigger
                         value="interview"
-                        className="data-[state=active]:bg-slate-700 data-[state=active]:text-blue-400"
+                        className="data-[state=active]:bg-neutral-200 dark:data-[state=active]:bg-neutral-700 data-[state=active]:text-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
                       >
                         Interview Prep
                       </TabsTrigger>
@@ -461,9 +542,12 @@ export default function Homepage() {
 
               {/* Recent activity and achievements */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-700">
+                <Card
+                  className="bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+                  data-slot="card"
+                >
                   <CardHeader>
-                    <CardTitle className="flex items-center text-base text-slate-100">
+                    <CardTitle className="flex items-center text-base text-foreground">
                       <Activity className="mr-2 h-5 w-5 text-green-400" />
                       Recent Activity
                     </CardTitle>
@@ -502,9 +586,12 @@ export default function Homepage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-700">
+                <Card
+                  className="bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+                  data-slot="card"
+                >
                   <CardHeader>
-                    <CardTitle className="flex items-center text-base text-slate-100">
+                    <CardTitle className="flex items-center text-base text-foreground">
                       <Award className="mr-2 h-5 w-5 text-yellow-500" />
                       Achievements
                     </CardTitle>
@@ -545,7 +632,7 @@ export default function Homepage() {
                   </CardContent>
                 </Card>
               </div>
-              <InstagramFeed />
+              <HomeFeed />
             </div>
           </div>
 
@@ -553,7 +640,10 @@ export default function Homepage() {
           <div className="col-span-12 lg:col-span-3">
             <div className="grid gap-6">
               {/* Daily challenge */}
-              <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white border-0">
+              <Card
+                className="bg-gradient-to-br from-orange-500 to-yellow-500 text-white border-0"
+                data-slot="card"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -580,10 +670,13 @@ export default function Homepage() {
               </Card>
 
               {/* Study schedule */}
-              <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-700">
+              <Card
+                className="bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+                data-slot="card"
+              >
                 <CardHeader>
-                  <CardTitle className="flex items-center text-base text-slate-100">
-                    <Calendar className="mr-2 h-5 w-5 text-blue-400" />
+                  <CardTitle className="flex items-center text-base text-foreground">
+                    <Calendar className="mr-2 h-5 w-5 text-purple-400" />
                     Study Schedule
                   </CardTitle>
                 </CardHeader>
@@ -616,9 +709,12 @@ export default function Homepage() {
               </Card>
 
               {/* Leaderboard */}
-              <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-700">
+              <Card
+                className="bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+                data-slot="card"
+              >
                 <CardHeader>
-                  <CardTitle className="flex items-center text-base text-slate-100">
+                  <CardTitle className="flex items-center text-base text-foreground">
                     <TrendingUp className="mr-2 h-5 w-5 text-purple-400" />
                     Weekly Leaderboard
                   </CardTitle>
@@ -658,9 +754,12 @@ export default function Homepage() {
               </Card>
 
               {/* Quick actions */}
-              <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-700">
+              <Card
+                className="bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+                data-slot="card"
+              >
                 <CardHeader>
-                  <CardTitle className="text-base text-slate-100">
+                  <CardTitle className="text-base text-foreground">
                     Quick Actions
                   </CardTitle>
                 </CardHeader>
@@ -696,8 +795,8 @@ function NavItem({
       variant="ghost"
       className={`w-full justify-start ${
         active
-          ? "bg-blue-900/50 text-blue-300"
-          : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/50"
+          ? "bg-neutral-800 text-white hover:bg-neutral-700"
+          : "text-muted-foreground hover:text-foreground hover:bg-neutral-200 dark:hover:bg-neutral-800"
       }`}
     >
       <Icon className="mr-2 h-4 w-4" />
@@ -722,10 +821,10 @@ function StatItem({
     switch (color) {
       case "green":
         return "text-green-400";
-      case "blue":
-        return "text-blue-400";
-      case "purple":
-        return "text-purple-400";
+      case "yellow":
+        return "text-yellow-400";
+      case "red":
+        return "text-red-400";
       default:
         return "text-blue-400";
     }
@@ -733,7 +832,7 @@ function StatItem({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="text-sm text-slate-400">{label}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
       <div className={`font-semibold ${getColorClasses()}`}>
         {value.toLocaleString()}
         {unit}
@@ -761,13 +860,13 @@ function QuickStatCard({
   const getColorClasses = () => {
     switch (color) {
       case "green":
-        return "text-green-400 bg-green-900/20";
+        return "text-green-400 bg-muted";
       case "blue":
-        return "text-blue-400 bg-blue-900/20";
+        return "text-blue-400 bg-muted";
       case "purple":
-        return "text-purple-400 bg-purple-900/20";
+        return "text-purple-400 bg-muted";
       default:
-        return "text-blue-400 bg-blue-900/20";
+        return "text-blue-400 bg-muted";
     }
   };
 
@@ -785,21 +884,26 @@ function QuickStatCard({
   };
 
   return (
-    <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-700">
+    <Card
+      className="bg-gradient-to-t from-primary/5 to-card dark:bg-card shadow-xs"
+      data-slot="card"
+    >
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className={`p-2 rounded-lg ${getColorClasses()}`}>
             <Icon className="h-5 w-5" />
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-slate-100">{value}</div>
-            <div className="text-xs text-slate-400">{subtitle}</div>
+            <div className="text-2xl font-semibold text-foreground">
+              {value}
+            </div>
+            <div className="text-xs text-muted-foreground">{subtitle}</div>
           </div>
         </div>
         <div className="mb-2">
-          <div className="text-sm font-medium text-slate-300">{title}</div>
+          <div className="text-sm font-medium text-foreground">{title}</div>
         </div>
-        <Progress value={progress} className="h-1.5 bg-slate-700">
+        <Progress value={progress} className="h-1.5 bg-muted">
           <div
             className={`h-full rounded-full ${getProgressColor()}`}
             style={{ width: `${progress}%` }}
@@ -829,32 +933,32 @@ function LearningPathItem({
   const getDifficultyColor = () => {
     switch (difficulty) {
       case "Easy":
-        return "bg-green-900/20 text-green-400 border-green-800";
+        return "bg-muted text-green-400 border-green-800";
       case "Medium":
-        return "bg-yellow-900/20 text-yellow-400 border-yellow-800";
+        return "bg-muted text-yellow-400 border-yellow-800";
       case "Hard":
-        return "bg-red-900/20 text-red-400 border-red-800";
+        return "bg-muted text-red-400 border-red-800";
       default:
-        return "bg-gray-900/20 text-gray-400 border-gray-800";
+        return "bg-muted text-gray-400 border-gray-800";
     }
   };
 
   return (
-    <div className="p-4 border border-slate-700 rounded-lg hover:bg-slate-800/50 transition-colors">
+    <div className="p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-900/20 rounded-lg">
-            <Icon className="h-5 w-5 text-blue-400" />
+          <div className="p-2 bg-muted rounded-lg">
+            <Icon className="h-5 w-5 text-purple-400" />
           </div>
           <div>
-            <h4 className="font-semibold text-slate-100">{title}</h4>
-            <p className="text-sm text-slate-400">{description}</p>
+            <h4 className="font-semibold text-foreground">{title}</h4>
+            <p className="text-sm text-muted-foreground">{description}</p>
           </div>
         </div>
         <Button
           variant="ghost"
           size="sm"
-          className="text-slate-400 hover:text-slate-100"
+          className="text-muted-foreground hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
         >
           <ArrowRight className="h-4 w-4" />
         </Button>
@@ -862,15 +966,15 @@ function LearningPathItem({
 
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <Badge variant="outline" className={getDifficultyColor()}>
+          <Badge variant="default" className={getDifficultyColor()}>
             {difficulty}
           </Badge>
-          <span className="text-xs text-slate-400">{timeEstimate}</span>
+          <span className="text-xs text-muted-foreground">{timeEstimate}</span>
         </div>
-        <span className="text-sm font-medium text-slate-300">{progress}%</span>
+        <span className="text-sm font-medium text-foreground">{progress}%</span>
       </div>
 
-      <Progress value={progress} className="h-2 bg-slate-700">
+      <Progress value={progress} className="h-2 bg-muted">
         <div
           className="h-full bg-blue-500 rounded-full"
           style={{ width: `${progress}%` }}
@@ -903,7 +1007,7 @@ function ActivityItem({
       case "Attempted":
         return "text-yellow-400";
       default:
-        return "text-slate-400";
+        return "text-muted-foreground";
     }
   };
 
@@ -912,13 +1016,13 @@ function ActivityItem({
       <div>
         <div className="text-sm">
           <span className={`font-medium ${getActionColor()}`}>{action}</span>
-          <span className="text-slate-300 ml-1">{item}</span>
+          <span className="text-foreground ml-1">{item}</span>
         </div>
         <div className="flex items-center space-x-2 mt-1">
-          <span className="text-xs text-slate-400">{time}</span>
+          <span className="text-xs text-muted-foreground">{time}</span>
           <Badge
             variant="outline"
-            className="text-xs border-slate-700 text-slate-300"
+            className="text-xs border-border text-muted-foreground"
           >
             {difficulty}
           </Badge>
@@ -968,28 +1072,26 @@ function AchievementItem({
         earned ? "bg-green-900/10" : "opacity-60"
       }`}
     >
-      <div
-        className={`p-2 rounded-lg ${
-          earned ? "bg-green-900/20" : "bg-slate-800"
-        }`}
-      >
+      <div className={`p-2 rounded-lg bg-muted`}>
         <Icon
-          className={`h-4 w-4 ${earned ? "text-green-400" : "text-slate-400"}`}
+          className={`h-4 w-4 ${
+            earned ? "text-green-400" : "text-muted-foreground"
+          }`}
         />
       </div>
       <div className="flex-1">
         <div className="flex items-center space-x-2">
-          <h4 className="text-sm font-medium text-slate-100">{title}</h4>
+          <h4 className="text-sm font-medium text-foreground">{title}</h4>
           <Badge
             variant="outline"
-            className={`text-xs ${getRarityColor()} border-slate-700`}
+            className={`text-xs ${getRarityColor()} border-border`}
           >
             {rarity}
           </Badge>
         </div>
-        <p className="text-xs text-slate-400">{description}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
         {!earned && progress && (
-          <Progress value={progress} className="h-1 mt-1 bg-slate-700">
+          <Progress value={progress} className="h-1 mt-1 bg-muted">
             <div
               className="h-full bg-blue-500 rounded-full"
               style={{ width: `${progress}%` }}
@@ -1020,13 +1122,13 @@ function ScheduleItem({
   const getTypeColor = () => {
     switch (type) {
       case "practice":
-        return "bg-blue-900/20 text-blue-400";
+        return "bg-muted text-blue-400";
       case "theory":
-        return "bg-green-900/20 text-green-400";
+        return "bg-muted text-green-400";
       case "interview":
-        return "bg-purple-900/20 text-purple-400";
+        return "bg-muted text-purple-400";
       default:
-        return "bg-gray-900/20 text-gray-400";
+        return "bg-muted text-gray-400";
     }
   };
 
@@ -1036,12 +1138,14 @@ function ScheduleItem({
         current ? "bg-blue-900/10 border border-blue-800" : ""
       }`}
     >
-      <div className="text-sm font-mono text-slate-400 w-12">{time}</div>
+      <div className="text-sm font-mono text-muted-foreground w-12">{time}</div>
       <div className="flex-1">
         <div className="flex items-center space-x-2">
           <h4
             className={`text-sm font-medium ${
-              completed ? "line-through text-slate-500" : "text-slate-100"
+              completed
+                ? "line-through text-muted-foreground"
+                : "text-foreground"
             }`}
           >
             {title}
@@ -1052,10 +1156,10 @@ function ScheduleItem({
           )}
         </div>
         <div className="flex items-center space-x-2 mt-1">
-          <span className="text-xs text-slate-400">{duration}</span>
+          <span className="text-xs text-muted-foreground">{duration}</span>
           <Badge
             variant="outline"
-            className={`text-xs ${getTypeColor()} border-slate-700`}
+            className={`text-xs ${getTypeColor()} border-border`}
           >
             {type}
           </Badge>
@@ -1088,7 +1192,7 @@ function LeaderboardItem({
       case 3:
         return "text-amber-400";
       default:
-        return "text-slate-400";
+        return "text-muted-foreground";
     }
   };
 
@@ -1103,7 +1207,7 @@ function LeaderboardItem({
       </div>
       <Avatar className="h-8 w-8">
         <AvatarImage src={avatar || "/placeholder.svg"} alt={name} />
-        <AvatarFallback className="bg-slate-700 text-xs text-slate-300">
+        <AvatarFallback className="bg-secondary text-xs text-secondary-foreground">
           {name
             .split(" ")
             .map((n) => n[0])
@@ -1113,13 +1217,13 @@ function LeaderboardItem({
       <div className="flex-1">
         <div
           className={`text-sm font-medium ${
-            isCurrentUser ? "text-blue-300" : "text-slate-100"
+            isCurrentUser ? "text-blue-300" : "text-foreground"
           }`}
         >
           {name}
         </div>
       </div>
-      <div className="text-sm font-semibold text-slate-300">
+      <div className="text-sm font-semibold text-foreground">
         {points.toLocaleString()}
       </div>
     </div>
@@ -1137,9 +1241,9 @@ function ActionButton({
   return (
     <Button
       variant="outline"
-      className="h-auto py-3 px-3 border-slate-700 bg-slate-800/50 hover:bg-slate-700/50 flex flex-col items-center justify-center space-y-1 w-full text-slate-300 hover:text-slate-100"
+      className="h-auto py-3 px-3 border-border bg-neutral-100 dark:bg-neutral-800 hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 flex flex-col items-center justify-center space-y-1 w-full text-muted-foreground"
     >
-      <Icon className="h-5 w-5 text-blue-400" />
+      <Icon className="h-5 w-5 text-purple-400" />
       <span className="text-xs">{label}</span>
     </Button>
   );

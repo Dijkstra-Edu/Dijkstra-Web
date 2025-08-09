@@ -18,6 +18,8 @@ import {
   IconSettings,
   IconUsers,
   IconTransformPoint,
+  IconFidgetSpinner,
+  IconArticle,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -65,18 +67,23 @@ const data = {
     },
     {
       title: "Discussion Forum",
-      url: "/discussions",
+      url: "https://discordapp.com/channels/1117871960874041376/1117873313130237992",
       icon: IconTransformPoint,
     },
     {
-      title: "Pin Board",
-      url: "/pin-board",
-      icon: IconFolder,
+      title: "Blogs and Articles",
+      url: "/blog",
+      icon: IconArticle,
     },
     {
       title: "Join a Team",
       url: "/teams",
       icon: IconUsers,
+    },
+    {
+      title: "Project Planner (Jira)",
+      url: "/planner",
+      icon: IconFidgetSpinner,
     },
   ],
   navClouds: [
