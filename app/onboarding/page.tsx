@@ -26,7 +26,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import BackgroundPaths from "../../components/kokonutui/background-paths";
 import { useSearchParams } from "next/navigation";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const steps = [
   {
@@ -172,7 +172,6 @@ export default function Page() {
     expandedSections: {},
   });
   const router = useRouter();
-
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -1339,7 +1338,9 @@ export default function Page() {
     <div className="flex items-center justify-center h-[600px]">
       <div className="text-center space-y-8 max-w-2xl">
         {/* Success Icon */}
-        <motion.div
+        <motion.img
+          src="/icon.png"
+          alt="Dijkstra GPT logo"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{
@@ -1348,10 +1349,8 @@ export default function Page() {
             type: "spring",
             stiffness: 200,
           }}
-          className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-lg"
-        >
-          <CheckCircle className="w-10 h-10 text-white" />
-        </motion.div>
+          className="h-30 w-30 mx-auto"
+        />
 
         {/* Title and Description */}
         <motion.div
