@@ -48,6 +48,8 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
+    //console.log("Middleware running for:", req.nextUrl.pathname);
+    
     // You can add additional logic here if needed
     // For now, just continue
     return NextResponse.next();
@@ -55,23 +57,20 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
+        //console.log("Token in authorized:", token);
         const { pathname } = req.nextUrl;
 
-        // Public routes that don't require authentication
-        const publicRoutes = ["/login", "/"];
-        const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
         
-        if (isPublicRoute) {
-          return true;
-        }
-
-        // Onboarding routes (if you need them to be accessible)
-        if (pathname.startsWith("/onboarding")) {
+        //const publicRoutes = ["/","/login"]; 
+        //const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+        
+        // Public routes that don't require authentication
+        if (pathname === '/' || pathname === "/login" || pathname.startsWith("/onboarding")){
           return true;
         }
 
         // All other routes require authentication
-        return !!token;
+        return !!(token);
       },
     },
     pages: {
