@@ -77,12 +77,9 @@ const Resume = () => {
 
   return (
     <div
-      className="min-h-screen py-12 font-inter relative"
-      style={{
-        background: 'linear-gradient(135deg,#001600 0%,#011e01 65%,#000000 100%), linear-gradient(315deg, transparent 0%, rgba(0,0,0,0.7) 40%, #000000 100%)',
-      }}
+      className="min-h-screen py-12 font-inter relative bg-card text-card-foreground transition-colors duration-300"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_20%,rgba(255,255,255,0.02),transparent)] pointer-events-none"></div>
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-background/80 to-primary/10 dark:from-background/90 dark:to-primary/20"></div>
       <div className="max-w-6xl mx-auto px-6 space-y-10 relative z-10">
         <ResourceSection
           title="Resumes Templates"
