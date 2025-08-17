@@ -239,8 +239,8 @@ export default function LatexPreview({ data }: LatexPreviewProps) {
 
       <div className="flex-1 overflow-hidden">
         {showLatex ? (
-          <div className="h-full">
-            <div className="flex justify-between items-center mb-2">
+          <div className="h-full flex flex-col">
+            <div className="flex justify-between items-center mb-2 flex-shrink-0">
               <h3 className="text-sm font-semibold text-gray-700">Generated LaTeX Code</h3>
               <button
                 onClick={async () => {
@@ -259,16 +259,16 @@ export default function LatexPreview({ data }: LatexPreviewProps) {
                 {copied ? "Copied!" : "Copy Code"}
               </button>
             </div>
-            <div className="h-full overflow-y-auto bg-gray-50 rounded-lg border">
-              <pre className="p-4 text-xs font-mono leading-relaxed overflow-x-auto">
-                <code>{latexCode}</code>
+            <div className="flex-1 overflow-hidden bg-gray-50 rounded-lg border">
+              <pre className="p-4 text-xs font-mono leading-relaxed h-full overflow-auto w-full whitespace-pre-wrap break-words">
+                <code className="block w-full">{latexCode}</code>
               </pre>
             </div>
           </div>
         ) : (
-          <div className="h-full">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Resume Preview</h3>
-            <div className="h-full overflow-y-auto bg-white border rounded-lg">{renderHTMLPreview()}</div>
+          <div className="h-full flex flex-col">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex-shrink-0">Resume Preview</h3>
+            <div className="flex-1 overflow-auto bg-white border rounded-lg">{renderHTMLPreview()}</div>
           </div>
         )}
       </div>

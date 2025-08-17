@@ -1,7 +1,7 @@
 // ResumeBuilder.tsx - Standalone Resume Builder Component
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ResumeData } from '@/types/resume';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
@@ -28,6 +28,7 @@ export default function ResumeBuilder({
   const [resumeData, setResumeData] = useState<Partial<ResumeData>>(initialData);
   const [leftPanelWidth, setLeftPanelWidth] = useState(50); // Percentage
   const [isDragging, setIsDragging] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const handleDataChange = (data: Partial<ResumeData>) => {
     setResumeData(data);
@@ -39,22 +40,21 @@ export default function ResumeBuilder({
     e.preventDefault();
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
     
-    const containerElement = e.currentTarget as HTMLElement;
-    const rect = containerElement.getBoundingClientRect();
+    const rect = containerRef.current.getBoundingClientRect();
     const containerWidth = rect.width;
     const newLeftWidth = ((e.clientX - rect.left) / containerWidth) * 100;
     
     // Constrain between 20% and 80%
     const constrainedWidth = Math.min(80, Math.max(20, newLeftWidth));
     setLeftPanelWidth(constrainedWidth);
-  };
+  }, [isDragging]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   React.useEffect(() => {
     if (isDragging) {
@@ -70,7 +70,7 @@ export default function ResumeBuilder({
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   return (
     <div className={`min-h-screen bg-white ${className}`}>
@@ -89,10 +89,10 @@ export default function ResumeBuilder({
       )}
 
       {/* Two Panel Layout with Resizable Divider */}
-      <div className="flex" style={{ height: height }}>
-        {/* Left Panel - Form */}
+      <div className="flex w-full max-w-full overflow-hidden" style={{ height: height }} ref={containerRef}>
+        {/* Left Panel - Form - Resizable width */}
         <div 
-          className="border-r border-gray-200 bg-gray-50"
+          className="border-r border-gray-200 bg-gray-50 flex-shrink-0 overflow-hidden"
           style={{ width: `${leftPanelWidth}%` }}
         >
           <div className="h-full overflow-y-auto">
@@ -124,9 +124,9 @@ export default function ResumeBuilder({
           </div>
         </div>
 
-        {/* Right Panel - Preview */}
+        {/* Right Panel - Preview - Resizable width */}
         <div 
-          className="bg-white"
+          className="bg-white flex-shrink-0 overflow-hidden"
           style={{ width: `${100 - leftPanelWidth}%` }}
         >
           <div className="h-full overflow-y-auto">
