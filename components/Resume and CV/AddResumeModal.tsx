@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import {
@@ -17,15 +16,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import GlobalApi from "@/app/services/GlobalApi";
 
+interface ResumeData {
+  title: string;
+  resumeId: string;
+  userEmail: string;
+  userName: string;
+  documentId: string;
+}
+
 interface AddResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onResumeCreated?: (resumeData: ResumeData) => void;
 }
 
-export default function AddResumeModal({ isOpen, onClose }: AddResumeModalProps) {
+export default function AddResumeModal({ isOpen, onClose, onResumeCreated }: AddResumeModalProps) {
   const [resumeTitle, setResumeTitle] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const router = useRouter();
   const { data: session } = useSession();
 
   const handleCreate = async () => {
@@ -47,7 +54,17 @@ export default function AddResumeModal({ isOpen, onClose }: AddResumeModalProps)
       const response = await GlobalApi.CreateNewResume(data);
       if (response) {
         setLoading(false);
-        router.push(`/dashboard/resume/${response.data.data.documentId}/edit`);
+        // Instead of navigating, call the onResumeCreated callback
+        if (onResumeCreated) {
+          onResumeCreated({
+            title: resumeTitle,
+            resumeId: uuid,
+            userEmail: session?.user?.email || "",
+            userName: session?.user?.name || "",
+            documentId: response.data.data.documentId
+          });
+        }
+        onClose(); // Close the modal
       }
     } catch (error) {
       setLoading(false);
