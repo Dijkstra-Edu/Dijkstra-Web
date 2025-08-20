@@ -31,6 +31,42 @@ import {
   SheetDescription,
 } from "./ui/sheet";
 
+const handleLogout = async () => {
+  try {
+    console.log("Starting logout process...");
+    console.log("Current cookies before clear:", document.cookie);
+    
+    // Clearing the QA cookie (if it exists)
+    const qaLogoutResponse = await fetch("/api/qa-logout", { 
+      method: "POST", 
+      credentials: "include" 
+    });
+    
+    if (qaLogoutResponse.ok) {
+      const data = await qaLogoutResponse.json();
+      console.log("QA logout response:", data);
+      console.log("Current cookies after clear:", document.cookie);
+    } else {
+      console.warn("QA logout failed:", qaLogoutResponse.status);
+    }
+    
+    console.log("Proceeding with NextAuth signout");
+    
+    // Then sign out from NextAuth
+    await signOut({ 
+      callbackUrl: "/login",
+      redirect: true 
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    // Fallback: still try to sign out even if QA clear fails
+    await signOut({ 
+      callbackUrl: "/login",
+      redirect: true 
+    });
+  }
+};
+
 export function SiteHeader({ title }: { title: string }) {
   /*
   Things to change:
@@ -226,7 +262,7 @@ export function SiteHeader({ title }: { title: string }) {
             className="mx-2 data-[orientation=vertical]:h-4"
           />
           <Button
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={handleLogout}
             variant="default"
             asChild
             size="sm"
