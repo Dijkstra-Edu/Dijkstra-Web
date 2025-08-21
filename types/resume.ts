@@ -58,3 +58,14 @@ export interface ResumeData {
     linkedin?: string;
   };
 }
+
+export interface SavedResumeData {
+  resumeId: string;
+  title: string;
+  template: 'deedy' | 'row-based';
+  content: Partial<ResumeData>;
+  lastModified: string;
+  documentId: string;
+  userEmail: string;
+  userName: string;
+}

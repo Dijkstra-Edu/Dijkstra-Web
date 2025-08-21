@@ -12,6 +12,396 @@ function escapeLatex(text: string): string {
     .replace(/~/g, '\\textasciitilde{}');
 }
 
+export function generateRowBasedLatex(data: Partial<ResumeData>): string {
+  const personalInfo = data.personalInfo || { name: '', email: '', phone: '', website: '' };
+  const experience = data.experience || [];
+  const projects = data.projects || [];
+  const education = data.education || [];
+  const skills = data.skills || { programming: { expert: [], intermediate: [], beginner: [] }, technology: [] };
+  const links = data.links || {};
+  
+  // Extract user data with defaults
+  const name = escapeLatex(personalInfo.name || 'John Doe');
+  const email = escapeLatex(personalInfo.email || 'youremail@yourdomain.com');
+  const phone = escapeLatex(personalInfo.phone || '0541 999 99 99');
+  const website = escapeLatex(personalInfo.website || 'yourwebsite.com');
+  const github = escapeLatex(links.github || 'github.com/yourusername');
+  const linkedin = escapeLatex(links.linkedin || 'linkedin.com/in/yourusername');
+
+  // Generate education section
+  const educationSection = education.length > 0 ? education.map(edu => {
+    const graduationDate = edu.expectedGraduation || 'Sept 2020 – May 2024';
+    const institution = escapeLatex(edu.institution || 'Your University');
+    const degree = escapeLatex(edu.degree || 'BS in Computer Science');
+    const location = edu.location ? ` -- ${escapeLatex(edu.location)}` : '';
+    
+    let eduContent = `\\begin{twocolentry}{
+            ${graduationDate}
+        }
+            \\textbf{${institution}}, ${degree}${location}\\end{twocolentry}`;
+
+    if (edu.gpa || edu.honors) {
+      eduContent += `
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}`;
+      
+      if (edu.gpa) {
+        eduContent += `
+                \\item GPA: ${escapeLatex(edu.gpa)}/4.0`;
+      }
+      
+      if (edu.honors && edu.honors.length > 0) {
+        eduContent += `
+                \\item \\textbf{Honors:} ${edu.honors.map(h => escapeLatex(h)).join(', ')}`;
+      }
+      
+      eduContent += `
+            \\end{highlights}
+        \\end{onecolentry}`;
+    }
+
+    return eduContent;
+  }).join('\n\n        \\vspace{0.2 cm}\n\n        ') : `\\begin{twocolentry}{
+            Sept 2020 – May 2024
+        }
+            \\textbf{Your University}, BS in Computer Science\\end{twocolentry}
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}
+                \\item GPA: 3.9/4.0
+                \\item \\textbf{Coursework:} Data Structures, Algorithms, Computer Architecture
+            \\end{highlights}
+        \\end{onecolentry}`;
+
+  // Generate experience section
+  const experienceSection = experience.length > 0 ? experience.map(exp => {
+    const dateRange = `${exp.startDate || 'June 2022'} – ${exp.endDate || 'Aug 2024'}`;
+    const company = escapeLatex(exp.company || 'Company Name');
+    const position = escapeLatex(exp.position || 'Software Engineer');
+    const location = exp.location ? ` -- ${escapeLatex(exp.location)}` : '';
+    
+    let expContent = `\\begin{twocolentry}{
+            ${dateRange}
+        }
+            \\textbf{${position}}, ${company}${location}\\end{twocolentry}`;
+
+    if (exp.description && exp.description.length > 0) {
+      expContent += `
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}`;
+      
+      exp.description.forEach(desc => {
+        expContent += `
+                \\item ${escapeLatex(desc)}`;
+      });
+      
+      expContent += `
+            \\end{highlights}
+        \\end{onecolentry}`;
+    }
+
+    return expContent;
+  }).join('\n\n        \\vspace{0.2 cm}\n\n        ') : `\\begin{twocolentry}{
+            June 2022 – Aug 2024
+        }
+            \\textbf{Software Engineer}, Tech Company -- City, State\\end{twocolentry}
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}
+                \\item Developed and maintained web applications using modern technologies
+                \\item Collaborated with cross-functional teams to deliver high-quality software
+                \\item Implemented efficient algorithms and data structures
+            \\end{highlights}
+        \\end{onecolentry}`;
+
+  // Generate projects section
+  const projectsSection = projects.length > 0 ? projects.map(project => {
+    const projectName = escapeLatex(project.name || 'Project Name');
+    const link = project.link || 'github.com/username/repo';
+    
+    let projContent = `\\begin{twocolentry}{
+            \\href{${link}}{${link}}
+        }
+            \\textbf{${projectName}}\\end{twocolentry}`;
+
+    if (project.details && project.details.length > 0) {
+      projContent += `
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}`;
+      
+      project.details.forEach(detail => {
+        projContent += `
+                \\item ${escapeLatex(detail)}`;
+      });
+      
+      projContent += `
+            \\end{highlights}
+        \\end{onecolentry}`;
+    }
+
+    return projContent;
+  }).join('\n\n        \\vspace{0.2 cm}\n\n        ') : `\\begin{twocolentry}{
+            \\href{https://github.com/username/project}{github.com/username/project}
+        }
+            \\textbf{Web Application}\\end{twocolentry}
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}
+                \\item Built a full-stack web application using React and Node.js
+                \\item Implemented user authentication and data persistence
+            \\end{highlights}
+        \\end{onecolentry}`;
+
+  // Generate technologies section
+  let technologiesSection = '';
+  if (skills.programming || skills.technology) {
+    if (skills.programming && (skills.programming.expert?.length || skills.programming.intermediate?.length || skills.programming.beginner?.length)) {
+      const allLanguages = [
+        ...(skills.programming.expert || []),
+        ...(skills.programming.intermediate || []),
+        ...(skills.programming.beginner || [])
+      ];
+      if (allLanguages.length > 0) {
+        technologiesSection += `\\begin{onecolentry}
+            \\textbf{Languages:} ${allLanguages.map(lang => escapeLatex(lang)).join(', ')}
+        \\end{onecolentry}`;
+      }
+    }
+    
+    if (skills.technology && skills.technology.length > 0) {
+      if (technologiesSection) technologiesSection += '\n\n        \\vspace{0.2 cm}\n\n        ';
+      technologiesSection += `\\begin{onecolentry}
+            \\textbf{Technologies:} ${skills.technology.map(tech => escapeLatex(tech)).join(', ')}
+        \\end{onecolentry}`;
+    }
+  }
+
+  if (!technologiesSection) {
+    technologiesSection = `\\begin{onecolentry}
+            \\textbf{Languages:} Python, JavaScript, Java, C++, SQL
+        \\end{onecolentry}
+
+        \\vspace{0.2 cm}
+
+        \\begin{onecolentry}
+            \\textbf{Technologies:} React, Node.js, MongoDB, AWS, Docker
+        \\end{onecolentry}`;
+  }
+
+  return `\\documentclass[10pt, letterpaper]{article}
+
+% Packages:
+\\usepackage[
+    ignoreheadfoot, % set margins without considering header and footer
+    top=2 cm, % seperation between body and page edge from the top
+    bottom=2 cm, % seperation between body and page edge from the bottom
+    left=2 cm, % seperation between body and page edge from the left
+    right=2 cm, % seperation between body and page edge from the right
+    footskip=1.0 cm, % seperation between body and footer
+    % showframe % for debugging 
+]{geometry} % for adjusting page geometry
+\\usepackage{titlesec} % for customizing section titles
+\\usepackage{tabularx} % for making tables with fixed width columns
+\\usepackage{array} % tabularx requires this
+\\usepackage[dvipsnames]{xcolor} % for coloring text
+\\definecolor{primaryColor}{RGB}{0, 0, 0} % define primary color
+\\usepackage{enumitem} % for customizing lists
+\\usepackage{fontawesome5} % for using icons
+\\usepackage{amsmath} % for math
+\\usepackage[
+    pdftitle={${name}'s CV},
+    pdfauthor={${name}},
+    pdfcreator={LaTeX with RenderCV},
+    colorlinks=true,
+    urlcolor=primaryColor
+]{hyperref} % for links, metadata and bookmarks
+\\usepackage[pscoord]{eso-pic} % for floating text on the page
+\\usepackage{calc} % for calculating lengths
+\\usepackage{bookmark} % for bookmarks
+\\usepackage{lastpage} % for getting the total number of pages
+\\usepackage{changepage} % for one column entries (adjustwidth environment)
+\\usepackage{paracol} % for two and three column entries
+\\usepackage{ifthen} % for conditional statements
+\\usepackage{needspace} % for avoiding page brake right after the section title
+\\usepackage{iftex} % check if engine is pdflatex, xetex or luatex
+
+% Ensure that generate pdf is machine readable/ATS parsable:
+\\ifPDFTeX
+    \\input{glyphtounicode}
+    \\pdfgentounicode=1
+    \\usepackage[T1]{fontenc}
+    \\usepackage[utf8]{inputenc}
+    \\usepackage{lmodern}
+\\fi
+
+\\usepackage{charter}
+
+% Some settings:
+\\raggedright
+\\AtBeginEnvironment{adjustwidth}{\\partopsep0pt} % remove space before adjustwidth environment
+\\pagestyle{empty} % no header or footer
+\\setcounter{secnumdepth}{0} % no section numbering
+\\setlength{\\parindent}{0pt} % no indentation
+\\setlength{\\topskip}{0pt} % no top skip
+\\setlength{\\columnsep}{0.15cm} % set column seperation
+\\pagenumbering{gobble} % no page numbering
+
+\\titleformat{\\section}{\\needspace{4\\baselineskip}\\bfseries\\large}{}{0pt}{}[\\vspace{1pt}\\titlerule]
+
+\\titlespacing{\\section}{
+    % left space:
+    -1pt
+}{
+    % top space:
+    0.3 cm
+}{
+    % bottom space:
+    0.2 cm
+} % section title spacing
+
+\\renewcommand\\labelitemi{$\\vcenter{\\hbox{\\small$\\bullet$}}$} % custom bullet points
+\\newenvironment{highlights}{
+    \\begin{itemize}[
+        topsep=0.10 cm,
+        parsep=0.10 cm,
+        partopsep=0pt,
+        itemsep=0pt,
+        leftmargin=0 cm + 10pt
+    ]
+}{
+    \\end{itemize}
+} % new environment for highlights
+
+\\newenvironment{highlightsforbulletentries}{
+    \\begin{itemize}[
+        topsep=0.10 cm,
+        parsep=0.10 cm,
+        partopsep=0pt,
+        itemsep=0pt,
+        leftmargin=10pt
+    ]
+}{
+    \\end{itemize}
+} % new environment for highlights for bullet entries
+
+\\newenvironment{onecolentry}{
+    \\begin{adjustwidth}{
+        0 cm + 0.00001 cm
+    }{
+        0 cm + 0.00001 cm
+    }
+}{
+    \\end{adjustwidth}
+} % new environment for one column entries
+
+\\newenvironment{twocolentry}[2][]{
+    \\onecolentry
+    \\def\\secondColumn{#2}
+    \\setcolumnwidth{\\fill, 4.5 cm}
+    \\begin{paracol}{2}
+}{
+    \\switchcolumn \\raggedleft \\secondColumn
+    \\end{paracol}
+    \\endonecolentry
+} % new environment for two column entries
+
+\\newenvironment{threecolentry}[3][]{
+    \\onecolentry
+    \\def\\thirdColumn{#3}
+    \\setcolumnwidth{, \\fill, 4.5 cm}
+    \\begin{paracol}{3}
+    {\\raggedright #2} \\switchcolumn
+}{
+    \\switchcolumn \\raggedleft \\thirdColumn
+    \\end{paracol}
+    \\endonecolentry
+} % new environment for three column entries
+
+\\newenvironment{header}{
+    \\setlength{\\topsep}{0pt}\\par\\kern\\topsep\\centering\\linespread{1.5}
+}{
+    \\par\\kern\\topsep
+} % new environment for the header
+
+\\newcommand{\\placelastupdatedtext}{% \\placetextbox{<horizontal pos>}{<vertical pos>}{<stuff>}
+  \\AddToShipoutPictureFG*{% Add <stuff> to current page foreground
+    \\put(
+        \\LenToUnit{\\paperwidth-2 cm-0 cm+0.05cm},
+        \\LenToUnit{\\paperheight-1.0 cm}
+    ){\\vtop{{\\null}\\makebox[0pt][c]{
+        \\small\\color{gray}\\textit{Last updated in September 2024}\\hspace{\\widthof{Last updated in September 2024}}
+    }}}%
+  }%
+}%
+
+% save the original href command in a new command:
+\\let\\hrefWithoutArrow\\href
+
+% new command for external links:
+
+\\begin{document}
+    \\newcommand{\\AND}{\\unskip
+        \\cleaders\\copy\\ANDbox\\hskip\\wd\\ANDbox
+        \\ignorespaces
+    }
+    \\newsavebox\\ANDbox
+    \\sbox\\ANDbox{$|$}
+
+    \\begin{header}
+        \\fontsize{25 pt}{25 pt}\\selectfont ${name}
+
+        \\vspace{5 pt}
+
+        \\normalsize
+        \\mbox{\\hrefWithoutArrow{mailto:${email}}{${email}}}%
+        \\kern 5.0 pt%
+        \\AND%
+        \\kern 5.0 pt%
+        \\mbox{\\hrefWithoutArrow{tel:${phone.replace(/[^\d]/g, '')}}{${phone}}}%
+        \\kern 5.0 pt%
+        \\AND%
+        \\kern 5.0 pt%
+        \\mbox{\\hrefWithoutArrow{https://${website}}{${website}}}%
+        \\kern 5.0 pt%
+        \\AND%
+        \\kern 5.0 pt%
+        \\mbox{\\hrefWithoutArrow{https://${linkedin}}{${linkedin}}}%
+        \\kern 5.0 pt%
+        \\AND%
+        \\kern 5.0 pt%
+        \\mbox{\\hrefWithoutArrow{https://${github}}{${github}}}%
+    \\end{header}
+
+    \\vspace{5 pt - 0.3 cm}
+
+    \\section{Education}
+
+        ${educationSection}
+
+    \\section{Experience}
+
+        ${experienceSection}
+
+    \\section{Projects}
+
+        ${projectsSection}
+
+    \\section{Technologies}
+
+        ${technologiesSection}
+
+\\end{document}`;
+}
+
 export function generateDeedyLatex(data: Partial<ResumeData>): string {
   const personalInfo = data.personalInfo || {};
   const experience = data.experience || [];

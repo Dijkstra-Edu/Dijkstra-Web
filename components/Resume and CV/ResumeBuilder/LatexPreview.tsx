@@ -3,20 +3,21 @@
 
 import React, { useState } from 'react';
 import { ResumeData } from '@/types/resume';
-import { generateDeedyLatex } from '@/lib/latex-generator';
+import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
 
 interface LatexPreviewProps {
   data: Partial<ResumeData>;
+  template?: 'deedy' | 'row-based';
 }
 
-export default function LatexPreview({ data }: LatexPreviewProps) {
+export default function LatexPreview({ data, template = 'deedy' }: LatexPreviewProps) {
   const [isCompiling, setIsCompiling] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showLatex, setShowLatex] = useState(false);
   const [copied, setCopied] = useState(false); // Add copied state
 
-  const latexCode = generateDeedyLatex(data);
+  const latexCode = template === 'row-based' ? generateRowBasedLatex(data) : generateDeedyLatex(data);
 
   const renderHTMLPreview = () => {
     if (!data.personalInfo?.name) {
@@ -26,6 +27,222 @@ export default function LatexPreview({ data }: LatexPreviewProps) {
         </div>
       );
     }
+
+    if (template === 'row-based') {
+      return renderRowBasedPreview();
+    }
+
+    return renderDeedyPreview();
+  };
+
+  const renderRowBasedPreview = () => {
+    return (
+      <div className="p-6 bg-white" style={{ fontFamily: 'Charter, Times, serif', fontSize: '10pt', lineHeight: '1.4' }}>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-normal text-gray-900 mb-3">
+            {data.personalInfo?.name || 'John Doe'}
+          </h1>
+          <div className="text-sm text-gray-700 flex justify-center items-center flex-wrap gap-2">
+            <span className="hover:text-blue-600 cursor-pointer underline">
+              {data.personalInfo?.email || 'youremail@yourdomain.com'}
+            </span>
+            <span>|</span>
+            <span>{data.personalInfo?.phone || '0541 999 99 99'}</span>
+            <span>|</span>
+            <span className="hover:text-blue-600 cursor-pointer underline">
+              {data.personalInfo?.website || 'yourwebsite.com'}
+            </span>
+            <span>|</span>
+            <span className="hover:text-blue-600 cursor-pointer underline">
+              {data.links?.linkedin || 'linkedin.com/in/yourusername'}
+            </span>
+            <span>|</span>
+            <span className="hover:text-blue-600 cursor-pointer underline">
+              {data.links?.github || 'github.com/yourusername'}
+            </span>
+          </div>
+        </div>
+
+        {/* Education Section */}
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-4">
+            Education
+          </h2>
+          {data.education && data.education.length > 0 ? (
+            <div className="space-y-4">
+              {data.education.map((edu, index) => (
+                <div key={index}>
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <span className="font-bold text-sm">{edu.institution}</span>
+                      <span>, {edu.degree}</span>
+                      {edu.location && <span> -- {edu.location}</span>}
+                    </div>
+                    <div className="text-sm text-gray-600 text-right">
+                      {edu.expectedGraduation || 'Sept 2020 – May 2024'}
+                    </div>
+                  </div>
+                  {(edu.gpa || edu.honors) && (
+                    <ul className="text-sm text-gray-700 ml-4">
+                      {edu.gpa && <li>• GPA: {edu.gpa}/4.0</li>}
+                      {edu.honors && edu.honors.length > 0 && (
+                        <li>• <strong>Honors:</strong> {edu.honors.join(', ')}</li>
+                      )}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>
+              <div className="flex justify-between items-start mb-1">
+                <div>
+                  <span className="font-bold text-sm">Your University</span>
+                  <span>, BS in Computer Science</span>
+                </div>
+                <div className="text-sm text-gray-600">Sept 2020 – May 2024</div>
+              </div>
+              <ul className="text-sm text-gray-700 ml-4">
+                <li>• GPA: 3.9/4.0</li>
+                <li>• <strong>Coursework:</strong> Data Structures, Algorithms, Computer Architecture</li>
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Experience Section */}
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-4">
+            Experience
+          </h2>
+          {data.experience && data.experience.length > 0 ? (
+            <div className="space-y-4">
+              {data.experience.map((exp, index) => (
+                <div key={index}>
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <span className="font-bold text-sm">{exp.position}</span>
+                      <span>, {exp.company}</span>
+                      {exp.location && <span> -- {exp.location}</span>}
+                    </div>
+                    <div className="text-sm text-gray-600 text-right">
+                      {exp.startDate} – {exp.endDate}
+                    </div>
+                  </div>
+                  {exp.description && exp.description.length > 0 && (
+                    <ul className="text-sm text-gray-700 ml-4">
+                      {exp.description.map((desc, i) => (
+                        <li key={i}>• {desc}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>
+              <div className="flex justify-between items-start mb-1">
+                <div>
+                  <span className="font-bold text-sm">Software Engineer</span>
+                  <span>, Tech Company -- City, State</span>
+                </div>
+                <div className="text-sm text-gray-600">June 2022 – Aug 2024</div>
+              </div>
+              <ul className="text-sm text-gray-700 ml-4">
+                <li>• Developed and maintained web applications using modern technologies</li>
+                <li>• Collaborated with cross-functional teams to deliver high-quality software</li>
+                <li>• Implemented efficient algorithms and data structures</li>
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Projects Section */}
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-4">
+            Projects
+          </h2>
+          {data.projects && data.projects.length > 0 ? (
+            <div className="space-y-4">
+              {data.projects.map((project, index) => (
+                <div key={index}>
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <span className="font-bold text-sm">{project.name}</span>
+                    </div>
+                    <div className="text-sm text-blue-600 hover:underline cursor-pointer">
+                      {project.link || 'github.com/username/repo'}
+                    </div>
+                  </div>
+                  {project.details && project.details.length > 0 && (
+                    <ul className="text-sm text-gray-700 ml-4">
+                      {project.details.map((detail, i) => (
+                        <li key={i}>• {detail}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>
+              <div className="flex justify-between items-start mb-1">
+                <div>
+                  <span className="font-bold text-sm">Web Application</span>
+                </div>
+                <div className="text-sm text-blue-600 hover:underline cursor-pointer">
+                  github.com/username/project
+                </div>
+              </div>
+              <ul className="text-sm text-gray-700 ml-4">
+                <li>• Built a full-stack web application using React and Node.js</li>
+                <li>• Implemented user authentication and data persistence</li>
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Technologies Section */}
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-4">
+            Technologies
+          </h2>
+          <div className="space-y-3">
+            {data.skills?.programming && (
+              data.skills.programming.expert?.length || 
+              data.skills.programming.intermediate?.length || 
+              data.skills.programming.beginner?.length
+            ) ? (
+              <div className="text-sm">
+                <span className="font-bold">Languages:</span> {[
+                  ...(data.skills.programming.expert || []),
+                  ...(data.skills.programming.intermediate || []),
+                  ...(data.skills.programming.beginner || [])
+                ].join(', ')}
+              </div>
+            ) : (
+              <div className="text-sm">
+                <span className="font-bold">Languages:</span> Python, JavaScript, Java, C++, SQL
+              </div>
+            )}
+            
+            {data.skills?.technology && data.skills.technology.length > 0 ? (
+              <div className="text-sm">
+                <span className="font-bold">Technologies:</span> {data.skills.technology.join(', ')}
+              </div>
+            ) : (
+              <div className="text-sm">
+                <span className="font-bold">Technologies:</span> React, Node.js, MongoDB, AWS, Docker
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderDeedyPreview = () => {
 
     return (
       <div className="p-6 bg-white" style={{ fontFamily: 'Times, serif', fontSize: '10pt', lineHeight: '1.2' }}>

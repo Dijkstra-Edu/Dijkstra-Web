@@ -68,6 +68,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     links: {
       github: "",
       linkedin: "",
+      ...initialData.links,
     },
   });
 
@@ -79,6 +80,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     setData((prev) => ({
       ...prev,
       personalInfo: {
+        name: "",
+        email: "",
+        phone: "",
+        website: "",
         ...prev.personalInfo,
         [field]: value,
       },
@@ -193,9 +198,18 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     setData((prev) => ({
       ...prev,
       skills: {
+        programming: {
+          expert: [],
+          intermediate: [],
+          beginner: [],
+        },
+        technology: [],
         ...prev.skills,
         [category]: {
-          ...prev.skills?.[category],
+          expert: [],
+          intermediate: [],
+          beginner: [],
+          ...(category === 'programming' ? prev.skills?.programming : {}),
           [subcategory]: value,
         },
       },
@@ -700,6 +714,11 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                   setData((prev) => ({
                     ...prev,
                     skills: {
+                      programming: {
+                        expert: [],
+                        intermediate: [],
+                        beginner: [],
+                      },
                       ...prev.skills,
                       technology: handleStringArrayInput(e.target.value),
                     },

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, FileImage, BarChart3, Video } from "lucide-react";
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedProjectsTable } from "@/components/Resume and CV/stacked-projects-table";
 import AddResumeModal from "./AddResumeModal";
 import ResumeBuilder from "@/components/Resume and CV/ResumeBuilder/ResumeBuilder";
+import { ResumeDataService } from "@/app/services/ResumeDataService";
+import { SavedResumeData } from "@/types/resume";
 
 interface ResumeData {
   title: string;
@@ -16,7 +18,20 @@ interface ResumeData {
 }
 
 // Placeholder component for the new resume builder
-const ResumeBuilderWrapper = ({ resumeData, onBack }: { resumeData: ResumeData; onBack: () => void }) => {
+const ResumeBuilderWrapper = ({ 
+  resumeData, 
+  onBack, 
+  template = 'deedy' 
+}: { 
+  resumeData: ResumeData; 
+  onBack: () => void; 
+  template?: 'deedy' | 'row-based';
+}) => {
+  const templateTitle = template === 'row-based' ? 'Row-based Resume Builder' : 'Column Resume Builder';
+  const templateSubtitle = template === 'row-based' ? 
+    'Row-based Resume' : 
+    'Column Resume';
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header with back button */}
@@ -30,8 +45,8 @@ const ResumeBuilderWrapper = ({ resumeData, onBack }: { resumeData: ResumeData; 
               ← Back to Dashboard
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Resume Builder</h1>
-              <p className="text-sm text-muted-foreground">Editing: {resumeData.title}</p>
+              <h1 className="text-2xl font-bold text-foreground">Editing: {resumeData.title}</h1>
+              <p className="text-sm text-muted-foreground">{templateSubtitle}</p>
             </div>
           </div>
         </div>
@@ -42,6 +57,14 @@ const ResumeBuilderWrapper = ({ resumeData, onBack }: { resumeData: ResumeData; 
         showHeader={false}
         height="calc(100vh - 80px)"
         className=""
+        template={template}
+        headerTitle={templateTitle}
+        headerSubtitle={templateSubtitle}
+        resumeId={resumeData.resumeId}
+        resumeTitle={resumeData.title}
+        documentId={resumeData.documentId}
+        userEmail={resumeData.userEmail}
+        userName={resumeData.userName}
       />
     </div>
   );
@@ -50,28 +73,45 @@ const ResumeBuilderWrapper = ({ resumeData, onBack }: { resumeData: ResumeData; 
 const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (isBuilding: boolean) => void }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentResumeData, setCurrentResumeData] = useState<ResumeData | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<'deedy' | 'row-based'>('deedy');
+  const [savedResumes, setSavedResumes] = useState<SavedResumeData[]>([]);
+
+  // Load saved resumes on component mount
+  useEffect(() => {
+    const loadSavedResumes = () => {
+      const saved = ResumeDataService.getAllSavedResumes();
+      setSavedResumes(saved);
+    };
+
+    loadSavedResumes();
+    // Set up an interval to refresh saved resumes (in case of updates from other tabs)
+    const interval = setInterval(loadSavedResumes, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Demo resource arrays
   const resumesCreated = [
     {
       id: "1",
-      title: "Resume template 1",
+      title: "Column Resume",
       description: "Executive-style resume ideal for senior professionals and C-suite roles.",
       fileType: "PDF",
       fileSize: "1.2 MB",
       color: "charcoal" as const,
       icon: <FileText />,
       pdfUrl: "/pdfs/resume-template-1.pdf",
+      template: 'deedy' as const,
     },
     {
       id: "2",
-      title: "Resume template 2",
+      title: "Row Resume",
       description: "Creative and visually appealing layout, perfect for designers and artists.",
       fileType: "PDF",
       fileSize: "8.5 MB",
       color: "taupe" as const,
       icon: <FileImage />,
       pdfUrl: "/pdfs/resume-template-2.pdf",
+      template: 'row-based' as const,
     },
   ];
 
@@ -102,18 +142,31 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
     ...resumesCreated.map((item) => ({
       id: item.id,
       title: item.title,
-      owner: "You",
-      lastModified: "4 days ago",
+      owner: "Template",
+      lastModified: "Template",
+      isTemplate: true,
     })),
     ...cvsCreated.map((item) => ({
       id: item.id,
       title: item.title,
+      owner: "Template", 
+      lastModified: "Template",
+      isTemplate: true,
+    })),
+    ...savedResumes.map((item) => ({
+      id: item.resumeId,
+      title: item.title,
       owner: "You",
-      lastModified: "4 days ago",
+      lastModified: ResumeDataService.formatLastModified(item.lastModified),
+      isTemplate: false,
+      resumeData: item,
     })),
   ];
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (template?: 'deedy' | 'row-based') => {
+    if (template) {
+      setSelectedTemplate(template);
+    }
     setIsModalOpen(true);
   };
 
@@ -127,15 +180,81 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
 
   const handleBackToDashboard = () => {
     setCurrentResumeData(null);
+    setSelectedTemplate('deedy');
+    // Refresh saved resumes when returning to dashboard
+    const saved = ResumeDataService.getAllSavedResumes();
+    setSavedResumes(saved);
     // Notify parent component that we're exiting resume building mode
     if (onResumeBuildingModeChange) {
       onResumeBuildingModeChange(false);
     }
   };
 
+  const handleProjectClick = (project: { 
+    id: string; 
+    title: string; 
+    owner: string; 
+    lastModified: string; 
+    isTemplate?: boolean; 
+    resumeData?: SavedResumeData;
+  }) => {
+    if (project.isTemplate) {
+      // Handle template clicks (existing functionality)
+      return;
+    }
+    
+    if (project.resumeData) {
+      // Load saved resume
+      const resumeData: ResumeData = {
+        title: project.resumeData.title,
+        resumeId: project.resumeData.resumeId,
+        userEmail: project.resumeData.userEmail,
+        userName: project.resumeData.userName,
+        documentId: project.resumeData.documentId,
+      };
+      
+      setSelectedTemplate(project.resumeData.template);
+      setCurrentResumeData(resumeData);
+      
+      if (onResumeBuildingModeChange) {
+        onResumeBuildingModeChange(true);
+      }
+    }
+  };
+
+  const handleDeleteResume = (projectId: string) => {
+    // Only allow deleting saved resumes, not templates
+    const project = stackedProjects.find(p => p.id === projectId);
+    if (project && !project.isTemplate) {
+      const success = ResumeDataService.deleteResumeData(projectId);
+      if (success) {
+        // Refresh saved resumes
+        const saved = ResumeDataService.getAllSavedResumes();
+        setSavedResumes(saved);
+      }
+    }
+  };
+
+  const handleBulkDeleteResumes = (projectIds: string[]) => {
+    // Filter out templates - only delete saved resumes
+    const resumeIdsToDelete = projectIds.filter(id => {
+      const project = stackedProjects.find(p => p.id === id);
+      return project && !project.isTemplate;
+    });
+
+    if (resumeIdsToDelete.length > 0) {
+      const deletedCount = ResumeDataService.deleteBulkResumeData(resumeIdsToDelete);
+      if (deletedCount > 0) {
+        // Refresh saved resumes
+        const saved = ResumeDataService.getAllSavedResumes();
+        setSavedResumes(saved);
+      }
+    }
+  };
+
   // If we have currentResumeData, show the ResumeBuilder instead of the regular page
   if (currentResumeData) {
-    return <ResumeBuilderWrapper resumeData={currentResumeData} onBack={handleBackToDashboard} />;
+    return <ResumeBuilderWrapper resumeData={currentResumeData} onBack={handleBackToDashboard} template={selectedTemplate} />;
   }
 
   return (
@@ -176,7 +295,12 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
             }
           }}
         />
-        <StackedProjectsTable projects={stackedProjects} />
+        <StackedProjectsTable 
+          projects={stackedProjects} 
+          onProjectClick={handleProjectClick} 
+          onDelete={handleDeleteResume}
+          onBulkDelete={handleBulkDeleteResumes}
+        />
         
         {/* Use our new AddResumeModal component */}
         <AddResumeModal 

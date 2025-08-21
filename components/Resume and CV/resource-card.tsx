@@ -9,6 +9,7 @@ interface ResourceCardProps {
   color: 'charcoal' | 'taupe' | 'slateBlue' | 'bronze';
   icon: React.ReactNode;
   onDownload?: () => void;
+  onClick?: () => void;
   className?: string;
 }
 
@@ -20,6 +21,7 @@ export const ResourceCard = ({
   color,
   icon,
   onDownload,
+  onClick,
   className = "",
 }: ResourceCardProps) => {
   const colorMap = {
@@ -29,10 +31,24 @@ export const ResourceCard = ({
     bronze: '#665C54',
   };
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
+  const handleDownloadClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when download button is clicked
+    if (onDownload) {
+      onDownload();
+    }
+  };
+
   return (
     <div
-      className={`bg-card text-card-foreground border rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-gray-400/30 hover:bg-[oklch(0.97_0.005_250)] dark:hover:shadow-blue-500/30 dark:hover:bg-[oklch(0.27_0.04_265)] ${className}`}
+      className={`bg-card text-card-foreground border rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-gray-400/30 hover:bg-[oklch(0.97_0.005_250)] dark:hover:shadow-blue-500/30 dark:hover:bg-[oklch(0.27_0.04_265)] ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={typeof window !== 'undefined' && !document.documentElement.classList.contains('dark') ? { borderColor: 'oklch(0.92 0.01 250)' } : {}}
+      onClick={handleCardClick}
     >
       <div
         className="h-32 flex items-center justify-center"
@@ -54,7 +70,7 @@ export const ResourceCard = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onDownload}
+            onClick={handleDownloadClick}
             className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary focus-visible:ring-2"
           >
             <Download className="w-4 h-4 mr-2" />
