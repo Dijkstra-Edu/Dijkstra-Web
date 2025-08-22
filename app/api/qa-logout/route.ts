@@ -6,14 +6,14 @@ const ENV = process.env.ENVIRONMENT || "DEV";
 
 export async function POST(req: Request) {
   console.log("QA logout API called");
-  console.log("Current cookies:", req.headers.get("cookie"));
+// console.log("Current cookies:", req.headers.get("cookie"));
   
   // Allow this in any environment for cleanup purposes
   try {
     const cookieOptions = {
       path: "/",
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.ENV === "QA",
       sameSite: "lax" as const,
       maxAge: 0,
       expires: new Date(0),
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       message: "QA access cleared",
       timestamp: new Date().toISOString(),
       cookieCleared: true,
-      environment: process.env.NODE_ENV
+      environment: process.env.ENV
     });
     
     // Set multiple cookie clearing headers to be sure
