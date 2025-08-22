@@ -24,16 +24,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Username and password required" }, { status: 400 });
     }
 
-    // --- TEMPORARY BYPASS ---
-    /* const TEMP_USER = process.env.TEMP_QA_USER || "tempuser";
-    const TEMP_PASS = process.env.TEMP_QA_PASS || "temppass";
-
-    if (username === TEMP_USER && password === TEMP_PASS) {
-      console.log("Temp user authenticated successfully");
-      return issueSuccessResponse("Temporary QA bypass used");
-    }
-    // --- END TEMPORARY BYPASS --- */
-
     const secretKey = process.env.SECRET_KEY;
     const ghToken = process.env.GITHUB_TOKEN;
     const teamNames = process.env.TEAM_NAMES;
@@ -74,9 +64,7 @@ export async function POST(req: Request) {
 
     if (orgRes.status === 404) {
       return NextResponse.json({ 
-        error: "Not a member of Dijkstra-Edu organization",
-        redirectToJoining: true,
-        joiningUrl: process.env.JOINING_PAGE_URL || "/join-team"
+        error: "Not a member of Dijkstra-Edu organization"
       }, { status: 403 });
     } else if (orgRes.status === 401) {
       return NextResponse.json({ error: "GitHub token invalid" }, { status: 500 });
@@ -86,7 +74,7 @@ export async function POST(req: Request) {
 
     console.log("Checking team membership for:", username, "in teams:", teamNames);
 
-    // Check membership in development teams
+    // Split team names and check membership in any of them
     const allowedTeams = teamNames.split(',').map(team => team.trim());
     let userInTeam = false;
     let memberOfTeams: string[] = [];
@@ -111,6 +99,7 @@ export async function POST(req: Request) {
         userInTeam = true;
         memberOfTeams.push(teamName);
         console.log(`User is a member of team: ${teamName}`);
+        break;
       } else if (teamRes.status === 404) {
         console.log(`User is not a member of team: ${teamName} (or team doesn't exist)`);
       } else if (teamRes.status === 401) {
@@ -122,9 +111,7 @@ export async function POST(req: Request) {
 
     if (!userInTeam) {
       return NextResponse.json({ 
-        error: `Not a member of any required development teams: ${allowedTeams.join(', ')}`,
-        redirectToJoining: true,
-        joiningUrl: process.env.JOINING_PAGE_URL || "/join-team"
+        error: `Not a member of any required development teams`
       }, { status: 403 });
     }
 
@@ -136,7 +123,7 @@ export async function POST(req: Request) {
     console.error("QA verify error:", err);
     return NextResponse.json({
       error: "Internal server error",
-      details: process.env.NODE_ENV === "development" ? String(err) : undefined
+      details: ENV === "QA" ? String(err) : undefined
     }, { status: 500 });
   }
 }
@@ -154,7 +141,7 @@ function issueSuccessResponse(note: string) {
     serialize("qa_verified", "true", {
       path: "/",
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: ENV === "QA",
       sameSite: "lax",
       maxAge: 60 * 60 * 8, // 8 hours
     })
