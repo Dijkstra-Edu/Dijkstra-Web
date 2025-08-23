@@ -38,17 +38,18 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
 
   const renderRowBasedPreview = () => {
     return (
-      <div 
-        className="bg-white origin-top-left transition-transform duration-200" 
-        style={{ 
-          fontFamily: 'Charter, Times, serif', 
-          fontSize: '10pt', 
-          lineHeight: '1.4',
-          transform: `scale(${scale})`,
-          width: `${100 / scale}%`,
-          height: `${100 / scale}%`
-        }}
-      >
+      <div className="w-full h-full overflow-hidden">
+        <div 
+          className="bg-white origin-top-left transition-transform duration-200" 
+          style={{ 
+            fontFamily: 'Charter, Times, serif', 
+            fontSize: '10pt', 
+            lineHeight: '1.4',
+            transform: `scale(${scale})`,
+            width: `${100 / scale}%`,
+            height: `${100 / scale}%`
+          }}
+        >
         <div className="p-6">
         {/* Header */}
         <div className="text-center mb-8">
@@ -252,23 +253,25 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
         </div>
         </div>
       </div>
+      </div>
     );
   };
 
   const renderDeedyPreview = () => {
 
     return (
-      <div 
-        className="bg-white origin-top-left transition-transform duration-200" 
-        style={{ 
-          fontFamily: 'Times, serif', 
-          fontSize: '10pt', 
-          lineHeight: '1.2',
-          transform: `scale(${scale})`,
-          width: `${100 / scale}%`,
-          height: `${100 / scale}%`
-        }}
-      >
+      <div className="w-full h-full overflow-hidden">
+        <div 
+          className="bg-white origin-top-left transition-transform duration-200" 
+          style={{ 
+            fontFamily: 'Times, serif', 
+            fontSize: '10pt', 
+            lineHeight: '1.2',
+            transform: `scale(${scale})`,
+            width: `${100 / scale}%`,
+            height: `${100 / scale}%`
+          }}
+        >
         <div className="p-6">
         {/* Header */}
         <div className="border-b border-gray-400 pb-4 mb-6">
@@ -404,6 +407,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
           </div>
         </div>
         </div>
+      </div>
       </div>
     );
   };
