@@ -44,7 +44,9 @@ export default function ResumeBuilder({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!resumeId); // Loading if resumeId is provided
+  const [previewScale, setPreviewScale] = useState(1); // Scale factor for preview
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const previewContainerRef = React.useRef<HTMLDivElement>(null);
   
   // Load saved data on mount if resumeId is provided
   useEffect(() => {
@@ -87,6 +89,47 @@ export default function ResumeBuilder({
 
     return () => clearTimeout(saveTimer);
   }, [resumeData, resumeId, template, resumeTitle, documentId, userEmail, userName]);
+
+  // Calculate preview scale based on container width
+  const calculatePreviewScale = useCallback(() => {
+    if (!previewContainerRef.current) return;
+    
+    // Standard resume width (8.5 inches * 96 DPI = 816px)
+    const standardResumeWidth = 816;
+    const containerWidth = previewContainerRef.current.clientWidth;
+    const padding = 48; // 24px padding on each side (p-6 = 1.5rem = 24px)
+    const availableWidth = containerWidth - padding;
+    
+    // Calculate scale to fit the resume in the available width
+    const newScale = Math.min(1, availableWidth / standardResumeWidth);
+    setPreviewScale(Math.max(0.3, newScale)); // Minimum scale of 30%
+  }, []);
+
+  // Update scale when container resizes
+  useEffect(() => {
+    calculatePreviewScale();
+    
+    const resizeObserver = new ResizeObserver(() => {
+      calculatePreviewScale();
+    });
+    
+    if (previewContainerRef.current) {
+      resizeObserver.observe(previewContainerRef.current);
+    }
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [calculatePreviewScale]);
+
+  // Recalculate scale when left panel width changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      calculatePreviewScale();
+    }, 100); // Small delay to let the DOM update
+    
+    return () => clearTimeout(timer);
+  }, [leftPanelWidth, calculatePreviewScale]);
 
   // Manual save function
   const handleManualSave = async () => {
@@ -232,10 +275,15 @@ export default function ResumeBuilder({
         <div 
           className="bg-white flex-shrink-0 overflow-hidden"
           style={{ width: `${100 - leftPanelWidth}%` }}
+          ref={previewContainerRef}
         >
           <div className="h-full overflow-y-auto">
             <div className="p-6">
-              <LatexPreview data={resumeData} template={template} />
+              <LatexPreview 
+                data={resumeData} 
+                template={template} 
+                scale={previewScale}
+              />
             </div>
           </div>
         </div>
