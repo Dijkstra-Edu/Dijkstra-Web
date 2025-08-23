@@ -16,6 +16,7 @@ interface ResumeBuilderProps {
   headerTitle?: string;
   headerSubtitle?: string;
   template?: 'deedy' | 'row-based';
+  documentType?: 'resume' | 'cv';
   resumeId?: string;
   resumeTitle?: string;
   documentId?: string;
@@ -29,9 +30,10 @@ export default function ResumeBuilder({
   className = "",
   height = "calc(100vh - 80px)",
   showHeader = true,
-  headerTitle = "LaTeX Resume Builder",
-  headerSubtitle = "Professional Deedy-Style Resume with Real-time Preview",
+  headerTitle,
+  headerSubtitle,
   template = 'deedy',
+  documentType = 'resume',
   resumeId,
   resumeTitle,
   documentId,
@@ -47,6 +49,17 @@ export default function ResumeBuilder({
   const [previewScale, setPreviewScale] = useState(1); // Scale factor for preview
   const containerRef = React.useRef<HTMLDivElement>(null);
   const previewContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Dynamic titles based on document type
+  const defaultHeaderTitle = documentType === 'cv' 
+    ? "LaTeX CV Builder" 
+    : "LaTeX Resume Builder";
+  const defaultHeaderSubtitle = documentType === 'cv'
+    ? "Professional CV with Real-time Preview"
+    : "Professional Resume with Real-time Preview";
+  
+  const displayHeaderTitle = headerTitle || defaultHeaderTitle;
+  const displayHeaderSubtitle = headerSubtitle || defaultHeaderSubtitle;
   
   // Load saved data on mount if resumeId is provided
   useEffect(() => {
@@ -202,8 +215,8 @@ export default function ResumeBuilder({
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{headerTitle}</h1>
-              <p className="text-sm text-gray-600">{headerSubtitle}</p>
+              <h1 className="text-2xl font-bold text-gray-900">{displayHeaderTitle}</h1>
+              <p className="text-sm text-gray-600">{displayHeaderSubtitle}</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-500">

@@ -28,12 +28,16 @@ interface AddResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onResumeCreated?: (resumeData: ResumeData) => void;
+  documentType?: 'resume' | 'cv';
 }
 
-export default function AddResumeModal({ isOpen, onClose, onResumeCreated }: AddResumeModalProps) {
+export default function AddResumeModal({ isOpen, onClose, onResumeCreated, documentType = 'resume' }: AddResumeModalProps) {
   const [resumeTitle, setResumeTitle] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const { data: session } = useSession();
+
+  const docTypeLabel = documentType === 'cv' ? 'CV' : 'Resume';
+  const defaultTitle = documentType === 'cv' ? 'My New CV' : 'My New Resume';
 
   const handleCreate = async () => {
     if (!resumeTitle) return;
@@ -76,12 +80,12 @@ export default function AddResumeModal({ isOpen, onClose, onResumeCreated }: Add
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Resume</DialogTitle>
+          <DialogTitle>Create New {docTypeLabel}</DialogTitle>
           <DialogDescription>
-            <p>Add a title for your new resume</p>
+            <p>Add a title for your new {docTypeLabel.toLowerCase()}</p>
             <Input 
               className="my-2" 
-              placeholder="Ex. Full Stack Resume"
+              placeholder={`Ex. ${defaultTitle}`}
               onChange={(e) => setResumeTitle(e.target.value)}
             />
           </DialogDescription>

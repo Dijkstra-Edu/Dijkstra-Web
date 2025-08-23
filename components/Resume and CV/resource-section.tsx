@@ -44,6 +44,8 @@ export const ResourceSection = ({ title, resources, onCreate, onDownload }: Reso
               onClick={
                 resource.title === "Column Resume" ? () => onCreate('deedy') :
                 resource.title === "Row Resume" ? () => onCreate('row-based') :
+                resource.title === "Column CV" ? () => onCreate('deedy') :
+                resource.title === "Row CV" ? () => onCreate('row-based') :
                 undefined
               }
               className="bg-card text-card-foreground rounded-xl shadow-md p-6 flex flex-col justify-between border border-border transition-colors duration-300" 

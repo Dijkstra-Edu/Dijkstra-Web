@@ -21,16 +21,22 @@ interface ResumeData {
 const ResumeBuilderWrapper = ({ 
   resumeData, 
   onBack, 
-  template = 'deedy' 
+  template = 'deedy',
+  documentType = 'resume'
 }: { 
   resumeData: ResumeData; 
   onBack: () => void; 
   template?: 'deedy' | 'row-based';
+  documentType?: 'resume' | 'cv';
 }) => {
-  const templateTitle = template === 'row-based' ? 'Row-based Resume Builder' : 'Column Resume Builder';
+  const isCV = documentType === 'cv';
+  const docTypeLabel = isCV ? 'CV' : 'Resume';
+  const templateTitle = template === 'row-based' ? 
+    `Row-based ${docTypeLabel} Builder` : 
+    `Column ${docTypeLabel} Builder`;
   const templateSubtitle = template === 'row-based' ? 
-    'Row-based Resume' : 
-    'Column Resume';
+    `Row-based ${docTypeLabel}` : 
+    `Column ${docTypeLabel}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -58,6 +64,7 @@ const ResumeBuilderWrapper = ({
         height="calc(100vh - 80px)"
         className=""
         template={template}
+        documentType={documentType}
         headerTitle={templateTitle}
         headerSubtitle={templateSubtitle}
         resumeId={resumeData.resumeId}
@@ -74,6 +81,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentResumeData, setCurrentResumeData] = useState<ResumeData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<'deedy' | 'row-based'>('deedy');
+  const [currentDocumentType, setCurrentDocumentType] = useState<'resume' | 'cv'>('resume');
   const [savedResumes, setSavedResumes] = useState<SavedResumeData[]>([]);
 
   // Load saved resumes on component mount
@@ -118,23 +126,25 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
   const cvsCreated = [
     {
       id: "4",
-      title: "CV template 1",
-      description: "Academic CV designed for research, publications, and scholarly achievements.",
+      title: "Column CV",
+      description: "Academic CV with column-based layout, perfect for research and scholarly achievements.",
       fileType: "PDF",
       fileSize: "4.7 MB",
       color: "slateBlue" as const,
       icon: <BarChart3 />,
       pdfUrl: "/pdfs/cv-template-1.pdf",
+      template: 'deedy' as const,
     },
     {
       id: "5",
-      title: "CV template 2",
-      description: "Video CV template to present a dynamic personal introduction and skills summary.",
-      fileType: "MP4",
-      fileSize: "22 MB",
+      title: "Row CV",
+      description: "Professional CV with row-based layout, ideal for comprehensive career presentation.",
+      fileType: "PDF",
+      fileSize: "5.2 MB",
       color: "bronze" as const,
       icon: <Video />,
       pdfUrl: "/pdfs/cv-template-2.pdf",
+      template: 'row-based' as const,
     },
   ];
 
@@ -163,11 +173,20 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
     })),
   ];
 
-  const handleOpenModal = (template?: 'deedy' | 'row-based') => {
+  const handleOpenModal = (template?: 'deedy' | 'row-based', documentType: 'resume' | 'cv' = 'resume') => {
     if (template) {
       setSelectedTemplate(template);
     }
+    setCurrentDocumentType(documentType);
     setIsModalOpen(true);
+  };
+
+  const handleOpenResumeModal = (template?: 'deedy' | 'row-based') => {
+    handleOpenModal(template, 'resume');
+  };
+
+  const handleOpenCVModal = (template?: 'deedy' | 'row-based') => {
+    handleOpenModal(template, 'cv');
   };
 
   const handleResumeCreated = (resumeData: ResumeData) => {
@@ -254,7 +273,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
 
   // If we have currentResumeData, show the ResumeBuilder instead of the regular page
   if (currentResumeData) {
-    return <ResumeBuilderWrapper resumeData={currentResumeData} onBack={handleBackToDashboard} template={selectedTemplate} />;
+    return <ResumeBuilderWrapper resumeData={currentResumeData} onBack={handleBackToDashboard} template={selectedTemplate} documentType={currentDocumentType} />;
   }
 
   return (
@@ -266,7 +285,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
         <ResourceSection
           title="Resumes Templates"
           resources={resumesCreated}
-          onCreate={handleOpenModal}
+          onCreate={handleOpenResumeModal}
           onDownload={(pdfUrl) => {
             if (pdfUrl) {
               const link = document.createElement('a');
@@ -282,7 +301,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
         <ResourceSection
           title="CV's Templates"
           resources={cvsCreated}
-          onCreate={handleOpenModal}
+          onCreate={handleOpenCVModal}
           onDownload={(pdfUrl) => {
             if (pdfUrl) {
               const link = document.createElement('a');
@@ -307,6 +326,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onResumeCreated={handleResumeCreated}
+          documentType={currentDocumentType}
         />
       </div>
     </div>
