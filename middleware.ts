@@ -1,81 +1,75 @@
-// import { withAuth } from "next-auth/middleware";
-// import { NextResponse } from "next/server";
-
-// export default withAuth(
-//   function middleware(req) {
-//     // Optional: Additional logic for authenticated users
-//     return NextResponse.next();
-//   },
-//   {
-//     callbacks: {
-//       authorized: ({ req, token }) => {
-//         const path = req.nextUrl.pathname;
-
-//         // Allow auth-related routes
-//         if (
-//           path.startsWith('/api/auth') ||
-//           path.startsWith('/_next') ||
-//           path.includes('.')
-//         ) {
-//           return true;
-//         }
-
-//         // Public routes
-//         if (path === "/login" || path.startsWith("/onboarding")) {
-//           return true;
-//         }
-
-//         // Protected routes require authentication
-//         return token != null;
-//       },
-//     },
-//     pages: {
-//       signIn: "/login", // Ensure this is your sign-in page
-//       error: "/login",
-//     },
-//   }
-// );
-
-// export const config = {
-//   matcher: [
-//     "/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:png|jpg|jpeg|gif|svg|ico)$).*)",
-//   ],
-// };
-
 // middleware.ts
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { ENV } from "./lib/constants";
 
 export default withAuth(
-  function middleware(req) {
-    //console.log("Middleware running for:", req.nextUrl.pathname);
-    
-    // You can add additional logic here if needed
-    // For now, just continue
+  async function middleware(req) {
+    const { pathname, origin} = req.nextUrl;
+   
+    // QA lockdown - block EVERYTHING except QA gate routes
+    if (ENV === "QA") {
+      const token = req.nextauth.token;
+      const bypassCookie = req.cookies.get("qa_verified")?.value;
+     
+      // ONLY allow QA gate routes and essential API routes
+      const isQAGateRoute = 
+        pathname.startsWith("/qa-gate") ||
+        pathname.startsWith("/api/qa-gate") ||
+        pathname.startsWith("/api/qa-logout") ||
+        pathname.startsWith("/api/auth"); // NextAuth API routes
+      
+      // If QA gate route, allow through
+      if (isQAGateRoute) {
+        return NextResponse.next();
+      }
+      
+      // For ALL other routes (including /login), check QA bypass first
+      if (!bypassCookie) {
+        return NextResponse.redirect(new URL("/qa-gate", origin));
+      }
+     
+      // After QA bypass is confirmed, check NextAuth requirements
+      // Allow /login page since user has passed QA gate
+      if (pathname === "/" || pathname === "/login") {
+        return NextResponse.next();
+      }
+      
+      // For all other protected routes, also require NextAuth token
+      if (!token) {
+        return NextResponse.redirect(new URL("/", origin));
+      }
+    }
+   
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        //console.log("Token in authorized:", token);
         const { pathname } = req.nextUrl;
-
-        
-        //const publicRoutes = ["/","/login"]; 
-        //const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-        
-        // Public routes that don't require authentication
-        if (pathname === '/' || pathname === "/login" || pathname.startsWith("/onboarding")){
+       
+        // For QA environment, let the main middleware handle all authorization
+        if (ENV === "QA") {
           return true;
         }
-
-        // All other routes require authentication
-        return !!(token);
+       
+        // Always allow these public routes in non-QA environments
+        if (
+          pathname === "/" ||
+          pathname === "/login" ||
+          pathname.startsWith("/onboarding") ||
+          pathname.startsWith("/api/auth")
+        ) {
+          return true;
+        }
+       
+        // For non-QA environments, require token for protected routes
+        return !!token;
       },
     },
-    pages: {
-      signIn: "/login",
-    },
+    //pages: {
+    //  signIn: "/login",
+    //},
   }
 );
 
@@ -83,12 +77,11 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api/auth (NextAuth routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public files (images, etc.)
      */
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp)$).*)",
   ],
 };
