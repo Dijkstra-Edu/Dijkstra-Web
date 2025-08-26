@@ -3,13 +3,13 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { join_page } from "@/lib/constants";
 
 export default function QAGatePage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const join = process.env.NEXT_PUBLIC_JOINING_PAGE_URL || "https://github.com/Dijkstra-Edu";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -102,7 +102,7 @@ export default function QAGatePage() {
               <p>
                 • Must be a member of Dijkstra-Edu organization.<br></br>Not a member?{" "}
                 <a 
-                  href={join} 
+                  href={join_page} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-blue-500 underline hover:text-blue-700"

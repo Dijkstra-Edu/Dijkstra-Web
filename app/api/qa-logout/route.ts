@@ -1,8 +1,7 @@
 // app/api/qa-logout/route.ts
 import { NextResponse } from "next/server";
 import { serialize } from "cookie";
-
-const ENV = process.env.ENVIRONMENT || "DEV";
+import { ENV } from "@/lib/constants";
 
 export async function POST(req: Request) {
   console.log("QA logout API called");
@@ -13,7 +12,7 @@ export async function POST(req: Request) {
     const cookieOptions = {
       path: "/",
       httpOnly: true,
-      secure: process.env.ENV === "QA",
+      secure: ENV === "QA",
       sameSite: "lax" as const,
       maxAge: 0,
       expires: new Date(0),
@@ -27,7 +26,7 @@ export async function POST(req: Request) {
       message: "QA access cleared",
       timestamp: new Date().toISOString(),
       cookieCleared: true,
-      environment: process.env.ENV
+      environment: ENV
     });
     
     // Set multiple cookie clearing headers to be sure
