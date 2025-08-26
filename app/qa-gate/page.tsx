@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { join_page } from "@/lib/constants";
+import { JOIN_PAGE } from "@/lib/constants";
 
 export default function QAGatePage() {
   const [username, setUsername] = useState("");
@@ -102,7 +102,7 @@ export default function QAGatePage() {
               <p>
                 • Must be a member of Dijkstra-Edu organization.<br></br>Not a member?{" "}
                 <a 
-                  href={join_page} 
+                  href={JOIN_PAGE} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-blue-500 underline hover:text-blue-700"
