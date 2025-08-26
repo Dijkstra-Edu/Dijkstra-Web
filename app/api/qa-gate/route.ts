@@ -2,8 +2,11 @@
 import { NextResponse } from "next/server";
 import { serialize } from "cookie";
 import crypto from "crypto";
-
-const ENV = process.env.ENVIRONMENT || "DEV";
+import { ENV } from "@/lib/constants";
+import { secretKey } from "@/lib/constants";
+import { ghToken } from "@/lib/constants";
+import { teamNames } from "@/lib/constants";
+import { org } from "@/lib/constants";
 
 export async function POST(req: Request) {
   console.log("QA Gate API called, ENV:", ENV);
@@ -24,10 +27,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Username and password required" }, { status: 400 });
     }
 
-    const secretKey = process.env.SECRET_KEY;
-    const ghToken = process.env.GITHUB_TOKEN;
-    const teamNames = process.env.TEAM_NAMES;
-
     if (!secretKey || !ghToken || !teamNames) {
       console.error("Missing required env vars:", {
         hasSecretKey: !!secretKey,
@@ -47,7 +46,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    const org = "Dijkstra-Edu";
 
     console.log("Checking GitHub org membership for:", username);
 
