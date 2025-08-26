@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 import { serialize } from "cookie";
 import crypto from "crypto";
 import { ENV } from "@/lib/constants";
-import { secretKey } from "@/lib/constants";
-import { ghToken } from "@/lib/constants";
-import { teamNames } from "@/lib/constants";
-import { org } from "@/lib/constants";
+import { SECRETKEY } from "@/lib/constants";
+import { GHTOKEN } from "@/lib/constants";
+import { TEAMNAMES } from "@/lib/constants";
+import { ORG } from "@/lib/constants";
 
 export async function POST(req: Request) {
   console.log("QA Gate API called, ENV:", ENV);
@@ -27,16 +27,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Username and password required" }, { status: 400 });
     }
 
-    if (!secretKey || !ghToken || !teamNames) {
+    if (!SECRETKEY || !GHTOKEN || !TEAMNAMES) {
       console.error("Missing required env vars:", {
-        hasSecretKey: !!secretKey,
-        hasGhToken: !!ghToken,
-        hasTeamNames: !!teamNames,
+        hasSecretKey: !!SECRETKEY,
+        hasGhToken: !!GHTOKEN,
+        hasTeamNames: !!TEAMNAMES,
       });
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
-    const expectedPassword = `${username}-${secretKey}`;
+    const expectedPassword = `${username}-${SECRETKEY}`;
     const isValid =
       password.length === expectedPassword.length &&
       crypto.timingSafeEqual(Buffer.from(password), Buffer.from(expectedPassword));
@@ -50,9 +50,9 @@ export async function POST(req: Request) {
     console.log("Checking GitHub org membership for:", username);
 
     // Check if user is in org
-    const orgRes = await fetch(`https://api.github.com/orgs/${org}/members/${username}`, {
+    const orgRes = await fetch(`https://api.github.com/orgs/${ORG}/members/${username}`, {
       headers: {
-        Authorization: `Bearer ${ghToken}`,
+        Authorization: `Bearer ${GHTOKEN}`,
         Accept: "application/vnd.github+json",
         "User-Agent": "QA-Gate-App",
       },
@@ -70,10 +70,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Organization check failed" }, { status: 403 });
     }
 
-    console.log("Checking team membership for:", username, "in teams:", teamNames);
+    console.log("Checking team membership for:", username, "in teams:", TEAMNAMES);
 
     // Split team names and check membership in any of them
-    const allowedTeams = teamNames.split(',').map(team => team.trim());
+    const allowedTeams = TEAMNAMES.split(',').map(team => team.trim());
     let userInTeam = false;
     let memberOfTeams: string[] = [];
 
@@ -81,10 +81,10 @@ export async function POST(req: Request) {
       console.log("Checking membership in team:", teamName);
       
       const teamRes = await fetch(
-        `https://api.github.com/orgs/${org}/teams/${teamName}/members/${username}`,
+        `https://api.github.com/orgs/${ORG}/teams/${teamName}/members/${username}`,
         {
           headers: {
-            Authorization: `Bearer ${ghToken}`,
+            Authorization: `Bearer ${GHTOKEN}`,
             Accept: "application/vnd.github+json",
             "User-Agent": "QA-Gate-App",
           },
