@@ -65,7 +65,7 @@ export default withAuth(
         //const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
         
         // Public routes that don't require authentication
-        if (pathname === '/' || pathname === "/login" || pathname.startsWith("/onboarding")){
+        if (pathname === '/'){ //|| pathname === "/login" || pathname.startsWith("/onboarding")){ //uncomment /login and /onbaording when prod is ready
           return true;
         }
 
@@ -74,7 +74,7 @@ export default withAuth(
       },
     },
     pages: {
-      signIn: "/login",
+      signIn: "/", //change to /login when production is ready
     },
   }
 );
