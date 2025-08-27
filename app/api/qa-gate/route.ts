@@ -46,7 +46,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-
     console.log("Checking GitHub org membership for:", username);
 
     // Check if user is in org
@@ -115,7 +114,7 @@ export async function POST(req: Request) {
 
     // All checks passed - issue cookie
     console.log("All checks passed, issuing cookie. User is member of teams:", memberOfTeams);
-    return issueSuccessResponse(`Access granted for team member of: ${memberOfTeams.join(', ')}`);
+    return issueSuccessResponse(`Access granted for team member of: ${memberOfTeams.join(', ')}`, req);
 
   } catch (err) {
     console.error("QA verify error:", err);
@@ -126,7 +125,7 @@ export async function POST(req: Request) {
   }
 }
 
-function issueSuccessResponse(note: string) {
+function issueSuccessResponse(note: string, req: Request) {
   const res = NextResponse.json({
     success: true,
     message: "Access granted",
@@ -134,16 +133,34 @@ function issueSuccessResponse(note: string) {
     timestamp: new Date().toISOString(),
   });
 
-  res.headers.set(
-    "Set-Cookie",
-    serialize("qa_verified", "true", {
-      path: "/",
-      httpOnly: true,
-      secure: ENV === "QA",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 8, // 8 hours
-    })
-  );
+  // Get the request URL 
+  const url = new URL(req.url);
+  const isSecure = url.protocol === 'https:';
+  const hostname = url.hostname;
+
+  // More robust cookie settings
+  const cookieOptions: any = {
+    path: "/",
+    httpOnly: true,
+    secure: isSecure, 
+    sameSite: "lax" as const,
+    maxAge: 60 * 60 * 8, // 8 hours
+  };
+  
+  // Set domain explicitly for production
+  if (hostname !== 'localhost') {
+    cookieOptions.domain = process.env.DOMAIN;
+  }
+
+  // Additional debug logging
+  console.log("Setting cookie with options:", {
+    ...cookieOptions,
+    url: url.origin,
+    protocol: url.protocol,
+    hostname
+  });
+
+  res.headers.set("Set-Cookie", serialize("qa_verified", "true", cookieOptions));
 
   return res;
 }
