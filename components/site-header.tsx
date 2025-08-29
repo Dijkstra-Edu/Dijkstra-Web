@@ -31,8 +31,6 @@ import {
   SheetDescription,
 } from "./ui/sheet";
 
-import { handleLogout } from "@/lib/logout";
-
 export function SiteHeader({ title }: { title: string }) {
   /*
   Things to change:
@@ -228,14 +226,14 @@ export function SiteHeader({ title }: { title: string }) {
             className="mx-2 data-[orientation=vertical]:h-4"
           />
           <Button
-            onClick={() => {handleLogout()}}
+            onClick={() => signOut({ callbackUrl: "/login" })}
             variant="default"
             asChild
             size="sm"
             className="hidden sm:flex cursor-pointer"
           >
             <span>
-              <IconLogout className="h-4 w-4"/> Sign Out
+              <IconLogout className="h-4 w-4" /> Sign Out
             </span>
           </Button>
         </div>
