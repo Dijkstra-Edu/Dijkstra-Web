@@ -12,7 +12,7 @@ export interface Experience {
 export interface Project {
   id: string;
   name: string;
-  description: string;
+  description: string[];
   location: string;
   startDate: string;
   endDate: string;

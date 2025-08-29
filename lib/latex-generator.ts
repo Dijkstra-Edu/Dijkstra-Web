@@ -1,69 +1,91 @@
 // lib/latex-generator.ts
-import { ResumeData } from '@/types/resume';
+import { ResumeData } from "@/types/resume";
 
 function escapeLatex(text: string): string {
-  if (!text) return '';
+  if (!text) return "";
   return text
-    .replace(/\\/g, '\\textbackslash{}')
-    .replace(/[{}]/g, '\\$&')
-    .replace(/\$/g, '\\$')
-    .replace(/[%#&_]/g, '\\$&')
-    .replace(/\^/g, '\\textasciicircum{}')
-    .replace(/~/g, '\\textasciitilde{}');
+    .replace(/\\/g, "\\textbackslash{}")
+    .replace(/[{}]/g, "\\$&")
+    .replace(/\$/g, "\\$")
+    .replace(/[%#&_]/g, "\\$&")
+    .replace(/\^/g, "\\textasciicircum{}")
+    .replace(/~/g, "\\textasciitilde{}");
 }
 
 export function generateRowBasedLatex(data: Partial<ResumeData>): string {
-  const personalInfo = data.personalInfo || { name: '', email: '', phone: '', website: '' };
+  const personalInfo = data.personalInfo || {
+    name: "",
+    email: "",
+    phone: "",
+    website: "",
+  };
   const experience = data.experience || [];
   const projects = data.projects || [];
   const education = data.education || [];
-  const skills = data.skills || { programming: { expert: [], intermediate: [], beginner: [] }, technology: [] };
+  const skills = data.skills || {
+    programming: { expert: [], intermediate: [], beginner: [] },
+    technology: [],
+  };
   const links = data.links || {};
-  
+
   // Extract user data with defaults
-  const name = escapeLatex(personalInfo.name || 'John Doe');
-  const email = escapeLatex(personalInfo.email || 'youremail@yourdomain.com');
-  const phone = escapeLatex(personalInfo.phone || '0541 999 99 99');
-  const website = escapeLatex(personalInfo.website || 'yourwebsite.com');
-  const github = escapeLatex(links.github || 'github.com/yourusername');
-  const linkedin = escapeLatex(links.linkedin || 'linkedin.com/in/yourusername');
+  const name = escapeLatex(personalInfo.name || "John Doe");
+  const email = escapeLatex(personalInfo.email || "youremail@yourdomain.com");
+  const phone = escapeLatex(personalInfo.phone || "0541 999 99 99");
+  const website = escapeLatex(personalInfo.website || "yourwebsite.com");
+  const github = escapeLatex(links.github || "github.com/yourusername");
+  const linkedin = escapeLatex(
+    links.linkedin || "linkedin.com/in/yourusername"
+  );
 
   // Generate education section
-  const educationSection = education.length > 0 ? education.map(edu => {
-    const graduationDate = edu.expectedGraduation || 'Sept 2020 – May 2024';
-    const institution = escapeLatex(edu.institution || 'Your University');
-    const degree = escapeLatex(edu.degree || 'BS in Computer Science');
-    const location = edu.location ? ` -- ${escapeLatex(edu.location)}` : '';
-    
-    let eduContent = `\\begin{twocolentry}{
+  const educationSection =
+    education.length > 0
+      ? education
+          .map((edu) => {
+            const graduationDate =
+              edu.expectedGraduation || "Sept 2020 – May 2024";
+            const institution = escapeLatex(
+              edu.institution || "Your University"
+            );
+            const degree = escapeLatex(edu.degree || "BS in Computer Science");
+            const location = edu.location
+              ? ` -- ${escapeLatex(edu.location)}`
+              : "";
+
+            let eduContent = `\\begin{twocolentry}{
             ${graduationDate}
         }
             \\textbf{${institution}}, ${degree}${location}\\end{twocolentry}`;
 
-    if (edu.gpa || edu.honors) {
-      eduContent += `
+            if (edu.gpa || edu.honors) {
+              eduContent += `
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}`;
-      
-      if (edu.gpa) {
-        eduContent += `
+
+              if (edu.gpa) {
+                eduContent += `
                 \\item GPA: ${escapeLatex(edu.gpa)}/4.0`;
-      }
-      
-      if (edu.honors && edu.honors.length > 0) {
-        eduContent += `
-                \\item \\textbf{Honors:} ${edu.honors.map(h => escapeLatex(h)).join(', ')}`;
-      }
-      
-      eduContent += `
+              }
+
+              if (edu.honors && edu.honors.length > 0) {
+                eduContent += `
+                \\item \\textbf{Honors:} ${edu.honors
+                  .map((h) => escapeLatex(h))
+                  .join(", ")}`;
+              }
+
+              eduContent += `
             \\end{highlights}
         \\end{onecolentry}`;
-    }
+            }
 
-    return eduContent;
-  }).join('\n\n        \\vspace{0.2 cm}\n\n        ') : `\\begin{twocolentry}{
+            return eduContent;
+          })
+          .join("\n\n        \\vspace{0.2 cm}\n\n        ")
+      : `\\begin{twocolentry}{
             Sept 2020 – May 2024
         }
             \\textbf{Your University}, BS in Computer Science\\end{twocolentry}
@@ -77,36 +99,45 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
         \\end{onecolentry}`;
 
   // Generate experience section
-  const experienceSection = experience.length > 0 ? experience.map(exp => {
-    const dateRange = `${exp.startDate || 'June 2022'} – ${exp.endDate || 'Aug 2024'}`;
-    const company = escapeLatex(exp.company || 'Company Name');
-    const position = escapeLatex(exp.position || 'Software Engineer');
-    const location = exp.location ? ` -- ${escapeLatex(exp.location)}` : '';
-    
-    let expContent = `\\begin{twocolentry}{
+  const experienceSection =
+    experience.length > 0
+      ? experience
+          .map((exp) => {
+            const dateRange = `${exp.startDate || "June 2022"} – ${
+              exp.endDate || "Aug 2024"
+            }`;
+            const company = escapeLatex(exp.company || "Company Name");
+            const position = escapeLatex(exp.position || "Software Engineer");
+            const location = exp.location
+              ? ` -- ${escapeLatex(exp.location)}`
+              : "";
+
+            let expContent = `\\begin{twocolentry}{
             ${dateRange}
         }
             \\textbf{${position}}, ${company}${location}\\end{twocolentry}`;
 
-    if (exp.description && exp.description.length > 0) {
-      expContent += `
+            if (exp.description && exp.description.length > 0) {
+              expContent += `
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}`;
-      
-      exp.description.forEach(desc => {
-        expContent += `
+
+              exp.description.forEach((desc) => {
+                expContent += `
                 \\item ${escapeLatex(desc)}`;
-      });
-      
-      expContent += `
+              });
+
+              expContent += `
             \\end{highlights}
         \\end{onecolentry}`;
-    }
+            }
 
-    return expContent;
-  }).join('\n\n        \\vspace{0.2 cm}\n\n        ') : `\\begin{twocolentry}{
+            return expContent;
+          })
+          .join("\n\n        \\vspace{0.2 cm}\n\n        ")
+      : `\\begin{twocolentry}{
             June 2022 – Aug 2024
         }
             \\textbf{Software Engineer}, Tech Company -- City, State\\end{twocolentry}
@@ -121,34 +152,39 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
         \\end{onecolentry}`;
 
   // Generate projects section
-  const projectsSection = projects.length > 0 ? projects.map(project => {
-    const projectName = escapeLatex(project.name || 'Project Name');
-    const link = project.link || 'github.com/username/repo';
-    
-    let projContent = `\\begin{twocolentry}{
+  const projectsSection =
+    projects.length > 0
+      ? projects
+          .map((project) => {
+            const projectName = escapeLatex(project.name || "Project Name");
+            const link = project.link || "github.com/username/repo";
+
+            let projContent = `\\begin{twocolentry}{
             \\href{${link}}{${link}}
         }
             \\textbf{${projectName}}\\end{twocolentry}`;
 
-    if (project.details && project.details.length > 0) {
-      projContent += `
+            if (project.details && project.details.length > 0) {
+              projContent += `
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}`;
-      
-      project.details.forEach(detail => {
-        projContent += `
+
+              project.details.forEach((detail) => {
+                projContent += `
                 \\item ${escapeLatex(detail)}`;
-      });
-      
-      projContent += `
+              });
+
+              projContent += `
             \\end{highlights}
         \\end{onecolentry}`;
-    }
+            }
 
-    return projContent;
-  }).join('\n\n        \\vspace{0.2 cm}\n\n        ') : `\\begin{twocolentry}{
+            return projContent;
+          })
+          .join("\n\n        \\vspace{0.2 cm}\n\n        ")
+      : `\\begin{twocolentry}{
             \\href{https://github.com/username/project}{github.com/username/project}
         }
             \\textbf{Web Application}\\end{twocolentry}
@@ -162,25 +198,35 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
         \\end{onecolentry}`;
 
   // Generate technologies section
-  let technologiesSection = '';
+  let technologiesSection = "";
   if (skills.programming || skills.technology) {
-    if (skills.programming && (skills.programming.expert?.length || skills.programming.intermediate?.length || skills.programming.beginner?.length)) {
+    if (
+      skills.programming &&
+      (skills.programming.expert?.length ||
+        skills.programming.intermediate?.length ||
+        skills.programming.beginner?.length)
+    ) {
       const allLanguages = [
         ...(skills.programming.expert || []),
         ...(skills.programming.intermediate || []),
-        ...(skills.programming.beginner || [])
+        ...(skills.programming.beginner || []),
       ];
       if (allLanguages.length > 0) {
         technologiesSection += `\\begin{onecolentry}
-            \\textbf{Languages:} ${allLanguages.map(lang => escapeLatex(lang)).join(', ')}
+            \\textbf{Languages:} ${allLanguages
+              .map((lang) => escapeLatex(lang))
+              .join(", ")}
         \\end{onecolentry}`;
       }
     }
-    
+
     if (skills.technology && skills.technology.length > 0) {
-      if (technologiesSection) technologiesSection += '\n\n        \\vspace{0.2 cm}\n\n        ';
+      if (technologiesSection)
+        technologiesSection += "\n\n        \\vspace{0.2 cm}\n\n        ";
       technologiesSection += `\\begin{onecolentry}
-            \\textbf{Technologies:} ${skills.technology.map(tech => escapeLatex(tech)).join(', ')}
+            \\textbf{Technologies:} ${skills.technology
+              .map((tech) => escapeLatex(tech))
+              .join(", ")}
         \\end{onecolentry}`;
     }
   }
@@ -366,7 +412,10 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
         \\kern 5.0 pt%
         \\AND%
         \\kern 5.0 pt%
-        \\mbox{\\hrefWithoutArrow{tel:${phone.replace(/[^\d]/g, '')}}{${phone}}}%
+        \\mbox{\\hrefWithoutArrow{tel:${phone.replace(
+          /[^\d]/g,
+          ""
+        )}}{${phone}}}%
         \\kern 5.0 pt%
         \\AND%
         \\kern 5.0 pt%
@@ -408,27 +457,38 @@ export function generateDeedyLatex(data: Partial<ResumeData>): string {
   const projects = data.projects || [];
   const education = data.education || [];
   const skills = data.skills || {};
-  
+
   // Extract user data with defaults
-  const name = escapeLatex((personalInfo as any).name || 'John Doe');
-  const email = escapeLatex((personalInfo as any).email || 'john.doe@example.com');
-  const phone = escapeLatex((personalInfo as any).phone || '111.111.1111');
-  const phoneRaw = (personalInfo as any).phone?.replace(/[^\d]/g, '') || '11111111111';
+  const name = escapeLatex((personalInfo as any).name || "John Doe");
+  const email = escapeLatex(
+    (personalInfo as any).email || "john.doe@example.com"
+  );
+  const phone = escapeLatex((personalInfo as any).phone || "111.111.1111");
+  const phoneRaw =
+    (personalInfo as any).phone?.replace(/[^\d]/g, "") || "11111111111";
 
   // Generate experience section
-  const experienceSection = experience.length > 0 ? experience.map(exp => {
-    const responsibilities = exp.description || 
-      ['Developed a cloud-based solution to automate and enhance the engineering process for network installation using AWS and Python.'];
-    
-    return `\\runsubsection{${escapeLatex(exp.company || 'Company A')}}
-\\descript{| ${escapeLatex(exp.position || 'Advanced Development Intern')} }
-\\location{${escapeLatex(exp.startDate || 'May 2018')} – ${escapeLatex(exp.endDate || 'Aug 2018')} | ${escapeLatex(exp.location || 'Somewhere, XX')}}
+  const experienceSection =
+    experience.length > 0
+      ? experience
+          .map((exp) => {
+            const responsibilities = exp.description || [
+              "Developed a cloud-based solution to automate and enhance the engineering process for network installation using AWS and Python.",
+            ];
+
+            return `\\runsubsection{${escapeLatex(exp.company || "Company A")}}
+\\descript{| ${escapeLatex(exp.position || "Advanced Development Intern")} }
+\\location{${escapeLatex(exp.startDate || "May 2018")} – ${escapeLatex(
+              exp.endDate || "Aug 2018"
+            )} | ${escapeLatex(exp.location || "Somewhere, XX")}}
 \\vspace{\\topsep} % Hacky fix for awkward extra vertical space
 \\begin{tightemize}
-${responsibilities.map(resp => `\\item ${escapeLatex(resp)}`).join('\n')}
+${responsibilities.map((resp) => `\\item ${escapeLatex(resp)}`).join("\n")}
 \\end{tightemize}
 \\sectionsep`;
-  }).join('\n\n') : `\\runsubsection{Company A}
+          })
+          .join("\n\n")
+      : `\\runsubsection{Company A}
 \\descript{| Advanced Development Intern }
 \\location{May 2018 – Aug 2018 | Somewhere, XX}
 \\vspace{\\topsep} % Hacky fix for awkward extra vertical space
@@ -463,18 +523,36 @@ ${responsibilities.map(resp => `\\item ${escapeLatex(resp)}`).join('\n')}
 \\sectionsep`;
 
   // Generate projects section
-  const projectsSection = projects.length > 0 ? projects.map(project => {
-    const descriptions = project.details || 
-      ['Spearhead the development effort for the path-planning functionality of a team of three robots.'];
-    
-    return `\\runsubsection{${escapeLatex(project.name || 'Space Robotics Team')}}
-\\descript{| ${escapeLatex(project.description || 'Path-Planning Lead')}}
-\\location{${escapeLatex(project.startDate || 'Jan 2018')} – ${escapeLatex(project.endDate || 'Present')} | ${escapeLatex(project.location || 'Somewhere, XX')}}
+  // Generate projects section
+  const projectsSection =
+    projects.length > 0
+      ? projects
+          .map((project) => {
+            const descriptions =
+              project.details && project.details.length > 0
+                ? project.details
+                : [
+                    "Spearhead the development effort for the path-planning functionality of a team of three robots.",
+                  ];
+
+            return `\\runsubsection{${escapeLatex(
+              project.name || "Space Robotics Team"
+            )}}
+\\descript{| ${escapeLatex(
+              Array.isArray(project.description)
+                ? project.description.join(" ")
+                : project.description || "Path-Planning Lead"
+            )}}
+\\location{${escapeLatex(project.startDate || "Jan 2018")} – ${escapeLatex(
+              project.endDate || "Present"
+            )} | ${escapeLatex(project.location || "Somewhere, XX")}}
 \\begin{tightemize}
-${descriptions.map(desc => `\\item ${escapeLatex(desc)}`).join('\n')}
+${descriptions.map((desc) => `\\item ${escapeLatex(desc)}`).join("\n")}
 \\end{tightemize}
 \\sectionsep`;
-  }).join('\n\n') : `\\runsubsection{Space Robotics Team}
+          })
+          .join("\n\n")
+      : `\\runsubsection{Space Robotics Team}
 \\descript{| Path-Planning Lead}
 \\location{Jan 2018 – Present | Somewhere, XX}
 \\begin{tightemize}
@@ -493,15 +571,27 @@ ${descriptions.map(desc => `\\item ${escapeLatex(desc)}`).join('\n')}
 \\sectionsep`;
 
   // Generate education section
-  const educationSection = education.length > 0 ? education.map(edu => {
-    return `\\subsection{${escapeLatex(edu.institution || 'My University')}}
-\\descript{${escapeLatex(edu.degree || 'Bachelor of Science in Computer Science with minors in Mathematics and Statistics')}}
-\\location{${escapeLatex(edu.expectedGraduation || 'Expected Dec 2019')} | ${escapeLatex(edu.location || 'Somewhere, XX')}}
+  const educationSection =
+    education.length > 0
+      ? education
+          .map((edu) => {
+            return `\\subsection{${escapeLatex(
+              edu.institution || "My University"
+            )}}
+\\descript{${escapeLatex(
+              edu.degree ||
+                "Bachelor of Science in Computer Science with minors in Mathematics and Statistics"
+            )}}
+\\location{${escapeLatex(
+              edu.expectedGraduation || "Expected Dec 2019"
+            )} | ${escapeLatex(edu.location || "Somewhere, XX")}}
 % College of Engineering \\\\
 Dean's List (All Semesters) \\\\
-\\location{ Cum. GPA: ${escapeLatex(edu.gpa || '4.0')} / 4.0}
+\\location{ Cum. GPA: ${escapeLatex(edu.gpa || "4.0")} / 4.0}
 \\sectionsep`;
-  }).join('\n\n') : `\\subsection{My University}
+          })
+          .join("\n\n")
+      : `\\subsection{My University}
 \\descript{Bachelor of Science in Computer Science with minors in Mathematics and Statistics}
 \\location{Expected Dec 2019 | Somewhere, XX}
 % College of Engineering \\\\
@@ -510,26 +600,38 @@ Dean's List (All Semesters) \\\\
 \\sectionsep`;
 
   // Generate skills section
-  const skillsSection = skills && Object.keys(skills).length > 0 ? 
-    Object.entries(skills).map(([category, items]) => {
-      if (category === 'programming' && typeof items === 'object') {
-        const prog = items as any;
-        let progSection = '';
-        if (prog.expert?.length > 0) {
-          progSection += `\\location{3+ years:}\n${prog.expert.join(' \\textbullet{} ')} \\\\\n`;
-        }
-        if (prog.intermediate?.length > 0) {
-          progSection += `\\location{1+ years:}\n${prog.intermediate.join(' \\textbullet{} ')} \\\\\n`;
-        }
-        if (prog.beginner?.length > 0) {
-          progSection += `\\location{0+ years:}\n${prog.beginner.join(' \\textbullet{} ')} \\\\\n`;
-        }
-        return `\\subsection{Programming}\n${progSection}\\sectionsep`;
-      } else if (category === 'technology' && Array.isArray(items)) {
-        return `\\subsection{Technology}\n${items.join(' \\textbullet{} ')} \\\\\n\\sectionsep`;
-      }
-      return '';
-    }).join('\n\n') : `\\subsection{Programming}
+  const skillsSection =
+    skills && Object.keys(skills).length > 0
+      ? Object.entries(skills)
+          .map(([category, items]) => {
+            if (category === "programming" && typeof items === "object") {
+              const prog = items as any;
+              let progSection = "";
+              if (prog.expert?.length > 0) {
+                progSection += `\\location{3+ years:}\n${prog.expert.join(
+                  " \\textbullet{} "
+                )} \\\\\n`;
+              }
+              if (prog.intermediate?.length > 0) {
+                progSection += `\\location{1+ years:}\n${prog.intermediate.join(
+                  " \\textbullet{} "
+                )} \\\\\n`;
+              }
+              if (prog.beginner?.length > 0) {
+                progSection += `\\location{0+ years:}\n${prog.beginner.join(
+                  " \\textbullet{} "
+                )} \\\\\n`;
+              }
+              return `\\subsection{Programming}\n${progSection}\\sectionsep`;
+            } else if (category === "technology" && Array.isArray(items)) {
+              return `\\subsection{Technology}\n${items.join(
+                " \\textbullet{} "
+              )} \\\\\n\\sectionsep`;
+            }
+            return "";
+          })
+          .join("\n\n")
+      : `\\subsection{Programming}
 \\location{3+ years:}
 Python \\textbullet{} C/C++ \\\\
 \\location{1+ years:}

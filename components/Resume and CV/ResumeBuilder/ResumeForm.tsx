@@ -34,7 +34,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       {
         id: Date.now().toString(),
         name: "",
-        description: "",
+        description: [],
         location: "",
         startDate: "",
         endDate: "",
@@ -159,7 +159,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         {
           id: Date.now().toString(),
           name: "",
-          description: "",
+          description: [],
           location: "",
           startDate: "",
           endDate: "",
@@ -526,9 +526,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                         updateProject(
                           index,
                           "details",
-                          e.target.value
-                            .split("\n")
-                            .filter((line) => line.trim())
+                          e.target.value.split("\n") 
                         )
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -536,6 +534,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                       placeholder="Built responsive web application&#10;Integrated third-party APIs&#10;Deployed using Docker"
                     />
                   </div>
+
                 </div>
               </div>
             ))}
