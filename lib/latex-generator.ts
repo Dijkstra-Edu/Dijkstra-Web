@@ -18,6 +18,7 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
     email: "",
     phone: "",
     website: "",
+    location: "",
   };
   const experience = data.experience || [];
   const projects = data.projects || [];
@@ -33,6 +34,7 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
   const email = escapeLatex(personalInfo.email || "youremail@yourdomain.com");
   const phone = escapeLatex(personalInfo.phone || "0541 999 99 99");
   const website = escapeLatex(personalInfo.website || "yourwebsite.com");
+  const location = escapeLatex(personalInfo.location || "Your Location");
   const github = escapeLatex(links.github || "github.com/yourusername");
   const linkedin = escapeLatex(
     links.linkedin || "linkedin.com/in/yourusername"
@@ -44,21 +46,18 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
       ? education
           .map((edu) => {
             const graduationDate =
-              edu.expectedGraduation || "Sept 2020 – May 2024";
+              edu.expectedGraduation || "Sept 2000 – May 2005";
             const institution = escapeLatex(
-              edu.institution || "Your University"
+              edu.institution || "University of Pennsylvania"
             );
             const degree = escapeLatex(edu.degree || "BS in Computer Science");
-            const location = edu.location
-              ? ` -- ${escapeLatex(edu.location)}`
-              : "";
 
             let eduContent = `\\begin{twocolentry}{
             ${graduationDate}
         }
-            \\textbf{${institution}}, ${degree}${location}\\end{twocolentry}`;
+            \\textbf{${institution}}, ${degree}\\end{twocolentry}`;
 
-            if (edu.gpa || edu.honors) {
+            if (edu.gpa || edu.honors || edu.coursework) {
               eduContent += `
 
         \\vspace{0.10 cm}
@@ -67,7 +66,18 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
 
               if (edu.gpa) {
                 eduContent += `
-                \\item GPA: ${escapeLatex(edu.gpa)}/4.0`;
+                \\item GPA: ${escapeLatex(edu.gpa)}/4.0${
+                  edu.link
+                    ? ` (\\href{${edu.link}}{${escapeLatex(
+                        edu.linkText || "transcript"
+                      )}})`
+                    : ""
+                }`;
+              }
+
+              if (edu.coursework) {
+                eduContent += `
+                \\item \\textbf{Coursework:} ${escapeLatex(edu.coursework)}`;
               }
 
               if (edu.honors && edu.honors.length > 0) {
@@ -86,15 +96,15 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
           })
           .join("\n\n        \\vspace{0.2 cm}\n\n        ")
       : `\\begin{twocolentry}{
-            Sept 2020 – May 2024
+            Sept 2000 – May 2005
         }
-            \\textbf{Your University}, BS in Computer Science\\end{twocolentry}
+            \\textbf{University of Pennsylvania}, BS in Computer Science\\end{twocolentry}
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}
-                \\item GPA: 3.9/4.0
-                \\item \\textbf{Coursework:} Data Structures, Algorithms, Computer Architecture
+                \\item GPA: 3.9/4.0 (\\href{https://example.com}{a link to somewhere})
+                \\item \\textbf{Coursework:} Computer Architecture, Comparison of Learning Algorithms, Computational Theory
             \\end{highlights}
         \\end{onecolentry}`;
 
@@ -103,14 +113,14 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
     experience.length > 0
       ? experience
           .map((exp) => {
-            const dateRange = `${exp.startDate || "June 2022"} – ${
-              exp.endDate || "Aug 2024"
+            const dateRange = `${exp.startDate || "June 2005"} – ${
+              exp.endDate || "Aug 2007"
             }`;
-            const company = escapeLatex(exp.company || "Company Name");
+            const company = escapeLatex(exp.company || "Apple");
             const position = escapeLatex(exp.position || "Software Engineer");
             const location = exp.location
               ? ` -- ${escapeLatex(exp.location)}`
-              : "";
+              : " -- Cupertino, CA";
 
             let expContent = `\\begin{twocolentry}{
             ${dateRange}
@@ -138,43 +148,84 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
           })
           .join("\n\n        \\vspace{0.2 cm}\n\n        ")
       : `\\begin{twocolentry}{
-            June 2022 – Aug 2024
+            June 2005 – Aug 2007
         }
-            \\textbf{Software Engineer}, Tech Company -- City, State\\end{twocolentry}
+            \\textbf{Software Engineer}, Apple -- Cupertino, CA\\end{twocolentry}
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}
-                \\item Developed and maintained web applications using modern technologies
-                \\item Collaborated with cross-functional teams to deliver high-quality software
-                \\item Implemented efficient algorithms and data structures
+                \\item Reduced time to render user buddy lists by 75\\% by implementing a prediction algorithm
+                \\item Integrated iChat with Spotlight Search by creating a tool to extract metadata from saved chat transcripts and provide metadata to a system-wide search database
+                \\item Redesigned chat file format and implemented backward compatibility for search
+            \\end{highlights}
+        \\end{onecolentry}
+
+
+        \\vspace{0.2 cm}
+
+        \\begin{twocolentry}{
+            June 2003 – Aug 2003
+        }
+            \\textbf{Software Engineer Intern}, Microsoft -- Redmond, WA\\end{twocolentry}
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}
+                \\item Designed a UI for the VS open file switcher (Ctrl-Tab) and extended it to tool windows
+                \\item Created a service to provide gradient across VS and VS add-ins, optimizing its performance via caching
+                \\item Built an app to compute the similarity of all methods in a codebase, reducing the time from \\$\\mathcal{O}(n^2)\\$ to \\$\\mathcal{O}(n \\log n)\\$
+                \\item Created a test case generation tool that creates random XML docs from XML Schema
+                \\item Automated the extraction and processing of large datasets from legacy systems using SQL and Perl scripts
             \\end{highlights}
         \\end{onecolentry}`;
 
-  // Generate projects section
+  // Generate projects section - FIXED TO BE DYNAMIC
   const projectsSection =
     projects.length > 0
       ? projects
           .map((project) => {
-            const projectName = escapeLatex(project.name || "Project Name");
-            const link = project.link || "github.com/username/repo";
+            const projectName = escapeLatex(project.name || "Unnamed Project");
+            const link = project.link || "github.com/name/repo";
+
+            // Use date range if both dates exist, otherwise use the link
+            const dateOrLink =
+              project.startDate && project.endDate
+                ? `${project.startDate} – ${project.endDate}`
+                : `\\href{${link}}{${link}}`;
 
             let projContent = `\\begin{twocolentry}{
-            \\href{${link}}{${link}}
+            ${dateOrLink}
         }
             \\textbf{${projectName}}\\end{twocolentry}`;
 
-            if (project.details && project.details.length > 0) {
+            // Check if there are any details to display
+            const hasDetails =
+              (project.details && project.details.length > 0) ||
+              (project.description && project.description.length > 0);
+
+            if (hasDetails) {
               projContent += `
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}`;
 
-              project.details.forEach((detail) => {
-                projContent += `
+              // Add description items if they exist
+              if (project.description && project.description.length > 0) {
+                project.description.forEach((desc) => {
+                  projContent += `
+                \\item ${escapeLatex(desc)}`;
+                });
+              }
+
+              // Add details items if they exist
+              if (project.details && project.details.length > 0) {
+                project.details.forEach((detail) => {
+                  projContent += `
                 \\item ${escapeLatex(detail)}`;
-              });
+                });
+              }
 
               projContent += `
             \\end{highlights}
@@ -185,15 +236,47 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
           })
           .join("\n\n        \\vspace{0.2 cm}\n\n        ")
       : `\\begin{twocolentry}{
-            \\href{https://github.com/username/project}{github.com/username/project}
+            \\href{https://github.com/sinaatalay/rendercv}{github.com/name/repo}
         }
-            \\textbf{Web Application}\\end{twocolentry}
+            \\textbf{Multi-User Drawing Tool}\\end{twocolentry}
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}
-                \\item Built a full-stack web application using React and Node.js
-                \\item Implemented user authentication and data persistence
+                \\item Developed an electronic classroom where multiple users can simultaneously view and draw on a "chalkboard" with each person's edits synchronized
+                \\item Tools Used: C++, MFC
+            \\end{highlights}
+        \\end{onecolentry}
+
+
+        \\vspace{0.2 cm}
+
+        \\begin{twocolentry}{
+            \\href{https://github.com/sinaatalay/rendercv}{github.com/name/repo}
+        }
+            \\textbf{Synchronized Desktop Calendar}\\end{twocolentry}
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}
+                \\item Developed a desktop calendar with globally shared and synchronized calendars, allowing users to schedule meetings with other users
+                \\item Tools Used: C\\#, .NET, SQL, XML
+            \\end{highlights}
+        \\end{onecolentry}
+
+
+        \\vspace{0.2 cm}
+
+        \\begin{twocolentry}{
+            2002
+        }
+            \\textbf{Custom Operating System}\\end{twocolentry}
+
+        \\vspace{0.10 cm}
+        \\begin{onecolentry}
+            \\begin{highlights}
+                \\item Built a UNIX-style OS with a scheduler, file system, text editor, and calculator
+                \\item Tools Used: C
             \\end{highlights}
         \\end{onecolentry}`;
 
@@ -233,13 +316,13 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
 
   if (!technologiesSection) {
     technologiesSection = `\\begin{onecolentry}
-            \\textbf{Languages:} Python, JavaScript, Java, C++, SQL
+            \\textbf{Languages:} C++, C, Java, Objective-C, C\\#, SQL, JavaScript
         \\end{onecolentry}
 
         \\vspace{0.2 cm}
 
         \\begin{onecolentry}
-            \\textbf{Technologies:} React, Node.js, MongoDB, AWS, Docker
+            \\textbf{Technologies:} .NET, Microsoft SQL Server, XCode, Interface Builder
         \\end{onecolentry}`;
   }
 
@@ -327,6 +410,7 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
     \\end{itemize}
 } % new environment for highlights
 
+
 \\newenvironment{highlightsforbulletentries}{
     \\begin{itemize}[
         topsep=0.10 cm,
@@ -394,6 +478,7 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
 
 % new command for external links:
 
+
 \\begin{document}
     \\newcommand{\\AND}{\\unskip
         \\cleaders\\copy\\ANDbox\\hskip\\wd\\ANDbox
@@ -408,14 +493,15 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
         \\vspace{5 pt}
 
         \\normalsize
+        \\mbox{${location}}%
+        \\kern 5.0 pt%
+        \\AND%
+        \\kern 5.0 pt%
         \\mbox{\\hrefWithoutArrow{mailto:${email}}{${email}}}%
         \\kern 5.0 pt%
         \\AND%
         \\kern 5.0 pt%
-        \\mbox{\\hrefWithoutArrow{tel:${phone.replace(
-          /[^\d]/g,
-          ""
-        )}}{${phone}}}%
+        \\mbox{\\hrefWithoutArrow{tel:+90-541-999-99-99}{${phone}}}%
         \\kern 5.0 pt%
         \\AND%
         \\kern 5.0 pt%
@@ -522,7 +608,6 @@ ${responsibilities.map((resp) => `\\item ${escapeLatex(resp)}`).join("\n")}
 \\end{tightemize}
 \\sectionsep`;
 
-  // Generate projects section
   // Generate projects section
   const projectsSection =
     projects.length > 0
@@ -865,10 +950,11 @@ Introduction to Probability \\\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \\section{Societies}
-Association for Computing Machinery (ACM)\\\\
-Scrum Alliance Certified ScrumMaster\\\\
-University Honors College\\\\
-National Merit Scholarship Finalist \\\\
+${
+  Array.isArray(data.societies) && data.societies.length > 0
+    ? data.societies.map((s) => escapeLatex(s) + "\\").join("\n")
+    : "None listed \\"
+}
 \\sectionsep
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -876,8 +962,24 @@ National Merit Scholarship Finalist \\\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \\section{Links}
-Github:// \\href{https://github.com/}{\\bf JohnDoe} \\\\
-LinkedIn://  \\href{https://www.linkedin.com/}{\\bf johndoe}
+${
+  data.links && Object.keys(data.links).length > 0
+    ? Object.entries(data.links)
+        .map(([key, value]) => {
+          let url = "";
+          if (key === "github") url = `https://github.com/${value}`;
+          else if (key === "linkedin")
+            url = `https://www.linkedin.com/in/${value}`;
+          else if (key === "website")
+            url = value.startsWith("http") ? value : `https://${value}`;
+          else url = value;
+          return `${escapeLatex(
+            key.charAt(0).toUpperCase() + key.slice(1)
+          )}:// \\href{${url}}{\\bf ${escapeLatex(value)}} \\`;
+        })
+        .join("\n")
+    : "None listed \\"
+}
 \\sectionsep
 
 \\end{minipage}

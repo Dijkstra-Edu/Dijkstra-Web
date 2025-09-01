@@ -188,9 +188,9 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                       {project.link || 'github.com/username/repo'}
                     </div>
                   </div>
-                  {project.details && project.details.length > 0 && (
+                  {project.description && project.description.length > 0 && (
                     <ul className="text-sm text-gray-700 ml-4">
-                      {project.details.map((detail, i) => (
+                      {project.description.map((detail, i) => (
                         <li key={i}>• {detail}</li>
                       ))}
                     </ul>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { mockResumeData } from "@/data/mockResumeData";
 import { ResumeData } from "@/types/resume";
 
 interface ResumeFormProps {
@@ -14,62 +15,19 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
 }) => {
   const [data, setData] = useState<Partial<ResumeData>>({
     personalInfo: {
-      name: "",
-      email: "",
-      phone: "",
+      name: mockResumeData.personalInfo.name,
+      email: mockResumeData.personalInfo.email,
+      phone: mockResumeData.personalInfo.phone,
+      website: mockResumeData.personalInfo.website,
       ...initialData.personalInfo,
     },
-    experience: initialData.experience || [
-      {
-        id: Date.now().toString(),
-        company: "",
-        position: "",
-        startDate: "",
-        endDate: "",
-        location: "",
-        description: [],
-      },
-    ],
-    projects: initialData.projects || [
-      {
-        id: Date.now().toString(),
-        name: "",
-        description: [],
-        location: "",
-        startDate: "",
-        endDate: "",
-        details: [],
-      },
-    ],
-    education: initialData.education || [
-      {
-        id: Date.now().toString(),
-        institution: "",
-        degree: "",
-        location: "",
-        expectedGraduation: "",
-        gpa: "",
-      },
-    ],
-    skills: {
-      programming: {
-        expert: [],
-        intermediate: [],
-        beginner: [],
-      },
-      technology: [],
-      ...initialData.skills,
-    },
-    coursework: {
-      graduate: [],
-      undergraduate: [],
-    },
-    societies: [],
-    links: {
-      github: "",
-      linkedin: "",
-      ...initialData.links,
-    },
+  experience: initialData.experience || mockResumeData.experience,
+  projects: initialData.projects || mockResumeData.projects,
+  education: initialData.education || mockResumeData.education,
+  skills: initialData.skills || mockResumeData.skills,
+  coursework: initialData.coursework || mockResumeData.coursework,
+  societies: initialData.societies || mockResumeData.societies,
+  links: initialData.links || mockResumeData.links,
   });
 
   useEffect(() => {
