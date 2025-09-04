@@ -261,13 +261,20 @@ export function Certifications() {
               ) : (
                 <>
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <h4 className="font-semibold text-lg">{cert.name}</h4>
-                      <p className="text-primary font-medium">{cert.issuer}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>Issued: {formatDate(cert.issueDate)}</span>
-                        <span>Expires: {formatDate(cert.expiryDate)}</span>
-                        {isExpiringSoon(cert.expiryDate) && <Badge variant="destructive">Expiring Soon</Badge>}
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={`/abstract-geometric-shapes.png`}
+                        alt={`${cert.issuer} logo`}
+                        className="w-16 h-16 rounded-lg object-cover border"
+                      />
+                      <div className="space-y-1">
+                        <h4 className="font-semibold text-lg">{cert.name}</h4>
+                        <p className="text-primary font-medium">{cert.issuer}</p>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>Issued: {formatDate(cert.issueDate)}</span>
+                          <span>Expires: {formatDate(cert.expiryDate)}</span>
+                          {isExpiringSoon(cert.expiryDate) && <Badge variant="destructive">Expiring Soon</Badge>}
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2">

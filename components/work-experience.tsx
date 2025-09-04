@@ -315,17 +315,24 @@ export function WorkExperience() {
               ) : (
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-semibold text-lg">{exp.position}</h4>
-                      <p className="text-primary font-medium">{exp.company}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(exp.startDate)} - {exp.current ? "Present" : formatDate(exp.endDate)}
-                        {exp.current && (
-                          <Badge variant="secondary" className="ml-2">
-                            Current
-                          </Badge>
-                        )}
-                      </p>
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${exp.company} company logo`)}`}
+                        alt={`${exp.company} logo`}
+                        className="w-16 h-16 rounded-lg object-cover border"
+                      />
+                      <div>
+                        <h4 className="font-semibold text-lg">{exp.position}</h4>
+                        <p className="text-primary font-medium">{exp.company}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(exp.startDate)} - {exp.current ? "Present" : formatDate(exp.endDate)}
+                          {exp.current && (
+                            <Badge variant="secondary" className="ml-2">
+                              Current
+                            </Badge>
+                          )}
+                        </p>
+                      </div>
                     </div>
                     {isEditing && (
                       <div className="flex gap-2">

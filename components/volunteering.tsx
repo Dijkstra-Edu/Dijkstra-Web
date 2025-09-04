@@ -271,15 +271,22 @@ export function Volunteering() {
 
                   {/* Existing code */}
                   <div className="space-y-3">
-                    <div>
-                      <h4 className="font-semibold text-lg">{vol.role}</h4>
-                      <p className="text-primary font-medium">{vol.organization}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                        <span>
-                          {formatDate(vol.startDate)} - {vol.current ? "Present" : formatDate(vol.endDate)}
-                        </span>
-                        <span>{vol.hoursContributed} hours</span>
-                        {vol.current && <Badge variant="secondary">Ongoing</Badge>}
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={`/abstract-geometric-shapes.png?key=flpqa&height=48&width=48&query=${encodeURIComponent(`${vol.organization} organization logo`)}`}
+                        alt={`${vol.organization} logo`}
+                        className="w-16 h-16 rounded-lg object-cover border"
+                      />
+                      <div>
+                        <h4 className="font-semibold text-lg">{vol.role}</h4>
+                        <p className="text-primary font-medium">{vol.organization}</p>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                          <span>
+                            {formatDate(vol.startDate)} - {vol.current ? "Present" : formatDate(vol.endDate)}
+                          </span>
+                          <span>{vol.hoursContributed} hours</span>
+                          {vol.current && <Badge variant="secondary">Ongoing</Badge>}
+                        </div>
                       </div>
                     </div>
 
