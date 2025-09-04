@@ -9,10 +9,17 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Edit, Plus, Trash2, Save, X } from "lucide-react"
+import { CompanyAutoComplete } from "./company-autocomplete"
+
+interface Company {
+  name: string
+  domain?: string
+  logo_url?: string
+}
 
 interface WorkExperience {
   id: string
-  company: string
+  company: Company | null
   position: string
   startDate: string
   endDate: string
@@ -27,7 +34,7 @@ export function WorkExperience() {
   const [experiences, setExperiences] = useState<WorkExperience[]>([
     {
       id: "1",
-      company: "TechCorp Inc.",
+      company: { name: "TechCorp Inc.", domain: "techcorp.com" },
       position: "Software Engineering Intern",
       startDate: "2024-06",
       endDate: "2024-08",
@@ -38,7 +45,7 @@ export function WorkExperience() {
     },
     {
       id: "2",
-      company: "University Research Lab",
+      company: { name: "University Research Lab" },
       position: "Research Assistant",
       startDate: "2024-01",
       endDate: "",
@@ -52,7 +59,7 @@ export function WorkExperience() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<WorkExperience | null>(null)
   const [newForm, setNewForm] = useState<Omit<WorkExperience, "id">>({
-    company: "",
+    company: null,
     position: "",
     startDate: "",
     endDate: "",
@@ -96,7 +103,7 @@ export function WorkExperience() {
     }
     setExperiences((prev) => [newExp, ...prev])
     setNewForm({
-      company: "",
+      company: null,
       position: "",
       startDate: "",
       endDate: "",
@@ -143,27 +150,31 @@ export function WorkExperience() {
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="flex flex-col space-y-2">
                       <Label htmlFor="new-position">Position</Label>
                       <Input
                         id="new-position"
                         value={newForm.position}
                         onChange={(e) => setNewForm({ ...newForm, position: e.target.value })}
-                        placeholder="Software Engineer"
+                        placeholder="e.g. Software Engineer"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="new-company">Company</Label>
-                      <Input
-                        id="new-company"
-                        value={newForm.company}
-                        onChange={(e) => setNewForm({ ...newForm, company: e.target.value })}
-                        placeholder="Company Name"
+                    <div  className="flex flex-col space-y-2">
+                      <Label>Company</Label>
+                      <CompanyAutoComplete
+                        apiKey={process.env.NEXT_PUBLIC_LOGODEV_API_KEY!}
+                        value={newForm.company?.name || ""}
+                        onChange={(val) => setNewForm({ ...newForm, company: { 
+                          name: val.name, 
+                          domain: val.domain || "", 
+                          logo_url: val.logo_url || "" 
+                        }})}
+                        selectedCompany={newForm.company}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="flex flex-col space-y-2">
                       <Label htmlFor="new-start">Start Date</Label>
                       <Input
                         id="new-start"
@@ -172,7 +183,7 @@ export function WorkExperience() {
                         onChange={(e) => setNewForm({ ...newForm, startDate: e.target.value })}
                       />
                     </div>
-                    <div>
+                    <div className="flex flex-col space-y-2">
                       <Label htmlFor="new-end">End Date</Label>
                       <Input
                         id="new-end"
@@ -193,7 +204,7 @@ export function WorkExperience() {
                     />
                     <Label htmlFor="new-current">Currently working here</Label>
                   </div>
-                  <div>
+                  <div className="flex flex-col space-y-2">
                     <Label htmlFor="new-description">Description</Label>
                     <Textarea
                       id="new-description"
@@ -202,7 +213,7 @@ export function WorkExperience() {
                       placeholder="Describe your role and achievements..."
                     />
                   </div>
-                  <div>
+                  <div className="flex flex-col space-y-2">
                     <Label htmlFor="new-skills">Skills (comma-separated)</Label>
                     <Input
                       id="new-skills"
@@ -235,7 +246,7 @@ export function WorkExperience() {
                   <CardContent className="pt-6">
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
+                        <div className="flex flex-col space-y-2" >  
                           <Label htmlFor="edit-position">Position</Label>
                           <Input
                             id="edit-position"
@@ -243,17 +254,22 @@ export function WorkExperience() {
                             onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
                           />
                         </div>
-                        <div>
+                        <div className="flex flex-col space-y-2">
                           <Label htmlFor="edit-company">Company</Label>
-                          <Input
-                            id="edit-company"
-                            value={editForm.company}
-                            onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                          <CompanyAutoComplete
+                            apiKey={process.env.NEXT_PUBLIC_LOGODEV_API_KEY!}
+                            value={editForm.company?.name || ""}
+                            onChange={(val) => setEditForm({ ...editForm, company: { 
+                              name: val.name, 
+                              domain: val.domain || "", 
+                              logo_url: val.logo_url || "" 
+                            }})}
+                            selectedCompany={editForm.company}
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
+                        <div className="flex flex-col space-y-2">
                           <Label htmlFor="edit-start">Start Date</Label>
                           <Input
                             id="edit-start"
@@ -262,7 +278,7 @@ export function WorkExperience() {
                             onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
                           />
                         </div>
-                        <div>
+                        <div className="flex flex-col space-y-2">
                           <Label htmlFor="edit-end">End Date</Label>
                           <Input
                             id="edit-end"
@@ -283,7 +299,7 @@ export function WorkExperience() {
                         />
                         <Label htmlFor="edit-current">Currently working here</Label>
                       </div>
-                      <div>
+                      <div className="flex flex-col space-y-2">
                         <Label htmlFor="edit-description">Description</Label>
                         <Textarea
                           id="edit-description"
@@ -291,7 +307,7 @@ export function WorkExperience() {
                           onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                         />
                       </div>
-                      <div>
+                      <div className="flex flex-col space-y-2">
                         <Label htmlFor="edit-skills">Skills (comma-separated)</Label>
                         <Input
                           id="edit-skills"
@@ -317,7 +333,7 @@ export function WorkExperience() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h4 className="font-semibold text-lg">{exp.position}</h4>
-                      <p className="text-primary font-medium">{exp.company}</p>
+                      <p className="text-primary font-medium">{exp.company?.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {formatDate(exp.startDate)} - {exp.current ? "Present" : formatDate(exp.endDate)}
                         {exp.current && (
