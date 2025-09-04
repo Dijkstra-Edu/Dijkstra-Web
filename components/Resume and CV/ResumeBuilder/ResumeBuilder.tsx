@@ -2,14 +2,14 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { ResumeData } from '@/types/resume';
+import { UserProfileData } from '@/types/new_resume';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
 import { ResumeDataService } from '@/app/services/ResumeDataService';
 
 interface ResumeBuilderProps {
-  initialData?: Partial<ResumeData>;
-  onDataChange?: (data: Partial<ResumeData>) => void;
+  initialData?: Partial<UserProfileData>;
+  onDataChange?: (data: Partial<UserProfileData>) => void;
   className?: string;
   height?: string;
   showHeader?: boolean;
@@ -40,7 +40,7 @@ export default function ResumeBuilder({
   userEmail,
   userName
 }: ResumeBuilderProps) {
-  const [resumeData, setResumeData] = useState<Partial<ResumeData>>(initialData);
+  const [resumeData, setResumeData] = useState<Partial<UserProfileData>>(initialData);
   const [leftPanelWidth, setLeftPanelWidth] = useState(50); // Percentage
   const [isDragging, setIsDragging] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -167,7 +167,7 @@ export default function ResumeBuilder({
     }
   };
 
-  const handleDataChange = (data: Partial<ResumeData>) => {
+  const handleDataChange = (data: Partial<UserProfileData>) => {
     setResumeData(data);
     onDataChange?.(data);
   };
@@ -257,7 +257,7 @@ export default function ResumeBuilder({
           <div className="h-full overflow-y-auto">
             <div className="p-6">
               <div className="bg-white rounded-lg shadow-sm">
-                <ResumeForm 
+                <ResumeForm
                   key={resumeId || 'new-resume'} // Force re-mount when loading different resume
                   onDataChange={handleDataChange}
                   initialData={resumeData}
@@ -292,9 +292,9 @@ export default function ResumeBuilder({
         >
           <div className="h-full overflow-y-auto">
             <div className="p-6">
-              <LatexPreview 
-                data={resumeData} 
-                template={template} 
+              <LatexPreview
+                data={resumeData}
+                template={template}
                 scale={previewScale}
               />
             </div>

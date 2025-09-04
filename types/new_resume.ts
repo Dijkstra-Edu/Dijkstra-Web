@@ -1,7 +1,3 @@
-// types/resume.ts
-// This file contains all types related to resumes
-
-// User profile data types
 export interface User {
   id: string;
   created_at: string;
@@ -124,16 +120,4 @@ export interface UserProfileData {
   projects: Project[];
   links: Links;
   organizations: Organization[];
-}
-
-// Saved resume data type
-export interface SavedUserProfileData {
-  resumeId: string;
-  title: string;
-  template: 'deedy' | 'row-based';
-  content: Partial<UserProfileData>;
-  lastModified: string;
-  documentId: string;
-  userEmail: string;
-  userName: string;
 }

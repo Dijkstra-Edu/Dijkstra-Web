@@ -1,5 +1,5 @@
 // lib/latex-generator.ts
-import { ResumeData } from "@/types/resume";
+import { UserProfileData } from "@/types/resume";
 
 function escapeLatex(text: string): string {
   if (!text) return "";
@@ -12,44 +12,40 @@ function escapeLatex(text: string): string {
     .replace(/~/g, "\\textasciitilde{}");
 }
 
-export function generateRowBasedLatex(data: Partial<ResumeData>): string {
-  const personalInfo = data.personalInfo || {
-    name: "",
-    email: "",
-    phone: "",
-    website: "",
-    location: "",
+export function generateRowBasedLatex(data: Partial<UserProfileData>): string {
+  const user = data.user || {
+    id: "",
+    created_at: "",
+    updated_at: "",
+    github_user_name: "",
+    first_name: "",
+    middle_name: "",
+    last_name: "",
+    rank: "",
+    streak: 0
   };
-  const experience = data.experience || [];
+  const experience = data.experience;
   const projects = data.projects || [];
   const education = data.education || [];
-  const skills = data.skills || {
-    programming: { expert: [], intermediate: [], beginner: [] },
-    technology: [],
-  };
   const links = data.links || {};
 
   // Extract user data with defaults
-  const name = escapeLatex(personalInfo.name || "John Doe");
-  const email = escapeLatex(personalInfo.email || "youremail@yourdomain.com");
-  const phone = escapeLatex(personalInfo.phone || "0541 999 99 99");
-  const website = escapeLatex(personalInfo.website || "yourwebsite.com");
-  const location = escapeLatex(personalInfo.location || "Your Location");
-  const github = escapeLatex(links.github || "github.com/yourusername");
-  const linkedin = escapeLatex(
-    links.linkedin || "linkedin.com/in/yourusername"
-  );
+  const fullName = `${user.first_name || ""} ${user.middle_name || ""} ${user.last_name || ""}`.trim();
+  const name = escapeLatex(fullName || "John Doe");
+  const email = escapeLatex((links as any).linkedin_user_name ? `${(links as any).linkedin_user_name}@example.com` : "youremail@yourdomain.com");
+  const phone = escapeLatex("0541 999 99 99"); // Default phone as it's not in the new structure
+  const website = escapeLatex((links as any).portfolio_link || "yourwebsite.com");
+  const location = escapeLatex("Your Location"); // Default location as it's not directly in the new structure
+  const github = escapeLatex((links as any).github_link || "github.com/yourusername");
+  const linkedin = escapeLatex((links as any).linkedin_link || "linkedin.com/in/yourusername");
 
   // Generate education section
   const educationSection =
     education.length > 0
       ? education
           .map((edu) => {
-            const graduationDate =
-              edu.expectedGraduation || "Sept 2000 – May 2005";
-            const institution = escapeLatex(
-              edu.institution || "University of Pennsylvania"
-            );
+            const graduationDate = `${edu.start_date || "Sept 2000"} – ${edu.end_date || "May 2005"}`;
+            const institution = escapeLatex(edu.school || "University of Pennsylvania");
             const degree = escapeLatex(edu.degree || "BS in Computer Science");
 
             let eduContent = `\\begin{twocolentry}{
@@ -57,37 +53,13 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
         }
             \\textbf{${institution}}, ${degree}\\end{twocolentry}`;
 
-            if (edu.gpa || edu.honors || edu.coursework) {
+            if (edu.description_general) {
               eduContent += `
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
-            \\begin{highlights}`;
-
-              if (edu.gpa) {
-                eduContent += `
-                \\item GPA: ${escapeLatex(edu.gpa)}/4.0${
-                  edu.link
-                    ? ` (\\href{${edu.link}}{${escapeLatex(
-                        edu.linkText || "transcript"
-                      )}})`
-                    : ""
-                }`;
-              }
-
-              if (edu.coursework) {
-                eduContent += `
-                \\item \\textbf{Coursework:} ${escapeLatex(edu.coursework)}`;
-              }
-
-              if (edu.honors && edu.honors.length > 0) {
-                eduContent += `
-                \\item \\textbf{Honors:} ${edu.honors
-                  .map((h) => escapeLatex(h))
-                  .join(", ")}`;
-              }
-
-              eduContent += `
+            \\begin{highlights}
+                \\item ${escapeLatex(edu.description_general)}
             \\end{highlights}
         \\end{onecolentry}`;
             }
@@ -110,43 +82,41 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
 
   // Generate experience section
   const experienceSection =
-    experience.length > 0
-      ? experience
-          .map((exp) => {
-            const dateRange = `${exp.startDate || "June 2005"} – ${
-              exp.endDate || "Aug 2007"
-            }`;
-            const company = escapeLatex(exp.company || "Apple");
-            const position = escapeLatex(exp.position || "Software Engineer");
-            const location = exp.location
-              ? ` -- ${escapeLatex(exp.location)}`
-              : " -- Cupertino, CA";
+    experience
+      ? (() => {
+          const dateRange = `${experience.start_date || "June 2005"} – ${
+            experience.end_date || "Aug 2007"
+          }`;
+          const company = escapeLatex(experience.company_name || "Apple");
+          const position = escapeLatex(experience.title || "Software Engineer");
+          const location = experience.location
+            ? ` -- ${escapeLatex(experience.location)}`
+            : " -- Cupertino, CA";
 
-            let expContent = `\\begin{twocolentry}{
+          let expContent = `\\begin{twocolentry}{
             ${dateRange}
         }
             \\textbf{${position}}, ${company}${location}\\end{twocolentry}`;
 
-            if (exp.description && exp.description.length > 0) {
-              expContent += `
+          if (experience.work_done && experience.work_done.length > 0) {
+            expContent += `
 
         \\vspace{0.10 cm}
         \\begin{onecolentry}
             \\begin{highlights}`;
 
-              exp.description.forEach((desc) => {
-                expContent += `
-                \\item ${escapeLatex(desc)}`;
-              });
-
+            experience.work_done.forEach((desc) => {
               expContent += `
+                \\item ${escapeLatex(desc)}`;
+            });
+
+            expContent += `
             \\end{highlights}
         \\end{onecolentry}`;
-            }
+          }
 
-            return expContent;
-          })
-          .join("\n\n        \\vspace{0.2 cm}\n\n        ")
+          return expContent;
+        })()
       : `\\begin{twocolentry}{
             June 2005 – Aug 2007
         }
@@ -159,40 +129,18 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
                 \\item Integrated iChat with Spotlight Search by creating a tool to extract metadata from saved chat transcripts and provide metadata to a system-wide search database
                 \\item Redesigned chat file format and implemented backward compatibility for search
             \\end{highlights}
-        \\end{onecolentry}
-
-
-        \\vspace{0.2 cm}
-
-        \\begin{twocolentry}{
-            June 2003 – Aug 2003
-        }
-            \\textbf{Software Engineer Intern}, Microsoft -- Redmond, WA\\end{twocolentry}
-
-        \\vspace{0.10 cm}
-        \\begin{onecolentry}
-            \\begin{highlights}
-                \\item Designed a UI for the VS open file switcher (Ctrl-Tab) and extended it to tool windows
-                \\item Created a service to provide gradient across VS and VS add-ins, optimizing its performance via caching
-                \\item Built an app to compute the similarity of all methods in a codebase, reducing the time from \\$\\mathcal{O}(n^2)\\$ to \\$\\mathcal{O}(n \\log n)\\$
-                \\item Created a test case generation tool that creates random XML docs from XML Schema
-                \\item Automated the extraction and processing of large datasets from legacy systems using SQL and Perl scripts
-            \\end{highlights}
         \\end{onecolentry}`;
 
-  // Generate projects section - FIXED TO BE DYNAMIC
+  // Generate projects section
   const projectsSection =
     projects.length > 0
       ? projects
           .map((project) => {
             const projectName = escapeLatex(project.name || "Unnamed Project");
-            const link = project.link || "github.com/name/repo";
+            const link = project.landing_page_link || "github.com/name/repo";
 
-            // Use date range if both dates exist, otherwise use the link
-            const dateOrLink =
-              project.startDate && project.endDate
-                ? `${project.startDate} – ${project.endDate}`
-                : `\\href{${link}}{${link}}`;
+            // Use date range from created_at and updated_at
+            const dateOrLink = `\\href{${link}}{${link}}`;
 
             let projContent = `\\begin{twocolentry}{
             ${dateOrLink}
@@ -200,9 +148,7 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
             \\textbf{${projectName}}\\end{twocolentry}`;
 
             // Check if there are any details to display
-            const hasDetails =
-              (project.details && project.details.length > 0) ||
-              (project.description && project.description.length > 0);
+            const hasDetails = project.description || (project.topics && project.topics.length > 0);
 
             if (hasDetails) {
               projContent += `
@@ -211,19 +157,17 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
         \\begin{onecolentry}
             \\begin{highlights}`;
 
-              // Add description items if they exist
-              if (project.description && project.description.length > 0) {
-                project.description.forEach((desc) => {
-                  projContent += `
-                \\item ${escapeLatex(desc)}`;
-                });
+              // Add description if it exists
+              if (project.description) {
+                projContent += `
+                \\item ${escapeLatex(project.description)}`;
               }
 
-              // Add details items if they exist
-              if (project.details && project.details.length > 0) {
-                project.details.forEach((detail) => {
+              // Add topics if they exist
+              if (project.topics && project.topics.length > 0) {
+                project.topics.forEach((topic) => {
                   projContent += `
-                \\item ${escapeLatex(detail)}`;
+                \\item ${escapeLatex(topic)}`;
                 });
               }
 
@@ -246,72 +190,30 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
                 \\item Developed an electronic classroom where multiple users can simultaneously view and draw on a "chalkboard" with each person's edits synchronized
                 \\item Tools Used: C++, MFC
             \\end{highlights}
-        \\end{onecolentry}
-
-
-        \\vspace{0.2 cm}
-
-        \\begin{twocolentry}{
-            \\href{https://github.com/sinaatalay/rendercv}{github.com/name/repo}
-        }
-            \\textbf{Synchronized Desktop Calendar}\\end{twocolentry}
-
-        \\vspace{0.10 cm}
-        \\begin{onecolentry}
-            \\begin{highlights}
-                \\item Developed a desktop calendar with globally shared and synchronized calendars, allowing users to schedule meetings with other users
-                \\item Tools Used: C\\#, .NET, SQL, XML
-            \\end{highlights}
-        \\end{onecolentry}
-
-
-        \\vspace{0.2 cm}
-
-        \\begin{twocolentry}{
-            2002
-        }
-            \\textbf{Custom Operating System}\\end{twocolentry}
-
-        \\vspace{0.10 cm}
-        \\begin{onecolentry}
-            \\begin{highlights}
-                \\item Built a UNIX-style OS with a scheduler, file system, text editor, and calculator
-                \\item Tools Used: C
-            \\end{highlights}
         \\end{onecolentry}`;
 
   // Generate technologies section
   let technologiesSection = "";
-  if (skills.programming || skills.technology) {
-    if (
-      skills.programming &&
-      (skills.programming.expert?.length ||
-        skills.programming.intermediate?.length ||
-        skills.programming.beginner?.length)
-    ) {
-      const allLanguages = [
-        ...(skills.programming.expert || []),
-        ...(skills.programming.intermediate || []),
-        ...(skills.programming.beginner || []),
-      ];
-      if (allLanguages.length > 0) {
-        technologiesSection += `\\begin{onecolentry}
-            \\textbf{Languages:} ${allLanguages
-              .map((lang) => escapeLatex(lang))
+  
+  // Add tools from experience
+  if (experience && experience.tools_used && experience.tools_used.length > 0) {
+    technologiesSection += `\\begin{onecolentry}
+            \\textbf{Tools:} ${experience.tools_used
+              .map((tool) => escapeLatex(tool))
               .join(", ")}
         \\end{onecolentry}`;
-      }
-    }
+  }
 
-    if (skills.technology && skills.technology.length > 0) {
-      if (technologiesSection)
-        technologiesSection += "\n\n        \\vspace{0.2 cm}\n\n        ";
-      technologiesSection += `\\begin{onecolentry}
-            \\textbf{Technologies:} ${skills.technology
+  // Add tools from projects
+  if (projects.length > 0 && projects[0].tools && projects[0].tools.length > 0) {
+    if (technologiesSection) {
+      technologiesSection += "\n\n        \\vspace{0.2 cm}\n\n        ";
+    }
+    technologiesSection += `\\begin{onecolentry}
+            \\textbf{Project Technologies:} ${projects[0].tools
               .map((tech) => escapeLatex(tech))
               .join(", ")}
         \\end{onecolentry}`;
-    }
   }
 
   if (!technologiesSection) {
@@ -537,43 +439,49 @@ export function generateRowBasedLatex(data: Partial<ResumeData>): string {
 \\end{document}`;
 }
 
-export function generateDeedyLatex(data: Partial<ResumeData>): string {
-  const personalInfo = data.personalInfo || {};
-  const experience = data.experience || [];
+export function generateDeedyLatex(data: Partial<UserProfileData>): string {
+  const user = data.user || {
+    id: "",
+    created_at: "",
+    updated_at: "",
+    github_user_name: "",
+    first_name: "",
+    middle_name: "",
+    last_name: "",
+    rank: "",
+    streak: 0
+  };
+  const experience = data.experience;
   const projects = data.projects || [];
   const education = data.education || [];
-  const skills = data.skills || {};
+  const links = data.links || {};
 
   // Extract user data with defaults
-  const name = escapeLatex((personalInfo as any).name || "John Doe");
-  const email = escapeLatex(
-    (personalInfo as any).email || "john.doe@example.com"
-  );
-  const phone = escapeLatex((personalInfo as any).phone || "111.111.1111");
-  const phoneRaw =
-    (personalInfo as any).phone?.replace(/[^\d]/g, "") || "11111111111";
+  const fullName = `${user.first_name || ""} ${user.middle_name || ""} ${user.last_name || ""}`.trim();
+  const name = escapeLatex(fullName || "John Doe");
+  const email = escapeLatex((links as any).linkedin_user_name ? `${(links as any).linkedin_user_name}@example.com` : "john.doe@example.com");
+  const phone = escapeLatex("111.111.1111"); // Default phone as it's not in the new structure
+  const phoneRaw = "11111111111"; // Default phone as it's not in the new structure
 
   // Generate experience section
   const experienceSection =
-    experience.length > 0
-      ? experience
-          .map((exp) => {
-            const responsibilities = exp.description || [
-              "Developed a cloud-based solution to automate and enhance the engineering process for network installation using AWS and Python.",
-            ];
+    experience
+      ? (() => {
+          const responsibilities = experience.work_done || [
+            "Developed a cloud-based solution to automate and enhance the engineering process for network installation using AWS and Python.",
+          ];
 
-            return `\\runsubsection{${escapeLatex(exp.company || "Company A")}}
-\\descript{| ${escapeLatex(exp.position || "Advanced Development Intern")} }
-\\location{${escapeLatex(exp.startDate || "May 2018")} – ${escapeLatex(
-              exp.endDate || "Aug 2018"
-            )} | ${escapeLatex(exp.location || "Somewhere, XX")}}
+          return `\\runsubsection{${escapeLatex(experience.company_name || "Company A")}}
+\\descript{| ${escapeLatex(experience.title || "Advanced Development Intern")} }
+\\location{${escapeLatex(experience.start_date || "May 2018")} – ${escapeLatex(
+            experience.end_date || "Aug 2018"
+          )} | ${escapeLatex(experience.location || "Somewhere, XX")}}
 \\vspace{\\topsep} % Hacky fix for awkward extra vertical space
 \\begin{tightemize}
 ${responsibilities.map((resp) => `\\item ${escapeLatex(resp)}`).join("\n")}
 \\end{tightemize}
 \\sectionsep`;
-          })
-          .join("\n\n")
+        })()
       : `\\runsubsection{Company A}
 \\descript{| Advanced Development Intern }
 \\location{May 2018 – Aug 2018 | Somewhere, XX}
@@ -584,28 +492,6 @@ ${responsibilities.map((resp) => `\\item ${escapeLatex(resp)}`).join("\n")}
 \\item Consulted with other teams to jump start cloud-technology adoption and solutions throughout the company.
 \\item Contributed to initial planning for optics-alignment system utilizing AWS, reinforcement learning, and an IoT architecture.
 \\end{tightemize}
-\\sectionsep
-
-\\runsubsection{Company B}
-\\descript{| Intern }
-\\location{Feb 2017 – Nov 2017 | Somewhere, XX}
-\\begin{tightemize}
-\\item Coordinated with multiple departments to lead a software product evaluation resulting in a fit-for-purpose verdict and provided a recommendation on moving forward.
-\\item Organized meetings with the vendor to receive in-depth product information and answers to cross-departmental questions.
-\\item Participated on the Web Development Taskforce to provide AngularJS sites to internal customers.
-\\item Participated in an internal CodeJam to prototype a blockchain application for managing a model supply-chain.
-\\item Worked with a team to plan executive visit and team-building exercise for 200 employees.
-\\end{tightemize}
-\\sectionsep
-
-\\runsubsection{My University ITS}
-\\descript{| Assistant Support Specialist }
-\\location{Aug 2015 – Oct 2016 | Somewhere, XX}
-\\begin{tightemize}
-\\item Interacted with clients to assess their problems and implement a solution in an efficient, friendly manner.
-\\item Prepared workstations and laptops for future use by company employees.
-\\item Created scripts to automate common tasks and increase productivity.
-\\end{tightemize}
 \\sectionsep`;
 
   // Generate projects section
@@ -613,24 +499,15 @@ ${responsibilities.map((resp) => `\\item ${escapeLatex(resp)}`).join("\n")}
     projects.length > 0
       ? projects
           .map((project) => {
-            const descriptions =
-              project.details && project.details.length > 0
-                ? project.details
-                : [
-                    "Spearhead the development effort for the path-planning functionality of a team of three robots.",
-                  ];
+            const descriptions = project.topics || [
+              "Spearhead the development effort for the path-planning functionality of a team of three robots.",
+            ];
 
-            return `\\runsubsection{${escapeLatex(
-              project.name || "Space Robotics Team"
-            )}}
-\\descript{| ${escapeLatex(
-              Array.isArray(project.description)
-                ? project.description.join(" ")
-                : project.description || "Path-Planning Lead"
-            )}}
-\\location{${escapeLatex(project.startDate || "Jan 2018")} – ${escapeLatex(
-              project.endDate || "Present"
-            )} | ${escapeLatex(project.location || "Somewhere, XX")}}
+            return `\\runsubsection{${escapeLatex(project.name || "Space Robotics Team")}}
+\\descript{| ${escapeLatex(project.description || "Path-Planning Lead")}}
+\\location{${escapeLatex(project.created_at.split('T')[0] || "Jan 2018")} – ${escapeLatex(
+              project.updated_at.split('T')[0] || "Present"
+            )} | ${escapeLatex(project.organization || "Somewhere, XX")}}
 \\begin{tightemize}
 ${descriptions.map((desc) => `\\item ${escapeLatex(desc)}`).join("\n")}
 \\end{tightemize}
@@ -644,15 +521,6 @@ ${descriptions.map((desc) => `\\item ${escapeLatex(desc)}`).join("\n")}
 \\item Spearhead the development effort for the path-planning functionality of a team of three robots.
 \\item ROS provides movement servers and the planning is being implemented in Python to allow for fully-autonomous operation.
 \\end{tightemize}
-\\sectionsep
-
-\\runsubsection{Chit Chat}
-\\descript{| Class Project for Distributed Client-Server Programming}
-\\location{Jan 2018 – May 2018 | Somewhere, XX}
-\\begin{tightemize}
-\\item Lead the development of \\textbf{\\href{https://github.com/user/repo}{Chit Chat}}, an anonymous chat application created as a class project.
-\\item Chit Chat provides real-time communication while utilizing a PHP backend and AngularJS frontend.
-\\end{tightemize}
 \\sectionsep`;
 
   // Generate education section
@@ -660,19 +528,16 @@ ${descriptions.map((desc) => `\\item ${escapeLatex(desc)}`).join("\n")}
     education.length > 0
       ? education
           .map((edu) => {
-            return `\\subsection{${escapeLatex(
-              edu.institution || "My University"
-            )}}
+            return `\\subsection{${escapeLatex(edu.school || "My University")}}
 \\descript{${escapeLatex(
-              edu.degree ||
-                "Bachelor of Science in Computer Science with minors in Mathematics and Statistics"
+              edu.degree ? `${edu.degree} in ${edu.field}` : "Bachelor of Science in Computer Science with minors in Mathematics and Statistics"
             )}}
 \\location{${escapeLatex(
-              edu.expectedGraduation || "Expected Dec 2019"
+              edu.end_date || "Expected Dec 2019"
             )} | ${escapeLatex(edu.location || "Somewhere, XX")}}
 % College of Engineering \\\\
-Dean's List (All Semesters) \\\\
-\\location{ Cum. GPA: ${escapeLatex(edu.gpa || "4.0")} / 4.0}
+${edu.description_general ? escapeLatex(edu.description_general) : "Dean's List (All Semesters)"} \\\\
+\\location{ Cum. GPA: 3.9 / 4.0}
 \\sectionsep`;
           })
           .join("\n\n")
@@ -685,38 +550,20 @@ Dean's List (All Semesters) \\\\
 \\sectionsep`;
 
   // Generate skills section
-  const skillsSection =
-    skills && Object.keys(skills).length > 0
-      ? Object.entries(skills)
-          .map(([category, items]) => {
-            if (category === "programming" && typeof items === "object") {
-              const prog = items as any;
-              let progSection = "";
-              if (prog.expert?.length > 0) {
-                progSection += `\\location{3+ years:}\n${prog.expert.join(
-                  " \\textbullet{} "
-                )} \\\\\n`;
-              }
-              if (prog.intermediate?.length > 0) {
-                progSection += `\\location{1+ years:}\n${prog.intermediate.join(
-                  " \\textbullet{} "
-                )} \\\\\n`;
-              }
-              if (prog.beginner?.length > 0) {
-                progSection += `\\location{0+ years:}\n${prog.beginner.join(
-                  " \\textbullet{} "
-                )} \\\\\n`;
-              }
-              return `\\subsection{Programming}\n${progSection}\\sectionsep`;
-            } else if (category === "technology" && Array.isArray(items)) {
-              return `\\subsection{Technology}\n${items.join(
-                " \\textbullet{} "
-              )} \\\\\n\\sectionsep`;
-            }
-            return "";
-          })
-          .join("\n\n")
-      : `\\subsection{Programming}
+  let skillsSection = "";
+  
+  // Add tools from experience
+  if (experience && experience.tools_used && experience.tools_used.length > 0) {
+    skillsSection += `\\subsection{Tools}\n${experience.tools_used.join(" \\textbullet{} ")} \\\\\n\\sectionsep`;
+  }
+
+  // Add tools from projects
+  if (projects.length > 0 && projects[0].tools && projects[0].tools.length > 0) {
+    skillsSection += `\n\n\\subsection{Project Technologies}\n${projects[0].tools.join(" \\textbullet{} ")} \\\\\n\\sectionsep`;
+  }
+
+  if (!skillsSection) {
+    skillsSection = `\\subsection{Programming}
 \\location{3+ years:}
 Python \\textbullet{} C/C++ \\\\
 \\location{1+ years:}
@@ -730,6 +577,7 @@ Git/Github \\textbullet{} AWS \\textbullet{} Linux \\\\
 UNIX \\textbullet{} Windows \\textbullet{} ROS \\\\
 Artificial Intelligence \\textbullet{} Automation \\\\
 \\sectionsep`;
+  }
 
   return `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Deedy - One Page Two Column Resume
@@ -838,70 +686,6 @@ ${experienceSection}
 ${projectsSection}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     RESEARCH
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \\section{Research}
-% \\runsubsection{Cornell Robot Learning Lab}
-% \\descript{| Researcher}
-% \\location{Jan 2014 – Jan 2015 | Ithaca, NY}
-% Worked with \\textbf{\\href{http://www.cs.cornell.edu/~ashesh/}{Ashesh Jain}} and \\textbf{\\href{http://www.cs.cornell.edu/~asaxena/}{Prof Ashutosh Saxena}} to create \\textbf{PlanIt}, a tool which  learns from large scale user preference feedback to plan robot trajectories in human environments.
-% \\sectionsep
-
-% \\runsubsection{Cornell Phonetics Lab}
-% \\descript{| Head Undergraduate Researcher}
-% \\location{Mar 2012 – May 2013 | Ithaca, NY}
-% Led the development of \\textbf{QuickTongue}, the first ever breakthrough tongue-controlled game with \\textbf{\\href{http://conf.ling.cornell.edu/~tilsen/}{Prof Sam Tilsen}} to aid in Linguistics research.
-% \\sectionsep
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     COMMUNITY SERVICE
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \\section{Community Service}
-
-% \\begin{tabular}{rll}
-% 2013 -- 2018    & Tennessee     & St. Baldrick's Foundation\\\\
-% 2014 -- 2017	& Tennessee     & American Cancer Society's Hope Lodge\\\\
-% 2013 -- 2015    & Tennessee     & Habitat for Humanity\\\\
-% 2011 -- 2015    & Tennessee     & Special Olympics\\\\
-% \\end{tabular}
-% \\sectionsep
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     SOCIETIES
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \\section{Societies}
-
-% \\begin{tabular}{rll}
-% 2018 -- 2018    & National      & Association of Computing Machinery (ACM)\\\\
-% 2017 -- 2019	& National      & Scrum Alliance Certified ScrumMaster\\\\
-% 2015 -- 2019    & University    & Shackouls Honors College\\\\
-% \\end{tabular}
-% \\sectionsep
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     AWARDS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \\section{Awards}
-% \\begin{tabular}{rll}
-% 2015        & 99\\textsuperscript{th} percentile & National Merit Scholarship Finalist\\\\
-% \\end{tabular}
-% \\sectionsep
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     PUBLICATIONS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \\section{Publications}
-% \\renewcommand\\refname{\\vskip -1.5cm} % Couldn't get this working from the .cls file
-% \\bibliographystyle{abbrv}
-% \\bibliography{publications}
-% \\nocite{*}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %     COLUMN TWO
 %
@@ -927,55 +711,22 @@ ${educationSection}
 ${skillsSection}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     COURSEWORK
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\\section{Coursework}
-\\subsection{Graduate}
-Analysis of Algorithms
-\\sectionsep
-
-\\subsection{Undergraduate}
-Artificial Intelligence \\\\
-{\\footnotesize \\textit{\\textbf{(Teaching Assistant) }}} \\\\
-AI Robotics \\\\
-Operating Systems I \\\\
-Calculus I-IV \\\\
-Data Analysis I \\\\
-Introduction to Probability \\\\
-\\sectionsep
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     Societies
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\\section{Societies}
-${
-  Array.isArray(data.societies) && data.societies.length > 0
-    ? data.societies.map((s) => escapeLatex(s) + "\\").join("\n")
-    : "None listed \\"
-}
-\\sectionsep
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     LINKS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \\section{Links}
 ${
-  data.links && Object.keys(data.links).length > 0
-    ? Object.entries(data.links)
+  links && Object.keys(links).length > 0
+    ? Object.entries(links)
+        .filter(([key, value]) => value && key !== 'id' && key !== 'user_id' && key !== 'created_at' && key !== 'updated_at')
         .map(([key, value]) => {
-          let url = "";
-          if (key === "github") url = `https://github.com/${value}`;
-          else if (key === "linkedin")
-            url = `https://www.linkedin.com/in/${value}`;
-          else if (key === "website")
-            url = value.startsWith("http") ? value : `https://${value}`;
-          else url = value;
+          const displayKey = key.replace(/_link$/, '').replace(/_/g, ' ');
+          const displayName = key.replace(/_link$/, '_user_name');
+          const displayValue = links[displayName as keyof typeof links] || value;
+          
           return `${escapeLatex(
-            key.charAt(0).toUpperCase() + key.slice(1)
-          )}:// \\href{${url}}{\\bf ${escapeLatex(value)}} \\`;
+            displayKey.charAt(0).toUpperCase() + displayKey.slice(1)
+          )}:// \\href{${value}}{\\bf ${escapeLatex(displayValue as string)}} \\`;
         })
         .join("\n")
     : "None listed \\"

@@ -1,100 +1,113 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { mockResumeData } from "@/data/mockResumeData";
-import { ResumeData } from "@/types/resume";
+import { userProfileData } from "@/data/mockResumeData";
+import { UserProfileData, Education, Project } from "@/types/resume";
 
 interface ResumeFormProps {
-  onDataChange: (data: Partial<ResumeData>) => void;
-  initialData?: Partial<ResumeData>;
+  onDataChange: (data: Partial<UserProfileData>) => void;
+  initialData?: Partial<UserProfileData>;
 }
 
 const ResumeForm: React.FC<ResumeFormProps> = ({
   onDataChange,
   initialData = {},
 }) => {
-  const [data, setData] = useState<Partial<ResumeData>>({
-    personalInfo: {
-      name: mockResumeData.personalInfo.name,
-      email: mockResumeData.personalInfo.email,
-      phone: mockResumeData.personalInfo.phone,
-      website: mockResumeData.personalInfo.website,
-      ...initialData.personalInfo,
-    },
-  experience: initialData.experience || mockResumeData.experience,
-  projects: initialData.projects || mockResumeData.projects,
-  education: initialData.education || mockResumeData.education,
-  skills: initialData.skills || mockResumeData.skills,
-  coursework: initialData.coursework || mockResumeData.coursework,
-  societies: initialData.societies || mockResumeData.societies,
-  links: initialData.links || mockResumeData.links,
+  const [data, setData] = useState<Partial<UserProfileData>>({
+    user: initialData.user || userProfileData.user,
+    experience: initialData.experience || userProfileData.experience,
+    education: initialData.education || userProfileData.education,
+    projects: initialData.projects || userProfileData.projects,
+    links: initialData.links || userProfileData.links,
+    organizations: initialData.organizations || userProfileData.organizations,
   });
 
   useEffect(() => {
     onDataChange(data);
   }, [data, onDataChange]);
 
-  const updatePersonalInfo = (field: string, value: string) => {
+  const updateUser = (field: string, value: string) => {
     setData((prev) => ({
       ...prev,
-      personalInfo: {
-        name: "",
-        email: "",
-        phone: "",
-        website: "",
-        ...prev.personalInfo,
+      user: {
+        ...prev.user!,
         [field]: value,
       },
     }));
   };
 
   const updateExperience = (
+    field: string,
+    value: string | string[] | boolean | number
+  ) => {
+    setData((prev) => ({
+      ...prev,
+      experience: {
+        ...prev.experience!,
+        [field]: value,
+      },
+    }));
+  };
+
+  const updateEducation = (
     index: number,
     field: string,
-    value: string | string[]
+    value: string | string[] | boolean | number
   ) => {
     setData((prev) => {
-      const newExperience = [...(prev.experience || [])];
-      newExperience[index] = {
-        ...newExperience[index],
+      const newEducation = [...(prev.education || [])];
+      newEducation[index] = {
+        ...newEducation[index],
         [field]: value,
       };
       return {
         ...prev,
-        experience: newExperience,
+        education: newEducation,
       };
     });
   };
 
-  const addExperience = () => {
-    setData((prev) => ({
-      ...prev,
-      experience: [
-        ...(prev.experience || []),
-        {
-          id: Date.now().toString(),
-          company: "",
-          position: "",
-          startDate: "",
-          endDate: "",
-          location: "",
-          description: [],
-        },
-      ],
-    }));
+  const addEducation = () => {
+    setData((prev) => {
+      const newEducation: Education = {
+        id: Date.now(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        profile_id: prev.user?.id || "",
+        school: "",
+        school_type: "",
+        degree: "",
+        field: "",
+        currently_studying: false,
+        location: "",
+        location_type: "",
+        start_date: "",
+        description_general: "",
+        description_detailed: "",
+        description_less: "",
+        work_done: [],
+        school_score_multiplier: 1,
+        tools_used: [],
+      };
+      
+      return {
+        ...prev,
+        education: [...(prev.education || []), newEducation],
+      };
+    });
   };
 
-  const removeExperience = (index: number) => {
+  const removeEducation = (index: number) => {
     setData((prev) => ({
       ...prev,
-      experience: prev.experience?.filter((_, i) => i !== index) || [],
+      education: prev.education?.filter((_, i) => i !== index) || [],
     }));
   };
 
   const updateProject = (
     index: number,
     field: string,
-    value: string | string[]
+    value: string | string[] | boolean | number
   ) => {
     setData((prev) => {
       const newProjects = [...(prev.projects || [])];
@@ -110,67 +123,46 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   };
 
   const addProject = () => {
-    setData((prev) => ({
-      ...prev,
-      projects: [
-        ...(prev.projects || []),
-        {
-          id: Date.now().toString(),
-          name: "",
-          description: [],
-          location: "",
-          startDate: "",
-          endDate: "",
-          details: [],
-        },
-      ],
-    }));
+    setData((prev) => {
+      const newProject: Project = {
+        id: Date.now(),
+        profile_id: prev.user?.id || "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        name: "",
+        organization: "",
+        owner: prev.user?.github_user_name || "",
+        private: false,
+        github_stars: 0,
+        github_about: "",
+        github_open_issues: 0,
+        github_forks: 0,
+        description: "",
+        domain: "",
+        topics: [],
+        tools: [],
+        readme: false,
+        license: false,
+        landing_page: false,
+        docs_page: false,
+        own_domain_name: false,
+        total_lines_contributed: 0,
+        improper_uploads: false,
+        complexity_rating: 0,
+        testing_framework_present: false,
+      };
+      
+      return {
+        ...prev,
+        projects: [...(prev.projects || []), newProject],
+      };
+    });
   };
 
   const removeProject = (index: number) => {
     setData((prev) => ({
       ...prev,
       projects: prev.projects?.filter((_, i) => i !== index) || [],
-    }));
-  };
-
-  const updateEducation = (index: number, field: string, value: string) => {
-    setData((prev) => {
-      const newEducation = [...(prev.education || [])];
-      newEducation[index] = {
-        ...newEducation[index],
-        [field]: value,
-      };
-      return {
-        ...prev,
-        education: newEducation,
-      };
-    });
-  };
-
-  const updateSkills = (
-    category: string,
-    subcategory: string,
-    value: string[]
-  ) => {
-    setData((prev) => ({
-      ...prev,
-      skills: {
-        programming: {
-          expert: [],
-          intermediate: [],
-          beginner: [],
-        },
-        technology: [],
-        ...prev.skills,
-        [category]: {
-          expert: [],
-          intermediate: [],
-          beginner: [],
-          ...(category === 'programming' ? prev.skills?.programming : {}),
-          [subcategory]: value,
-        },
-      },
     }));
   };
 
@@ -192,50 +184,39 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
           <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
+                First Name
               </label>
               <input
                 type="text"
-                value={data.personalInfo?.name || ""}
-                onChange={(e) => updatePersonalInfo("name", e.target.value)}
+                value={data.user?.first_name || ""}
+                onChange={(e) => updateUser("first_name", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                placeholder="John Doe"
+                placeholder="John"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={data.personalInfo?.email || ""}
-                onChange={(e) => updatePersonalInfo("email", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                placeholder="john.doe@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Phone Number
+                Last Name
               </label>
               <input
                 type="text"
-                value={data.personalInfo?.phone || ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-                  if (value.length <= 10) {
-                    updatePersonalInfo("phone", value); // Update phone number in state
-                  }
-                }}
-                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                placeholder="Enter your phone number"
+                value={data.user?.last_name || ""}
+                onChange={(e) => updateUser("last_name", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="Doe"
               />
-              {data.personalInfo?.phone &&
-                data.personalInfo.phone.length > 10 && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Enter a valid 10-digit phone number
-                  </p>
-                )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                GitHub Username
+              </label>
+              <input
+                type="text"
+                value={data.user?.github_user_name || ""}
+                onChange={(e) => updateUser("github_user_name", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="johndoe"
+              />
             </div>
           </div>
         </div>
@@ -246,26 +227,155 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
             <h2 className="text-xl font-bold text-gray-800 border-b border-gray-200 pb-2">
               Experience
             </h2>
+          </div>
+          <div className="space-y-4">
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Company
+                  </label>
+                  <input
+                    type="text"
+                    value={data.experience?.company_name || ""}
+                    onChange={(e) =>
+                      updateExperience("company_name", e.target.value)
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="Company Name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Position
+                  </label>
+                  <input
+                    type="text"
+                    value={data.experience?.title || ""}
+                    onChange={(e) =>
+                      updateExperience("title", e.target.value)
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="Software Engineer"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Start Date
+                    </label>
+                    <input
+                      type="text"
+                      value={data.experience?.start_date || ""}
+                      onChange={(e) =>
+                        updateExperience("start_date", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="2023-01-15"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      End Date
+                    </label>
+                    <input
+                      type="text"
+                      value={data.experience?.end_date || ""}
+                      onChange={(e) =>
+                        updateExperience("end_date", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="2024-08-30"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={data.experience?.location || ""}
+                    onChange={(e) =>
+                      updateExperience("location", e.target.value)
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="San Francisco, CA"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={data.experience?.description_general || ""}
+                    onChange={(e) =>
+                      updateExperience("description_general", e.target.value)
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    rows={3}
+                    placeholder="Led the development of scalable microservices for a next-generation fintech platform, improving system performance and reliability."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Work Done (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={(data.experience?.work_done || []).join(", ")}
+                    onChange={(e) =>
+                      updateExperience("work_done", handleStringArrayInput(e.target.value))
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="API Design & Development, System Architecture, Database Management"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Tools Used (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={(data.experience?.tools_used || []).join(", ")}
+                    onChange={(e) =>
+                      updateExperience("tools_used", handleStringArrayInput(e.target.value))
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="Golang, Python, PostgreSQL, Docker, Kubernetes"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Education */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-800 border-b border-gray-200 pb-2">
+              Education
+            </h2>
             <button
-              onClick={addExperience}
+              onClick={addEducation}
               className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs"
             >
               Add
             </button>
           </div>
           <div className="space-y-4">
-            {data.experience?.map((exp, index) => (
+            {data.education?.map((edu, index) => (
               <div
                 key={index}
                 className="border border-gray-200 rounded-lg p-4"
               >
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-sm font-semibold text-gray-800">
-                    Experience {index + 1}
+                    Education {index + 1}
                   </h3>
-                  {data.experience && data.experience.length > 1 && (
+                  {data.education && data.education.length > 1 && (
                     <button
-                      onClick={() => removeExperience(index)}
+                      onClick={() => removeEducation(index)}
                       className="text-red-600 hover:text-red-800 text-xs"
                     >
                       Remove
@@ -275,30 +385,44 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                 <div className="grid grid-cols-1 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Company
+                      School
                     </label>
                     <input
                       type="text"
-                      value={exp.company}
+                      value={edu.school}
                       onChange={(e) =>
-                        updateExperience(index, "company", e.target.value)
+                        updateEducation(index, "school", e.target.value)
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="Company Name"
+                      placeholder="University Name"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Position
+                      Degree
                     </label>
                     <input
                       type="text"
-                      value={exp.position}
+                      value={edu.degree}
                       onChange={(e) =>
-                        updateExperience(index, "position", e.target.value)
+                        updateEducation(index, "degree", e.target.value)
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="Software Engineer"
+                      placeholder="Bachelor of Science"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Field
+                    </label>
+                    <input
+                      type="text"
+                      value={edu.field}
+                      onChange={(e) =>
+                        updateEducation(index, "field", e.target.value)
+                      }
+                      className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="Computer Science"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -308,12 +432,12 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                       </label>
                       <input
                         type="text"
-                        value={exp.startDate}
+                        value={edu.start_date}
                         onChange={(e) =>
-                          updateExperience(index, "startDate", e.target.value)
+                          updateEducation(index, "start_date", e.target.value)
                         }
                         className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="Jan 2023"
+                        placeholder="2018-09-01"
                       />
                     </div>
                     <div>
@@ -322,12 +446,12 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                       </label>
                       <input
                         type="text"
-                        value={exp.endDate}
+                        value={edu.end_date || ""}
                         onChange={(e) =>
-                          updateExperience(index, "endDate", e.target.value)
+                          updateEducation(index, "end_date", e.target.value)
                         }
                         className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="Present"
+                        placeholder="2022-06-15"
                       />
                     </div>
                   </div>
@@ -337,30 +461,26 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={exp.location}
+                      value={edu.location}
                       onChange={(e) =>
-                        updateExperience(index, "location", e.target.value)
+                        updateEducation(index, "location", e.target.value)
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="San Francisco, CA"
+                      placeholder="Boston, MA"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Job Description (one bullet point per line)
+                      Description
                     </label>
                     <textarea
-                      value={exp.description?.join("\n") || ""}
+                      value={edu.description_general}
                       onChange={(e) =>
-                        updateExperience(
-                          index,
-                          "description",
-                          e.target.value.split("\n") // Keep all lines, including empty ones
-                        )
+                        updateEducation(index, "description_general", e.target.value)
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      rows={3}
-                      placeholder="Developed web applications using React and Node.js&#10;Led a team of 3 engineers&#10;Improved application performance by 40%"
+                      rows={2}
+                      placeholder="Specialized in machine learning and distributed systems, graduating with honors."
                     />
                   </div>
                 </div>
@@ -418,171 +538,72 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Location
+                      Organization
                     </label>
                     <input
                       type="text"
-                      value={project.location}
+                      value={project.organization}
                       onChange={(e) =>
-                        updateProject(index, "location", e.target.value)
+                        updateProject(index, "organization", e.target.value)
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="San Francisco, CA"
+                      placeholder="Open Source Initiative"
                     />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Start Date
-                      </label>
-                      <input
-                        type="text"
-                        value={project.startDate}
-                        onChange={(e) =>
-                          updateProject(index, "startDate", e.target.value)
-                        }
-                        className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="Jan 2023"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        End Date
-                      </label>
-                      <input
-                        type="text"
-                        value={project.endDate}
-                        onChange={(e) =>
-                          updateProject(index, "endDate", e.target.value)
-                        }
-                        className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="Present"
-                      />
-                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Project Description
+                      Description
                     </label>
-                    <input
-                      type="text"
+                    <textarea
                       value={project.description}
                       onChange={(e) =>
                         updateProject(index, "description", e.target.value)
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="Brief description of the project"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Details (one bullet point per line)
-                    </label>
-                    <textarea
-                      value={project.details?.join("\n") || ""}
-                      onChange={(e) =>
-                        updateProject(
-                          index,
-                          "details",
-                          e.target.value.split("\n") 
-                        )
-                      }
-                      className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       rows={3}
-                      placeholder="Built responsive web application&#10;Integrated third-party APIs&#10;Deployed using Docker"
-                    />
-                  </div>
-
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Education */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-            Education
-          </h2>
-          <div className="space-y-4">
-            {data.education?.map((edu, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg p-4"
-              >
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Institution
-                    </label>
-                    <input
-                      type="text"
-                      value={edu.institution}
-                      onChange={(e) =>
-                        updateEducation(index, "institution", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="University Name"
+                      placeholder="An open-source library for advanced data analysis and visualization."
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Degree
+                      Domain
                     </label>
                     <input
                       type="text"
-                      value={edu.degree}
+                      value={project.domain}
                       onChange={(e) =>
-                        updateEducation(index, "degree", e.target.value)
+                        updateProject(index, "domain", e.target.value)
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="Bachelor of Science"
+                      placeholder="Data Science"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Expected Graduation
+                      Topics (comma-separated)
                     </label>
                     <input
                       type="text"
-                      value={edu.expectedGraduation}
+                      value={(project.topics || []).join(", ")}
                       onChange={(e) =>
-                        updateEducation(
-                          index,
-                          "expectedGraduation",
-                          e.target.value
-                        )
+                        updateProject(index, "topics", handleStringArrayInput(e.target.value))
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="May 2023"
+                      placeholder="data-visualization, machine-learning, statistics"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      GPA (optional)
+                      Tools (comma-separated)
                     </label>
                     <input
                       type="text"
-                      value={edu.gpa}
+                      value={(project.tools || []).join(", ")}
                       onChange={(e) =>
-                        updateEducation(index, "gpa", e.target.value)
+                        updateProject(index, "tools", handleStringArrayInput(e.target.value))
                       }
                       className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="3.8"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Location
-                    </label>
-                    <input
-                      type="text"
-                      value={edu.location}
-                      onChange={(e) =>
-                        updateEducation(index, "location", e.target.value)
-                      }
-                      className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="Boston, MA"
+                      placeholder="Python, Pandas, NumPy, Plotly"
                     />
                   </div>
                 </div>
@@ -591,98 +612,64 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
           </div>
         </div>
 
-        {/* Skills */}
+        {/* Links */}
         <div>
           <h2 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-            Skills
+            Links
           </h2>
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                Programming Languages
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Expert Level (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={data.skills?.programming?.expert?.join(", ") || ""}
-                    onChange={(e) =>
-                      updateSkills(
-                        "programming",
-                        "expert",
-                        handleStringArrayInput(e.target.value)
-                      )
-                    }
-                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="Python, JavaScript"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Intermediate Level (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={
-                      data.skills?.programming?.intermediate?.join(", ") || ""
-                    }
-                    onChange={(e) =>
-                      updateSkills(
-                        "programming",
-                        "intermediate",
-                        handleStringArrayInput(e.target.value)
-                      )
-                    }
-                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="Java, C++"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Beginner Level (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={data.skills?.programming?.beginner?.join(", ") || ""}
-                    onChange={(e) =>
-                      updateSkills(
-                        "programming",
-                        "beginner",
-                        handleStringArrayInput(e.target.value)
-                      )
-                    }
-                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="Rust, Go"
-                  />
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                Technologies & Tools (comma-separated)
+                Portfolio Link
               </label>
               <input
                 type="text"
-                value={data.skills?.technology?.join(", ") || ""}
-                onChange={(e) =>
-                  setData((prev) => ({
-                    ...prev,
-                    skills: {
-                      programming: {
-                        expert: [],
-                        intermediate: [],
-                        beginner: [],
-                      },
-                      ...prev.skills,
-                      technology: handleStringArrayInput(e.target.value),
-                    },
-                  }))
-                }
+                value={data.links?.portfolio_link || ""}
+                onChange={(e) => setData(prev => ({
+                  ...prev,
+                  links: {
+                    ...prev.links!,
+                    portfolio_link: e.target.value
+                  }
+                }))}
                 className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                placeholder="React, Node.js, Docker, AWS"
+                placeholder="https://yourportfolio.com"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                GitHub Link
+              </label>
+              <input
+                type="text"
+                value={data.links?.github_link || ""}
+                onChange={(e) => setData(prev => ({
+                  ...prev,
+                  links: {
+                    ...prev.links!,
+                    github_link: e.target.value
+                  }
+                }))}
+                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="https://github.com/yourusername"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                LinkedIn Link
+              </label>
+              <input
+                type="text"
+                value={data.links?.linkedin_link || ""}
+                onChange={(e) => setData(prev => ({
+                  ...prev,
+                  links: {
+                    ...prev.links!,
+                    linkedin_link: e.target.value
+                  }
+                }))}
+                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="https://linkedin.com/in/yourusername"
               />
             </div>
           </div>
@@ -693,3 +680,5 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
 };
 
 export default ResumeForm;
+
+// Made with Bob

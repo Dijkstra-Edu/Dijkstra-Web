@@ -2,11 +2,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ResumeData } from '@/types/resume';
-import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
+import { UserProfileData } from '@/types/resume';
+import { generateRowBasedLatex, generateDeedyLatex } from '@/lib/latex-generator';
 
 interface LatexPreviewProps {
-  data: Partial<ResumeData>;
+  data: Partial<UserProfileData>;
   template?: 'deedy' | 'row-based';
   scale?: number;
 }
@@ -21,7 +21,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
   const latexCode = template === 'row-based' ? generateRowBasedLatex(data) : generateDeedyLatex(data);
 
   const renderHTMLPreview = () => {
-    if (!data.personalInfo?.name) {
+    if (!data.user?.first_name) {
       return (
         <div className="p-8 text-center text-gray-500">
           <p>Fill in your information to see the preview</p>
@@ -37,6 +37,8 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
   };
 
   const renderRowBasedPreview = () => {
+    const fullName = `${data.user?.first_name || ''} ${data.user?.middle_name || ''} ${data.user?.last_name || ''}`.trim();
+    
     return (
       <div className="w-full h-full overflow-hidden">
         <div 
@@ -54,25 +56,25 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-normal text-gray-900 mb-3">
-            {data.personalInfo?.name || 'John Doe'}
+            {fullName || 'John Doe'}
           </h1>
           <div className="text-sm text-gray-700 flex justify-center items-center flex-wrap gap-2">
             <span className="hover:text-blue-600 cursor-pointer underline">
-              {data.personalInfo?.email || 'youremail@yourdomain.com'}
+              {data.links?.linkedin_user_name ? `${data.links.linkedin_user_name}@example.com` : 'youremail@yourdomain.com'}
             </span>
             <span>|</span>
-            <span>{data.personalInfo?.phone || '0541 999 99 99'}</span>
+            <span>Phone Number</span>
             <span>|</span>
             <span className="hover:text-blue-600 cursor-pointer underline">
-              {data.personalInfo?.website || 'yourwebsite.com'}
-            </span>
-            <span>|</span>
-            <span className="hover:text-blue-600 cursor-pointer underline">
-              {data.links?.linkedin || 'linkedin.com/in/yourusername'}
+              {data.links?.portfolio_link || 'yourwebsite.com'}
             </span>
             <span>|</span>
             <span className="hover:text-blue-600 cursor-pointer underline">
-              {data.links?.github || 'github.com/yourusername'}
+              {data.links?.linkedin_link || 'linkedin.com/in/yourusername'}
+            </span>
+            <span>|</span>
+            <span className="hover:text-blue-600 cursor-pointer underline">
+              {data.links?.github_link || 'github.com/yourusername'}
             </span>
           </div>
         </div>
@@ -88,22 +90,17 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                 <div key={index}>
                   <div className="flex justify-between items-start mb-1">
                     <div>
-                      <span className="font-bold text-sm">{edu.institution}</span>
+                      <span className="font-bold text-sm">{edu.school}</span>
                       <span>, {edu.degree}</span>
                       {edu.location && <span> -- {edu.location}</span>}
                     </div>
                     <div className="text-sm text-gray-600 text-right">
-                      {edu.expectedGraduation || 'Sept 2020 – May 2024'}
+                      {edu.start_date} - {edu.end_date || 'Present'}
                     </div>
                   </div>
-                  {(edu.gpa || edu.honors) && (
-                    <ul className="text-sm text-gray-700 ml-4">
-                      {edu.gpa && <li>• GPA: {edu.gpa}/4.0</li>}
-                      {edu.honors && edu.honors.length > 0 && (
-                        <li>• <strong>Honors:</strong> {edu.honors.join(', ')}</li>
-                      )}
-                    </ul>
-                  )}
+                  <div className="text-sm text-gray-700 ml-4">
+                    {edu.description_general && <p>• {edu.description_general}</p>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -129,29 +126,27 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
           <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-4">
             Experience
           </h2>
-          {data.experience && data.experience.length > 0 ? (
+          {data.experience ? (
             <div className="space-y-4">
-              {data.experience.map((exp, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-start mb-1">
-                    <div>
-                      <span className="font-bold text-sm">{exp.position}</span>
-                      <span>, {exp.company}</span>
-                      {exp.location && <span> -- {exp.location}</span>}
-                    </div>
-                    <div className="text-sm text-gray-600 text-right">
-                      {exp.startDate} – {exp.endDate}
-                    </div>
+              <div>
+                <div className="flex justify-between items-start mb-1">
+                  <div>
+                    <span className="font-bold text-sm">{data.experience.title}</span>
+                    <span>, {data.experience.company_name}</span>
+                    {data.experience.location && <span> -- {data.experience.location}</span>}
                   </div>
-                  {exp.description && exp.description.length > 0 && (
-                    <ul className="text-sm text-gray-700 ml-4">
-                      {exp.description.map((desc, i) => (
-                        <li key={i}>• {desc}</li>
-                      ))}
-                    </ul>
-                  )}
+                  <div className="text-sm text-gray-600 text-right">
+                    {data.experience.start_date} – {data.experience.end_date || 'Present'}
+                  </div>
                 </div>
-              ))}
+                {data.experience.work_done && data.experience.work_done.length > 0 && (
+                  <ul className="text-sm text-gray-700 ml-4">
+                    {data.experience.work_done.map((desc, i) => (
+                      <li key={i}>• {desc}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
           ) : (
             <div>
@@ -185,13 +180,14 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                       <span className="font-bold text-sm">{project.name}</span>
                     </div>
                     <div className="text-sm text-blue-600 hover:underline cursor-pointer">
-                      {project.link || 'github.com/username/repo'}
+                      {project.landing_page_link || 'github.com/username/repo'}
                     </div>
                   </div>
-                  {project.description && project.description.length > 0 && (
+                  {project.description && (
                     <ul className="text-sm text-gray-700 ml-4">
-                      {project.description.map((detail, i) => (
-                        <li key={i}>• {detail}</li>
+                      <li>• {project.description}</li>
+                      {project.topics && project.topics.map((topic, i) => (
+                        <li key={i}>• {topic}</li>
                       ))}
                     </ul>
                   )}
@@ -222,27 +218,13 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
             Technologies
           </h2>
           <div className="space-y-3">
-            {data.skills?.programming && (
-              data.skills.programming.expert?.length || 
-              data.skills.programming.intermediate?.length || 
-              data.skills.programming.beginner?.length
-            ) ? (
-              <div className="text-sm">
-                <span className="font-bold">Languages:</span> {[
-                  ...(data.skills.programming.expert || []),
-                  ...(data.skills.programming.intermediate || []),
-                  ...(data.skills.programming.beginner || [])
-                ].join(', ')}
-              </div>
-            ) : (
-              <div className="text-sm">
-                <span className="font-bold">Languages:</span> Python, JavaScript, Java, C++, SQL
-              </div>
-            )}
+            <div className="text-sm">
+              <span className="font-bold">Tools:</span> {data.experience?.tools_used?.join(', ') || 'Python, JavaScript, Java, C++, SQL'}
+            </div>
             
-            {data.skills?.technology && data.skills.technology.length > 0 ? (
+            {data.projects && data.projects.length > 0 && data.projects[0].tools && data.projects[0].tools.length > 0 ? (
               <div className="text-sm">
-                <span className="font-bold">Technologies:</span> {data.skills.technology.join(', ')}
+                <span className="font-bold">Project Technologies:</span> {data.projects[0].tools.join(', ')}
               </div>
             ) : (
               <div className="text-sm">
@@ -258,6 +240,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
   };
 
   const renderDeedyPreview = () => {
+    const fullName = `${data.user?.first_name || ''} ${data.user?.middle_name || ''} ${data.user?.last_name || ''}`.trim();
 
     return (
       <div className="w-full h-full overflow-hidden">
@@ -277,14 +260,14 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
         <div className="border-b border-gray-400 pb-4 mb-6">
           <div className="text-center">
             <h1 className="text-3xl font-thin text-gray-900 mb-2 tracking-widest" style={{ fontFamily: 'Lato, sans-serif' }}>
-              {data.personalInfo?.name?.toUpperCase() || 'YOUR NAME'}
+              {fullName.toUpperCase() || 'YOUR NAME'}
             </h1>
             <div className="text-sm text-gray-700">
               <span className="hover:text-blue-600 cursor-pointer underline">
-                {data.personalInfo?.email || 'your.email@example.com'}
+                {data.links?.linkedin_user_name ? `${data.links.linkedin_user_name}@example.com` : 'your.email@example.com'}
               </span>
               <span className="mx-2">|</span>
-              <span>{data.personalInfo?.phone || '111.111.1111'}</span>
+              <span>Phone Number</span>
             </div>
           </div>
         </div>
@@ -293,32 +276,30 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
           {/* Left Column */}
           <div className="col-span-2">
             {/* Experience */}
-            {data.experience && data.experience.length > 0 && (
+            {data.experience && (
               <div className="mb-6">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 border-b border-blue-600 pb-1 mb-3">
                   Experience
                 </h2>
-                {data.experience.map((exp, index) => (
-                  <div key={index} className="mb-4">
-                    <div className="flex justify-between items-start mb-1">
-                      <div>
-                        <span className="font-bold text-sm">{exp.company}</span>
-                        <span className="mx-2">|</span>
-                        <span className="italic text-sm">{exp.position}</span>
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        <span>{exp.startDate} - {exp.endDate}</span>
-                        <span className="mx-2">|</span>
-                        <span>{exp.location}</span>
-                      </div>
+                <div className="mb-4">
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <span className="font-bold text-sm">{data.experience.company_name}</span>
+                      <span className="mx-2">|</span>
+                      <span className="italic text-sm">{data.experience.title}</span>
                     </div>
-                    <ul className="text-xs leading-relaxed">
-                      {exp.description?.map((item, i) => (
-                        <li key={i}>• {item}</li>
-                      ))}
-                    </ul>
+                    <div className="text-xs text-gray-600">
+                      <span>{data.experience.start_date} - {data.experience.end_date || 'Present'}</span>
+                      <span className="mx-2">|</span>
+                      <span>{data.experience.location}</span>
+                    </div>
                   </div>
-                ))}
+                  <ul className="text-xs leading-relaxed">
+                    {data.experience.work_done?.map((item, i) => (
+                      <li key={i}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
 
@@ -337,13 +318,11 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                         <span className="italic text-sm">{project.description}</span>
                       </div>
                       <div className="text-xs text-gray-600">
-                        <span>{project.startDate} - {project.endDate}</span>
-                        <span className="mx-2">|</span>
-                        <span>{project.location}</span>
+                        <span>{project.created_at.split('T')[0]} - {project.updated_at.split('T')[0]}</span>
                       </div>
                     </div>
                     <ul className="text-xs leading-relaxed">
-                      {project.details?.map((item, i) => (
+                      {project.topics?.map((item, i) => (
                         <li key={i}>• {item}</li>
                       ))}
                     </ul>
@@ -363,47 +342,34 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                 </h2>
                 {data.education.map((edu, index) => (
                   <div key={index} className="mb-3">
-                    <div className="font-bold text-sm">{edu.institution}</div>
-                    <div className="text-xs">{edu.degree}</div>
-                    <div className="text-xs text-gray-600">{edu.expectedGraduation} | {edu.location}</div>
-                    {edu.gpa && <div className="text-xs">GPA: {edu.gpa}</div>}
+                    <div className="font-bold text-sm">{edu.school}</div>
+                    <div className="text-xs">{edu.degree} in {edu.field}</div>
+                    <div className="text-xs text-gray-600">{edu.start_date} - {edu.end_date || 'Present'} | {edu.location}</div>
                   </div>
                 ))}
               </div>
             )}
 
             {/* Skills */}
-            {data.skills && (
-              <div className="mb-6">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 border-b border-blue-600 pb-1 mb-3">
-                  Skills
-                </h2>
-                
-                {data.skills.programming && (
-                  <div className="mb-3">
-                    <div className="font-bold text-xs">Programming</div>
-                    <div className="text-xs">
-                      {data.skills.programming.expert && data.skills.programming.expert.length > 0 && (
-                        <div><strong>Expert:</strong> {data.skills.programming.expert.join(', ')}</div>
-                      )}
-                      {data.skills.programming.intermediate && data.skills.programming.intermediate.length > 0 && (
-                        <div><strong>Intermediate:</strong> {data.skills.programming.intermediate.join(', ')}</div>
-                      )}
-                      {data.skills.programming.beginner && data.skills.programming.beginner.length > 0 && (
-                        <div><strong>Beginner:</strong> {data.skills.programming.beginner.join(', ')}</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {data.skills.technology && data.skills.technology.length > 0 && (
-                  <div className="mb-3">
-                    <div className="font-bold text-xs">Technology</div>
-                    <div className="text-xs">{data.skills.technology.join(', ')}</div>
-                  </div>
-                )}
+            <div className="mb-6">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 border-b border-blue-600 pb-1 mb-3">
+                Skills
+              </h2>
+              
+              <div className="mb-3">
+                <div className="font-bold text-xs">Tools</div>
+                <div className="text-xs">
+                  {data.experience?.tools_used?.join(' • ') || 'Python • JavaScript • React'}
+                </div>
               </div>
-            )}
+              
+              {data.projects && data.projects.length > 0 && data.projects[0].tools && data.projects[0].tools.length > 0 && (
+                <div className="mb-3">
+                  <div className="font-bold text-xs">Project Technologies</div>
+                  <div className="text-xs">{data.projects[0].tools.join(' • ')}</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         </div>

@@ -1,13 +1,13 @@
 // services/ResumeDataService.ts
-import { ResumeData, SavedResumeData } from '@/types/resume';
+import { UserProfileData, SavedUserProfileData } from '@/types/resume';
 
 export class ResumeDataService {
   private static STORAGE_KEY = 'dijkstra-resume-data';
 
   // Save resume data to localStorage
-  static saveResumeData(resumeId: string, data: Partial<ResumeData>, template: 'deedy' | 'row-based', title: string, documentId: string, userEmail: string, userName: string): void {
+  static saveResumeData(resumeId: string, data: Partial<UserProfileData>, template: 'deedy' | 'row-based', title: string, documentId: string, userEmail: string, userName: string): void {
     try {
-      const savedData: SavedResumeData = {
+      const savedData: SavedUserProfileData = {
         resumeId,
         title,
         template,
@@ -33,7 +33,7 @@ export class ResumeDataService {
   }
 
   // Load specific resume data from localStorage
-  static loadResumeData(resumeId: string): SavedResumeData | null {
+  static loadResumeData(resumeId: string): SavedUserProfileData | null {
     try {
       const allData = this.getAllSavedResumes();
       const resumeData = allData.find(item => item.resumeId === resumeId);
@@ -45,7 +45,7 @@ export class ResumeDataService {
   }
 
   // Get all saved resumes
-  static getAllSavedResumes(): SavedResumeData[] {
+  static getAllSavedResumes(): SavedUserProfileData[] {
     try {
       const data = localStorage.getItem(this.STORAGE_KEY);
       return data ? JSON.parse(data) : [];
@@ -130,3 +130,5 @@ export class ResumeDataService {
     }
   }
 }
+
+// Made with Bob
