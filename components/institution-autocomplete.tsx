@@ -6,37 +6,37 @@ import { Button } from "./ui/button"
 import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-interface Company {
+interface Institution {
   name: string
   domain?: string
   logo_url?: string
 }
 
-interface CompanyData {
+interface InstitutionData {
   name: string
   domain?: string
   logo_url?: string
 }
 
-interface CompanyAutoCompleteProps {
+interface InstitutionAutoCompleteProps {
   apiKey: string
   value: string
-  onChange: (company: CompanyData) => void
-  selectedCompany?: CompanyData | null
+  onChange: (institution: InstitutionData) => void
+  selectedInstitution?: InstitutionData | null
 }
 
-export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }: CompanyAutoCompleteProps) {
+export function InstitutionAutoComplete({ apiKey, value, onChange, selectedInstitution }: InstitutionAutoCompleteProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value||"")
-  const [companies, setCompanies] = useState<Company[]>([])
+  const [institutions, setInstitutions] = useState<Institution[]>([])
 
-  // Check if query matches any existing company exactly
-  const exactMatch = companies.find(c => c.name.toLowerCase() === query.toLowerCase())
+  // Check if query matches any existing institution exactly
+  const exactMatch = institutions.find(c => c.name.toLowerCase() === query.toLowerCase())
   const showCustomOption = query.trim() && !exactMatch
 
   useEffect(()=>{
     if(!query){ 
-      setCompanies([])
+      setInstitutions([])
       return
     }
 
@@ -46,32 +46,32 @@ export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }
           Authorization: `Bearer ${apiKey}`
         }
       }).then((res) => res.json()).then((data)=> {
-        // The API returns an array of companies with logo URLs
+        // The API returns an array of institutions with logo URLs
         if (Array.isArray(data)) {
-          setCompanies(data.map((company: any) => ({
-            name: company.name,
-            domain: company.domain,
-            logo_url: company.logo_url
+          setInstitutions(data.map((institution: any) => ({
+            name: institution.name,
+            domain: institution.domain,
+            logo_url: institution.logo_url
           })))
         } else {
-          setCompanies([])
+          setInstitutions([])
         }
       }).catch((err)=> {
         console.error("Logo.dev error:", err)
-        setCompanies([])
+        setInstitutions([])
       })
     },300)
 
     return () => clearTimeout(timeout)
   }, [query, apiKey])
 
-  const handleCustomCompany = () => {
-    const customCompany: CompanyData = {
+  const handleCustomInstitution = () => {
+    const customInstitution: InstitutionData = {
       name: query.trim(),
       domain: "",
       logo_url: ""
     }
-    onChange(customCompany)
+    onChange(customInstitution)
     setQuery(query.trim())
     setOpen(false)
   }
@@ -83,19 +83,19 @@ export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }
         <PopoverTrigger asChild>
             <Button variant="outline" role="combobox" aria-expanded={open} className="w-[300px] justify-between">
                 <div className="flex items-center gap-2">
-                    {selectedCompany?.logo_url ? (
+                    {selectedInstitution?.logo_url ? (
                         <img 
-                            src={selectedCompany.logo_url} 
-                            alt={`${selectedCompany.name} logo`}
+                            src={selectedInstitution.logo_url} 
+                            alt={`${selectedInstitution.name} logo`}
                             className="w-4 h-4 object-contain"
                         />
-                    ) : selectedCompany ? (
+                    ) : selectedInstitution ? (
                         <div className="w-4 h-4 rounded bg-muted flex items-center justify-center text-xs font-semibold">
-                            {selectedCompany.name.charAt(0).toUpperCase()}
+                            {selectedInstitution.name.charAt(0).toUpperCase()}
                         </div>
                     ) : null}
                     <span className="truncate">
-                        {selectedCompany?.name || value || "Select company..."}
+                        {selectedInstitution?.name || value || "Select institution..."}
                     </span>
                 </div>
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -104,46 +104,46 @@ export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }
         
         <PopoverContent className="w-[300px] p-0 bg-background border">
             <Command className="bg-background">
-                <CommandInput placeholder="Search company..." value={query} onValueChange={setQuery} className="text-foreground" />
+                <CommandInput placeholder="Search institution..."  value={query} onValueChange={setQuery} className="text-foreground" />
                 <CommandList className="bg-background">
-                    {companies.length === 0 && !showCustomOption && query && (
-                        <CommandEmpty>No company found.</CommandEmpty>
+                    {institutions.length === 0 && !showCustomOption && query && (
+                        <CommandEmpty>No institution found.</CommandEmpty>
                     )}
                     
-                    {companies.length > 0 && (
-                        <CommandGroup heading="Companies">
-                            {companies.map((company: Company) => (
+                    {institutions.length > 0 && (
+                        <CommandGroup heading="Institutions">
+                            {institutions.map((institution: Institution) => (
                                 <CommandItem 
-                                    key={company.domain || company.name} 
-                                    value={company.name} 
+                                    key={institution.domain || institution.name} 
+                                    value={institution.name} 
                                     onSelect={(currentValue) => {
-                                        const selectedCompanyData: CompanyData = {
-                                            name: company.name,
-                                            domain: company.domain,
-                                            logo_url: company.logo_url
+                                        const selectedInstitutionData: InstitutionData = {
+                                            name: institution.name,
+                                            domain: institution.domain,
+                                            logo_url: institution.logo_url
                                         }
-                                        onChange(selectedCompanyData)
-                                        setQuery(company.name)
+                                        onChange(selectedInstitutionData)
+                                        setQuery(institution.name)
                                         setOpen(false)
                                     }} 
                                     className="flex items-center gap-2 hover:bg-accent  "
                                 >
-                                    {company.logo_url ? (
+                                    {institution.logo_url ? (
                                         <img 
-                                            src={company.logo_url} 
-                                            alt={`${company.name} logo`}
+                                            src={institution.logo_url} 
+                                            alt={`${institution.name} logo`}
                                             className="w-5 h-5 object-contain flex-shrink-0"
                                         />
                                     ) : (
                                          <img
-                        src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${companies[0]?.name} company logo`)}`}
-                        alt={`${companies[0]?.name} logo`}
+                        src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${institutions[0]?.name} institution logo`)}`}
+                        alt={`${institutions[0]?.name} logo`}
                         className="w-16 h-16 rounded-lg object-cover border"
                       />
                                     )}
-                                    <span className="flex-1 truncate">{company.name}</span>
+                                    <span className="flex-1 truncate">{institution.name}</span>
                                     <Check className={cn("ml-auto h-4 w-4", 
-                                        selectedCompany?.name === company.name ? "opacity-100" : "opacity-0"
+                                        selectedInstitution?.name === institution.name ? "opacity-100" : "opacity-0"
                                     )} />
                                 </CommandItem>
                             ))}
@@ -151,9 +151,9 @@ export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }
                     )}
                     
                     {showCustomOption && (
-                        <CommandGroup heading={companies.length > 0 ? "Or create new" : "Create new"}>
+                        <CommandGroup heading={institutions.length > 0 ? "Or create new" : "Create new"}>
                             <CommandItem
-                                onSelect={handleCustomCompany}
+                                onSelect={handleCustomInstitution}
                                 className="flex items-center gap-2 text-primary hover:bg-accent"
                             >
                                 <Plus className="w-5 h-5" />
