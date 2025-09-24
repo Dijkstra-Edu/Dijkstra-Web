@@ -1,21 +1,22 @@
 import { NextResponse } from "next/server"
+import { API_URLS } from "@/constants/api"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const q = searchParams.get("q")?.trim()
+  const query = searchParams.get("q")?.trim()
 
-  if (!q) {
+  if (!query) {
     // No query, return empty list to keep UX simple
     return NextResponse.json([])
   }
 
-  const apiKey = process.env.LOGODEV_API_KEY || process.env.NEXT_PUBLIC_LOGODEV_API_KEY
+  const apiKey = process.env.NEXT_PUBLIC_LOGODEV_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: "Missing LOGODEV_API_KEY" }, { status: 500 })
   }
 
   try {
-    const res = await fetch(`https://api.logo.dev/search?q=${encodeURIComponent(q)}` , {
+    const response = await fetch(API_URLS.logoDevSearch(query), {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
@@ -23,18 +24,18 @@ export async function GET(request: Request) {
       next: { revalidate: 60 },
     })
 
-    if (!res.ok) {
-      const text = await res.text()
-      return NextResponse.json({ error: "Upstream error", details: text }, { status: res.status })
+    if (!response.ok) {
+      const text = await response.text()
+      return NextResponse.json({ error: "Upstream error", details: text }, { status: response.status })
     }
 
-    const data = await res.json()
+    const data = await response.json()
     const companies = Array.isArray(data)
-      ? data.map((c: any) => ({ name: c.name, domain: c.domain, logo_url: c.logo_url }))
+      ? data.map((company: any) => ({ name: company.name, domain: company.domain, logo_url: company.logo_url }))
       : []
 
     return NextResponse.json(companies)
-  } catch (err: any) {
-    return NextResponse.json({ error: "Request failed", message: err?.message ?? String(err) }, { status: 502 })
+  } catch (error: any) {
+    return NextResponse.json({ error: "Request failed", message: error?.message ?? String(error) }, { status: 502 })
   }
 }
