@@ -9,30 +9,45 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Edit, Plus, GraduationCap, Trash2, Save, X } from "lucide-react"
+import { MonthPicker } from "@/components/ui/date-picker"
+import { InstitutionAutoComplete } from "./institution-autocomplete"
+interface Institution{
+  name: string
+  domain: string
+  logo_url?: string
+}
 
 interface Education {
   id: string
-  institution: string
+  institution: Institution | null
   degree: string
   field: string
-  startDate: string
-  endDate: string
+  startDate: Date
+  endDate: Date
   gpa: string
   current: boolean
   description: string
 }
 
+// Draft type for Add form where dates can be left blank until selected
+type EducationDraft = Omit<Education, "id" | "startDate" | "endDate"> & {
+  startDate?: Date
+  endDate?: Date
+}
+
 export function Education() {
   const [isEditing, setIsEditing] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [editValidationErrors, setEditValidationErrors] = useState<{[key: string]: string}>({})
   const [education, setEducation] = useState<Education[]>([
     {
       id: "1",
-      institution: "University of California, Berkeley",
+      institution: {name: "University of California, Berkeley", domain: "https://www.berkeley.edu" },
       degree: "Bachelor of Science",
       field: "Computer Science",
-      startDate: "2022-08",
-      endDate: "2026-05",
+      startDate: new Date(2022, 7), // August 2022
+      endDate: new Date(2026, 4), // May 2026
       gpa: "3.8",
       current: true,
       description:
@@ -40,11 +55,11 @@ export function Education() {
     },
     {
       id: "2",
-      institution: "Community College of San Francisco",
+      institution: {name: "Community College of San Francisco" , domain: "https://www.ccsf.edu"},
       degree: "Associate of Science",
       field: "Mathematics",
-      startDate: "2020-08",
-      endDate: "2022-05",
+      startDate: new Date(2020, 7), 
+      endDate: new Date(2022, 4), 
       gpa: "3.9",
       current: false,
       description: "Completed general education requirements and advanced mathematics courses",
@@ -53,20 +68,69 @@ export function Education() {
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Education | null>(null)
-  const [newForm, setNewForm] = useState<Omit<Education, "id">>({
-    institution: "",
+  const [newForm, setNewForm] = useState<EducationDraft>({
+    institution: null,
     degree: "",
     field: "",
-    startDate: "",
-    endDate: "",
+    startDate: undefined,
+    endDate: undefined,
     gpa: "",
     current: false,
     description: "",
   })
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+  const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", { year: "numeric", month: "short" })
+  }
+
+  const validateForm = (form: EducationDraft) => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!form.institution?.name) {
+      errors.institution = "Institution is required"
+    }
+    if (!form.degree.trim()) {
+      errors.degree = "Degree is required"
+    }
+    if (!form.field.trim()) {
+      errors.field = "Field of study is required"
+    }
+    if (!form.startDate) {
+      errors.startDate = "Start date is required"
+    }
+    if (!form.current && !form.endDate) {
+      errors.endDate = "End date is required when not currently studying"
+    }
+    if (!form.current && form.startDate && form.endDate && form.startDate >= form.endDate) {
+      errors.endDate = "End date must be after start date"
+    }
+    
+    return errors
+  }
+
+  const validateEditForm = (form: Education) => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!form.institution?.name) {
+      errors.institution = "Institution is required"
+    }
+    if (!form.degree.trim()) {
+      errors.degree = "Degree is required"
+    }
+    if (!form.field.trim()) {
+      errors.field = "Field of study is required"
+    }
+    if (!form.startDate) {
+      errors.startDate = "Start date is required"
+    }
+    if (!form.current && !form.endDate) {
+      errors.endDate = "End date is required when not currently studying"
+    }
+    if (!form.current && form.startDate && form.endDate && form.startDate >= form.endDate) {
+      errors.endDate = "End date must be after start date"
+    }
+    
+    return errors
   }
 
   const handleEdit = (edu: Education) => {
@@ -76,15 +140,22 @@ export function Education() {
 
   const handleSave = () => {
     if (editForm) {
-      setEducation((prev) => prev.map((edu) => (edu.id === editForm.id ? editForm : edu)))
-      setEditingId(null)
-      setEditForm(null)
+      const errors = validateEditForm(editForm)
+      setEditValidationErrors(errors)
+      
+      if (Object.keys(errors).length === 0) {
+        setEducation((prev) => prev.map((edu) => (edu.id === editForm.id ? editForm : edu)))
+        setEditingId(null)
+        setEditForm(null)
+        setEditValidationErrors({})
+      }
     }
   }
 
   const handleCancel = () => {
     setEditingId(null)
     setEditForm(null)
+    setEditValidationErrors({})
   }
 
   const handleDelete = (id: string) => {
@@ -92,22 +163,28 @@ export function Education() {
   }
 
   const handleAdd = () => {
-    const newEdu: Education = {
-      ...newForm,
-      id: Date.now().toString(),
+    const errors = validateForm(newForm)
+    setValidationErrors(errors)
+    
+    if (Object.keys(errors).length === 0) {
+      const newEdu: Education = {
+        ...(newForm as Omit<Education, "id"> & { startDate: Date; endDate: Date }),
+        id: Date.now().toString(),
+      }
+      setEducation((prev) => [newEdu, ...prev])
+      setNewForm({
+        institution: null,
+        degree: "",
+        field: "",
+        startDate: undefined,
+        endDate: undefined,
+        gpa: "",
+        current: false,
+        description: "",
+      })
+      setIsAdding(false)
+      setValidationErrors({})
     }
-    setEducation((prev) => [newEdu, ...prev])
-    setNewForm({
-      institution: "",
-      degree: "",
-      field: "",
-      startDate: "",
-      endDate: "",
-      gpa: "",
-      current: false,
-      description: "",
-    })
-    setIsAdding(false)
   }
 
   return (
@@ -137,55 +214,85 @@ export function Education() {
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="new-degree">Degree</Label>
+                    <div className="flex flex-col space-y-2">
+                      <Label htmlFor="new-degree" className="flex items-center gap-1">
+                        Degree <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="new-degree"
                         value={newForm.degree}
                         onChange={(e) => setNewForm({ ...newForm, degree: e.target.value })}
                         placeholder="Bachelor of Science"
+                        className={validationErrors.degree ? "border-red-500" : ""}
                       />
+                      {validationErrors.degree && (
+                        <span className="text-red-500 text-sm">{validationErrors.degree}</span>
+                      )}
                     </div>
-                    <div>
-                      <Label htmlFor="new-field">Field of Study</Label>
+                    <div className="flex flex-col space-y-2">
+                      <Label htmlFor="new-field" className="flex items-center gap-1">
+                        Field of Study <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="new-field"
                         value={newForm.field}
                         onChange={(e) => setNewForm({ ...newForm, field: e.target.value })}
                         placeholder="Computer Science"
+                        className={validationErrors.field ? "border-red-500" : ""}
                       />
+                      {validationErrors.field && (
+                        <span className="text-red-500 text-sm">{validationErrors.field}</span>
+                      )}
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="new-institution">Institution</Label>
-                    <Input
-                      id="new-institution"
-                      value={newForm.institution}
-                      onChange={(e) => setNewForm({ ...newForm, institution: e.target.value })}
-                      placeholder="University Name"
-                    />
+                  <div className="flex flex-col space-y-2">
+                    <Label htmlFor="new-institution" className="flex items-center gap-1">
+                      Institution <span className="text-red-500">*</span>
+                    </Label>
+                    <InstitutionAutoComplete
+                        value={newForm.institution?.name || ""}
+                        onChange={(val) => setNewForm({ ...newForm, institution: { 
+                          name: val.name, 
+                          domain: val.domain || "", 
+                          logo_url: val.logo_url || "" 
+                        }})}
+                        selectedInstitution={newForm.institution}
+                      />
+                    {validationErrors.institution && (
+                      <span className="text-red-500 text-sm">{validationErrors.institution}</span>
+                    )}
                   </div>
                   <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="new-start">Start Date</Label>
-                      <Input
-                        id="new-start"
-                        type="month"
-                        value={newForm.startDate}
-                        onChange={(e) => setNewForm({ ...newForm, startDate: e.target.value })}
+                    <div className="flex flex-col space-y-2">
+                      <Label htmlFor="new-start" className="flex items-center gap-1">
+                        Start Date <span className="text-red-500">*</span>
+                      </Label>
+                      <MonthPicker
+                        date={newForm.startDate}
+                        onDateChange={(date) => setNewForm({ ...newForm, startDate: date })}
+                        placeholder="Select start date"
+                        className={validationErrors.startDate ? "border-red-500" : ""}
                       />
+                      {validationErrors.startDate && (
+                        <span className="text-red-500 text-sm">{validationErrors.startDate}</span>
+                      )}
                     </div>
-                    <div>
-                      <Label htmlFor="new-end">End Date</Label>
-                      <Input
-                        id="new-end"
-                        type="month"
-                        value={newForm.endDate}
-                        onChange={(e) => setNewForm({ ...newForm, endDate: e.target.value })}
+                    <div className="flex flex-col space-y-2">
+                      <Label htmlFor="new-end" className="flex items-center gap-1">
+                        End Date {!newForm.current && <span className="text-red-500">*</span>}
+                      </Label>
+                      <MonthPicker
+                        date={newForm.endDate}
+                        onDateChange={(date) => setNewForm({ ...newForm, endDate: date })}
+                        placeholder="Select end date"
                         disabled={newForm.current}
+                        className={validationErrors.endDate ? "border-red-500" : ""}
                       />
+                      {validationErrors.endDate && (
+                        <span className="text-red-500 text-sm">{validationErrors.endDate}</span>
+                      )}
                     </div>
-                    <div>
+                    <div className="flex flex-col space-y-2">
                       <Label htmlFor="new-gpa">GPA</Label>
                       <Input
                         id="new-gpa"
@@ -199,13 +306,21 @@ export function Education() {
                     <Checkbox
                       id="new-current"
                       checked={newForm.current}
-                      onCheckedChange={(checked) =>
-                        setNewForm({ ...newForm, current: !!checked, endDate: checked ? "" : newForm.endDate })
-                      }
+                      onCheckedChange={(checked) => {
+                        setNewForm({ ...newForm, current: !!checked, endDate: checked ? new Date() : newForm.endDate })
+                        if (checked) {
+                          // Clear end date validation error when "currently studying" is checked
+                          setValidationErrors(prev => {
+                            const newErrors = { ...prev }
+                            delete newErrors.endDate
+                            return newErrors
+                          })
+                        }
+                      }}
                     />
                     <Label htmlFor="new-current">Currently studying here</Label>
                   </div>
-                  <div>
+                  <div className="flex flex-col space-y-2">
                     <Label htmlFor="new-description">Description</Label>
                     <Textarea
                       id="new-description"
@@ -219,7 +334,7 @@ export function Education() {
                       <Save className="w-4 h-4 mr-2" />
                       Save
                     </Button>
-                    <Button variant="outline" onClick={() => setIsAdding(false)}>
+                    <Button variant="outline" onClick={() => { setIsAdding(false); setValidationErrors({}); }}>
                       <X className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
@@ -238,52 +353,83 @@ export function Education() {
                   <CardContent className="pt-6">
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="edit-degree">Degree</Label>
+                        <div className="flex flex-col space-y-2">
+                          <Label htmlFor="edit-degree" className="flex items-center gap-1">
+                            Degree <span className="text-red-500">*</span>
+                          </Label>
                           <Input
                             id="edit-degree"
                             value={editForm.degree}
                             onChange={(e) => setEditForm({ ...editForm, degree: e.target.value })}
+                            className={editValidationErrors.degree ? "border-red-500" : ""}
                           />
+                          {editValidationErrors.degree && (
+                            <span className="text-red-500 text-sm">{editValidationErrors.degree}</span>
+                          )}
                         </div>
-                        <div>
-                          <Label htmlFor="edit-field">Field of Study</Label>
+                        <div  className="flex flex-col space-y-2">
+                          <Label htmlFor="edit-field" className="flex items-center gap-1">
+                            Field of Study <span className="text-red-500">*</span>
+                          </Label>
                           <Input
                             id="edit-field"
                             value={editForm.field}
                             onChange={(e) => setEditForm({ ...editForm, field: e.target.value })}
+                            className={editValidationErrors.field ? "border-red-500" : ""}
                           />
+                          {editValidationErrors.field && (
+                            <span className="text-red-500 text-sm">{editValidationErrors.field}</span>
+                          )}
                         </div>
                       </div>
-                      <div>
-                        <Label htmlFor="edit-institution">Institution</Label>
-                        <Input
-                          id="edit-institution"
-                          value={editForm.institution}
-                          onChange={(e) => setEditForm({ ...editForm, institution: e.target.value })}
-                        />
+                      <div  className="flex flex-col space-y-2">
+                        <Label htmlFor="edit-institution" className="flex items-center gap-1">
+                          Institution <span className="text-red-500">*</span>
+                        </Label>
+                        <InstitutionAutoComplete
+                            value={editForm.institution?.name || ""}
+                            onChange={(val) => setEditForm({ ...editForm, institution: { 
+                              name: val.name, 
+                              domain: val.domain || "", 
+                              logo_url: val.logo_url || "" 
+                            }})}
+                            selectedInstitution={editForm.institution}
+                          />
+                        {editValidationErrors.institution && (
+                          <span className="text-red-500 text-sm">{editValidationErrors.institution}</span>
+                        )}
                       </div>
                       <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="edit-start">Start Date</Label>
-                          <Input
-                            id="edit-start"
-                            type="month"
-                            value={editForm.startDate}
-                            onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
-                          />
+                        <div  className="flex flex-col space-y-2">
+                          <Label htmlFor="edit-start" className="flex items-center gap-1">
+                            Start Date <span className="text-red-500">*</span>
+                          </Label>
+                          <MonthPicker
+                            date={editForm.startDate}
+                            onDateChange={(date) => setEditForm({ ...editForm, startDate: date || new Date() })}
+                            placeholder="Select start date"
+                            className={editValidationErrors.startDate ? "border-red-500" : ""}
+                          /> 
+                          {editValidationErrors.startDate && (
+                            <span className="text-red-500 text-sm">{editValidationErrors.startDate}</span>
+                          )}
                         </div>
-                        <div>
-                          <Label htmlFor="edit-end">End Date</Label>
-                          <Input
-                            id="edit-end"
-                            type="month"
-                            value={editForm.endDate}
-                            onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
+                        <div  className="flex flex-col space-y-2">
+                          <Label htmlFor="edit-end" className="flex items-center gap-1">
+                            End Date <span className="text-red-500">*</span>
+                          </Label>
+                          <MonthPicker
+                            date={editForm.endDate}
+                            onDateChange={(date) => setEditForm({ ...editForm, endDate: date || new Date() })}
+                            placeholder="Select end date"
                             disabled={editForm.current}
+                            className={editValidationErrors.endDate ? "border-red-500" : ""}
                           />
+                          {editValidationErrors.endDate && (
+                            <span className="text-red-500 text-sm">{editValidationErrors.endDate}</span>
+                          )}
                         </div>
-                        <div>
+                        <div  className="flex flex-col space-y-2">
                           <Label htmlFor="edit-gpa">GPA</Label>
                           <Input
                             id="edit-gpa"
@@ -296,13 +442,21 @@ export function Education() {
                         <Checkbox
                           id="edit-current"
                           checked={editForm.current}
-                          onCheckedChange={(checked) =>
-                            setEditForm({ ...editForm, current: !!checked, endDate: checked ? "" : editForm.endDate })
-                          }
+                          onCheckedChange={(checked) => {
+                            setEditForm({ ...editForm, current: !!checked, endDate: checked ? new Date() : editForm.endDate })
+                            if (checked) {
+                              // Clear end date validation error when "currently studying" is checked
+                              setEditValidationErrors(prev => {
+                                const newErrors = { ...prev }
+                                delete newErrors.endDate
+                                return newErrors
+                              })
+                            }
+                          }}
                         />
                         <Label htmlFor="edit-current">Currently studying here</Label>
                       </div>
-                      <div>
+                      <div  className="flex flex-col space-y-2">
                         <Label htmlFor="edit-description">Description</Label>
                         <Textarea
                           id="edit-description"
@@ -327,16 +481,28 @@ export function Education() {
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
-                      <img
-                        src={`/abstract-geometric-shapes.png?key=uovw9&height=48&width=48&query=${encodeURIComponent(`${edu.institution} university logo`)}`}
+                     {edu.institution?.logo_url ? (
+                        <img
+                          src={edu.institution.logo_url}
+                          alt={`${edu.institution.name} logo`}
+                          className="w-16 h-16 rounded-lg object-contain border bg-white"
+                        />
+                      ) : edu.institution ? (
+                         <img
+                        src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${edu.institution} company logo`)}`}
                         alt={`${edu.institution} logo`}
                         className="w-16 h-16 rounded-lg object-cover border"
                       />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg border bg-muted flex items-center justify-center">
+                          <span className="text-lg font-semibold text-muted-foreground">?</span>
+                        </div>
+                      )}
                       <div>
                         <h4 className="font-semibold text-lg">
                           {edu.degree} in {edu.field}
                         </h4>
-                        <p className="text-primary font-medium">{edu.institution}</p>
+                        <p className="text-primary font-medium">{edu.institution?.name}</p>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                           <span>
                             {formatDate(edu.startDate)} - {edu.current ? "Present" : formatDate(edu.endDate)}

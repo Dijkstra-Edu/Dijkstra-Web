@@ -6,16 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CalendarHeatmap from "react-calendar-heatmap";
+import type ReactCalendarHeatmapNS from "react-calendar-heatmap";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import "react-calendar-heatmap/dist/styles.css";
-import "react-tooltip/dist/react-tooltip.css";
 
 export function ContributionHeatmap() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [tooltipContent, setTooltipContent] = useState("");
 
-  const generateYearData = (year: number) => {
-    const data = [];
+  type HeatmapValue = { date: Date; count?: number };
+
+  const generateYearData = (year: number): HeatmapValue[] => {
+    const data: HeatmapValue[] = [];
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
 
@@ -33,7 +34,7 @@ export function ContributionHeatmap() {
 
   const yearData = useMemo(() => generateYearData(currentYear), [currentYear]);
 
-  const totalContributions = yearData.reduce((sum, day) => sum + day.count, 0);
+  const totalContributions = yearData.reduce((sum, day) => sum + (day.count || 0), 0);
 
   const goToPreviousYear = () => {
     setCurrentYear(currentYear - 1);
@@ -50,8 +51,8 @@ export function ContributionHeatmap() {
     return currentYear < new Date().getFullYear();
   };
 
-  const getClassForValue = (value: any) => {
-    if (!value || value.count === 0) {
+  const getClassForValue = (value?: HeatmapValue) => {
+    if (!value || !value.count) {
       return "color-empty";
     }
     if (value.count === 1) return "color-scale-1";
@@ -82,16 +83,12 @@ export function ContributionHeatmap() {
               showWeekdayLabels={true}
               showMonthLabels={true}
               weekdayLabels={["S", "M", "T", "W", "T", "F", "S"]}
-              tooltipDataAttrs={(value: any) => {
-                return {
-                  "data-tooltip-id": "calendar-tooltip",
-                  "data-tooltip-content": value.date
-                    ? `${value.date.toDateString()}: ${
-                        value.count || 0
-                      } contributions`
-                    : "No contributions",
-                };
-              }}
+              tooltipDataAttrs={(value) => ({
+                "data-tooltip-id": "calendar-tooltip",
+                "data-tooltip-content": value?.date
+                  ? `${(value.date as Date).toDateString()}: ${((value as any)?.count || 0)} contributions`
+                  : "No contributions",
+              }) as ReactCalendarHeatmapNS.TooltipDataAttrs}
             />
           </div>
 
