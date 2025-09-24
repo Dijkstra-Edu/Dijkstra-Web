@@ -19,13 +19,12 @@ interface InstitutionData {
 }
 
 interface InstitutionAutoCompleteProps {
-  apiKey: string
   value: string
   onChange: (institution: InstitutionData) => void
   selectedInstitution?: InstitutionData | null
 }
 
-export function InstitutionAutoComplete({ apiKey, value, onChange, selectedInstitution }: InstitutionAutoCompleteProps) {
+export function InstitutionAutoComplete({ value, onChange, selectedInstitution }: InstitutionAutoCompleteProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value||"")
   const [institutions, setInstitutions] = useState<Institution[]>([])
@@ -41,11 +40,8 @@ export function InstitutionAutoComplete({ apiKey, value, onChange, selectedInsti
     }
 
     const timeout = setTimeout(() => {
-      fetch(`https://api.logo.dev/search?q=${encodeURIComponent(query)}`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`
-        }
-      }).then((res) => res.json()).then((data)=> {
+      fetch(`/api/companies?q=${encodeURIComponent(query)}`)
+      .then((res) => res.json()).then((data)=> {
         // The API returns an array of institutions with logo URLs
         if (Array.isArray(data)) {
           setInstitutions(data.map((institution: any) => ({
@@ -63,7 +59,7 @@ export function InstitutionAutoComplete({ apiKey, value, onChange, selectedInsti
     },300)
 
     return () => clearTimeout(timeout)
-  }, [query, apiKey])
+  }, [query])
 
   const handleCustomInstitution = () => {
     const customInstitution: InstitutionData = {
@@ -128,19 +124,17 @@ export function InstitutionAutoComplete({ apiKey, value, onChange, selectedInsti
                                     }} 
                                     className="flex items-center gap-2 hover:bg-accent  "
                                 >
-                                    {institution.logo_url ? (
-                                        <img 
-                                            src={institution.logo_url} 
-                                            alt={`${institution.name} logo`}
-                                            className="w-5 h-5 object-contain flex-shrink-0"
-                                        />
-                                    ) : (
-                                         <img
-                        src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${institutions[0]?.name} institution logo`)}`}
-                        alt={`${institutions[0]?.name} logo`}
-                        className="w-16 h-16 rounded-lg object-cover border"
-                      />
-                                    )}
+                  {institution.logo_url ? (
+                    <img 
+                      src={institution.logo_url} 
+                      alt={`${institution.name} logo`}
+                      className="w-5 h-5 object-contain flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-semibold">
+                      {institution.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                                     <span className="flex-1 truncate">{institution.name}</span>
                                     <Check className={cn("ml-auto h-4 w-4", 
                                         selectedInstitution?.name === institution.name ? "opacity-100" : "opacity-0"

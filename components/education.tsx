@@ -29,6 +29,12 @@ interface Education {
   description: string
 }
 
+// Draft type for Add form where dates can be left blank until selected
+type EducationDraft = Omit<Education, "id" | "startDate" | "endDate"> & {
+  startDate?: Date
+  endDate?: Date
+}
+
 export function Education() {
   const [isEditing, setIsEditing] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
@@ -62,12 +68,12 @@ export function Education() {
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Education | null>(null)
-  const [newForm, setNewForm] = useState<Omit<Education, "id">>({
+  const [newForm, setNewForm] = useState<EducationDraft>({
     institution: null,
     degree: "",
     field: "",
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: undefined,
+    endDate: undefined,
     gpa: "",
     current: false,
     description: "",
@@ -77,7 +83,7 @@ export function Education() {
     return date.toLocaleDateString("en-US", { year: "numeric", month: "short" })
   }
 
-  const validateForm = (form: Omit<Education, "id">) => {
+  const validateForm = (form: EducationDraft) => {
     const errors: {[key: string]: string} = {}
     
     if (!form.institution?.name) {
@@ -162,7 +168,7 @@ export function Education() {
     
     if (Object.keys(errors).length === 0) {
       const newEdu: Education = {
-        ...newForm,
+        ...(newForm as Omit<Education, "id"> & { startDate: Date; endDate: Date }),
         id: Date.now().toString(),
       }
       setEducation((prev) => [newEdu, ...prev])
@@ -170,8 +176,8 @@ export function Education() {
         institution: null,
         degree: "",
         field: "",
-        startDate: new Date(),
-        endDate: new Date(),
+        startDate: undefined,
+        endDate: undefined,
         gpa: "",
         current: false,
         description: "",
@@ -244,7 +250,6 @@ export function Education() {
                       Institution <span className="text-red-500">*</span>
                     </Label>
                     <InstitutionAutoComplete
-                        apiKey={process.env.NEXT_PUBLIC_LOGODEV_API_KEY!}
                         value={newForm.institution?.name || ""}
                         onChange={(val) => setNewForm({ ...newForm, institution: { 
                           name: val.name, 
@@ -264,7 +269,7 @@ export function Education() {
                       </Label>
                       <MonthPicker
                         date={newForm.startDate}
-                        onDateChange={(date) => setNewForm({ ...newForm, startDate: date || new Date() })}
+                        onDateChange={(date) => setNewForm({ ...newForm, startDate: date })}
                         placeholder="Select start date"
                         className={validationErrors.startDate ? "border-red-500" : ""}
                       />
@@ -278,7 +283,7 @@ export function Education() {
                       </Label>
                       <MonthPicker
                         date={newForm.endDate}
-                        onDateChange={(date) => setNewForm({ ...newForm, endDate: date || new Date() })}
+                        onDateChange={(date) => setNewForm({ ...newForm, endDate: date })}
                         placeholder="Select end date"
                         disabled={newForm.current}
                         className={validationErrors.endDate ? "border-red-500" : ""}
@@ -329,7 +334,7 @@ export function Education() {
                       <Save className="w-4 h-4 mr-2" />
                       Save
                     </Button>
-                    <Button variant="outline" onClick={() => setIsAdding(false)}>
+                    <Button variant="outline" onClick={() => { setIsAdding(false); setValidationErrors({}); }}>
                       <X className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
@@ -382,7 +387,6 @@ export function Education() {
                           Institution <span className="text-red-500">*</span>
                         </Label>
                         <InstitutionAutoComplete
-                            apiKey={process.env.NEXT_PUBLIC_LOGODEV_API_KEY!}
                             value={editForm.institution?.name || ""}
                             onChange={(val) => setEditForm({ ...editForm, institution: { 
                               name: val.name, 

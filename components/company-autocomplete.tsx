@@ -19,13 +19,12 @@ interface CompanyData {
 }
 
 interface CompanyAutoCompleteProps {
-  apiKey: string
   value: string
   onChange: (company: CompanyData) => void
   selectedCompany?: CompanyData | null
 }
 
-export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }: CompanyAutoCompleteProps) {
+export function CompanyAutoComplete({ value, onChange, selectedCompany }: CompanyAutoCompleteProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value||"")
   const [companies, setCompanies] = useState<Company[]>([])
@@ -41,29 +40,23 @@ export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }
     }
 
     const timeout = setTimeout(() => {
-      fetch(`https://api.logo.dev/search?q=${encodeURIComponent(query)}`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`
-        }
-      }).then((res) => res.json()).then((data)=> {
-        // The API returns an array of companies with logo URLs
-        if (Array.isArray(data)) {
-          setCompanies(data.map((company: any) => ({
-            name: company.name,
-            domain: company.domain,
-            logo_url: company.logo_url
-          })))
-        } else {
+      fetch(`/api/companies?q=${encodeURIComponent(query)}`)
+        .then((res) => res.json())
+        .then((data)=> {
+          if (Array.isArray(data)) {
+            setCompanies(data)
+          } else {
+            setCompanies([])
+          }
+        })
+        .catch((err)=> {
+          console.error("Company search error:", err)
           setCompanies([])
-        }
-      }).catch((err)=> {
-        console.error("Logo.dev error:", err)
-        setCompanies([])
-      })
+        })
     },300)
 
     return () => clearTimeout(timeout)
-  }, [query, apiKey])
+  }, [query])
 
   const handleCustomCompany = () => {
     const customCompany: CompanyData = {
@@ -102,10 +95,10 @@ export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }
             </Button>
         </PopoverTrigger>
         
-        <PopoverContent className="w-[300px] p-0 bg-background border">
-            <Command className="bg-background">
+        <PopoverContent className="w-[300px] p-0 bg-popover text-popover-foreground border">
+            <Command className="bg-popover text-popover-foreground">
                 <CommandInput placeholder="Search company..." value={query} onValueChange={setQuery} className="text-foreground" />
-                <CommandList className="bg-background">
+                <CommandList className="bg-popover text-popover-foreground">
                     {companies.length === 0 && !showCustomOption && query && (
                         <CommandEmpty>No company found.</CommandEmpty>
                     )}
@@ -135,11 +128,9 @@ export function CompanyAutoComplete({ apiKey, value, onChange, selectedCompany }
                                             className="w-5 h-5 object-contain flex-shrink-0"
                                         />
                                     ) : (
-                                         <img
-                        src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${companies[0]?.name} company logo`)}`}
-                        alt={`${companies[0]?.name} logo`}
-                        className="w-16 h-16 rounded-lg object-cover border"
-                      />
+                                        <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-semibold">
+                                          {company.name.charAt(0).toUpperCase()}
+                                        </div>
                                     )}
                                     <span className="flex-1 truncate">{company.name}</span>
                                     <Check className={cn("ml-auto h-4 w-4", 

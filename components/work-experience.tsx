@@ -29,6 +29,12 @@ interface WorkExperience {
   skills: string[]
 }
 
+// Draft type used for the Add form where dates can be left blank until chosen
+type WorkExperienceDraft = Omit<WorkExperience, "id" | "startDate" | "endDate"> & {
+  startDate?: Date
+  endDate?: Date
+}
+
 export function WorkExperience() {
   const [isEditing, setIsEditing] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
@@ -59,11 +65,11 @@ export function WorkExperience() {
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<WorkExperience | null>(null)
-  const [newForm, setNewForm] = useState<Omit<WorkExperience, "id">>({
+  const [newForm, setNewForm] = useState<WorkExperienceDraft>({
     company: null,
     position: "",
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: undefined,
+    endDate: undefined,
     current: false,
     description: "",
     skills: [],
@@ -104,7 +110,7 @@ export function WorkExperience() {
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
   const [editValidationErrors, setEditValidationErrors] = useState<{[key: string]: string}>({})
 
-  const validateForm = (form: Omit<WorkExperience, "id">) => {
+  const validateForm = (form: WorkExperienceDraft) => {
     const errors: {[key: string]: string} = {}
     
     if (!form.company?.name) {
@@ -186,15 +192,16 @@ export function WorkExperience() {
     }
     
     const newExp: WorkExperience = {
-      ...newForm,
+      // dates are guaranteed by validation above
+      ...(newForm as Omit<WorkExperience, "id"> & { startDate: Date; endDate: Date }),
       id: Date.now().toString(),
     }
     setExperiences((prev) => [newExp, ...prev])
     setNewForm({
       company: null,
       position: "",
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: undefined,
+      endDate: undefined,
       current: false,
       description: "",
       skills: [],
@@ -259,7 +266,6 @@ export function WorkExperience() {
                         Company <span className="text-red-500">*</span>
                       </Label>
                       <CompanyAutoComplete
-                        apiKey={process.env.NEXT_PUBLIC_LOGODEV_API_KEY!}
                         value={newForm.company?.name || ""}
                         onChange={(val) => setNewForm({ ...newForm, company: { 
                           name: val.name, 
@@ -280,7 +286,7 @@ export function WorkExperience() {
                       </Label>
                       <MonthPicker
                         date={newForm.startDate}
-                        onDateChange={(date) => setNewForm({ ...newForm, startDate: date || new Date() })}
+                        onDateChange={(date) => setNewForm({ ...newForm, startDate: date })}
                         placeholder="Select start month"
                         className={validationErrors.startDate ? "border-red-500" : ""}
                       />
@@ -294,7 +300,7 @@ export function WorkExperience() {
                       </Label>
                       <MonthPicker
                         date={newForm.endDate}
-                        onDateChange={(date) => setNewForm({ ...newForm, endDate: date || new Date() })}
+                        onDateChange={(date) => setNewForm({ ...newForm, endDate: date })}
                         placeholder="Select end month"
                         disabled={newForm.current}
                         className={validationErrors.endDate ? "border-red-500" : ""}
@@ -386,7 +392,6 @@ export function WorkExperience() {
                             Company <span className="text-red-500">*</span>
                           </Label>
                           <CompanyAutoComplete
-                            apiKey={process.env.NEXT_PUBLIC_LOGODEV_API_KEY!}
                             value={editForm.company?.name || ""}
                             onChange={(val) => setEditForm({ ...editForm, company: { 
                               name: val.name, 
