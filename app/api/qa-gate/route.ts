@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       console.log("Checking membership in team:", teamName);
       
       const teamRes = await fetch(
-        `https://api.github.com/orgs/${ORG}/teams/${teamName}/members/${username}`,
+        `https://api.github.com/orgs/${ORG}/teams/team-${teamName}/members/${username}`,
         {
           headers: {
             Authorization: `Bearer ${GHTOKEN}`,
