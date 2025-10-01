@@ -3,6 +3,6 @@ import LandingPage from "@/components/landing-page"
 
 
 export default function Home() {
-   return <ComingSoonPage />
-      // return <LandingPage />
+   // return <ComingSoonPage />
+      return <LandingPage />
 }
