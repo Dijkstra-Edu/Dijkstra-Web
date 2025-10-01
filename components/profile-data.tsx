@@ -176,61 +176,55 @@ export function ProfileData() {
         </div>
         <Separator className="my-1" />
 
-        {/* Team & Project Section with red to grey to black gradient */}
-        <div
-          className="p-[2px] rounded-lg border-2 border-transparent 
-                        bg-gradient-to-r from-green-700 via-gray-500 to-black bg-origin-border"
-        >
-          <div className="w-full h-full bg-background rounded-md p-4 space-y-3">
-            <h3 className="text-m font-bold text-center mb-3">
-              Current Project & Team
-            </h3>
+        {/* Current Project & Team Card f0f5f0 */}
+        <Card className="bg-[#f0f5f0] dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-0 shadow-md">
+          <CardContent className="py-2 space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-bold">Current Project & Team</h3>
+              <p className="text-muted-foreground dark:text-gray-400 text-sm mt-1">
+                Your current assignment and role
+              </p>
+            </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-red-500" />
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
                 <div>
-                  <span className="text-xs text-muted-foreground">Team: </span>
-                  <span className="text-xs font-medium">
-                    <a href="#">CERT Generator</a>
+                  <span className="text-xs text-muted-foreground dark:text-gray-400">Team: </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <a href="#" className="hover:underline">CERT Generator</a>
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <FolderGit2 className="w-4 h-4 text-gray-500" />
+              <div className="flex items-center gap-3">
+                <FolderGit2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <div>
-                  <span className="text-xs text-muted-foreground">
-                    Project:{" "}
-                  </span>
-                  <span className="text-xs font-medium">
-                    <a href="#">Dijkstra Statistics & Aggregation</a>
+                  <span className="text-xs text-muted-foreground dark:text-gray-400">Project: </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <a href="#" className="hover:underline">Dijkstra Statistics & Aggregation</a>
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-gray-700" />
+              <div className="flex items-center gap-3">
+                <UserCheck className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                 <div>
-                  <span className="text-xs text-muted-foreground">Role: </span>
-                  <span className="text-xs font-medium">
-                    SDE-1 (Frontend Engineer)
-                  </span>
+                  <span className="text-xs text-muted-foreground dark:text-gray-400">Role: </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">SDE-1 (Frontend Engineer)</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-black" />
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-pink-600 dark:text-pink-400" />
                 <div>
-                  <span className="text-xs text-muted-foreground">
-                    Member Since:{" "}
-                  </span>
-                  <span className="text-xs font-medium">24th March, 2025</span>
+                  <span className="text-xs text-muted-foreground dark:text-gray-400">Member Since: </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">24th March, 2025</span>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         <Separator className="my-1" />
         {/* Updated buttons with download icons and new logos */}
