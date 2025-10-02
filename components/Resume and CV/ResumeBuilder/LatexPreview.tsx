@@ -425,7 +425,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
           <button
             onClick={compileToPDF}
             disabled={isCompiling}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-3 py-1 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50"
           >
             {isCompiling ? 'Compiling...' : 'Generate PDF'}
           </button>

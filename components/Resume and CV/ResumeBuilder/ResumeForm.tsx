@@ -358,7 +358,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
             </h2>
             <button
               onClick={addEducation}
-              className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs"
+              className="px-3 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer text-xs"
             >
               Add
             </button>
@@ -497,7 +497,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
             </h2>
             <button
               onClick={addProject}
-              className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-xs"
+              className="px-3 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer text-xs"
             >
               Add
             </button>
