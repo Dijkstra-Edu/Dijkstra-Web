@@ -72,7 +72,7 @@ export default function BackgroundPaths({
       </div>
 
       {/* Scrollable, centered content */}
-      <div className="relative z-10 flex-1 overflow-y-auto px-4 md:px-6 py-6">
+      <div className="relative z-10 flex-1 overflow-auto px-4 md:px-6 py-6">
         <div className="min-h-full grid place-items-center">
           <div className="w-full max-w-4xl text-center">
             {/* Header */}
@@ -81,7 +81,7 @@ export default function BackgroundPaths({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
-                className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neutral-900 to-neutral-700/80 dark:from-white dark:to-white/80 mb-8"
+                className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neutral-900 to-neutral-700/80 dark:from-white dark:to-white/80 mb-5"
               >
                 {title}
               </motion.h1>
