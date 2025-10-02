@@ -37,7 +37,7 @@ export default withAuth(
       
       // For all other protected routes, also require NextAuth token
       if (!token) {
-        return NextResponse.redirect(new URL("/login", origin));
+        return NextResponse.redirect(new URL("/", origin));
       }
     }
    
