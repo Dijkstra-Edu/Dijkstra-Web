@@ -31,7 +31,7 @@ export default withAuth(
      
       // After QA bypass is confirmed, check NextAuth requirements
       // Allow /login page since user has passed QA gate
-      if (/*pathname === "/" ||*/ pathname === "/login" || pathname.startsWith("/onboarding")) {
+      if (pathname === "/" || pathname === "/login" || pathname.startsWith("/onboarding")) {
         return NextResponse.next();
       }
       

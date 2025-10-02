@@ -34,7 +34,7 @@ export default function QAGatePage() {
         const data = await res.json();
         console.log("QA gate passed:", data);
         // Redirect to login or home page
-        window.location.href = "/";
+        window.location.href = "/login";
       } else {
         let errorMessage = "Access denied";
         try {
