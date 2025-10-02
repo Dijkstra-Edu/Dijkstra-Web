@@ -137,3 +137,14 @@ export interface SavedUserProfileData {
   userEmail: string;
   userName: string;
 }
+
+export interface SavedResumeData {
+  resumeId: string;
+  title: string;
+  template: 'deedy' | 'row-based';
+  content: Partial<UserProfileData>;
+  lastModified: string;
+  documentId: string;
+  userEmail: string;
+  userName: string;
+}
