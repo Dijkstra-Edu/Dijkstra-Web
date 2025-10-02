@@ -7,7 +7,7 @@ interface ResourceCardProps {
   fileType: string;
   fileSize: string;
   color: 'charcoal' | 'taupe' | 'slateBlue' | 'bronze';
-  icon: React.ReactNode;
+  img_placeholder: string;
   onDownload?: () => void;
   onClick?: () => void;
   className?: string;
@@ -19,7 +19,7 @@ export const ResourceCard = ({
   fileType,
   fileSize,
   color,
-  icon,
+  img_placeholder,
   onDownload,
   onClick,
   className = "",
@@ -46,36 +46,54 @@ export const ResourceCard = ({
 
   return (
     <div
-      className={`bg-card text-card-foreground border rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-gray-400/30 hover:bg-[oklch(0.97_0.005_250)] dark:hover:shadow-blue-500/30 dark:hover:bg-[oklch(0.27_0.04_265)] ${onClick ? 'cursor-pointer' : ''} ${className}`}
-      style={typeof window !== 'undefined' && !document.documentElement.classList.contains('dark') ? { borderColor: 'oklch(0.92 0.01 250)' } : {}}
+      className={`bg-card text-card-foreground border rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-gray-400/30 hover:bg-[oklch(0.97_0.005_250)] dark:hover:shadow-blue-500/30 dark:hover:bg-[oklch(0.27_0.04_265)] ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      style={
+        typeof window !== 'undefined' &&
+        !document.documentElement.classList.contains('dark')
+          ? { borderColor: 'oklch(0.92 0.01 250)' }
+          : {}
+      }
       onClick={handleCardClick}
     >
-      <div
-        className="h-32 flex items-center justify-center"
-        style={{ backgroundColor: colorMap[color] }}
-      >
-        <div className="text-white text-4xl drop-shadow">{icon}</div>
-      </div>
-      <div className="p-6 space-y-4">
-        <div>
-          <h3 className="text-xl font-semibold text-card-foreground font-inter mb-1">{title}</h3>
-          <p className="text-sm text-card-foreground/80 font-inter">{description}</p>
+      <div className="flex">
+        {/* Left column - Image */}
+        <div
+          className="flex items-center justify-center w-40"
+          style={{ backgroundColor: colorMap[color] }}
+        >
+          <img
+            src={img_placeholder}
+            alt="Placeholder"
+            className="p-2 w-auto object-cover rounded-md shadow-md transition-all duration-300"
+          />
         </div>
-        <div className="flex items-center justify-between pt-2">
-          <div className="text-sm text-card-foreground/80 font-inter">
-            <span className="font-medium">{fileType}</span>
-            <span className="mx-1">•</span>
-            <span>{fileSize}</span>
+
+        {/* Right column - Content */}
+        <div className="flex-1 p-6 space-y-4">
+          <div>
+            <h3 className="text-xl font-semibold text-card-foreground font-inter mb-1">
+              {title}
+            </h3>
+            <p className="text-sm text-card-foreground/80 font-inter">
+              {description}
+            </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDownloadClick}
-            className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary focus-visible:ring-2"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download
-          </Button>
+          <div className="flex items-center justify-between pt-2">
+            <div className="text-sm text-card-foreground/80 font-inter">
+              <span className="font-medium">{fileType}</span>
+              <span className="mx-1">•</span>
+              <span>{fileSize}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDownloadClick}
+              className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary focus-visible:ring-2"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
         </div>
       </div>
     </div>

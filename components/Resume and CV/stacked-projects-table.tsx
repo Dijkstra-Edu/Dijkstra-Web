@@ -65,7 +65,7 @@ export const StackedProjectsTable = ({ projects, onProjectClick, onDelete, onBul
   return (
     <div className="bg-card text-card-foreground rounded-2xl shadow-sm p-6 mb-10 border border-border/60 backdrop-blur-sm">
       <div className="flex items-center justify-between pb-4 border-b border-border/60">
-        <h3 className="text-2xl font-semibold tracking-tight">All Projects</h3>
+        <h3 className="text-2xl font-semibold tracking-tight">All Documents</h3>
         <div className="flex items-center gap-3">
           {selectedItems.length > 0 && (
             <Button 
@@ -113,49 +113,59 @@ export const StackedProjectsTable = ({ projects, onProjectClick, onDelete, onBul
           </TableRow>
         </TableHeader>
         <TableBody>
-          {projects.map((project) => (
-            <TableRow
-              key={project.id}
-              className="hover:bg-muted/70 hover:shadow-primary/10 transition-all duration-200 cursor-pointer"
-              onClick={() => onProjectClick && onProjectClick(project)}
-            >
-              <TableCell className="w-12 align-middle">
-                <Checkbox 
-                  checked={selectedItems.includes(project.id)}
-                  onCheckedChange={(checked: boolean | string) => handleSelectItem(project.id, checked as boolean)}
-                  aria-label={`Select ${project.title}`} 
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </TableCell>
-              <TableCell className="text-base text-card-foreground font-inter">
-                {project.title} {!project.isTemplate && <span className="text-xs text-blue-600 ml-2">(Saved)</span>}
-              </TableCell>
-              <TableCell className="text-base text-muted-foreground font-inter">
-                {project.owner}
-              </TableCell>
-              <TableCell className="text-base text-muted-foreground font-inter">
-                {project.lastModified}
-              </TableCell>
-              <TableCell className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                <Button size="icon" variant="ghost" aria-label="Duplicate project"
-                  className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary"
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-                <Button size="icon" variant="ghost" aria-label="Download project"
-                  className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary"
-                >
-                  <Download className="w-4 h-4" />
-                </Button>
-                <Button size="icon" variant="ghost" aria-label="Delete project"
-                  className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary"
-                  onClick={() => handleDeleteSingle(project.id, project.title)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+          {projects.length > 0 ? (
+            projects.map((project) => (
+              <TableRow
+                key={project.id}
+                className="hover:bg-muted/70 hover:shadow-primary/10 transition-all duration-200 cursor-pointer"
+                onClick={() => onProjectClick && onProjectClick(project)}
+              >
+                <TableCell className="w-12 align-middle">
+                  <Checkbox 
+                    checked={selectedItems.includes(project.id)}
+                    onCheckedChange={(checked: boolean | string) => handleSelectItem(project.id, checked as boolean)}
+                    aria-label={`Select ${project.title}`} 
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </TableCell>
+                <TableCell className="text-base text-card-foreground font-inter">
+                  {project.title} {!project.isTemplate && (
+                    <span className="text-xs text-blue-600 ml-2">(Saved)</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-base text-muted-foreground font-inter">
+                  {project.owner}
+                </TableCell>
+                <TableCell className="text-base text-muted-foreground font-inter">
+                  {project.lastModified}
+                </TableCell>
+                <TableCell className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                  <Button size="icon" variant="ghost" aria-label="Duplicate project"
+                    className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" aria-label="Download project"
+                    className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" aria-label="Delete project"
+                    className="text-card-foreground hover:text-primary hover:bg-transparent focus-visible:ring-primary"
+                    onClick={() => handleDeleteSingle(project.id, project.title)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                No documents found.
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

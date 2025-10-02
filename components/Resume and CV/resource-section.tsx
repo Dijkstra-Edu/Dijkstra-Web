@@ -8,7 +8,7 @@ interface ResourceItem {
   fileType: string;
   fileSize: string;
   color: "charcoal" | "taupe" | "slateBlue" | "bronze";
-  icon: React.ReactNode;
+  img_placeholder: string;
   pdfUrl?: string;
   template?: "deedy" | "row-based";
 }
@@ -34,7 +34,7 @@ export const ResourceSection = ({
         </h2>
         <Button
           onClick={() => onCreate()}
-          className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-200 px-5 py-2.5"
+          className="rounded-xl bg-primary hover:bg-primary/90 cursor-pointer text-white shadow-md hover:shadow-lg transition-all duration-200 px-5 py-2.5"
         >
           + Create
         </Button>
@@ -55,7 +55,7 @@ export const ResourceSection = ({
                 ? () => onCreate("row-based")
                 : undefined
             }
-            className="bg-card text-card-foreground rounded-2xl shadow-sm hover:shadow-md p-6 border border-border hover:border-primary/40 transition-all duration-300"
+            className="bg-card text-card-foreground rounded-2xl shadow-sm hover:shadow-md border border-border hover:border-primary/40 transition-all duration-300"
           />
         ))}
       </div>

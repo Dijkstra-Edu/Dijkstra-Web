@@ -106,7 +106,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
       fileType: "PDF",
       fileSize: "1.2 MB",
       color: "charcoal" as const,
-      icon: <FileText />,
+      img_placeholder: "./resume_example.png",
       pdfUrl: "/pdfs/resume-template-1.pdf",
       template: 'deedy' as const,
     },
@@ -117,52 +117,13 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
       fileType: "PDF",
       fileSize: "8.5 MB",
       color: "taupe" as const,
-      icon: <FileImage />,
+      img_placeholder: "./cv_example.png",
       pdfUrl: "/pdfs/resume-template-2.pdf",
       template: 'row-based' as const,
     },
   ];
 
-  const cvsCreated = [
-    {
-      id: "4",
-      title: "Column CV",
-      description: "Academic CV with column-based layout, perfect for research and scholarly achievements.",
-      fileType: "PDF",
-      fileSize: "4.7 MB",
-      color: "slateBlue" as const,
-      icon: <BarChart3 />,
-      pdfUrl: "/pdfs/cv-template-1.pdf",
-      template: 'deedy' as const,
-    },
-    {
-      id: "5",
-      title: "Row CV",
-      description: "Professional CV with row-based layout, ideal for comprehensive career presentation.",
-      fileType: "PDF",
-      fileSize: "5.2 MB",
-      color: "bronze" as const,
-      icon: <Video />,
-      pdfUrl: "/pdfs/cv-template-2.pdf",
-      template: 'row-based' as const,
-    },
-  ];
-
   const stackedProjects = [
-    ...resumesCvTemplates.map((item) => ({
-      id: item.id,
-      title: item.title,
-      owner: "Template",
-      lastModified: "Template",
-      isTemplate: true,
-    })),
-    ...cvsCreated.map((item) => ({
-      id: item.id,
-      title: item.title,
-      owner: "Template", 
-      lastModified: "Template",
-      isTemplate: true,
-    })),
     ...savedResumes.map((item) => ({
       id: item.resumeId,
       title: item.title,
@@ -279,12 +240,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
   return (
     <div className="min-h-screenfont-inter relative bg-gradient-to-b from-background to-muted/30 text-card-foreground transition-colors duration-300">
       <div className="relative z-10 py-4 px-2">
-        <StackedProjectsTable 
-          projects={stackedProjects} 
-          onProjectClick={handleProjectClick} 
-          onDelete={handleDeleteResume}
-          onBulkDelete={handleBulkDeleteResumes}
-        />
+        
         
         <ResourceSection
           title="Resumes & CV Templates"
@@ -303,6 +259,12 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
           }}
         />
         
+        <StackedProjectsTable 
+          projects={stackedProjects} 
+          onProjectClick={handleProjectClick} 
+          onDelete={handleDeleteResume}
+          onBulkDelete={handleBulkDeleteResumes}
+        />
         
         {/* Use our new AddResumeModal component */}
         <AddResumeModal 
