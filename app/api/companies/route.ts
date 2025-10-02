@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     return NextResponse.json([])
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_LOGODEV_API_KEY
+  const apiKey = process.env.GODEV_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: "Missing LOGODEV_API_KEY" }, { status: 500 })
   }
