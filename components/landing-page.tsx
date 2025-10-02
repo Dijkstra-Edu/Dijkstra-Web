@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -28,6 +28,10 @@ import {
   BookOpen,
   FolderKanban,
   Trophy,
+  ChevronDown,
+  Cpu,
+  Globe,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
@@ -66,6 +70,7 @@ import { addWeeks, format } from "date-fns";
 import Masonry from "./masonry";
 import ContactForm from "./contact-form";
 import { items } from '../data/masonry'; // adjust the path as needed
+import { cn } from "@/lib/tiptap-utils";
 
 type TimelineSubItem = {
   title: string;
@@ -143,17 +148,30 @@ export default function LandingPage() {
   const isVerySmall = useMediaQuery("(max-width: 500px)");
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-
-
+  const [scrolled, setScrolled] = useState(false)
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
+      setScrolled(window.scrollY > 50)
+    }
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     setScrollY(window.scrollY);
+  //   };
+
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
 
   const headerClass =
     scrollY > 50
@@ -404,47 +422,101 @@ export default function LandingPage() {
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Header */}
       <header
-        className={`fixed top-0 px-[300px] left-0 right-0 z-50 transition-all duration-300 ${headerClass}`}
+        ref={headerRef}
+        onMouseLeave={() => setActiveMegaMenu(null)}
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50",
+          "transition-all duration-500 ease-out",
+          scrolled
+            ? activeMegaMenu
+              ? "bg-black/30 backdrop-blur-2xl border-b border-white/10"
+              : "bg-black/95 backdrop-blur-md border-b border-gray-800/50"
+            : "bg-black/30 backdrop-blur-xl border-b border-white/10",
+        )}
+        style={{
+          paddingTop: activeMegaMenu ? "1.5rem" : scrolled ? "1rem" : "1.5rem",
+          paddingBottom: activeMegaMenu ? "2rem" : scrolled ? "1rem" : "1.5rem",
+        }}
       >
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex items-center gap-2"
-          >
-            {/* <Cpu className="h-6 w-6 text-purple-500" />
-            <span className="font-bold text-xl">TechNova</span> */}
-            <a href="#" className="flex items-center gap-2">
-              <img src="/icon.png" alt="Logo" className="h-12 w-auto" />
-              <span className="font-bold text-xl">Dijkstra</span>
-            </a>
-          </motion.div>
-          <nav className="hidden md:flex items-center gap-8">
-            {["Mission", "Features", "Products", "About", "Testimonials"].map(
-              (item, i) => (
-                <motion.div
-                  key={item}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                >
-                  <Link
-                    href={`#${item.toLowerCase()}`}
-                    className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
-                  >
-                    {item}
-                  </Link>
-                </motion.div>
-              )
-            )}
-          </nav>
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4">
+          {/* Top Navigation Bar */}
+          <div className="flex justify-between items-center">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center gap-2"
+            >
+              <a href="#" className="flex items-center gap-2">
+                <img src="/icon.png" alt="Logo" className="h-12 w-auto" />
+                <span className="font-bold text-xl">Dijkstra</span>
+              </a>
+
+            </motion.div>
+
+            <nav className="hidden md:flex items-center gap-8">
+              {/* Features Mega Menu */}
+              <div className="relative" onMouseEnter={() => setActiveMegaMenu("features")}>
+                <button className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium py-2">
+                  Features
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 transition-transform duration-300",
+                      activeMegaMenu === "features" && "rotate-180",
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* Products Mega Menu */}
+              <div className="relative" onMouseEnter={() => setActiveMegaMenu("products")}>
+                <button className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium py-2">
+                  Products
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 transition-transform duration-300",
+                      activeMegaMenu === "products" && "rotate-180",
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* About Mega Menu */}
+              <div className="relative" onMouseEnter={() => setActiveMegaMenu("about")}>
+                <button className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium py-2">
+                  About
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 transition-transform duration-300",
+                      activeMegaMenu === "about" && "rotate-180",
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* Pricing - Simple Link */}
+              <Link
+                href="#pricing"
+                className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium"
+              >
+                Pricing
+              </Link>
+
+              {/* Testimonials - Simple Link */}
+              <Link
+                href="#testimonials"
+                className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium"
+              >
+                Testimonials
+              </Link>
+            </nav>
+
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <div className="flex items-center gap-4">
               <Button
                 className="bg-black hover:bg-neutral-900 border
              dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
@@ -472,19 +544,398 @@ export default function LandingPage() {
                 Get Started
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
-          </motion.div>
+              <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </motion.div>
+          </div>
+
+          {/* Expanded Mega Menu Content */}
+          <AnimatePresence>
+            {activeMegaMenu && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="pt-8 pb-4">
+                  {/* Features Content */}
+                  {activeMegaMenu === "features" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="grid grid-cols-12 gap-8"
+                    >
+                      {/* Column 1 - Main Info */}
+                      <div className="col-span-3 border-r border-gray-800/30 pr-8">
+                        <h3 className="text-2xl font-bold mb-2">Features</h3>
+                        <p className="text-gray-400 text-sm mb-6">Powerful tools to enhance your workflow</p>
+                        <a
+                          href="#features"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-500/50 text-purple-400 hover:bg-purple-500/10 transition-colors text-sm font-medium"
+                        >
+                          All Features
+                          <ArrowRight className="h-4 w-4" />
+                        </a>
+                      </div>
+
+                      {/* Column 2 - Main Features */}
+                      <div className="col-span-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                              Core Features
+                            </h4>
+                            <div className="space-y-3">
+                              <a
+                                href="#features"
+                                className="group/item flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-2 bg-purple-500/10 rounded-lg group-hover/item:bg-purple-500/20 transition-colors">
+                                  <Code className="h-4 w-4 text-purple-400" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm group-hover/item:text-purple-400 transition-colors">
+                                    Advanced API
+                                  </div>
+                                  <div className="text-xs text-gray-400">Robust developer tools</div>
+                                </div>
+                              </a>
+
+                              <a
+                                href="#features"
+                                className="group/item flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-2 bg-blue-500/10 rounded-lg group-hover/item:bg-blue-500/20 transition-colors">
+                                  <Globe className="h-4 w-4 text-blue-400" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm group-hover/item:text-blue-400 transition-colors">
+                                    Global CDN
+                                  </div>
+                                  <div className="text-xs text-gray-400">Lightning-fast delivery</div>
+                                </div>
+                              </a>
+
+                              <a
+                                href="#features"
+                                className="group/item flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-2 bg-green-500/10 rounded-lg group-hover/item:bg-green-500/20 transition-colors">
+                                  <CheckCircle className="h-4 w-4 text-green-400" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm group-hover/item:text-green-400 transition-colors">
+                                    Enterprise Security
+                                  </div>
+                                  <div className="text-xs text-gray-400">Bank-grade protection</div>
+                                </div>
+                              </a>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                              Advanced
+                            </h4>
+                            <div className="space-y-3">
+                              <a
+                                href="#features"
+                                className="group/item flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-2 bg-red-500/10 rounded-lg group-hover/item:bg-red-500/20 transition-colors">
+                                  <Cpu className="h-4 w-4 text-red-400" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm group-hover/item:text-red-400 transition-colors">
+                                    AI-Powered
+                                  </div>
+                                  <div className="text-xs text-gray-400">Smart automation</div>
+                                </div>
+                              </a>
+
+                              <a
+                                href="#features"
+                                className="group/item flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-2 bg-yellow-500/10 rounded-lg group-hover/item:bg-yellow-500/20 transition-colors">
+                                  <MessageSquare className="h-4 w-4 text-yellow-400" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm group-hover/item:text-yellow-400 transition-colors">
+                                    24/7 Support
+                                  </div>
+                                  <div className="text-xs text-gray-400">Always available</div>
+                                </div>
+                              </a>
+
+                              <a
+                                href="#features"
+                                className="group/item flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-2 bg-gray-500/10 rounded-lg group-hover/item:bg-gray-500/20 transition-colors">
+                                  <Github className="h-4 w-4 text-gray-400" />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm group-hover/item:text-gray-300 transition-colors">
+                                    Open Source
+                                  </div>
+                                  <div className="text-xs text-gray-400">Community-driven</div>
+                                </div>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Column 3 - Resources */}
+                      <div className="col-span-3 border-l border-gray-800/30 pl-8">
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Resources</h4>
+                        <div className="space-y-2">
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Documentation
+                          </a>
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            API Reference
+                          </a>
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Changelog
+                          </a>
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Community
+                          </a>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Products Content */}
+                  {activeMegaMenu === "products" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="grid grid-cols-12 gap-8"
+                    >
+                      {/* Column 1 - Main Info */}
+                      <div className="col-span-3 border-r border-gray-800/30 pr-8">
+                        <h3 className="text-2xl font-bold mb-2">Products</h3>
+                        <p className="text-gray-400 text-sm mb-6">Enterprise solutions for modern teams</p>
+                        <a
+                          href="#products"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-500/50 text-purple-400 hover:bg-purple-500/10 transition-colors text-sm font-medium"
+                        >
+                          All Products
+                          <ArrowRight className="h-4 w-4" />
+                        </a>
+                      </div>
+
+                      {/* Column 2 - Products List */}
+                      <div className="col-span-6">
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                              Infrastructure
+                            </h4>
+                            <div className="space-y-3">
+                              <a
+                                href="#products"
+                                className="group/item flex items-start gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-3 bg-purple-500/10 rounded-xl group-hover/item:bg-purple-500/20 transition-colors">
+                                  <Code className="h-5 w-5 text-purple-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-semibold mb-1 group-hover/item:text-purple-400 transition-colors">
+                                    TechNova Cloud
+                                  </div>
+                                  <div className="text-sm text-gray-400">
+                                    Scalable cloud infrastructure for modern applications
+                                  </div>
+                                </div>
+                              </a>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                              Analytics & Security
+                            </h4>
+                            <div className="space-y-3">
+                              <a
+                                href="#products"
+                                className="group/item flex items-start gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-3 bg-blue-500/10 rounded-xl group-hover/item:bg-blue-500/20 transition-colors">
+                                  <Globe className="h-5 w-5 text-blue-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-semibold mb-1 group-hover/item:text-blue-400 transition-colors">
+                                    TechNova Analytics
+                                  </div>
+                                  <div className="text-sm text-gray-400">
+                                    Data-driven insights and real-time dashboards
+                                  </div>
+                                </div>
+                              </a>
+
+                              <a
+                                href="#products"
+                                className="group/item flex items-start gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors"
+                              >
+                                <div className="p-3 bg-green-500/10 rounded-xl group-hover/item:bg-green-500/20 transition-colors">
+                                  <CheckCircle className="h-5 w-5 text-green-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-semibold mb-1 group-hover/item:text-green-400 transition-colors">
+                                    TechNova Security
+                                  </div>
+                                  <div className="text-sm text-gray-400">
+                                    Advanced protection for your digital assets
+                                  </div>
+                                </div>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Column 3 - Explore Further */}
+                      <div className="col-span-3 border-l border-gray-800/30 pl-8">
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                          Explore Further
+                        </h4>
+                        <div className="space-y-2">
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Plans & Pricing
+                          </a>
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Product Roadmap
+                          </a>
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Integrations
+                          </a>
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Comparisons
+                          </a>
+                          <a
+                            href="#"
+                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                          >
+                            Case Studies
+                          </a>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* About Content */}
+                  {activeMegaMenu === "about" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="grid grid-cols-12 gap-8"
+                    >
+                      {/* Column 1 - Main Info */}
+                      <div className="col-span-3 border-r border-gray-800/30 pr-8">
+                        <h3 className="text-2xl font-bold mb-2">About</h3>
+                        <p className="text-gray-400 text-sm mb-6">Learn more about our mission and team</p>
+                        <a
+                          href="#about"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-500/50 text-purple-400 hover:bg-purple-500/10 transition-colors text-sm font-medium"
+                        >
+                          About Us
+                          <ArrowRight className="h-4 w-4" />
+                        </a>
+                      </div>
+
+                      {/* Column 2 - Links */}
+                      <div className="col-span-5">
+                        <div className="space-y-3">
+                          <a href="#about" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
+                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Our Mission</div>
+                            <div className="text-sm text-gray-400">Democratizing technology for everyone</div>
+                          </a>
+
+                          <a href="#about" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
+                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Team</div>
+                            <div className="text-sm text-gray-400">Meet the people behind TechNova</div>
+                          </a>
+
+                          <a href="#" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
+                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Careers</div>
+                            <div className="text-sm text-gray-400">Join our growing team</div>
+                          </a>
+
+                          <a href="#contact" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
+                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Contact Us</div>
+                            <div className="text-sm text-gray-400">Get in touch with our team</div>
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Column 3 - Featured Article */}
+                      <div className="col-span-4 border-l border-gray-800/30 pl-8">
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                          Featured Article
+                        </h4>
+                        <a href="#" className="block group/article">
+                          <div className="aspect-video bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg mb-3 overflow-hidden">
+                            <img
+                              src="/placeholder.svg?height=200&width=300&text=Article+Image"
+                              alt="Featured article"
+                              className="w-full h-full object-cover opacity-80 group-hover/article:opacity-100 transition-opacity"
+                            />
+                          </div>
+                          <h5 className="font-semibold mb-2 group-hover/article:text-purple-400 transition-colors">
+                            The Future of Cloud Computing
+                          </h5>
+                          <p className="text-sm text-gray-400 mb-3">
+                            Discover how cloud technology is reshaping the digital landscape...
+                          </p>
+                          <span className="text-sm text-purple-400 font-medium inline-flex items-center gap-1">
+                            Read more
+                            <ArrowRight className="h-3 w-3" />
+                          </span>
+                        </a>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
@@ -624,7 +1075,7 @@ export default function LandingPage() {
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container-max mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -721,7 +1172,7 @@ export default function LandingPage() {
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container-max mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -808,7 +1259,7 @@ export default function LandingPage() {
       <section id="features" className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(4,131,4,0.15),transparent_50%)]" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container-max mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -885,6 +1336,197 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(4,131,4,0.15),transparent_50%)]" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">Simple, Transparent Pricing</h2>
+              <p className="text-gray-400 max-w-2xl mx-auto">
+                Choose the perfect plan for your needs. All plans include our core features with no hidden fees.
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Starter Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
+                <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-8 rounded-xl border border-gray-800/50 hover:border-green-500/30 transition-all duration-300">
+                  <div className="mb-6">
+                    <h3 className="text-2xl font-bold mb-2">Starter</h3>
+                    <p className="text-gray-400 text-sm">Perfect for small projects and testing</p>
+                  </div>
+
+                  <div className="mb-8">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-5xl font-bold">$29</span>
+                      <span className="text-gray-400">/month</span>
+                    </div>
+                  </div>
+
+                  <Button className="w-full mb-8 bg-gray-800 hover:bg-gray-700 text-white">Get Started</Button>
+
+                  <div className="space-y-4">
+                    <p className="text-sm font-semibold text-gray-300 mb-4">What's included:</p>
+                    {[
+                      "Up to 10 projects",
+                      "5GB storage",
+                      "Basic analytics",
+                      "Email support",
+                      "99.9% uptime SLA",
+                      "API access",
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Professional Plan (Popular) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <div className="h-full relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                  <span className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs font-semibold px-4 py-1 rounded-full">
+                    MOST POPULAR
+                  </span>
+                </div>
+
+                <div className="h-full bg-gradient-to-b from-green-900/20 to-gray-950 p-[1px] rounded-xl">
+                  <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-8 rounded-xl border border-green-500/50 shadow-lg shadow-green-900/20">
+                    <div className="mb-6">
+                      <h3 className="text-2xl font-bold mb-2">Professional</h3>
+                      <p className="text-gray-400 text-sm">For growing teams and businesses</p>
+                    </div>
+
+                    <div className="mb-8">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-5xl font-bold">$99</span>
+                        <span className="text-gray-400">/month</span>
+                      </div>
+                    </div>
+
+                    <Button className="w-full mb-8 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+                      Get Started
+                    </Button>
+
+                    <div className="space-y-4">
+                      <p className="text-sm font-semibold text-gray-300 mb-4">Everything in Starter, plus:</p>
+                      {[
+                        "Unlimited projects",
+                        "100GB storage",
+                        "Advanced analytics",
+                        "Priority support",
+                        "Custom integrations",
+                        "Team collaboration",
+                        "Advanced security",
+                        "99.99% uptime SLA",
+                      ].map((feature, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-300">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Enterprise Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
+                <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-8 rounded-xl border border-gray-800/50 hover:border-green-500/30 transition-all duration-300">
+                  <div className="mb-6">
+                    <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
+                    <p className="text-gray-400 text-sm">For large organizations</p>
+                  </div>
+
+                  <div className="mb-8">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-5xl font-bold">Custom</span>
+                    </div>
+                    <p className="text-gray-400 text-sm mt-2">Tailored to your needs</p>
+                  </div>
+
+                  <Button className="w-full mb-8 bg-gray-800 hover:bg-gray-700 text-white">Contact Sales</Button>
+
+                  <div className="space-y-4">
+                    <p className="text-sm font-semibold text-gray-300 mb-4">Everything in Professional, plus:</p>
+                    {[
+                      "Unlimited everything",
+                      "Dedicated infrastructure",
+                      "Custom analytics",
+                      "24/7 phone support",
+                      "Dedicated account manager",
+                      "Custom SLA",
+                      "Advanced compliance",
+                      "On-premise deployment",
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* FAQ or Additional Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-16 text-center"
+          >
+            <p className="text-gray-400 mb-4">All plans include a 14-day free trial. No credit card required.</p>
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Cancel anytime</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>No setup fees</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Secure payments</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Open Source, GitHub based, Community facing work */}
 
       {/* Our Members have gone on to work in the following companies */}
@@ -901,7 +1543,7 @@ export default function LandingPage() {
       <section id="products" className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container-max mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -948,8 +1590,14 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="bg-gradient-to-r from-green-600 to-gray-600 hover:from-gray-700 hover:to-green-700">
-                  Learn More
+                <Button
+                  variant="outline"
+                  className="group border-2 border-gray-700 hover:border-green-500 bg-gray-900/50 hover:bg-gray-800/50 text-white transition-all duration-300"
+                >
+                  <span className="flex items-center gap-2">
+                    Learn More
+                    <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-green-500 group-hover:translate-x-1 transition-all" />
+                  </span>
                 </Button>
               </motion.div>
 
@@ -1003,8 +1651,14 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="bg-gradient-to-r from-green-600 to-gray-600 hover:from-green-700 hover:to-gray-700">
-                  Learn More
+                <Button
+                  variant="outline"
+                  className="group border-2 border-gray-700 hover:border-green-500 bg-gray-900/50 hover:bg-gray-800/50 text-white transition-all duration-300"
+                >
+                  <span className="flex items-center gap-2">
+                    Learn More
+                    <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-green-500 group-hover:translate-x-1 transition-all" />
+                  </span>
                 </Button>
               </motion.div>
 
@@ -1059,8 +1713,14 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="bg-gradient-to-r from-green-600 to-gray-600 hover:from-green-700 hover:to-gray-700">
-                  Learn More
+                <Button
+                  variant="outline"
+                  className="group border-2 border-gray-700 hover:border-green-500 bg-gray-900/50 hover:bg-gray-800/50 text-white transition-all duration-300"
+                >
+                  <span className="flex items-center gap-2">
+                    Learn More
+                    <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-green-500 group-hover:translate-x-1 transition-all" />
+                  </span>
                 </Button>
               </motion.div>
 
@@ -1112,7 +1772,7 @@ export default function LandingPage() {
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container-max mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1193,7 +1853,7 @@ export default function LandingPage() {
       <section id="about" className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(5, 177, 5,0.1),transparent_60%)]" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container-max mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 px-[300px] gap-8 md:gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -1232,7 +1892,7 @@ export default function LandingPage() {
               </div>
               <Button
                 variant="outline"
-                className="border-green-500 text-green-500 hover:bg-green-600 text-sm sm:text-base cursor-pointer"
+                className="border-green-500 text-green-500 hover:bg-green-950 text-sm sm:text-base bg-transparent"
               >
                 Learn More About Us
               </Button>
@@ -1260,7 +1920,7 @@ export default function LandingPage() {
 
       <section
         id="features"
-        className="py-16 bg-white relative overflow-hidden h-[100vh]"
+        className="py-16 bg-white relative overflow-hidden h-[80vh]"
       >
         <div className="container mx-auto px-4 relative z-10">
           <div className="relative">

@@ -3,6 +3,7 @@ import LandingPage from "@/components/landing-page"
 
 
 export default function Home() {
-   // return <ComingSoonPage />
+   if (process.env.ENVIRONMENT === "QA" || process.env.ENVIRONMENT === "DEV" )
       return <LandingPage />
+   else return <ComingSoonPage />
 }

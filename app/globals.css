@@ -156,7 +156,7 @@
   }
 }
 
-.container {
+.container-max {
   width: 100%;
   max-width: 100%;
   padding-left: 1rem;
@@ -181,6 +181,25 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: #005500;
+}
+
+.default-scroll {
+  scrollbar-width: auto; /* Firefox */
+  scrollbar-color: auto; /* Firefox */
+}
+
+.default-scroll::-webkit-scrollbar {
+  width: initial;
+}
+
+.default-scroll::-webkit-scrollbar-track {
+  background: initial;
+}
+
+.default-scroll::-webkit-scrollbar-thumb {
+  background: initial;
+  border-radius: initial;
+  border: initial;
 }
 
 /* .landing-scroll *::-webkit-scrollbar {
