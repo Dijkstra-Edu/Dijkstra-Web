@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileData } from "@/components/profile-data";
 import Readme from "@/components/readme";
 import Resume from "@/components/Resume and CV/resume";
+import { StudentDashboard } from "@/components/student-dashboard";
 
 export default function Page() {
   const [data, setData] = useState<unknown[]>([]);
@@ -66,7 +67,7 @@ export default function Page() {
                   <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
                   <TabsTrigger value="readme">Readme</TabsTrigger>
                   <TabsTrigger value="resume">Resume & CV</TabsTrigger>
-                  <TabsTrigger value="achievments">Achievements</TabsTrigger>
+                  <TabsTrigger disabled value="achievements">Achievements</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="stats" className="space-y-4">
@@ -83,7 +84,9 @@ export default function Page() {
                     <DataTable data={data as { header: string; type: string; id: number; status: string; target: string; limit: string; reviewer: string; }[]} />
                   )}
                 </TabsContent>
-                <TabsContent value="portfolio">Make changes to your account here.</TabsContent>
+                <TabsContent value="portfolio">
+                  <StudentDashboard />
+                </TabsContent>
                 <TabsContent value="readme"><Readme /></TabsContent>
                 <TabsContent value="resume"><Resume onResumeBuildingModeChange={setIsResumeBuildingMode} /></TabsContent>
                 <TabsContent value="achievments">Make changes to your account here.</TabsContent>

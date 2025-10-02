@@ -467,7 +467,7 @@ export default function LandingPage() {
                 className="bg-black hover:bg-neutral-900 border
                  dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
                  h-9 px-4 py-2"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/onboarding")}
               >
                 Get Started
               </Button>
@@ -558,7 +558,7 @@ export default function LandingPage() {
             >
               <Button
                 onClick={() => {
-                  router.push("/dashboard");
+                  router.push("/onboarding");
                 }}
                 className="bg-gradient-to-r from-white to-white hover:from-green-700 hover:to-gray-700 text-black px-4 sm:px-8 py-4 sm:py-6 rounded-full text-sm sm:text-lg font-medium shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 transition-all duration-300 cursor-pointer"
               >
@@ -1346,7 +1346,7 @@ export default function LandingPage() {
                   className="bg-white hover:bg-gray-100 border
                  dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
                  h-9 px-10 py-8"
-                  onClick={() => router.push("/dashboard")}
+                  onClick={() => router.push("/onboarding")}
                 >
                   Get Started!
                 </Button>
