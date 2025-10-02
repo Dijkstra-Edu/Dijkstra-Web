@@ -33,6 +33,10 @@ import {
   Globe,
   MessageSquare,
   Wrench,
+  Book,
+  Crosshair,
+  XCircle,
+  CircleAlert,
 } from "lucide-react";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
@@ -431,11 +435,16 @@ export default function LandingPage() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50",
           "transition-all duration-500 ease-out",
+          // scrolled
+          //   ? activeMegaMenu
+          //     ? "bg-black/80 backdrop-blur-2xl border-b border-white/10"
+          //     : "bg-black/95 backdrop-blur-md border-b border-gray-800/50"
+          //   : "bg-black/80 backdrop-blur-xl border-b border-white/10",
           scrolled
             ? activeMegaMenu
-              ? "bg-black/30 backdrop-blur-2xl border-b border-white/10"
+              ? "bg-black/80 backdrop-blur-2xl border-b border-white/10"
               : "bg-black/95 backdrop-blur-md border-b border-gray-800/50"
-            : "bg-black/30 backdrop-blur-xl border-b border-white/10",
+            : "bg-black/80 backdrop-blur-xl border-b border-white/10",
         )}
         style={{
           paddingTop: activeMegaMenu ? "1.5rem" : scrolled ? "1rem" : "1.5rem",
@@ -701,7 +710,7 @@ export default function LandingPage() {
                         <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Resources</h4>
                         <div className="space-y-2">
                           <a
-                            href="#"
+                            href="https://docs.dijkstra.org.in/"
                             className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Documentation
@@ -719,7 +728,7 @@ export default function LandingPage() {
                             Changelog
                           </a>
                           <a
-                            href="#"
+                            href="https://discord.gg/Ct82yF3KAU"
                             className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Community
@@ -763,15 +772,15 @@ export default function LandingPage() {
                                 href="#products"
                                 className="group/item flex items-start gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors"
                               >
-                                <div className="p-3 bg-purple-500/10 rounded-xl group-hover/item:bg-purple-500/20 transition-colors">
-                                  <Code className="h-5 w-5 text-purple-400" />
+                                <div className="p-3 bg-green-500/10 rounded-xl group-hover/item:bg-green-500/20 transition-colors">
+                                  <Brain className="h-5 w-5 text-green-400" />
                                 </div>
                                 <div className="flex-1">
-                                  <div className="font-semibold mb-1 group-hover/item:text-purple-400 transition-colors">
-                                    TechNova Cloud
+                                  <div className="font-semibold mb-1 group-hover/item:text-green-400 transition-colors">
+                                    Dijkstra GPT
                                   </div>
                                   <div className="text-sm text-gray-400">
-                                    Scalable cloud infrastructure for modern applications
+                                    A smart GPT catered towards students aiming to break into tech
                                   </div>
                                 </div>
                               </a>
@@ -787,12 +796,12 @@ export default function LandingPage() {
                                 href="#products"
                                 className="group/item flex items-start gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors"
                               >
-                                <div className="p-3 bg-blue-500/10 rounded-xl group-hover/item:bg-blue-500/20 transition-colors">
-                                  <Globe className="h-5 w-5 text-blue-400" />
+                                <div className="p-3 bg-red-500/10 rounded-xl group-hover/item:bg-red-500/20 transition-colors">
+                                  <Book className="h-5 w-5 text-red-400" />
                                 </div>
                                 <div className="flex-1">
-                                  <div className="font-semibold mb-1 group-hover/item:text-blue-400 transition-colors">
-                                    TechNova Analytics
+                                  <div className="font-semibold mb-1 group-hover/item:text-red-400 transition-colors">
+                                    Resume Builder
                                   </div>
                                   <div className="text-sm text-gray-400">
                                     Data-driven insights and real-time dashboards
@@ -804,12 +813,12 @@ export default function LandingPage() {
                                 href="#products"
                                 className="group/item flex items-start gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors"
                               >
-                                <div className="p-3 bg-green-500/10 rounded-xl group-hover/item:bg-green-500/20 transition-colors">
-                                  <CheckCircle className="h-5 w-5 text-green-400" />
+                                <div className="p-3 bg-yellow-500/10 rounded-xl group-hover/item:bg-yellow-500/20 transition-colors">
+                                  <Trophy className="h-5 w-5 text-yellow-400" />
                                 </div>
                                 <div className="flex-1">
-                                  <div className="font-semibold mb-1 group-hover/item:text-green-400 transition-colors">
-                                    TechNova Security
+                                  <div className="font-semibold mb-1 group-hover/item:text-yellow-400 transition-colors">
+                                    Ranking Algorithm
                                   </div>
                                   <div className="text-sm text-gray-400">
                                     Advanced protection for your digital assets
@@ -828,7 +837,7 @@ export default function LandingPage() {
                         </h4>
                         <div className="space-y-2">
                           <a
-                            href="#"
+                            href="#pricing"
                             className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Plans & Pricing
@@ -981,9 +990,31 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#048304]/20 to-black" />
-          <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#048304]/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black to-[#048304]/20" />
+          <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-black via-[#048304]/10 to-transparent" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(5, 177, 5,0.1),transparent_65%)]" />
+          {/* Sparkling Stars 
+          <div className="absolute inset-0 overflow-hidden">
+            {Array.from({ length: 50 }).map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-white rounded-full"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  scale: [0, 1, 0],
+                }}
+                transition={{
+                  duration: Math.random() * 6 + 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: Math.random() * 5,
+                }}
+              />
+            ))}
+          </div>*/}
         </div>
 
         <div className="container mx-auto px-4 relative h-[100vh] z-10">
@@ -1010,15 +1041,34 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <Button
-                onClick={() => {
-                  router.push("/onboarding");
-                }}
-                className="bg-gradient-to-r from-white to-white hover:from-green-700 hover:to-gray-700 text-black px-4 sm:px-8 py-4 sm:py-6 rounded-full text-sm sm:text-lg font-medium shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 transition-all duration-300 cursor-pointer"
+                onClick={() => router.push("/onboarding")}
+                className="group bg-green-700 hover:bg-green-800 cursor-pointer text-white px-8 py-6 rounded-xl text-base font-semibold transition-colors duration-300"
               >
-                Get Started Now
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="flex items-center gap-2">
+                  Get Started Now
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/dashboard")}
+                className="group px-8 py-6 rounded-xl text-base font-medium cursor-pointer text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300"
+              >
+                <span className="flex items-center gap-2">
+                  Go to Dashboard
+                  <svg
+                    className="h-5 w-5 group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
               </Button>
             </motion.div>
           </div>
@@ -1380,13 +1430,13 @@ export default function LandingPage() {
               <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
                 <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-8 rounded-xl border border-gray-800/50 hover:border-green-500/30 transition-all duration-300">
                   <div className="mb-6">
-                    <h3 className="text-2xl font-bold mb-2">Starter</h3>
+                    <h3 className="text-2xl font-bold mb-2">Free</h3>
                     <p className="text-gray-400 text-sm">Perfect for small projects and testing</p>
                   </div>
 
                   <div className="mb-8">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold">$29</span>
+                      <span className="text-5xl font-bold">₹0</span>
                       <span className="text-gray-400">/month</span>
                     </div>
                   </div>
@@ -1396,18 +1446,34 @@ export default function LandingPage() {
                   <div className="space-y-4">
                     <p className="text-sm font-semibold text-gray-300 mb-4">What's included:</p>
                     {[
-                      "Up to 10 projects",
-                      "5GB storage",
-                      "Basic analytics",
-                      "Email support",
-                      "99.9% uptime SLA",
-                      "API access",
+                      "Dijkstra Predictive Ranking",
+                      "Stats Aggregation",
                     ].map((feature, i) => (
                       <div key={i} className="flex items-start gap-3">
                         <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                         <span className="text-sm text-gray-300">{feature}</span>
                       </div>
                     ))}
+                    {[
+                      "Can upgrade to pro based on contributions",
+                      "API access based on contributions",
+                      "Limited and generic support",
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <CircleAlert className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-300">{feature}</span>
+                      </div>
+                    ))}
+                    {[
+                      "Need to setup personal DB",
+                      "Need to setup Gemini Key",
+                      "No AI Resume Optimization",                      
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-300">{feature}</span>
+                      </div>
+                    ))}                    
                   </div>
                 </div>
               </div>
@@ -1430,13 +1496,13 @@ export default function LandingPage() {
                 <div className="h-full bg-gradient-to-b from-green-900/20 to-gray-950 p-[1px] rounded-xl">
                   <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-8 rounded-xl border border-green-500/50 shadow-lg shadow-green-900/20">
                     <div className="mb-6">
-                      <h3 className="text-2xl font-bold mb-2">Professional</h3>
+                      <h3 className="text-2xl font-bold mb-2">Basic</h3>
                       <p className="text-gray-400 text-sm">For growing teams and businesses</p>
                     </div>
 
                     <div className="mb-8">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-5xl font-bold">$99</span>
+                        <span className="text-5xl font-bold">₹999</span>
                         <span className="text-gray-400">/month</span>
                       </div>
                     </div>
@@ -1446,16 +1512,16 @@ export default function LandingPage() {
                     </Button>
 
                     <div className="space-y-4">
-                      <p className="text-sm font-semibold text-gray-300 mb-4">Everything in Starter, plus:</p>
+                      <p className="text-sm font-semibold text-gray-300 mb-4">Everything in Free, plus:</p>
                       {[
-                        "Unlimited projects",
-                        "100GB storage",
+                        "Has Access to DIjkstra GPT (Limited Credits)",
+                        "DIjkstra maintains DB (option to maintain it yourself)",
+                        "Resume optimization",
+                        "Daily tasks",
+                        "Study notes for interviews - Per company",
+                        "Resume AI optimization",
                         "Advanced analytics",
-                        "Priority support",
-                        "Custom integrations",
-                        "Team collaboration",
-                        "Advanced security",
-                        "99.99% uptime SLA",
+                        "Personalized study plan support",
                       ].map((feature, i) => (
                         <div key={i} className="flex items-start gap-3">
                           <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -1478,13 +1544,13 @@ export default function LandingPage() {
               <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
                 <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-8 rounded-xl border border-gray-800/50 hover:border-green-500/30 transition-all duration-300">
                   <div className="mb-6">
-                    <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                    <p className="text-gray-400 text-sm">For large organizations</p>
+                    <h3 className="text-2xl font-bold mb-2">Pro</h3>
+                    <p className="text-gray-400 text-sm">For Universities and Large Organizations</p>
                   </div>
 
                   <div className="mb-8">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold">Custom</span>
+                      <span className="text-5xl font-bold">₹2999</span>
                     </div>
                     <p className="text-gray-400 text-sm mt-2">Tailored to your needs</p>
                   </div>
@@ -1492,15 +1558,15 @@ export default function LandingPage() {
                   <Button className="w-full mb-8 bg-gray-800 hover:bg-gray-700 text-white">Contact Sales</Button>
 
                   <div className="space-y-4">
-                    <p className="text-sm font-semibold text-gray-300 mb-4">Everything in Professional, plus:</p>
+                    <p className="text-sm font-semibold text-gray-300 mb-4">Everything in Basic, plus:</p>
                     {[
-                      "Unlimited everything",
-                      "Dedicated infrastructure",
-                      "Custom analytics",
-                      "24/7 phone support",
-                      "Dedicated account manager",
-                      "Custom SLA",
-                      "Advanced compliance",
+                      "Dijkstra gpt (unlimited, dgpt3): Completely context aware of students profile",
+                      "Dijkstra maintains DB",
+                      "Dijkstra Learning Hub",
+                      "AI Resume optimization",
+                      "Entry into Dijkstra's Company pool",
+                      "Personalized plan + daily tasks + reminders: personalized reminders, personalized goal setting",
+                      "Study notes for interviews + interview tips and tricks",
                       "On-premise deployment",
                     ].map((feature, i) => (
                       <div key={i} className="flex items-start gap-3">
