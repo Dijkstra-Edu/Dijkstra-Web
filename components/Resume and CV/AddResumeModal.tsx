@@ -28,30 +28,35 @@ interface AddResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onResumeCreated?: (resumeData: ResumeData) => void;
-  documentType?: 'resume' | 'cv';
+  documentType?: "resume" | "cv";
 }
 
-export default function AddResumeModal({ isOpen, onClose, onResumeCreated, documentType = 'resume' }: AddResumeModalProps) {
+export default function AddResumeModal({
+  isOpen,
+  onClose,
+  onResumeCreated,
+  documentType = "resume",
+}: AddResumeModalProps) {
   const [resumeTitle, setResumeTitle] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const { data: session } = useSession();
 
-  const docTypeLabel = documentType === 'cv' ? 'CV' : 'Resume';
-  const defaultTitle = documentType === 'cv' ? 'My New CV' : 'My New Resume';
+  const docTypeLabel = documentType === "cv" ? "CV" : "Resume";
+  const defaultTitle = documentType === "cv" ? "My New CV" : "My New Resume";
 
   const handleCreate = async () => {
     if (!resumeTitle) return;
-    
+
     setLoading(true);
     const uuid = uuidv4();
-    
+
     const data = {
       data: {
         title: resumeTitle,
         resumeId: uuid,
         userEmail: session?.user?.email || "",
-        userName: session?.user?.name || ""
-      }
+        userName: session?.user?.name || "",
+      },
     };
 
     try {
@@ -65,7 +70,7 @@ export default function AddResumeModal({ isOpen, onClose, onResumeCreated, docum
             resumeId: uuid,
             userEmail: session?.user?.email || "",
             userName: session?.user?.name || "",
-            documentId: response.data.data.documentId
+            documentId: response.data.data.documentId,
           });
         }
         onClose(); // Close the modal
@@ -78,31 +83,36 @@ export default function AddResumeModal({ isOpen, onClose, onResumeCreated, docum
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="rounded-2xl shadow-lg border border-border/50 p-6">
         <DialogHeader>
-          <DialogTitle>Create New {docTypeLabel}</DialogTitle>
-          <DialogDescription>
-            <p>Add a title for your new {docTypeLabel.toLowerCase()}</p>
-            <Input 
-              className="my-2" 
-              placeholder={`Ex. ${defaultTitle}`}
-              onChange={(e) => setResumeTitle(e.target.value)}
-            />
+          <DialogTitle className="text-2xl font-semibold">
+            Create a New {docTypeLabel}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground mt-2">
+            Give your {docTypeLabel.toLowerCase()} a name to get started.
           </DialogDescription>
-          <div className="flex justify-end gap-5 mt-4">
-            <Button onClick={onClose} variant="ghost">Cancel</Button>
-            <Button 
-              disabled={!resumeTitle || loading}
-              onClick={handleCreate}
-            >
-              {loading ? <Loader2 className="animate-spin mr-2" /> : null}
-              Create
-            </Button>
-          </div>
         </DialogHeader>
+
+        <Input
+          className="my-4 rounded-xl border border-border/70 focus:ring-2 focus:ring-primary/40"
+          placeholder={`Ex. ${defaultTitle}`}
+          onChange={(e) => setResumeTitle(e.target.value)}
+        />
+
+        <div className="flex justify-end gap-3 mt-6">
+          <Button variant="ghost" className="rounded-lg" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            disabled={!resumeTitle || loading}
+            onClick={handleCreate}
+            className="rounded-lg shadow-sm px-5"
+          >
+            {loading && <Loader2 className="animate-spin mr-2" />}
+            Create
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
-
-

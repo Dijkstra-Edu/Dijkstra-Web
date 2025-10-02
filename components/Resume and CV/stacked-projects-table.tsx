@@ -63,44 +63,37 @@ export const StackedProjectsTable = ({ projects, onProjectClick, onDelete, onBul
   const isAllSelected = selectedItems.length === projects.length && projects.length > 0;
 
   return (
-    <div className="bg-card text-card-foreground rounded-xl shadow-md p-6 mt-8 transition-colors duration-300">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between">
-          <h3 className="text-3xl font-bold text-card-foreground font-inter tracking-tight">
-            All projects
-          </h3>
-          <div className="flex items-center gap-2">
-            {selectedItems.length > 0 && (
+    <div className="bg-card text-card-foreground rounded-2xl shadow-sm p-6 mb-10 border border-border/60 backdrop-blur-sm">
+      <div className="flex items-center justify-between pb-4 border-b border-border/60">
+        <h3 className="text-2xl font-semibold tracking-tight">All Projects</h3>
+        <div className="flex items-center gap-3">
+          {selectedItems.length > 0 && (
+            <Button 
+              variant="destructive"
+              size="sm"
+              className="rounded-lg shadow-sm"
+              onClick={handleBulkDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete {selectedItems.length}
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button 
-                variant="destructive" 
+                variant="outline"
                 size="sm"
-                onClick={handleBulkDelete}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="rounded-lg border border-border text-sm"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''}
+                More
+                <MoreHorizontal className="ml-2 h-4 w-4" />
               </Button>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="bg-transparent border-border text-card-foreground hover:bg-muted/50 hover:text-primary focus-visible:ring-primary"
-                >
-                  More
-                  <MoreHorizontal className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-card border-border text-card-foreground">
-                <DropdownMenuItem className="hover:bg-muted/50 hover:text-primary focus:bg-muted/50 focus:text-primary">
-                  Rename
-                </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-muted/50 hover:text-primary focus:bg-muted/50 focus:text-primary">
-                  Make a copy
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="rounded-xl shadow-lg border border-border bg-popover">
+              <DropdownMenuItem>Rename</DropdownMenuItem>
+              <DropdownMenuItem>Make a copy</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <Table>

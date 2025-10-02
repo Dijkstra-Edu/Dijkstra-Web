@@ -98,10 +98,10 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
   }, []);
 
   // Demo resource arrays
-  const resumesCreated = [
+  const resumesCvTemplates = [
     {
       id: "1",
-      title: "Column Resume",
+      title: "Double Column Template",
       description: "Executive-style resume ideal for senior professionals and C-suite roles.",
       fileType: "PDF",
       fileSize: "1.2 MB",
@@ -112,7 +112,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
     },
     {
       id: "2",
-      title: "Row Resume",
+      title: "Single Column Template",
       description: "Creative and visually appealing layout, perfect for designers and artists.",
       fileType: "PDF",
       fileSize: "8.5 MB",
@@ -149,7 +149,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
   ];
 
   const stackedProjects = [
-    ...resumesCreated.map((item) => ({
+    ...resumesCvTemplates.map((item) => ({
       id: item.id,
       title: item.title,
       owner: "Template",
@@ -277,14 +277,18 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
   }
 
   return (
-    <div
-      className="min-h-screen py-12 font-inter relative bg-card text-card-foreground transition-colors duration-300"
-    >
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-background/80 to-primary/10 dark:from-background/90 dark:to-primary/20"></div>
-      <div className="max-w-6xl mx-auto px-6 space-y-10 relative z-10">
+    <div className="min-h-screenfont-inter relative bg-gradient-to-b from-background to-muted/30 text-card-foreground transition-colors duration-300">
+      <div className="relative z-10 py-4 px-2">
+        <StackedProjectsTable 
+          projects={stackedProjects} 
+          onProjectClick={handleProjectClick} 
+          onDelete={handleDeleteResume}
+          onBulkDelete={handleBulkDeleteResumes}
+        />
+        
         <ResourceSection
-          title="Resumes Templates"
-          resources={resumesCreated}
+          title="Resumes & CV Templates"
+          resources={resumesCvTemplates}
           onCreate={handleOpenResumeModal}
           onDownload={(pdfUrl) => {
             if (pdfUrl) {
@@ -298,28 +302,7 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
             }
           }}
         />
-        <ResourceSection
-          title="CV's Templates"
-          resources={cvsCreated}
-          onCreate={handleOpenCVModal}
-          onDownload={(pdfUrl) => {
-            if (pdfUrl) {
-              const link = document.createElement('a');
-              link.href = pdfUrl;
-              const fileName = pdfUrl.split('/').pop() ?? 'resume.pdf';
-              link.download = fileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          }}
-        />
-        <StackedProjectsTable 
-          projects={stackedProjects} 
-          onProjectClick={handleProjectClick} 
-          onDelete={handleDeleteResume}
-          onBulkDelete={handleBulkDeleteResumes}
-        />
+        
         
         {/* Use our new AddResumeModal component */}
         <AddResumeModal 

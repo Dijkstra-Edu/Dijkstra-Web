@@ -65,8 +65,7 @@ export default function Page() {
                   <TabsTrigger value="stats">Stats</TabsTrigger>
                   <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
                   <TabsTrigger value="readme">Readme</TabsTrigger>
-                  <TabsTrigger value="resume">Resume</TabsTrigger>
-                  <TabsTrigger value="cv">CV</TabsTrigger>
+                  <TabsTrigger value="resume">Resume & CV</TabsTrigger>
                   <TabsTrigger value="achievments">Achievements</TabsTrigger>
                 </TabsList>
 
@@ -87,7 +86,6 @@ export default function Page() {
                 <TabsContent value="portfolio">Make changes to your account here.</TabsContent>
                 <TabsContent value="readme"><Readme /></TabsContent>
                 <TabsContent value="resume"><Resume onResumeBuildingModeChange={setIsResumeBuildingMode} /></TabsContent>
-                <TabsContent value="cv">Change your password here.</TabsContent>
                 <TabsContent value="achievments">Make changes to your account here.</TabsContent>
               </Tabs>
             </div>
