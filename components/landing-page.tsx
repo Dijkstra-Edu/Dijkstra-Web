@@ -32,6 +32,7 @@ import {
   Cpu,
   Globe,
   MessageSquare,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
@@ -44,7 +45,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dotted-dialog";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, color } from "framer-motion";
 import Image from "next/image";
 import { CloudPlatform } from "./interactive/cloud-platform";
 import { AnalyticsPlatform } from "./interactive/analytics-platform";
@@ -319,46 +320,49 @@ export default function LandingPage() {
         date={calculateDate(6)}
       />
       <TimelineItem
-        title="Property Offered to Landcom"
-        description="Landcom considers the property"
+        title="2) Refactoring Approach to Projects"
+        description="Revamping profiles, portfolios and resumes to better reflect your skills and experience."
         icon={Building}
         content={
           <p>
             <Clock className="inline mr-2" />
-            Landcom: 2 weeks to confirm interest
+            Can take anywhere between 2-4 weeks.
           </p>
         }
         cumulativeTime="8 weeks"
         date={calculateDate(8)}
       />
       <TimelineItem
-        title="Landcom Confirms Interest"
-        description="Landcom decides to proceed"
+        title="3) Approaching opportunities with Dijkstra and partner organizations"
+        description="Putting to use everything you've learned so far, with the help of Dijkstra and our partner organizations."
         icon={CheckCircle}
-        content={<p>Landcom confirms interest in acquiring the property</p>}
+        content={<p>
+            <Clock className="inline mr-2" />
+            Ideally 1-2 months of work within open source projects.
+          </p>}
         cumulativeTime="10 weeks"
         date={calculateDate(10)}
       />
       <TimelineItem
-        title="Landcom Due Diligence"
-        description="Landcom conducts due diligence"
+        title="4) Start applying to other Open Source Opportunities"
+        description="These include fellowships like GSOC, LFX, Outreachy, MLH Fellowship, etc."
         icon={FileSearch}
         content={
           <p>
-            <Clock className="inline mr-2" />2 months for due diligence
+            <Clock className="inline mr-2" />Anywhere between 3-6 months, depending on time of year
           </p>
         }
-        subItems={[
-          {
-            title: "Information Requests",
-            content: (
-              <p>
-                <Clock className="inline mr-2" />
-                Land-owning agencies: 5 business days to respond to requests
-              </p>
-            ),
-          },
-        ]}
+        // subItems={[
+        //   {
+        //     title: "Information Requests",
+        //     content: (
+        //       <p>
+        //         <Clock className="inline mr-2" />
+        //         Land-owning agencies: 5 business days to respond to requests
+        //       </p>
+        //     ),
+        //   },
+        // ]}
         cumulativeTime="18 weeks"
         date={calculateDate(18)}
       />
@@ -576,7 +580,7 @@ export default function LandingPage() {
                         <p className="text-gray-400 text-sm mb-6">Powerful tools to enhance your workflow</p>
                         <a
                           href="#features"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-500/50 text-purple-400 hover:bg-purple-500/10 transition-colors text-sm font-medium"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#048304] text-[#048304] hover:bg-[#048304]/10 transition-colors text-sm font-medium"
                         >
                           All Features
                           <ArrowRight className="h-4 w-4" />
@@ -698,25 +702,25 @@ export default function LandingPage() {
                         <div className="space-y-2">
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Documentation
                           </a>
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             API Reference
                           </a>
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Changelog
                           </a>
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Community
                           </a>
@@ -740,7 +744,7 @@ export default function LandingPage() {
                         <p className="text-gray-400 text-sm mb-6">Enterprise solutions for modern teams</p>
                         <a
                           href="#products"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-500/50 text-purple-400 hover:bg-purple-500/10 transition-colors text-sm font-medium"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#048304] text-[#048304] hover:bg-[#048304]/10 transition-colors text-sm font-medium"
                         >
                           All Products
                           <ArrowRight className="h-4 w-4" />
@@ -825,31 +829,31 @@ export default function LandingPage() {
                         <div className="space-y-2">
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Plans & Pricing
                           </a>
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Product Roadmap
                           </a>
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Integrations
                           </a>
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Comparisons
                           </a>
                           <a
                             href="#"
-                            className="block px-3 py-2 text-sm hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5"
+                            className="block px-3 py-2 text-sm hover:text-[#048304] transition-colors rounded-lg hover:bg-white/5"
                           >
                             Case Studies
                           </a>
@@ -873,7 +877,7 @@ export default function LandingPage() {
                         <p className="text-gray-400 text-sm mb-6">Learn more about our mission and team</p>
                         <a
                           href="#about"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-500/50 text-purple-400 hover:bg-purple-500/10 transition-colors text-sm font-medium"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#048304] text-[#048304] hover:bg-[#048304]/10 transition-colors text-sm font-medium"
                         >
                           About Us
                           <ArrowRight className="h-4 w-4" />
@@ -884,22 +888,22 @@ export default function LandingPage() {
                       <div className="col-span-5">
                         <div className="space-y-3">
                           <a href="#about" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
-                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Our Mission</div>
+                            <div className="font-medium mb-1 hover:text-[#048304] transition-colors">Our Mission</div>
                             <div className="text-sm text-gray-400">Democratizing technology for everyone</div>
                           </a>
 
                           <a href="#about" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
-                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Team</div>
+                            <div className="font-medium mb-1 hover:text-[#048304] transition-colors">Team</div>
                             <div className="text-sm text-gray-400">Meet the people behind TechNova</div>
                           </a>
 
                           <a href="#" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
-                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Careers</div>
+                            <div className="font-medium mb-1 hover:text-[#048304] transition-colors">Careers</div>
                             <div className="text-sm text-gray-400">Join our growing team</div>
                           </a>
 
                           <a href="#contact" className="block p-3 rounded-lg hover:bg-white/5 transition-colors">
-                            <div className="font-medium mb-1 hover:text-purple-400 transition-colors">Contact Us</div>
+                            <div className="font-medium mb-1 hover:text-[#048304] transition-colors">Contact Us</div>
                             <div className="text-sm text-gray-400">Get in touch with our team</div>
                           </a>
                         </div>
@@ -911,20 +915,20 @@ export default function LandingPage() {
                           Featured Article
                         </h4>
                         <a href="#" className="block group/article">
-                          <div className="aspect-video bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg mb-3 overflow-hidden">
+                          <div className="aspect-video bg-gradient-to-br from-red-500/20 to-blue-500/20 rounded-lg mb-3 overflow-hidden">
                             <img
-                              src="/placeholder.svg?height=200&width=300&text=Article+Image"
+                              src="/blog.png"
                               alt="Featured article"
                               className="w-full h-full object-cover opacity-80 group-hover/article:opacity-100 transition-opacity"
                             />
                           </div>
-                          <h5 className="font-semibold mb-2 group-hover/article:text-purple-400 transition-colors">
-                            The Future of Cloud Computing
+                          <h5 className="font-semibold mb-2 group-hover/article:text-red-600 transition-colors">
+                            Dijkstra Blog is Live!
                           </h5>
                           <p className="text-sm text-gray-400 mb-3">
-                            Discover how cloud technology is reshaping the digital landscape...
+                            Discover how students are sharing what they've learnt through Dijkstra blog...
                           </p>
-                          <span className="text-sm text-purple-400 font-medium inline-flex items-center gap-1">
+                          <span className="text-sm text-red-600 font-medium inline-flex items-center gap-1">
                             Read more
                             <ArrowRight className="h-3 w-3" />
                           </span>
@@ -1069,94 +1073,95 @@ export default function LandingPage() {
       </section>
 
       {/* What is Dijkstra */}
-      <section
-        id="features"
-        className="py-24 bg-white relative overflow-hidden"
+<section
+  id="features"
+  className="py-24 relative overflow-hidden bg-gradient-to-b from-white to-gray-50"
+>
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,197,94,0.08),transparent_60%)]" />
+
+  <div className="container mx-auto px-6 relative z-10">
+    <div className="text-center mb-20">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(5, 177, 5,0.1),transparent_50%)]" />
+        <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-gray-900">
+          So what's Dijkstra?
+        </h2>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          Dijkstra is a one-stop, open-source platform for aspiring Software Engineers 
+          to prepare and crack jobs in today’s competitive landscape.  
+          <br /> <br />
+          At its core, Dijkstra works on the following principles:
+        </p>
+      </motion.div>
+    </div>
 
-        <div className="container-max mx-auto px-4 relative z-10">
-          <div className="text-center mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
-                So what's Dijkstra?
-              </h2>
-              <p className="text-gray-700 max-w-2xl mx-auto">
-                Dijkstra is a one stop, open source, free for all platform for
-                aspiring Software Engineers to prepare and crack jobs,
-                especially in today's day and age.
-                {/* button to redirect to Dijkstra's Mission as well as About Us */}
-                <br />
-                Dijkstra works on the following principles:
-              </p>
-            </motion.div>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      {[
+        {
+          icon: <Eye className="h-6 w-6 text-purple-500" />,
+          title: "Visibility",
+          description:
+            "Track your progress across platforms like GitHub, LinkedIn, Leetcode, Codeforces, and more. See yourself level up through validated Proof of Work."
+        },
+        {
+          icon: <BrainCircuit className="h-6 w-6 text-blue-500" />,
+          title: "Develop Skills",
+          description:
+            "Sharpen your DSA, Software Engineering, and Systems Design with tasks like code pushes, articles, mentoring, and leading projects."
+        },
+        {
+          icon: <CheckCircle className="h-6 w-6 text-green-500" />,
+          title: "Proof of Work",
+          description:
+            "Your growth is visible across multiple platforms. Dijkstra helps gamify this journey, guiding you to plan and execute effectively."
+        },
+        {
+          icon: <Target className="h-6 w-6 text-red-500" />,
+          title: "Efficiency",
+          description:
+            "A project can double up as a research paper or portfolio piece. Dijkstra helps you align efforts to maximize output."
+        },
+        {
+          icon: <Users className="h-6 w-6 text-yellow-500" />,
+          title: "Community",
+          description:
+            "Give back by writing, coding, mentoring, and contributing. Build credibility and grow with the global tech community."
+        },
+        {
+          icon: <Workflow className="h-6 w-6 text-gray-500" />,
+          title: "Growth Mindset",
+          description:
+            "Everything leads to something bigger — internships, articles, or research. Dijkstra helps connect the dots for your career."
+        },
+      ].map((feature, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+        >
+          <div className="h-full bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+            <div className="mb-6 flex items-center justify-center w-14 h-14 rounded-xl bg-gray-100">
+              {feature.icon}
+            </div>
+            <h3 className="text-xl font-semibold mb-3 text-gray-900">
+              {feature.title}
+            </h3>
+            <p className="text-gray-600 leading-relaxed">
+              {feature.description}
+            </p>
           </div>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
 
-          <div className="grid md:grid-cols-2 px-[300px] lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Eye className="h-10 w-10 text-purple-500" />,
-                title: "Visibility",
-                description:
-                  "Track your progress across all platforms, be it GitHub, LinkedIn, Leetcode, Codeforces, etc; and see yourself level up in terms of skills (validated by Proof of Work) for jobs around the world.",
-              },
-              {
-                icon: <BrainCircuit className="h-10 w-10 text-blue-500" />,
-                title: "Develop Skills",
-                description:
-                  "Improve your DSA, Software Engineering, Systems Design hollistically through a variety of tasks within Dijkstra. Everything from simple code pushes, sharing new approaches, writing articles, to mentoring and leading projects. You're here to develop yourself into a Globally competitive Software Developer.",
-              },
-              {
-                icon: <CheckCircle className="h-10 w-10 text-green-500" />,
-                title: "Proof of Work",
-                description:
-                  "Dijkstra is a platform to keep track of your overall development, that comes down to proof of work on various spaces, be in Leetcode to GitHub, the onus is on YOU to develop yourself. We just help gamify the experience of gaining visiblity and understanding on how to plan your journey out.",
-              },
-              {
-                icon: <Target className="h-10 w-10 text-red-500" />,
-                title: "Killing two Birds with one stone",
-                description:
-                  "Turns out most things are inter-related! What's on your resume is technically on your LinkedIn. A project could double up as a Research Paper at a Conference. Dijkstra helps you plan things out to achieve more with what you do.",
-              },
-              {
-                icon: <Users className="h-10 w-10 text-yellow-500" />,
-                title: "Community",
-                description:
-                  "Give back to the community by writing articles, pushing code, thereby improving your credibility to the tech world.",
-              },
-              {
-                icon: <Workflow className="h-10 w-10 text-gray-400" />,
-                title: "One thing Leads to Another",
-                description:
-                  "Everything you do Leads to another. The skills you gain at an internship? It's leverage for your next job. The articles and papers you put out? That potentially increases your chances at a research lab. Whatever you do needs to lead to something bigger and better.",
-              },
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <div className="h-full bg-gradient-to-b from-white to-white p-6 rounded-xl border border-green-800/50 hover:border-green-500/50 transition-colors backdrop-blur-sm">
-                  <div className="mb-4 p-3  rounded-lg inline-block">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 text-black">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-400">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* How Does this work? */}
       {/* 
@@ -1223,6 +1228,7 @@ export default function LandingPage() {
               {[
                 "/logos/CERN.png",
                 "/logos/microsoft.png",
+                "/logos/apple.png",
                 "/logos/hsbc.png",
                 "/logos/hyperface.png",
                 "/logos/balkan.jpeg",
@@ -1230,6 +1236,7 @@ export default function LandingPage() {
                 "/logos/phillips.png",
                 "/logos/pwc.png",
                 "/logos/signify.png",
+                "/logos/tcs.png",
               ].map((src, idx) => (
                 <img
                   key={idx}
@@ -1256,63 +1263,67 @@ export default function LandingPage() {
 
       */}
       {/* Features Section */}
-      <section id="features" className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(4,131,4,0.15),transparent_50%)]" />
+      {/* <section id="features" className="py-24 relative overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950"> */}
+      <section id="features" className="py-24 relative overflow-hidden">  
 
-        <div className="container-max mx-auto px-4 relative z-10">
-          <div className="text-center mb-16">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,197,94,0.12),transparent_60%)]" />
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">Features</h2>
-              <p className="text-gray-400 max-w-2xl mx-auto">
-                Our platform offers a comprehensive suite of tools designed to
-                enhance your productivity and streamline your workflow.
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-white">
+                Features
+              </h2>
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                Our platform provides a suite of powerful tools designed to enhance productivity 
+                and streamline your workflow.
               </p>
             </motion.div>
           </div>
 
-          <div className="grid md:grid-cols-2 px-[300px] lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
               {
-                icon: <Brain className="h-10 w-10 text-purple-500" />,
+                icon: <Brain className="h-6 w-6 text-purple-500" />,
                 title: "Dijkstra GPT",
                 description:
-                  "Integrate seamlessly with our robust API designed for developers with comprehensive documentation and examples.",
+                  "Integrate seamlessly with our API — developer-friendly with full documentation and examples."
               },
               {
-                icon: <Trophy className="h-10 w-10 text-blue-500" />,
+                icon: <Trophy className="h-6 w-6 text-blue-500" />,
                 title: "Ranking & Tracking",
                 description:
-                  "Lightning-fast content delivery across our worldwide network with 99.9% uptime guarantee.",
+                  "Track performance globally with lightning-fast metrics and uptime reliability."
               },
               {
-                icon: <BookOpen className="h-10 w-10 text-green-500" />,
+                icon: <BookOpen className="h-6 w-6 text-green-500" />,
                 title: "Learning Center",
                 description:
-                  "Enterprise-grade security with end-to-end encryption and compliance with industry standards.",
+                  "Expand knowledge through structured resources backed by enterprise-grade security."
               },
               {
-                icon: <FolderKanban className="h-10 w-10 text-red-500" />,
+                icon: <FolderKanban className="h-6 w-6 text-red-500" />,
                 title: "Projects Hub",
                 description:
-                  "Leverage the power of artificial intelligence to optimize your workflow and gain valuable insights.",
+                  "Collaborate on open-source projects and leverage AI-powered insights for growth."
               },
               {
-                icon: <Handshake className="h-10 w-10 text-yellow-500" />,
+                icon: <Handshake className="h-6 w-6 text-yellow-500" />,
                 title: "Mentorship",
                 description:
-                  "Our dedicated team is always available to assist you with any issues through multiple channels.",
+                  "Connect with experienced mentors and build credibility through guided learning."
               },
               {
-                icon: <Github className="h-10 w-10 text-gray-400" />,
+                icon: <Github className="h-6 w-6 text-gray-300" />,
                 title: "Open Source",
                 description:
-                  "Contribute to our growing ecosystem of open-source tools and libraries with active community support.",
-              },
+                  "Join our growing open-source ecosystem and contribute to community-driven tools."
+              }
             ].map((feature, index) => (
               <motion.div
                 key={index}
@@ -1321,20 +1332,23 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-[1px] rounded-xl">
-                  <div className="h-full bg-gradient-to-b from-gray-900 to-gray-950 p-6 rounded-xl border border-gray-800/50 hover:border-green-500/50 transition-colors backdrop-blur-sm">
-                    <div className="mb-4 p-3 bg-gray-800/30 rounded-lg inline-block">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                    <p className="text-gray-400">{feature.description}</p>
+                <div className="h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:shadow-2xl hover:shadow-green-500/10 hover:scale-[1.02] transition-all duration-300">
+                  <div className="mb-6 flex items-center justify-center w-14 h-14 rounded-xl bg-white/10">
+                    {feature.icon}
                   </div>
+                  <h3 className="text-xl font-semibold mb-3 text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* Pricing Section */}
       <section id="pricing" className="py-24 relative overflow-hidden">
@@ -1792,25 +1806,25 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                name: "Sarah Johnson",
-                role: "CTO, TechStart Inc.",
-                image: "https://avatar.vercel.sh/jill",
+                name: "Neha Amin",
+                role: "Dijkstra Student - Aspiring Software Engineer",
+                image: "/neha.jpg",
                 content:
-                  "TechNova has completely transformed our development workflow. The platform's intuitive design and powerful features have increased our team's productivity by over 40%.",
+                  "As someone who ran away at the first mention of an API call or development , to actually enjoying the process of building your ideas into a software solution.  Dijikstra has been that experience that helped me overcome my fears.",
               },
               {
-                name: "Michael Chen",
-                role: "Founder, DataFlow",
-                image: "https://avatar.vercel.sh/jill",
+                name: "Abdul Wahab",
+                role: "Dijkstra Student - Aspiring Software Engineer",
+                image: "/abdul.jpg",
                 content:
-                  "Implementing TechNova was one of the best decisions we've made. The seamless integration and robust API have allowed us to focus on what matters most - building great products.",
+                  "I always wanted to explore real backend development, and Dijkstra gave me that chance. Working under Jonathan's guidance helped me dive deep into core concepts. I not only learned the technical side but also how to approach problems logically. This experience has boosted my confidence to take on bigger backend challenges.",
               },
               {
-                name: "Emily Rodriguez",
-                role: "Lead Developer, InnovateCorp",
-                image: "https://avatar.vercel.sh/jill",
+                name: "Nishita Daryn",
+                role: "Dijkstra Student - Aspiring Medical Engineer",
+                image: "/nishita.jpg",
                 content:
-                  "As a developer, I appreciate the attention to detail in TechNova's platform. The documentation is comprehensive, and the support team is always ready to help.",
+                  "As a non-CS major, I was initially intimidated by the idea of contributing to an open-source project. However, Dijkstra's supportive community and structured approach made it accessible and enjoyable. I've gained practical skills and confidence that I never thought possible.",
               },
             ].map((testimonial, index) => (
               <motion.div
@@ -1972,53 +1986,129 @@ export default function LandingPage() {
       {/* Contact Section */}
       <section
         id="contact"
-        className="py-24 relative overflow-hidden px-[300px] bg-white"
+        className="relative overflow-hidden py-28 bg-gradient-to-b from-white via-gray-50 to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(5, 177, 5,0.9),transparent_50%)]" />
+        {/* Background accents */}
+        <div className="absolute inset-0">
+          {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.08),transparent_70%)]" /> */}
+          {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.06),transparent_70%)]" /> */}
+        </div>
 
-        <div className="container mx-auto px-4 relative z-10 bg-w">
-          <div className="max-w-3xl mx-auto">
+        <div className="container relative z-10 mx-auto px-6">
+          <div className="grid lg:grid-cols-[1fr_auto_1fr] gap-20 items-start">
+
+            {/* Left Column */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="text-center mb-32"
             >
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">
-                So, Ready to Get Started?
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-gray-900 dark:text-white">
+                Ready to Get Started?
               </h2>
-              <p className="text-gray-300 mb-8 text-lg">
-                If you are a new user, please click the <b>Get Started</b>{" "}
-                button below, and get ready to be onboarded!
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-12 leading-relaxed max-w-xl">
+                Kickstart your journey with{" "}
+                <span className="text-green-600 dark:text-green-400 font-semibold">Dijkstra</span>. 
+                Whether you’re new or returning, choose your next step below.
               </p>
 
-              <div className="">
-                {/* <Button
-                  className="bg-black hover:bg-neutral-900 border
-                 dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
-                 h-9 px-4 py-2"
-                  onClick={() => router.push("/login")}
-                >
-                  Login
-                </Button> */}
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-16">
+                {/* Primary CTA */}
                 <Button
-                  className="bg-white hover:bg-gray-100 border
-                 dark:bg-black dark:hover:bg-neutral-900 dark:text-white border-[#048304] text-[#048304] hover:opacity-90 cursor-pointer
-                 h-9 px-10 py-8"
+                  className="relative bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold 
+                            px-8 py-3 rounded-xl shadow-lg shadow-green-600/20 cursor-pointer
+                            transition-all duration-300 hover:scale-[1.04] hover:shadow-green-500/30"
                   onClick={() => router.push("/onboarding")}
                 >
-                  Get Started!
+                  Get Started
+                </Button>
+
+                {/* Secondary CTA */}
+                <Button
+                  className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white 
+                            border border-gray-200 dark:border-gray-800 
+                            font-medium px-8 py-3 rounded-xl 
+                            transition-colors duration-200 cursor-pointer
+                            hover:bg-gray-100 dark:hover:bg-gray-800"
+                  onClick={() => router.push("/dashboard")}
+                >
+                  Go to Dashboard
                 </Button>
               </div>
-            </motion.div>
 
+
+              {/* Resource cards */}
+              <div className="grid items-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  {
+                    title: "Knowledgebase",
+                    desc: "We're here to help with any questions or code.",
+                    icon: BrainCircuit,
+                    link: "#",
+                    action: "Contact support",
+                    color: "text-red-400 dark:text-green-400"
+                  },
+                  {
+                    title: "FAQ",
+                    desc: "Search our FAQ for answers to anything you might ask.",
+                    icon: MessageSquare,
+                    link: "#",
+                    action: "Visit FAQ",
+                    color: "text-yellow-400 dark:text-green-400"
+                  },
+                  {
+                    title: "Developer APIs",
+                    desc: "Check out our development quickstart guide.",
+                    icon: Wrench,
+                    link: "#",
+                    action: "Explore APIs",
+                    color: "text-green-600 dark:text-green-400"
+                  },
+                ].map((item, idx) => (
+                  <Link
+                    key={idx}
+                    href={item.link}
+                    className="group rounded-xl bg-white/70 dark:bg-gray-900/50 backdrop-blur-sm 
+                              border border-gray-200/60 dark:border-gray-800/60 shadow-sm p-6 
+                              hover:shadow-lg hover:-translate-y-1 transition-all text-center"
+                  >
+                    <item.icon className={item.color + " mx-auto h-10 w-10"} />
+                    <div className="mt-5">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{item.desc}</p>
+                      <p className="text-gray-600 dark:text-gray-400 mt-5 inline-flex items-center gap-x-1 font-medium">
+                        {item.action}
+                        <svg
+                          className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m9 18 6-6-6-6" />
+                        </svg>
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+            {/* Divider */}
+            <div className="hidden lg:block w-px bg-gradient-to-b from-gray-200/70 via-gray-300/40 to-transparent dark:from-gray-700/60 dark:via-gray-700/40 dark:to-transparent mx-auto rounded-full" />
+
+            {/* Right Column - Contact Form */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative"
             >
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-green-500/10 blur-3xl rounded-full pointer-events-none" />
               <ContactForm />
             </motion.div>
           </div>
