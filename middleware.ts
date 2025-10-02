@@ -31,13 +31,13 @@ export default withAuth(
      
       // After QA bypass is confirmed, check NextAuth requirements
       // Allow /login page since user has passed QA gate
-      if (pathname === "/" || pathname === "/login" || pathname.startsWith("/onboarding")) {
+      if (/*pathname === "/" ||*/ pathname === "/login" || pathname.startsWith("/onboarding")) {
         return NextResponse.next();
       }
       
       // For all other protected routes, also require NextAuth token
       if (!token) {
-        return NextResponse.redirect(new URL("/", origin));
+        return NextResponse.redirect(new URL("/login", origin));
       }
     }
    
