@@ -10,7 +10,7 @@ interface LogoutOptions {
 
 export const handleLogout = async (options: LogoutOptions = {}) => {
   const {
-    callbackUrl = "/login",
+    callbackUrl = "/qa-gate",
     redirect = true,
     onSuccess,
     onError
