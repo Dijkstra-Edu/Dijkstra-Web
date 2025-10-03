@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Questions & Discussions
+  - name: Documentation Issues
+    url: https://github.com/Dijkstra-Edu/docs
+    about: Please open docs-related issues in the docs repository.
+  - name: Discussions
     url: https://github.com/Dijkstra-Edu/dijkstra-web/discussions
-    about: Please use GitHub Discussions for general questions.
+    about: Use GitHub Discussions for General Questions and Feedback.
+  - name: Support
+    url: mailto:support@dijkstra.org.in
+    about: Get help and support for using Dijkstra.
