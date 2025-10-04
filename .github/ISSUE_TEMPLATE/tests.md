@@ -1,5 +1,5 @@
 ---
-name: Test Request
+name: Test Related Issue
 about: Issue to be addressed - testing
 title: "[Test] Short description"
 labels: 'tests'
