@@ -1,19 +1,19 @@
 ---
-name: Feature Request
-about: Suggest a new feature
-title: "[Feature] Short description"
-labels: 'feature'
+name: Refactor Request
+about: Suggest a new refactor or improvement
+title: "[Refactor] Short description"
+labels: 'refactor'
 assignees: ''
 ---
 
 ## Description
-<!-- Describe the feature you'd like -->
+<!-- Describe the refactor you'd like -->
 
 ## Use Case
-<!-- Why is this feature useful? Who does it help? -->
+<!-- Why is this refactor useful? Who does it help? -->
 
 ## Suggested Solution
-<!-- How might this feature be implemented? -->
+<!-- How might this refactor be implemented? -->
 
 ---
 

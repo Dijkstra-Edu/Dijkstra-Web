@@ -1,19 +1,19 @@
 ---
-name: Feature Request
-about: Suggest a new feature
-title: "[Feature] Short description"
-labels: 'feature'
+name: Test Request
+about: Issue to be addressed - testing
+title: "[Test] Short description"
+labels: 'tests'
 assignees: ''
 ---
 
 ## Description
-<!-- Describe the feature you'd like -->
+<!-- Describe the test you'd like to implement -->
 
 ## Use Case
-<!-- Why is this feature useful? Who does it help? -->
+<!-- Why is this test useful? Who does it help? -->
 
 ## Suggested Solution
-<!-- How might this feature be implemented? -->
+<!-- How might this test be implemented? -->
 
 ---
 

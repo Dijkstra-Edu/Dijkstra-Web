@@ -1,19 +1,19 @@
 ---
-name: Feature Request
-about: Suggest a new feature
-title: "[Feature] Short description"
-labels: 'feature'
+name: Task Request
+about: Suggest a simple task that needs to be done with respect to the project
+title: "[Task] Short description"
+labels: 'task'
 assignees: ''
 ---
 
 ## Description
-<!-- Describe the feature you'd like -->
+<!-- Describe the task you'd like -->
 
 ## Use Case
-<!-- Why is this feature useful? Who does it help? -->
+<!-- Why is this task useful? Who does it help? -->
 
 ## Suggested Solution
-<!-- How might this feature be implemented? -->
+<!-- How might this task be implemented? -->
 
 ---
 
