@@ -51,9 +51,6 @@ import {
 } from "@/components/ui/dotted-dialog";
 import { motion, AnimatePresence, color } from "framer-motion";
 import Image from "next/image";
-import { CloudPlatform } from "./interactive/cloud-platform";
-import { AnalyticsPlatform } from "./interactive/analytics-platform";
-import { SecurityPlatform } from "./interactive/security-platform";
 import { TeamVisualization } from "./interactive/team-visualization";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
