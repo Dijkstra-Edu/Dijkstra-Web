@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import { FileText, FileImage, BarChart3, Video } from "lucide-react";
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedProjectsTable } from "@/components/Resume and CV/stacked-projects-table";
 import AddResumeModal from "./AddResumeModal";
@@ -19,7 +18,7 @@ interface ResumeData {
   template?: "deedy" | "row-based";
 }
 
-// Placeholder component for the new resume builder
+// Wrapper for the new ResumeBuilder with header/back button
 const ResumeBuilderWrapper = ({
   resumeData,
   onBack,
@@ -44,7 +43,6 @@ const ResumeBuilderWrapper = ({
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with back button */}
       <div className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -65,8 +63,6 @@ const ResumeBuilderWrapper = ({
           </div>
         </div>
       </div>
-
-      {/* Resume Builder Component */}
       <ResumeBuilder
         showHeader={false}
         height="calc(100vh - 80px)"
@@ -154,12 +150,16 @@ const Resume = ({
     })),
   ];
 
+  // Store the template to use for AddResumeModal
+  const [pendingTemplate, setPendingTemplate] = useState<"deedy" | "row-based">("deedy");
+
   const handleOpenModal = (
     template?: "deedy" | "row-based",
     documentType: "resume" | "cv" = "resume"
   ) => {
     if (template) {
       setSelectedTemplate(template);
+      setPendingTemplate(template);
     }
     setCurrentDocumentType(documentType);
     setIsModalOpen(true);
@@ -174,9 +174,11 @@ const Resume = ({
   // };
 
   const handleResumeCreated = (resumeData: ResumeData) => {
-    setSelectedTemplate(resumeData.template || "deedy");
+    // Use the pendingTemplate if not set in resumeData
+    const templateToUse = resumeData.template || pendingTemplate || "deedy";
+    setSelectedTemplate(templateToUse);
     setCurrentDocumentType(resumeData.documentType || "resume");
-    setCurrentResumeData(resumeData);
+    setCurrentResumeData({ ...resumeData, template: templateToUse });
 
     if (onResumeBuildingModeChange) {
       onResumeBuildingModeChange(true);
@@ -209,17 +211,17 @@ const Resume = ({
     }
 
     if (project.resumeData) {
-      // Load saved resume
-      const resumeData: ResumeData = {
+      // Use template from resumeData if available, otherwise default to 'deedy'
+      const templateToUse = project.resumeData.template || "deedy";
+      setSelectedTemplate(templateToUse);
+      setCurrentResumeData({
         title: project.resumeData.title,
         resumeId: project.resumeData.resumeId,
         userEmail: project.resumeData.userEmail,
         userName: project.resumeData.userName,
         documentId: project.resumeData.documentId,
-      };
-
-      setSelectedTemplate(project.resumeData.template);
-      setCurrentResumeData(resumeData);
+        template: templateToUse,
+      });
 
       if (onResumeBuildingModeChange) {
         onResumeBuildingModeChange(true);
@@ -301,7 +303,7 @@ const Resume = ({
         <AddResumeModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onResumeCreated={handleResumeCreated}
+          onResumeCreated={(resumeData) => handleResumeCreated({ ...resumeData, template: pendingTemplate })}
           documentType={currentDocumentType}
         />
       </div>

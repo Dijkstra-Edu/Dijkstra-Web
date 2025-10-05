@@ -75,6 +75,7 @@ export default function AddResumeModal({
             userName: session?.user?.name || "",
             documentId: response.data.data.documentId,
             documentType: selectedDocType,
+            // template will be injected by parent if needed
           });
         }
 
