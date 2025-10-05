@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { useSession } from "next-auth/react";
-
 import {
   Dialog,
   DialogContent,
@@ -22,6 +21,8 @@ interface ResumeData {
   userEmail: string;
   userName: string;
   documentId: string;
+  documentType?: "resume" | "cv";
+  template?: "deedy" | "row-based";
 }
 
 interface AddResumeModalProps {
@@ -37,12 +38,14 @@ export default function AddResumeModal({
   onResumeCreated,
   documentType = "resume",
 }: AddResumeModalProps) {
-  const [resumeTitle, setResumeTitle] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [resumeTitle, setResumeTitle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [selectedDocType, setSelectedDocType] = useState<"resume" | "cv">(
+    documentType
+  );
   const { data: session } = useSession();
 
-  const docTypeLabel = documentType === "cv" ? "CV" : "Resume";
-  const defaultTitle = documentType === "cv" ? "My New CV" : "My New Resume";
+  const defaultTitle = selectedDocType === "cv" ? "My New CV" : "My New Resume";
 
   const handleCreate = async () => {
     if (!resumeTitle) return;
@@ -63,7 +66,7 @@ export default function AddResumeModal({
       const response = await GlobalApi.CreateNewResume(data);
       if (response) {
         setLoading(false);
-        // Instead of navigating, call the onResumeCreated callback
+
         if (onResumeCreated) {
           onResumeCreated({
             title: resumeTitle,
@@ -71,9 +74,11 @@ export default function AddResumeModal({
             userEmail: session?.user?.email || "",
             userName: session?.user?.name || "",
             documentId: response.data.data.documentId,
+            documentType: selectedDocType,
           });
         }
-        onClose(); // Close the modal
+
+        onClose();
       }
     } catch (error) {
       setLoading(false);
@@ -86,19 +91,39 @@ export default function AddResumeModal({
       <DialogContent className="rounded-2xl shadow-lg border border-border/50 p-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
-            Create a New {docTypeLabel}
+            Create a New Document
           </DialogTitle>
           <DialogDescription className="text-muted-foreground mt-2">
-            Give your {docTypeLabel.toLowerCase()} a name to get started.
+            Enter a title and choose the type of document you want to create.
           </DialogDescription>
         </DialogHeader>
 
+        {/* Title input */}
         <Input
           className="my-4 rounded-xl border border-border/70 focus:ring-2 focus:ring-primary/40"
           placeholder={`Ex. ${defaultTitle}`}
+          value={resumeTitle}
           onChange={(e) => setResumeTitle(e.target.value)}
         />
 
+        {/* Document type dropdown */}
+        <div className="mt-2">
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            Document Type
+          </label>
+          <select
+            value={selectedDocType}
+            onChange={(e) =>
+              setSelectedDocType(e.target.value as "resume" | "cv")
+            }
+            className="w-full rounded-xl border border-border/70 bg-background px-3 py-2 focus:ring-2 focus:ring-primary/40"
+          >
+            <option value="resume">Resume</option>
+            <option value="cv">CV</option>
+          </select>
+        </div>
+
+        {/* Footer buttons */}
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="ghost" className="rounded-lg" onClick={onClose}>
             Cancel
