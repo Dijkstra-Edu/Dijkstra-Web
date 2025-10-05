@@ -1,14 +1,13 @@
-"use client";
-
+// ResumeApiService.ts
+// Handles API-like operations for resumes (simulated backend)
 import { v4 as uuidv4 } from 'uuid';
 
-// Define types for our API
 interface ResumeData {
   title: string;
   resumeId: string;
   userEmail: string;
   userName: string;
-  [key: string]: string | number | boolean | object; // For additional fields
+  [key: string]: string | number | boolean | object;
 }
 
 interface CreateResumeRequest {
@@ -24,15 +23,10 @@ interface ResumeResponse {
   };
 }
 
-class GlobalApi {
-  // Create a new resume
-  static async CreateNewResume(data: CreateResumeRequest): Promise<ResumeResponse> {
+export class ResumeApiService {
+  static async createResume(data: CreateResumeRequest): Promise<ResumeResponse> {
     try {
-      // Generate a unique document ID
       const documentId = uuidv4();
-      
-      // In a real application, this would be an API call to your backend
-      // For now, we'll simulate a successful response
       const response: ResumeResponse = {
         data: {
           data: {
@@ -41,33 +35,25 @@ class GlobalApi {
           }
         }
       };
-      
-      // Store in localStorage for persistence
       const resumes = JSON.parse(localStorage.getItem('resumes') || '[]');
       resumes.push({
         documentId: documentId,
         ...data.data
       });
       localStorage.setItem('resumes', JSON.stringify(resumes));
-      
       return Promise.resolve(response);
     } catch (error) {
       return Promise.reject(error);
     }
   }
 
-  // Get resume by ID
-  static async GetResumeById(resumeId: string): Promise<ResumeResponse> {
+  static async getResumeById(resumeId: string): Promise<ResumeResponse> {
     try {
-      // In a real application, this would be an API call to your backend
-      // For now, we'll retrieve from localStorage
       const resumes = JSON.parse(localStorage.getItem('resumes') || '[]');
       const resume = resumes.find((r: { documentId: string }) => r.documentId === resumeId);
-      
       if (!resume) {
         return Promise.reject(new Error('Resume not found'));
       }
-      
       return Promise.resolve({
         data: {
           data: resume
@@ -78,28 +64,18 @@ class GlobalApi {
     }
   }
 
-  // Update resume details
-  static async UpdateResumeDetail(
-    resumeId: string, 
-    data: { data: Record<string, string | number | boolean | object> }
-  ): Promise<ResumeResponse> {
+  static async updateResume(resumeId: string, data: CreateResumeRequest): Promise<ResumeResponse> {
     try {
-      // In a real application, this would be an API call to your backend
-      // For now, we'll update in localStorage
       const resumes = JSON.parse(localStorage.getItem('resumes') || '[]');
       const index = resumes.findIndex((r: { documentId: string }) => r.documentId === resumeId);
-      
       if (index === -1) {
         return Promise.reject(new Error('Resume not found'));
       }
-      
       resumes[index] = {
         ...resumes[index],
         ...data.data
       };
-      
       localStorage.setItem('resumes', JSON.stringify(resumes));
-      
       return Promise.resolve({
         data: {
           data: resumes[index]
@@ -110,7 +86,3 @@ class GlobalApi {
     }
   }
 }
-
-export default GlobalApi;
-
-

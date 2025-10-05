@@ -48,13 +48,7 @@ export const ResourceSection = ({
             onDownload={() =>
               onDownload && resource.pdfUrl && onDownload(resource.pdfUrl)
             }
-            onClick={
-              resource.title.includes("Column")
-                ? () => onCreate("deedy")
-                : resource.title.includes("Row")
-                ? () => onCreate("row-based")
-                : undefined
-            }
+            onClick={() => onCreate(resource.template)}
             className="bg-card text-card-foreground rounded-2xl shadow-sm hover:shadow-md border border-border hover:border-primary/40 transition-all duration-300"
           />
         ))}
