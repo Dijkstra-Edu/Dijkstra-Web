@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { UserProfileData } from '@/types/new_resume';
+import { UserProfileData } from '@/types/resume';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
 import { ResumeStorageService } from '@/services/ResumeStorageService';
