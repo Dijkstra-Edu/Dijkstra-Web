@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, FileImage, BarChart3, Video } from "lucide-react";
+// import { FileText, FileImage, BarChart3, Video } from "lucide-react";
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedProjectsTable } from "@/components/Resume and CV/stacked-projects-table";
 import AddResumeModal from "./AddResumeModal";
@@ -146,9 +146,9 @@ const Resume = ({ onResumeBuildingModeChange }: { onResumeBuildingModeChange?: (
     handleOpenModal(template, 'resume');
   };
 
-  const handleOpenCVModal = (template?: 'deedy' | 'row-based') => {
-    handleOpenModal(template, 'cv');
-  };
+  // const handleOpenCVModal = (template?: 'deedy' | 'row-based') => {
+  //   handleOpenModal(template, 'cv');
+  // };
 
   const handleResumeCreated = (resumeData: ResumeData) => {
     setCurrentResumeData(resumeData);
