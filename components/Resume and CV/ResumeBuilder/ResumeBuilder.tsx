@@ -5,7 +5,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { UserProfileData } from '@/types/new_resume';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
-import { ResumeDataService } from '@/app/services/ResumeDataService';
+import { ResumeStorageService } from '@/services/ResumeStorageService';
 
 interface ResumeBuilderProps {
   initialData?: Partial<UserProfileData>;
@@ -67,7 +67,7 @@ export default function ResumeBuilder({
       if (resumeId) {
         try {
           setIsLoading(true);
-          const savedData = await ResumeDataService.loadResumeData(resumeId);
+          const savedData = await ResumeStorageService.loadResumeData(resumeId);
           if (savedData && savedData.content) {
             setResumeData(savedData.content);
             setLastSaved(new Date());
@@ -88,7 +88,7 @@ export default function ResumeBuilder({
     if (!resumeId || !resumeData || Object.keys(resumeData).length === 0) return;
 
     const saveTimer = setTimeout(() => {
-      ResumeDataService.saveResumeData(
+  ResumeStorageService.saveResumeData(
         resumeId,
         resumeData,
         template,
@@ -149,7 +149,7 @@ export default function ResumeBuilder({
     if (resumeId && resumeData && Object.keys(resumeData).length > 0) {
       setIsSaving(true);
       try {
-        await ResumeDataService.saveResumeData(
+  await ResumeStorageService.saveResumeData(
           resumeId,
           resumeData,
           template,

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import GlobalApi from "@/app/services/GlobalApi";
+import { ResumeApiService } from "@/services/ResumeApiService";
 
 interface ResumeData {
   title: string;
@@ -63,7 +63,7 @@ export default function AddResumeModal({
     };
 
     try {
-      const response = await GlobalApi.CreateNewResume(data);
+  const response = await ResumeApiService.createResume(data);
       if (response) {
         setLoading(false);
 

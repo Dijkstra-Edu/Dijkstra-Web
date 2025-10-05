@@ -5,7 +5,7 @@ import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedProjectsTable } from "@/components/Resume and CV/stacked-projects-table";
 import AddResumeModal from "./AddResumeModal";
 import ResumeBuilder from "@/components/Resume and CV/ResumeBuilder/ResumeBuilder";
-import { ResumeDataService } from "@/app/services/ResumeDataService";
+import { ResumeStorageService } from "@/services/ResumeStorageService";
 import { SavedResumeData } from "@/types/resume";
 
 interface ResumeData {
@@ -101,7 +101,7 @@ const Resume = ({
   // Load saved resumes on component mount
   useEffect(() => {
     const loadSavedResumes = () => {
-      const saved = ResumeDataService.getAllSavedResumes();
+  const saved = ResumeStorageService.getAllSavedResumes();
       setSavedResumes(saved);
     };
 
@@ -144,7 +144,7 @@ const Resume = ({
       id: item.resumeId,
       title: item.title,
       owner: "You",
-      lastModified: ResumeDataService.formatLastModified(item.lastModified),
+  lastModified: ResumeStorageService.formatLastModified(item.lastModified),
       isTemplate: false,
       resumeData: item,
     })),
@@ -189,7 +189,7 @@ const Resume = ({
     setCurrentResumeData(null);
     setSelectedTemplate("deedy");
     // Refresh saved resumes when returning to dashboard
-    const saved = ResumeDataService.getAllSavedResumes();
+  const saved = ResumeStorageService.getAllSavedResumes();
     setSavedResumes(saved);
     // Notify parent component that we're exiting resume building mode
     if (onResumeBuildingModeChange) {
@@ -233,10 +233,10 @@ const Resume = ({
     // Only allow deleting saved resumes, not templates
     const project = stackedProjects.find((p) => p.id === projectId);
     if (project && !project.isTemplate) {
-      const success = ResumeDataService.deleteResumeData(projectId);
+  const success = ResumeStorageService.deleteResumeData(projectId);
       if (success) {
         // Refresh saved resumes
-        const saved = ResumeDataService.getAllSavedResumes();
+  const saved = ResumeStorageService.getAllSavedResumes();
         setSavedResumes(saved);
       }
     }
@@ -251,10 +251,10 @@ const Resume = ({
 
     if (resumeIdsToDelete.length > 0) {
       const deletedCount =
-        ResumeDataService.deleteBulkResumeData(resumeIdsToDelete);
+  ResumeStorageService.deleteBulkResumeData(resumeIdsToDelete);
       if (deletedCount > 0) {
         // Refresh saved resumes
-        const saved = ResumeDataService.getAllSavedResumes();
+  const saved = ResumeStorageService.getAllSavedResumes();
         setSavedResumes(saved);
       }
     }
