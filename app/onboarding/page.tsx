@@ -13,6 +13,7 @@ import {
   Sparkles,
   CheckCircle,
   Home,
+  Loader2,
 } from "lucide-react";
 import { IconBrandDiscord, IconBrandLinkedin } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -165,6 +166,7 @@ export default function Page() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [authRedirecting, setAuthRedirecting] = useState(false);
   const [state, setState] = useState<OnboardingState>({
     github: null,
     gitSetup: null,
@@ -202,12 +204,6 @@ export default function Page() {
           }
         }
 
-        useEffect(() => {
-          if (githubUsername && !completedSteps.includes("github")) {
-            markStepComplete("github");
-          }
-        }, [githubUsername, completedSteps, markStepComplete]);
-
         // Now manually redirect
         window.location.href = result.url;
       }
@@ -216,6 +212,8 @@ export default function Page() {
       alert("An unexpected error occurred. Please try again later.");
     }
   };
+
+
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -273,17 +271,15 @@ export default function Page() {
     setState((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  const toggleSection = useCallback(
-    (section: string) => {
-      updateState({
-        expandedSections: {
-          ...state.expandedSections,
-          [section]: !state.expandedSections[section],
-        },
-      });
-    },
-    [state.expandedSections, updateState]
-  );
+  const toggleSection = useCallback((section: string) => {
+    setState((prev) => ({
+      ...prev,
+      expandedSections: {
+        ...prev.expandedSections,
+        [section]: !prev.expandedSections[section],
+      },
+    }));
+  }, []);
 
   const handleGetStarted = useCallback(() => {
     setShowOnboarding(true);
@@ -329,19 +325,32 @@ export default function Page() {
     (stepId: string) => {
       if (!completedSteps.includes(stepId)) {
         setCompletedSteps((prev) => [...prev, stepId]);
-        // Auto-advance to next step after a short delay
         setTimeout(() => {
-          if (currentStep < 6) {
-            setCurrentStep(currentStep + 1);
-          } else if (currentStep === 6) {
-            // Go to completion step
-            setCurrentStep(7);
-          }
+          setCurrentStep((prev) => {
+            const stepOrder = steps.map((s) => s.id);
+            const completedIndex = stepOrder.indexOf(stepId);
+
+            const prevIndex = prev;
+
+            if (prevIndex <= completedIndex && prev < 6) {
+              const next = prev + 1;
+              updateUrlStep(next);
+              return next;
+            }
+            // If we're already past, do not change the current step
+            return prev;
+          });
         }, 1000);
       }
     },
-    [completedSteps, currentStep]
+    [completedSteps, updateUrlStep]
   );
+
+  useEffect(() => {
+    if (githubUsername && !completedSteps.includes("github")) {
+      markStepComplete("github");
+    }
+  }, [githubUsername, completedSteps, markStepComplete]);
 
   const canProceed = useCallback(() => {
     switch (currentStep) {
@@ -610,16 +619,25 @@ export default function Page() {
                 </Button>
               ) : (
                 <Button
-                  className="w-full h-12 text-base cursor-pointer font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-all duration-200"
+                  className="w-full h-12 text-base cursor-pointer font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                   size="lg"
+                  disabled={authRedirecting}
                   onClick={() => {
-                    updateState({ github: true });
-                    markStepComplete("github");
+                    setAuthRedirecting(true);
                     handleLogin();
                   }}
                 >
-                  <Github className="w-5 h-5 mr-2" />
-                  Sign in with GitHub
+                  {authRedirecting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Redirecting...
+                    </>
+                  ) : (
+                    <>
+                      <Github className="w-5 h-5 mr-2" />
+                      Sign in with GitHub
+                    </>
+                  )}
                 </Button>
               )}
 
@@ -1580,6 +1598,16 @@ export default function Page() {
           {/* Main Content */}
           <div className="w-full flex flex-col">
             <div className="flex-1">{renderStep()}</div>
+
+            {/* OAuth Redirect Overlay */}
+            {authRedirecting && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-3xl">
+                <div className="flex items-center gap-3 px-4 py-3 bg-white/10 border border-white/20 rounded-xl">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Redirecting to GitHub…</span>
+                </div>
+              </div>
+            )}
 
             {/* Navigation Buttons - Only show when in onboarding flow */}
             {showOnboarding && currentStep > 0 && currentStep < 7 && (
