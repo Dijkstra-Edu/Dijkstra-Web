@@ -45,16 +45,15 @@ export const authOptions: NextAuthOptions = {
     LinkedIn({
       clientId: process.env.LINKEDIN_CLIENT_ID as string,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET as string,
-      // Use LinkedIn OIDC discovery
       wellKnown: "https://www.linkedin.com/oauth/.well-known/openid-configuration",
       authorization: {
         params: {
-          scope: "openid profile email",
+          scope: "profile email openid",
         },
       },
-      idToken: true,
-      checks: ["pkce", "state"],
-      profile(profile) {
+      issuer: 'https://www.linkedin.com',
+      jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
+      async profile(profile) {
         const p: any = profile as any;
         const name = p.name || [p.given_name, p.family_name].filter(Boolean).join(" ") || undefined;
         return {
