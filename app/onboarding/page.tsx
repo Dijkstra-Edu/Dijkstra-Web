@@ -472,7 +472,7 @@ export default function Page() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="flex items-center justify-center max-w-4xl mx-auto"
+          className="flex items-center justify-center max-w-4xl"
         >
           <div className="flex items-center justify-between w-full max-w-2xl">
             {platforms.map((platform, index) => {
@@ -569,12 +569,66 @@ export default function Page() {
 
   // GitHub Step
   const GitHubStep = () => (
-    <div className="space-y-6 h-[600px]">
+    <div className="space-y-3 h-[600px]">
       {/* Step Indicator */}
       <StepIndicator />
 
+              {/* Mini Process Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="flex items-center justify-center max-w-4xl mt-24"
+        >
+          <div className="flex items-center justify-between w-full max-w-2xl">
+            {platforms.map((platform, index) => {
+              const Icon =
+                typeof platform.icon === "string" ? null : platform.icon;
+              return (
+                <div key={platform.id} className="flex items-center">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      delay: 0.6 + index * 0.1,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 150,
+                    }}
+                    className="flex flex-col items-center group cursor-pointer"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${platform.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg backdrop-blur-sm border border-white/20`}
+                    >
+                      {Icon ? (
+                        <Icon className="w-5 h-5 text-white" />
+                      ) : (
+                        <CustomIcon
+                          iconType={platform.icon as string}
+                          className="w-5 h-5 text-white"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground opacity-80 group-hover:opacity-100 transition-opacity">
+                      {platform.name}
+                    </span>
+                  </motion.div>
+                  {index < platforms.length - 1 && (
+                    <motion.div
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.4 }}
+                      className="w-6 h-0.5 mx-3 bg-gradient-to-r from-border to-muted-foreground/30 backdrop-blur-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
       {/* Header Section */}
-      <div className="text-center space-y-4 pt-24">
+      <div className="text-center space-y-4 pt-10 ">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -695,6 +749,60 @@ export default function Page() {
     <div className="space-y-6 h-[600px]">
       {/* Step Indicator */}
       <StepIndicator />
+
+              {/* Mini Process Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="flex items-center justify-center max-w-4xl mt-24"
+        >
+          <div className="flex items-center justify-between w-full max-w-2xl">
+            {platforms.map((platform, index) => {
+              const Icon =
+                typeof platform.icon === "string" ? null : platform.icon;
+              return (
+                <div key={platform.id} className="flex items-center">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      delay: 0.6 + index * 0.1,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 150,
+                    }}
+                    className="flex flex-col items-center group cursor-pointer"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${platform.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg backdrop-blur-sm border border-white/20`}
+                    >
+                      {Icon ? (
+                        <Icon className="w-5 h-5 text-white" />
+                      ) : (
+                        <CustomIcon
+                          iconType={platform.icon as string}
+                          className="w-5 h-5 text-white"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                      {platform.name}
+                    </span>
+                  </motion.div>
+                  {index < platforms.length - 1 && (
+                    <motion.div
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.4 }}
+                      className="w-6 h-0.5 mx-3 bg-gradient-to-r from-border to-muted-foreground/30 backdrop-blur-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
 
       {/* Header Section */}
       <div className="text-center space-y-4 pt-24">
@@ -831,8 +939,62 @@ export default function Page() {
       {/* Step Indicator */}
       <StepIndicator />
 
+              {/* Mini Process Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="flex items-center justify-center max-w-4xl mt-24"
+        >
+          <div className="flex items-center justify-between w-full max-w-2xl">
+            {platforms.map((platform, index) => {
+              const Icon =
+                typeof platform.icon === "string" ? null : platform.icon;
+              return (
+                <div key={platform.id} className="flex items-center">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      delay: 0.6 + index * 0.1,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 150,
+                    }}
+                    className="flex flex-col items-center group cursor-pointer"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${platform.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg backdrop-blur-sm border border-white/20`}
+                    >
+                      {Icon ? (
+                        <Icon className="w-5 h-5 text-white" />
+                      ) : (
+                        <CustomIcon
+                          iconType={platform.icon as string}
+                          className="w-5 h-5 text-white"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                      {platform.name}
+                    </span>
+                  </motion.div>
+                  {index < platforms.length - 1 && (
+                    <motion.div
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.4 }}
+                      className="w-6 h-0.5 mx-3 bg-gradient-to-r from-border to-muted-foreground/30 backdrop-blur-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
       {/* Header Section */}
-      <div className="text-center space-y-4 pt-24">
+      <div className="text-center space-y-4 pt-10">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -949,8 +1111,62 @@ export default function Page() {
       {/* Step Indicator */}
       <StepIndicator />
 
+              {/* Mini Process Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="flex items-center justify-center max-w-4xl mt-24"
+        >
+          <div className="flex items-center justify-between w-full max-w-2xl">
+            {platforms.map((platform, index) => {
+              const Icon =
+                typeof platform.icon === "string" ? null : platform.icon;
+              return (
+                <div key={platform.id} className="flex items-center">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      delay: 0.6 + index * 0.1,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 150,
+                    }}
+                    className="flex flex-col items-center group cursor-pointer"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${platform.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg backdrop-blur-sm border border-white/20`}
+                    >
+                      {Icon ? (
+                        <Icon className="w-5 h-5 text-white" />
+                      ) : (
+                        <CustomIcon
+                          iconType={platform.icon as string}
+                          className="w-5 h-5 text-white"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                      {platform.name}
+                    </span>
+                  </motion.div>
+                  {index < platforms.length - 1 && (
+                    <motion.div
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.4 }}
+                      className="w-6 h-0.5 mx-3 bg-gradient-to-r from-border to-muted-foreground/30 backdrop-blur-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
       {/* Header Section */}
-      <div className="text-center space-y-4 pt-24">
+      <div className="text-center space-y-4 pt-10">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1100,8 +1316,62 @@ export default function Page() {
         {/* Step Indicator */}
         <StepIndicator />
 
+                {/* Mini Process Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="flex items-center justify-center max-w-4xl mt-24"
+        >
+          <div className="flex items-center justify-between w-full max-w-2xl">
+            {platforms.map((platform, index) => {
+              const Icon =
+                typeof platform.icon === "string" ? null : platform.icon;
+              return (
+                <div key={platform.id} className="flex items-center">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      delay: 0.6 + index * 0.1,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 150,
+                    }}
+                    className="flex flex-col items-center group cursor-pointer"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${platform.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg backdrop-blur-sm border border-white/20`}
+                    >
+                      {Icon ? (
+                        <Icon className="w-5 h-5 text-white" />
+                      ) : (
+                        <CustomIcon
+                          iconType={platform.icon as string}
+                          className="w-5 h-5 text-white"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                      {platform.name}
+                    </span>
+                  </motion.div>
+                  {index < platforms.length - 1 && (
+                    <motion.div
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.4 }}
+                      className="w-6 h-0.5 mx-3 bg-gradient-to-r from-border to-muted-foreground/30 backdrop-blur-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
         {/* Header Section */}
-        <div className="text-center space-y-4 pt-24">
+        <div className="text-center space-y-4 pt-10">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1255,8 +1525,62 @@ export default function Page() {
         {/* Step Indicator */}
         <StepIndicator />
 
+                {/* Mini Process Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="flex items-center justify-center max-w-4xl mt-24"
+        >
+          <div className="flex items-center justify-between w-full max-w-2xl">
+            {platforms.map((platform, index) => {
+              const Icon =
+                typeof platform.icon === "string" ? null : platform.icon;
+              return (
+                <div key={platform.id} className="flex items-center">
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      delay: 0.6 + index * 0.1,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 150,
+                    }}
+                    className="flex flex-col items-center group cursor-pointer"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${platform.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg backdrop-blur-sm border border-white/20`}
+                    >
+                      {Icon ? (
+                        <Icon className="w-5 h-5 text-white" />
+                      ) : (
+                        <CustomIcon
+                          iconType={platform.icon as string}
+                          className="w-5 h-5 text-white"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground mt-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                      {platform.name}
+                    </span>
+                  </motion.div>
+                  {index < platforms.length - 1 && (
+                    <motion.div
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.4 }}
+                      className="w-6 h-0.5 mx-3 bg-gradient-to-r from-border to-muted-foreground/30 backdrop-blur-sm"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
         {/* Header Section */}
-        <div className="text-center space-y-4 pt-24">
+        <div className="text-center space-y-4 pt-10">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1591,10 +1915,10 @@ export default function Page() {
     <BackgroundPaths title="" showButton={false}>
       <div className="w-full max-w-6xl h-[85vh] relative">
         {/* Semi-transparent background rectangle */}
-        <div className="absolute inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl" />
+        <div className="absolute inset-0 bg-white/10 dark:bg-black/20 overflow-auto backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl" />
 
         {/* Scrollable content container */}
-        <div className="relative h-full overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent flex items-center justify-center">
+        <div className="relative overflow-auto h-full p-8 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent flex items-center justify-center">
           {/* Main Content */}
           <div className="w-full flex flex-col">
             <div className="flex-1">{renderStep()}</div>
@@ -1611,7 +1935,7 @@ export default function Page() {
 
             {/* Navigation Buttons - Only show when in onboarding flow */}
             {showOnboarding && currentStep > 0 && currentStep < 7 && (
-              <div className="flex items-center justify-between p-24 border-t border-white/10 mt-6">
+              <div className="flex items-center justify-between p-24 border-t border-white/10 mt-4">
                 <Button
                   variant="outline"
                   onClick={prevStep}
