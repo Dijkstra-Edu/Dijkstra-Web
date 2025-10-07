@@ -551,8 +551,38 @@ const formatTimeDisplay = (months: number): string => {
 };
 
 const SALARY_RANGES = [
-  "1-3 LPA", "3-6 LPA", "6-10 LPA", "10-15 LPA", "15-20 LPA", "20-25 LPA",
-  "25-30 LPA", "30-40 LPA", "40-50 LPA", "50-60 LPA", "60-80 LPA", "80 LPA+"
+  { value: "UNRANKED", label: "₹0 L (Unranked)" },
+  { value: "IRON_1", label: "₹0 L - ₹1 L (Iron 1)" },
+  { value: "IRON_2", label: "₹1 L - ₹2 L (Iron 2)" },
+  { value: "IRON_3", label: "₹2 L - ₹3 L (Iron 3)" },
+  { value: "BRONZE_1", label: "₹3 L - ₹4 L (Bronze 1)" },
+  { value: "BRONZE_2", label: "₹4 L - ₹5 L (Bronze 2)" },
+  { value: "BRONZE_3", label: "₹5 L - ₹6 L (Bronze 3)" },
+  { value: "SILVER_1", label: "₹6 L - ₹7 L (Silver 1)" },
+  { value: "SILVER_2", label: "₹7 L - ₹8 L (Silver 2)" },
+  { value: "SILVER_3", label: "₹8 L - ₹10 L (Silver 3)" },
+  { value: "GOLD_1", label: "₹10 L - ₹12 L (Gold 1)" },
+  { value: "GOLD_2", label: "₹12 L - ₹13 L (Gold 2)" },
+  { value: "GOLD_3", label: "₹13 L - ₹14 L (Gold 3)" },
+  { value: "PLATINUM_1", label: "₹14 L - ₹15 L (Platinum 1)" },
+  { value: "PLATINUM_2", label: "₹15 L - ₹16 L (Platinum 2)" },
+  { value: "PLATINUM_3", label: "₹16 L - ₹18 L (Platinum 3)" },
+  { value: "DIAMOND_1", label: "₹18 L - ₹20 L (Diamond 1)" },
+  { value: "DIAMOND_2", label: "₹20 L - ₹22 L (Diamond 2)" },
+  { value: "DIAMOND_3", label: "₹22 L - ₹24 L (Diamond 3)" },
+  { value: "EMERALD_1", label: "₹24 L - ₹26 L (Emerald 1)" },
+  { value: "EMERALD_2", label: "₹26 L - ₹28 L (Emerald 2)" },
+  { value: "EMERALD_3", label: "₹28 L - ₹30 L (Emerald 3)" },
+  { value: "LAPIS_1", label: "₹30 L - ₹35 L (Lapis 1)" },
+  { value: "LAPIS_2", label: "₹35 L - ₹40 L (Lapis 2)" },
+  { value: "LAPIS_3", label: "₹40 L - ₹45 L (Lapis 3)" },
+  { value: "QUARTZ_1", label: "₹45 L - ₹55 L (Quartz 1)" },
+  { value: "QUARTZ_2", label: "₹55 L - ₹60 L (Quartz 2)" },
+  { value: "QUARTZ_3", label: "₹60 L - ₹70 L (Quartz 3)" },
+  { value: "AMETHYST_1", label: "₹70 L - ₹80 L (Amethyst 1)" },
+  { value: "AMETHYST_2", label: "₹80 L - ₹90 L (Amethyst 2)" },
+  { value: "AMETHYST_3", label: "₹90 L - ₹1 Cr (Amethyst 3)" },
+  { value: "OBSIDIAN", label: "₹1 Cr+ (Obsidian)" }
 ];
 
 // Custom Multiselect Component
@@ -2119,7 +2149,9 @@ export default function Page() {
                 </SelectTrigger>
                 <SelectContent>
                   {SALARY_RANGES.map((salary) => (
-                    <SelectItem key={salary} value={salary}>{salary}</SelectItem>
+                    <SelectItem key={salary.value} value={salary.value}>
+                      {salary.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
