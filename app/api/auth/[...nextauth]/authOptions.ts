@@ -1,5 +1,6 @@
 // app/api/auth/[...nextauth]/authOptions.ts
 import GitHub from "next-auth/providers/github";
+import LinkedIn from "next-auth/providers/linkedin";
 import type { NextAuthOptions } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
@@ -41,6 +42,29 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
+    LinkedIn({
+      clientId: process.env.LINKEDIN_CLIENT_ID as string,
+      clientSecret: process.env.LINKEDIN_CLIENT_SECRET as string,
+      // Use LinkedIn OIDC discovery
+      wellKnown: "https://www.linkedin.com/oauth/.well-known/openid-configuration",
+      authorization: {
+        params: {
+          scope: "openid profile email",
+        },
+      },
+      idToken: true,
+      checks: ["pkce", "state"],
+      profile(profile) {
+        const p: any = profile as any;
+        const name = p.name || [p.given_name, p.family_name].filter(Boolean).join(" ") || undefined;
+        return {
+          id: String(p.sub),
+          name,
+          email: p.email || undefined,
+          image: p.picture || undefined,
+        } as any;
+      },
+    }),
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
@@ -50,42 +74,57 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.login = token.login;
-        session.user.avatar_url = token.avatar_url;
-        session.user.bio = token.bio;
-        session.user.followers = token.followers;
-        session.user.following = token.following;
-        session.user.public_repos = token.public_repos;
-        session.user.company = token.company;
-        session.user.location = token.location;
-        session.user.blog = token.blog;
-        session.user.created_at = token.created_at;
-        session.user.updated_at = token.updated_at;
-        session.user.organization = token.organization;
-        session.user.hireable = token.hireable;
+        const u: any = session.user as any;
+        // GitHub fields
+        u.id = (token as any).id;
+        u.login = (token as any).login;
+        u.avatar_url = (token as any).avatar_url;
+        u.bio = (token as any).bio;
+        u.followers = (token as any).followers;
+        u.following = (token as any).following;
+        u.public_repos = (token as any).public_repos;
+        u.company = (token as any).company;
+        u.location = (token as any).location;
+        u.blog = (token as any).blog;
+        u.created_at = (token as any).created_at;
+        u.updated_at = (token as any).updated_at;
+        u.organization = (token as any).organization;
+        u.hireable = (token as any).hireable;
+        // LinkedIn fields
+        u.linkedinId = (token as any).linkedinId as string | undefined;
+        u.linkedinName = (token as any).linkedinName as string | undefined;
+        u.linkedinImage = (token as any).linkedinImage as string | undefined;
       }
       return session;
     },
-    async jwt({ token, profile }) {
-      if (profile) {
+    async jwt({ token, profile, account }) {
+      if (profile && account?.provider === "github") {
         return {
           ...token,
-          id: Number(profile.id),
-          login: profile.login,
-          avatar_url: profile.avatar_url,
-          bio: profile.bio,
-          followers: profile.followers,
-          following: profile.following,
-          public_repos: profile.public_repos,
-          company: profile.company,
-          location: profile.location,
-          blog: profile.blog,
-          created_at: profile.created_at,
-          updated_at: profile.updated_at,
-          organization: profile.organization,
-          hireable: profile.hireable,
-        };
+          id: Number((profile as any).id),
+          login: (profile as any).login,
+          avatar_url: (profile as any).avatar_url,
+          bio: (profile as any).bio,
+          followers: (profile as any).followers,
+          following: (profile as any).following,
+          public_repos: (profile as any).public_repos,
+          company: (profile as any).company,
+          location: (profile as any).location,
+          blog: (profile as any).blog,
+          created_at: (profile as any).created_at,
+          updated_at: (profile as any).updated_at,
+          organization: (profile as any).organization,
+          hireable: (profile as any).hireable,
+        } as any;
+      }
+      if (profile && account?.provider === "linkedin") {
+        const p = profile as any;
+        return {
+          ...token,
+          linkedinId: String(p.sub || p.id),
+          linkedinName: p.name || undefined,
+          linkedinImage: p.picture || p.image || undefined,
+        } as any;
       }
       return token;
     },

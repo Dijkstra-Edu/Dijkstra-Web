@@ -167,6 +167,7 @@ export default function Page() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [authRedirecting, setAuthRedirecting] = useState(false);
+  const [authRedirectingProvider, setAuthRedirectingProvider] = useState<"github" | "linkedin" | null>(null);
   const [state, setState] = useState<OnboardingState>({
     github: null,
     gitSetup: null,
@@ -179,6 +180,7 @@ export default function Page() {
   const router = useRouter();
   const { data: session } = useSession();
   const githubUsername = session?.user?.login || "";
+  const linkedinConnected = Boolean((session as any)?.user?.linkedinId);
 
   const handleLogin = async () => {
     try {
@@ -209,6 +211,27 @@ export default function Page() {
       }
     } catch (error) {
       console.error("Login error:", error);
+      alert("An unexpected error occurred. Please try again later.");
+    }
+  };
+
+  const handleLinkedInLogin = async () => {
+    try {
+      const result = await signIn("linkedin", {
+        callbackUrl: "/onboarding?step=6",
+        redirect: false,
+      });
+
+      if (result?.error) {
+        console.error("LinkedIn login failed:", result.error);
+        alert("LinkedIn login failed. Please try again.");
+      }
+
+      if (result?.ok && result.url) {
+        window.location.href = result.url;
+      }
+    } catch (error) {
+      console.error("LinkedIn login error:", error);
       alert("An unexpected error occurred. Please try again later.");
     }
   };
@@ -357,11 +380,11 @@ export default function Page() {
       case 5: // LeetCode
         return state.leetcodeHandle.trim() !== "";
       case 6: // LinkedIn
-        return state.linkedinHandle.trim() !== "";
+        return state.linkedinHandle.trim() !== "" && linkedinConnected;
       default:
         return true;
     }
-  }, [currentStep, state.leetcodeHandle, state.linkedinHandle]);
+  }, [currentStep, state.leetcodeHandle, state.linkedinHandle, linkedinConnected]);
 
   // Step Indicator Component with clickable steps
   const StepIndicator = () => (
@@ -624,6 +647,7 @@ export default function Page() {
                   disabled={authRedirecting}
                   onClick={() => {
                     setAuthRedirecting(true);
+                    setAuthRedirectingProvider("github");
                     handleLogin();
                   }}
                 >
@@ -1247,7 +1271,10 @@ export default function Page() {
 
     const handleSave = () => {
       updateState({ linkedinHandle: localLinkedInHandle });
-      markStepComplete("linkedin");
+      // Do not mark complete until LinkedIn is also connected
+      if (linkedinConnected) {
+        markStepComplete("linkedin");
+      }
     };
 
     return (
@@ -1304,6 +1331,47 @@ export default function Page() {
                     Save
                   </Button>
                 </div>
+              </div>
+
+              {/* Secondary LinkedIn connect button */}
+              <div className="space-y-2">
+                {linkedinConnected ? (
+                  <Button
+                    className="w-full h-10 text-base cursor-default font-semibold bg-green-600 text-white rounded-xl transition-all duration-200"
+                    size="lg"
+                    disabled
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    LinkedIn Connected
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full h-10 text-base font-semibold bg-[#0A66C2] hover:bg-[#0a66c2]/90 text-white rounded-xl transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                    size="lg"
+                    disabled={authRedirecting}
+                    onClick={() => {
+                      setAuthRedirecting(true);
+                      setAuthRedirectingProvider("linkedin");
+                      handleLinkedInLogin();
+                    }}
+                  >
+                    {authRedirecting && authRedirectingProvider === "linkedin" ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Redirecting...
+                      </>
+                    ) : (
+                      <>
+                        <IconBrandLinkedin className="w-4 h-4 mr-2" />
+                        Connect LinkedIn
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                <p className="text-xs text-gray-500 text-center">
+                  Connecting LinkedIn confirms you have a LinkedIn account
+                </p>
               </div>
 
               <div className="text-center">
@@ -1604,7 +1672,7 @@ export default function Page() {
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-3xl">
                 <div className="flex items-center gap-3 px-4 py-3 bg-white/10 border border-white/20 rounded-xl">
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span className="text-sm">Redirecting to GitHub…</span>
+                  <span className="text-sm">Redirecting to {authRedirectingProvider === "linkedin" ? "LinkedIn" : "GitHub"}…</span>
                 </div>
               </div>
             )}
