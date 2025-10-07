@@ -9,6 +9,25 @@ interface ConnectedAccount {
   connected: boolean
 }
 
+interface PresetPin {
+  id: string
+  name: string
+  enabled: boolean
+  url: string
+  icon: string
+  color: string
+  tooltip: string
+}
+
+interface CustomPin {
+  id: string
+  title: string
+  url: string
+  tooltip: string
+  image: string
+  enabled: boolean
+}
+
 interface SettingsContextType {
   theme: string
   setTheme: (theme: string) => void
@@ -44,6 +63,13 @@ interface SettingsContextType {
   setShowRecommendations: (value: boolean) => void
   itemsPerPage: string
   setItemsPerPage: (value: string) => void
+
+  presetPins: PresetPin[]
+  updatePresetPin: (id: string, updates: Partial<PresetPin>) => void
+  customPins: CustomPin[]
+  addCustomPin: (pin: Omit<CustomPin, "id">) => void
+  updateCustomPin: (id: string, updates: Partial<CustomPin>) => void
+  deleteCustomPin: (id: string) => void
 
   // Appearance
   accentColor: string
@@ -147,6 +173,85 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [showRecommendations, setShowRecommendations] = React.useState(true)
   const [itemsPerPage, setItemsPerPage] = React.useState("20")
 
+  const [presetPins, setPresetPins] = React.useState<PresetPin[]>([
+    {
+      id: "reddit",
+      name: "Reddit",
+      enabled: false,
+      url: "https://reddit.com",
+      icon: "reddit",
+      color: "#FF4500",
+      tooltip: "Visit Reddit",
+    },
+    {
+      id: "google-scholar",
+      name: "Google Scholar",
+      enabled: false,
+      url: "https://scholar.google.com",
+      icon: "scholar",
+      color: "#fff",
+      tooltip: "Search academic papers",
+    },
+    {
+      id: "stackoverflow",
+      name: "Stack Overflow",
+      enabled: false,
+      url: "https://stackoverflow.com",
+      icon: "stackoverflow",
+      color: "#F48024",
+      tooltip: "Find programming solutions",
+    },
+    {
+      id: "discord",
+      name: "Discord",
+      enabled: false,
+      url: "https://discord.com",
+      icon: "discord",
+      color: "#5865F2",
+      tooltip: "Open Discord",
+    },
+    {
+      id: "linkedin",
+      name: "LinkedIn",
+      enabled: false,
+      url: "https://linkedin.com",
+      icon: "linkedin",
+      color: "#fff",
+      tooltip: "Visit LinkedIn",
+    },
+    {
+      id: "leetcode",
+      name: "LeetCode",
+      enabled: false,
+      url: "https://leetcode.com",
+      icon: "leetcode",
+      color: "#fff",
+      tooltip: "Practice coding problems",
+    },
+  ])
+
+  const [customPins, setCustomPins] = React.useState<CustomPin[]>([])
+
+  const updatePresetPin = (id: string, updates: Partial<PresetPin>) => {
+    setPresetPins((prev) => prev.map((pin) => (pin.id === id ? { ...pin, ...updates } : pin)))
+  }
+
+  const addCustomPin = (pin: Omit<CustomPin, "id">) => {
+    const newPin: CustomPin = {
+      ...pin,
+      id: `custom-${Date.now()}`,
+    }
+    setCustomPins((prev) => [...prev, newPin])
+  }
+
+  const updateCustomPin = (id: string, updates: Partial<CustomPin>) => {
+    setCustomPins((prev) => prev.map((pin) => (pin.id === id ? { ...pin, ...updates } : pin)))
+  }
+
+  const deleteCustomPin = (id: string) => {
+    setCustomPins((prev) => prev.filter((pin) => pin.id !== id))
+  }
+
   // Appearance
   const [accentColor, setAccentColor] = React.useState("blue")
   const [fontSize, setFontSize] = React.useState("medium")
@@ -213,9 +318,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       const storedSupabaseKey = localStorage.getItem("dijkstra_supabase_key")
       const storedGeminiKey = localStorage.getItem("dijkstra_gemini_key")
+      const storedPresetPins = localStorage.getItem("dijkstra_preset_pins")
+      const storedCustomPins = localStorage.getItem("dijkstra_custom_pins")
 
       if (storedSupabaseKey) setSupabaseKey(storedSupabaseKey)
       if (storedGeminiKey) setGeminiKey(storedGeminiKey)
+      if (storedPresetPins) setPresetPins(JSON.parse(storedPresetPins))
+      if (storedCustomPins) setCustomPins(JSON.parse(storedCustomPins))
     }
   }, [])
 
@@ -230,6 +339,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("dijkstra_gemini_key", geminiKey)
     }
   }, [geminiKey])
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dijkstra_preset_pins", JSON.stringify(presetPins))
+    }
+  }, [presetPins])
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dijkstra_custom_pins", JSON.stringify(customPins))
+    }
+  }, [customPins])
 
   return (
     <SettingsContext.Provider
@@ -262,6 +383,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setShowRecommendations,
         itemsPerPage,
         setItemsPerPage,
+        presetPins,
+        updatePresetPin,
+        customPins,
+        addCustomPin,
+        updateCustomPin,
+        deleteCustomPin,
         accentColor,
         setAccentColor,
         fontSize,

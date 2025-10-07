@@ -10,7 +10,9 @@ import {
   Keyboard,
   Lock,
   Paintbrush,
+  Plus,
   Settings,
+  Trash2,
   User,
 } from "lucide-react";
 
@@ -155,24 +157,98 @@ function NotificationsPage() {
 }
 
 function HomePage() {
-  const settings = useSettings();
+  const settings = useSettings()
+  const [newPinTitle, setNewPinTitle] = React.useState("")
+  const [newPinUrl, setNewPinUrl] = React.useState("")
+  const [newPinTooltip, setNewPinTooltip] = React.useState("")
+  const [newPinImage, setNewPinImage] = React.useState("")
+  const [showAddCustomPin, setShowAddCustomPin] = React.useState(false)
+
+  const handleAddCustomPin = () => {
+    if (newPinTitle && newPinUrl) {
+      settings.addCustomPin({
+        title: newPinTitle,
+        url: newPinUrl,
+        tooltip: newPinTooltip || newPinTitle,
+        image: newPinImage || "/placeholder.svg?height=40&width=40",
+        enabled: true,
+      })
+      setNewPinTitle("")
+      setNewPinUrl("")
+      setNewPinTooltip("")
+      setNewPinImage("")
+      setShowAddCustomPin(false)
+    }
+  }
+
+  const getPinIcon = (iconName: string, color: string) => {
+    const iconProps = { className: "h-5 w-5", style: { color } }
+
+    switch (iconName) {
+      case "reddit":
+        return (
+          <img
+            src="https://static.vecteezy.com/system/resources/previews/018/930/474/non_2x/reddit-logo-reddit-icon-transparent-free-png.png"
+            alt="Reddit"
+            className="w-6 h-6 object-contain"
+          />
+        )
+      case "scholar":
+        return (
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png"
+            alt="Google Scholar"
+            className="w-6 h-6 object-contain"
+          />
+        )
+      case "stackoverflow":
+        return (
+          <img
+            src="https://pbs.twimg.com/profile_images/1220067947798024192/30eZhfxx_400x400.png"
+            alt="Stack Overflow"
+            className="w-8 h-8 object-contain"
+          />
+        )
+      case "discord":
+        return (
+          <img
+            src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/discord-white-icon.png"
+            alt="Discord"
+            className="w-6 h-6 object-contain"
+          />
+        )
+      case "linkedin":
+        return (
+          <img
+            src="https://img.freepik.com/premium-vector/linkedin-logo-icon_1273375-1174.jpg"
+            alt="LinkedIn"
+            className="w-8 h-8 object-contain"
+          />
+        )
+      case "leetcode":
+        return (
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/1/19/LeetCode_logo_black.png"
+            alt="LeetCode"
+            className="w-8 h-8 object-contain"
+          />
+        )
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Home</h3>
-        <p className="text-sm text-muted-foreground">
-          Customize your home page experience
-        </p>
+        <p className="text-sm text-muted-foreground">Customize your home page experience</p>
       </div>
       <Separator />
       <div className="space-y-4">
         <div className="space-y-2">
           <Label>Default home page</Label>
-          <Select
-            value={settings.defaultHomePage}
-            onValueChange={settings.setDefaultHomePage}
-          >
+          <Select value={settings.defaultHomePage} onValueChange={settings.setDefaultHomePage}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -187,33 +263,20 @@ function HomePage() {
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Show recent activity</Label>
-            <p className="text-sm text-muted-foreground">
-              Display your recent activity on the home page
-            </p>
+            <p className="text-sm text-muted-foreground">Display your recent activity on the home page</p>
           </div>
-          <Switch
-            checked={settings.showRecentActivity}
-            onCheckedChange={settings.setShowRecentActivity}
-          />
+          <Switch checked={settings.showRecentActivity} onCheckedChange={settings.setShowRecentActivity} />
         </div>
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Show recommendations</Label>
-            <p className="text-sm text-muted-foreground">
-              Get personalized recommendations
-            </p>
+            <p className="text-sm text-muted-foreground">Get personalized recommendations</p>
           </div>
-          <Switch
-            checked={settings.showRecommendations}
-            onCheckedChange={settings.setShowRecommendations}
-          />
+          <Switch checked={settings.showRecommendations} onCheckedChange={settings.setShowRecommendations} />
         </div>
         <div className="space-y-2">
           <Label>Items per page</Label>
-          <Select
-            value={settings.itemsPerPage}
-            onValueChange={settings.setItemsPerPage}
-          >
+          <Select value={settings.itemsPerPage} onValueChange={settings.setItemsPerPage}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -224,6 +287,145 @@ function HomePage() {
               <SelectItem value="100">100</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium">Pins</h4>
+            <p className="text-sm text-muted-foreground">Quick access links to your favorite sites</p>
+          </div>
+
+          <div className="space-y-3">
+            <h5 className="text-sm font-medium">Preset Pins</h5>
+            {settings.presetPins.map((pin) => (
+              <div key={pin.id} className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded"
+                    style={{ backgroundColor: pin.color }}
+                  >
+                    {getPinIcon(pin.icon, "#ffffff")}                    
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{pin.name}</p>
+                    {pin.enabled && (
+                      <Input
+                        placeholder="Enter URL"
+                        value={pin.url}
+                        onChange={(e) => settings.updatePresetPin(pin.id, { url: e.target.value })}
+                        className="mt-1 h-8 text-xs"
+                      />
+                    )}
+                  </div>
+                </div>
+                <Switch
+                  checked={pin.enabled}
+                  onCheckedChange={(enabled) => settings.updatePresetPin(pin.id, { enabled })}
+                />
+              </div>
+            ))}
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h5 className="text-sm font-medium">Custom Pins</h5>
+              <Button size="sm" variant="outline" onClick={() => setShowAddCustomPin(!showAddCustomPin)}>
+                <Plus className="h-4 w-4 mr-1" />
+                Add Custom Pin
+              </Button>
+            </div>
+
+            {showAddCustomPin && (
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="pin-title">Title</Label>
+                  <Input
+                    id="pin-title"
+                    placeholder="My Custom Pin"
+                    value={newPinTitle}
+                    onChange={(e) => setNewPinTitle(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pin-url">URL</Label>
+                  <Input
+                    id="pin-url"
+                    placeholder="https://example.com"
+                    value={newPinUrl}
+                    onChange={(e) => setNewPinUrl(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pin-tooltip">Tooltip (optional)</Label>
+                  <Input
+                    id="pin-tooltip"
+                    placeholder="Description for this pin"
+                    value={newPinTooltip}
+                    onChange={(e) => setNewPinTooltip(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pin-image">Image URL (optional)</Label>
+                  <Input
+                    id="pin-image"
+                    placeholder="https://example.com/icon.png"
+                    value={newPinImage}
+                    onChange={(e) => setNewPinImage(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleAddCustomPin}>
+                    Add Pin
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowAddCustomPin(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {settings.customPins.length > 0 ? (
+              <div className="space-y-2">
+                {settings.customPins.map((pin) => (
+                  <div key={pin.id} className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-3 flex-1">
+                      <img
+                        src={pin.image || "/placeholder.svg"}
+                        alt={pin.title}
+                        className="h-8 w-8 rounded object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{pin.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{pin.url}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={pin.enabled}
+                        onCheckedChange={(enabled) => settings.updateCustomPin(pin.id, { enabled })}
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => settings.deleteCustomPin(pin.id)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No custom pins yet. Add one to get started!
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -281,6 +483,7 @@ function AccountsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => settings.disconnectAccount("GitHub")}
+                  disabled
                 >
                   Disconnect
                 </Button>
@@ -289,7 +492,7 @@ function AccountsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => settings.connectAccount("GitHub", "johndoe")}
+                onClick={() => settings.connectAccount("GitHub", "JRS296")}
               >
                 Connect
               </Button>
