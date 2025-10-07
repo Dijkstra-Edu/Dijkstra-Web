@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Home,
   Loader2,
+  XCircle,
 } from "lucide-react";
 import { IconBrandDiscord, IconBrandLinkedin } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -62,16 +63,16 @@ const steps = [
     color: "from-indigo-600 to-purple-600",
   },
   {
-    id: "leetcode",
-    title: "LeetCode",
-    icon: "leetcode",
-    color: "from-orange-400 to-yellow-500",
-  },
-  {
     id: "linkedin",
     title: "LinkedIn",
     icon: IconBrandLinkedin,
     color: "from-blue-700 to-blue-800",
+  },
+  {
+    id: "leetcode",
+    title: "LeetCode",
+    icon: "leetcode",
+    color: "from-orange-400 to-yellow-500",
   },
 ];
 
@@ -101,16 +102,16 @@ const platforms = [
     color: "from-indigo-600 to-purple-600",
   },
   {
-    id: "leetcode",
-    name: "LeetCode",
-    icon: "leetcode",
-    color: "from-orange-400 to-yellow-500",
-  },
-  {
     id: "linkedin",
     name: "LinkedIn",
     icon: IconBrandLinkedin,
     color: "from-blue-700 to-blue-800",
+  },
+  {
+    id: "leetcode",
+    name: "LeetCode",
+    icon: "leetcode",
+    color: "from-orange-400 to-yellow-500",
   },
 ];
 
@@ -218,7 +219,7 @@ export default function Page() {
   const handleLinkedInLogin = async () => {
     try {
       const result = await signIn("linkedin", {
-        callbackUrl: "/onboarding?step=6",
+        callbackUrl: "/onboarding?step=5",
         redirect: false,
       });
 
@@ -304,6 +305,14 @@ export default function Page() {
     }));
   }, []);
 
+  const isValidLeetCodeUsername = useCallback((value: string) => {
+    // Simple validation: 3-20 chars, letters, numbers, underscore, or hyphen
+    const normalized = value.trim();
+    if (normalized.length === 0) return false;
+    const pattern = /^[A-Za-z0-9_-]{3,20}$/;
+    return pattern.test(normalized);
+  }, []);
+
   const handleGetStarted = useCallback(() => {
     setShowOnboarding(true);
     setCurrentStep(1); // Start with GitHub step
@@ -375,16 +384,23 @@ export default function Page() {
     }
   }, [githubUsername, completedSteps, markStepComplete]);
 
+  // Auto-complete LinkedIn when connected via OAuth
+  useEffect(() => {
+    if (linkedinConnected && !completedSteps.includes("linkedin")) {
+      markStepComplete("linkedin");
+    }
+  }, [linkedinConnected, completedSteps, markStepComplete]);
+
   const canProceed = useCallback(() => {
     switch (currentStep) {
-      case 5: // LeetCode
-        return state.leetcodeHandle.trim() !== "";
-      case 6: // LinkedIn
-        return state.linkedinHandle.trim() !== "" && linkedinConnected;
+      case 5: // LinkedIn
+        return linkedinConnected;
+      case 6: // LeetCode
+        return isValidLeetCodeUsername(state.leetcodeHandle);
       default:
         return true;
     }
-  }, [currentStep, state.leetcodeHandle, state.linkedinHandle, linkedinConnected]);
+  }, [currentStep, state.leetcodeHandle, state.linkedinHandle, linkedinConnected, isValidLeetCodeUsername]);
 
   // Step Indicator Component with clickable steps
   const StepIndicator = () => (
@@ -882,47 +898,6 @@ export default function Page() {
       <div className="max-w-sm mx-auto space-y-4">
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
           <div className="space-y-4">
-            <Collapsible
-              open={state.expandedSections.vscodeHelp}
-              onOpenChange={() => toggleSection("vscodeHelp")}
-            >
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between bg-transparent border-white/30 text-gray-700 dark:text-gray-300 hover:bg-white/10 text-sm"
-                >
-                  How to use VS Code
-                  {state.expandedSections.vscodeHelp ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-3">
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3 space-y-2">
-                  <div className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10">
-                    <span className="text-gray-900 dark:text-white text-sm">
-                      Installing VS Code
-                    </span>
-                    <Badge className="bg-blue-500 text-xs">Step 1</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10">
-                    <span className="text-gray-900 dark:text-white text-sm">
-                      Essential Extensions
-                    </span>
-                    <Badge className="bg-blue-500 text-xs">Step 2</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10">
-                    <span className="text-gray-900 dark:text-white text-sm">
-                      Customizing Your Workspace
-                    </span>
-                    <Badge className="bg-blue-500 text-xs">Step 3</Badge>
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
             <div>
               <p className="font-medium mb-3 text-gray-900 dark:text-white">
                 Are you familiar with the CLI?
@@ -1108,11 +1083,54 @@ export default function Page() {
     const [localLeetCodeHandle, setLocalLeetCodeHandle] = useState(
       state.leetcodeHandle
     );
+    const [checking, setChecking] = useState(false);
+    const [exists, setExists] = useState<boolean | null>(null);
+    const [lastCheckedUsername, setLastCheckedUsername] = useState<string>("");
 
     // Update local state when global state changes (e.g., from localStorage)
     useEffect(() => {
       setLocalLeetCodeHandle(state.leetcodeHandle);
     }, [state.leetcodeHandle]);
+
+    // Debounced existence check
+    useEffect(() => {
+      const value = localLeetCodeHandle.trim();
+      
+      if (!isValidLeetCodeUsername(value)) {
+        setExists(null);
+        setChecking(false);
+        setLastCheckedUsername("");
+        return;
+      }
+
+      // If we already checked this username, don't check again
+      if (value === lastCheckedUsername) {
+        return;
+      }
+
+      setChecking(true);
+      setExists(null);
+      
+      const id = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/leetcode-user-exists?u=${encodeURIComponent(value)}`);
+          const data = await res.json();
+          
+          if (!res.ok) {
+            setExists(false);
+          } else {
+            setExists(Boolean(data.exists));
+            setLastCheckedUsername(value);
+          }
+        } catch (error) {
+          setExists(false);
+        } finally {
+          setChecking(false);
+        }
+      }, 500);
+      
+      return () => clearTimeout(id);
+    }, [localLeetCodeHandle, isValidLeetCodeUsername, lastCheckedUsername]);
 
     const handleSave = () => {
       updateState({ leetcodeHandle: localLeetCodeHandle });
@@ -1160,7 +1178,7 @@ export default function Page() {
                 >
                   What's your LeetCode handle?
                 </Label>
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 items-center">
                   <Input
                     id="leetcode-handle"
                     placeholder="Enter your LeetCode username"
@@ -1168,9 +1186,20 @@ export default function Page() {
                     onChange={(e) => setLocalLeetCodeHandle(e.target.value)}
                     className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-gray-900 dark:text-white placeholder:text-gray-500 text-sm"
                   />
+                  {localLeetCodeHandle.trim() !== "" && (
+                    !isValidLeetCodeUsername(localLeetCodeHandle) ? (
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    ) : checking ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                    ) : exists === true ? (
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                    ) : exists === false ? (
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    ) : null
+                  )}
                   <Button
                     onClick={handleSave}
-                    disabled={!localLeetCodeHandle.trim()}
+                    disabled={!(isValidLeetCodeUsername(localLeetCodeHandle) && exists === true)}
                     className="px-4"
                     size="sm"
                   >
@@ -1179,64 +1208,7 @@ export default function Page() {
                 </div>
               </div>
 
-              <div className="text-center">
-                <span className="text-gray-500 text-sm">or</span>
-              </div>
-
-              <Collapsible
-                open={state.expandedSections.leetcodeHelp}
-                onOpenChange={() => toggleSection("leetcodeHelp")}
-              >
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between bg-transparent border-white/30 text-gray-700 dark:text-gray-300 hover:bg-white/10 text-sm"
-                  >
-                    How to create a LeetCode account
-                    {state.expandedSections.leetcodeHelp ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-3">
-                  <div className="bg-orange-500/20 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-1 text-sm">
-                      Create Your LeetCode Account
-                    </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                      Start solving coding problems today
-                    </p>
-                    <div className="space-y-2 mb-3">
-                      {[
-                        "Visit leetcode.com and click 'Sign Up'",
-                        "Choose a unique username and create your profile",
-                        "Start with easy problems and work your way up",
-                      ].map((step, index) => (
-                        <div key={index} className="flex items-start space-x-2">
-                          <Badge variant="outline" className="mt-0.5 text-xs">
-                            {index + 1}
-                          </Badge>
-                          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                            {step}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <Button size="sm" className="w-full" asChild>
-                      <a
-                        href="https://leetcode.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="w-3 h-3 mr-2" />
-                        Go to LeetCode
-                      </a>
-                    </Button>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+              {/* Removed LeetCode help dropdown */}
             </div>
           </div>
         </div>
@@ -1258,25 +1230,8 @@ export default function Page() {
     );
   };
 
-  // LinkedIn Step with proper input handling
+  // LinkedIn Step simplified to OAuth-only
   const LinkedInStep = () => {
-    const [localLinkedInHandle, setLocalLinkedInHandle] = useState(
-      state.linkedinHandle
-    );
-
-    // Update local state when global state changes (e.g., from localStorage)
-    useEffect(() => {
-      setLocalLinkedInHandle(state.linkedinHandle);
-    }, [state.linkedinHandle]);
-
-    const handleSave = () => {
-      updateState({ linkedinHandle: localLinkedInHandle });
-      // Do not mark complete until LinkedIn is also connected
-      if (linkedinConnected) {
-        markStepComplete("linkedin");
-      }
-    };
-
     return (
       <div className="space-y-6 h-[600px]">
         {/* Step Indicator */}
@@ -1307,33 +1262,7 @@ export default function Page() {
         <div className="max-w-sm mx-auto space-y-4">
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="linkedin-handle"
-                  className="text-gray-900 dark:text-white text-sm"
-                >
-                  What's your LinkedIn handle?
-                </Label>
-                <div className="flex space-x-2">
-                  <Input
-                    id="linkedin-handle"
-                    placeholder="Enter your LinkedIn username"
-                    value={localLinkedInHandle}
-                    onChange={(e) => setLocalLinkedInHandle(e.target.value)}
-                    className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-gray-900 dark:text-white placeholder:text-gray-500 text-sm"
-                  />
-                  <Button
-                    onClick={handleSave}
-                    disabled={!localLinkedInHandle.trim()}
-                    className="px-4"
-                    size="sm"
-                  >
-                    Save
-                  </Button>
-                </div>
-              </div>
-
-              {/* Secondary LinkedIn connect button */}
+              {/* LinkedIn connect button */}
               <div className="space-y-2">
                 {linkedinConnected ? (
                   <Button
@@ -1374,104 +1303,7 @@ export default function Page() {
                 </p>
               </div>
 
-              <div className="text-center">
-                <span className="text-gray-500 text-sm">or</span>
-              </div>
-
-              <Collapsible
-                open={state.expandedSections.linkedinHelp}
-                onOpenChange={() => toggleSection("linkedinHelp")}
-              >
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between bg-transparent border-white/30 text-gray-700 dark:text-gray-300 hover:bg-white/10 text-sm"
-                  >
-                    How to create and optimize your LinkedIn profile
-                    {state.expandedSections.linkedinHelp ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-3">
-                  <div className="bg-blue-500/20 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-1 text-sm">
-                      Build Your Professional Presence
-                    </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                      Create a compelling LinkedIn profile
-                    </p>
-                    <div className="grid grid-cols-1 gap-3 mb-3">
-                      <div className="space-y-2">
-                        <h5 className="font-medium text-gray-900 dark:text-white text-xs">
-                          Profile Setup
-                        </h5>
-                        <div className="space-y-1 text-xs">
-                          {[
-                            "Professional headshot",
-                            "Compelling headline",
-                            "Detailed summary",
-                          ].map((item, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start space-x-2"
-                            >
-                              <Badge
-                                variant="outline"
-                                className="mt-0.5 text-xs"
-                              >
-                                {index + 1}
-                              </Badge>
-                              <span className="text-gray-600 dark:text-gray-300">
-                                {item}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h5 className="font-medium text-gray-900 dark:text-white text-xs">
-                          Optimization Tips
-                        </h5>
-                        <div className="space-y-1 text-xs">
-                          {[
-                            "Add relevant skills",
-                            "Connect with peers",
-                            "Share your projects",
-                          ].map((item, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start space-x-2"
-                            >
-                              <Badge
-                                variant="outline"
-                                className="mt-0.5 text-xs"
-                              >
-                                {index + 4}
-                              </Badge>
-                              <span className="text-gray-600 dark:text-gray-300">
-                                {item}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <Button size="sm" className="w-full" asChild>
-                      <a
-                        href="https://linkedin.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="w-3 h-3 mr-2" />
-                        Go to LinkedIn
-                      </a>
-                    </Button>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+              {/* Removed LinkedIn profile help dropdown */}
             </div>
           </div>
         </div>
@@ -1645,9 +1477,9 @@ export default function Page() {
       case 4:
         return <DiscordStep />;
       case 5:
-        return <LeetCodeStep />;
-      case 6:
         return <LinkedInStep />;
+      case 6:
+        return <LeetCodeStep />;
       case 7:
         return <CompletionStep />;
       default:
