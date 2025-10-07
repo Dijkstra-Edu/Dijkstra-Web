@@ -153,7 +153,7 @@ interface OnboardingState {
   // Career planning fields
   primarySpecialization: string;
   secondarySpecializations: string[];
-  timeToUpskill: string;
+  timeToUpskill: number;
   expectedSalary: string;
   selectedTools: string[];
 }
@@ -190,6 +190,33 @@ const CAREER_PATHS = {
     textGradient: "from-orange-500 to-pink-500",
     description: "Work on both frontend and backend development, handling the complete web application stack.",
   },
+  SDE_TEST: {
+    label: "SDE in Test",
+    shortLabel: "SDET",
+    icon: "sdet",
+    gradient: "from-purple-500 via-indigo-500 to-blue-500",
+    iconColor: "text-purple-500",
+    textGradient: "from-purple-500 to-blue-500",
+    description: "Develop automated testing frameworks and ensure software quality through comprehensive testing.",
+  },
+  QUALITY_ASSURANCE: {
+    label: "Quality Assurance",
+    shortLabel: "QA",
+    icon: "qa",
+    gradient: "from-emerald-500 via-green-500 to-teal-500",
+    iconColor: "text-emerald-500",
+    textGradient: "from-emerald-500 to-teal-500",
+    description: "Ensure software quality through manual and automated testing processes.",
+  },
+  TEST_AUTOMATION: {
+    label: "Test Automation",
+    shortLabel: "TA",
+    icon: "test",
+    gradient: "from-red-500 via-orange-500 to-yellow-500",
+    iconColor: "text-red-500",
+    textGradient: "from-red-500 to-yellow-500",
+    description: "Create and maintain automated testing suites and frameworks for continuous testing.",
+  },
   DEVOPS: {
     label: "DevOps Engineer",
     shortLabel: "DevOps",
@@ -198,6 +225,24 @@ const CAREER_PATHS = {
     iconColor: "text-blue-500",
     textGradient: "from-blue-500 to-teal-500",
     description: "Automate deployment pipelines and manage infrastructure for continuous integration and delivery.",
+  },
+  MLOPS: {
+    label: "MLOps Engineer",
+    shortLabel: "MLOps",
+    icon: "mlops",
+    gradient: "from-purple-600 via-pink-600 to-red-600",
+    iconColor: "text-purple-600",
+    textGradient: "from-purple-600 to-red-600",
+    description: "Manage machine learning model deployment, monitoring, and lifecycle in production environments.",
+  },
+  CI_CD: {
+    label: "CI/CD Engineer",
+    shortLabel: "CI/CD",
+    icon: "cicd",
+    gradient: "from-green-600 via-blue-600 to-purple-600",
+    iconColor: "text-green-600",
+    textGradient: "from-green-600 to-purple-600",
+    description: "Design and maintain continuous integration and deployment pipelines for software delivery.",
   },
   CLOUD: {
     label: "Cloud Engineer",
@@ -208,6 +253,42 @@ const CAREER_PATHS = {
     textGradient: "from-sky-500 to-indigo-500",
     description: "Design and manage cloud infrastructure using AWS, Azure, or Google Cloud Platform.",
   },
+  SITE_RELIABILITY: {
+    label: "Site Reliability",
+    shortLabel: "SRE",
+    icon: "sre",
+    gradient: "from-orange-600 via-red-600 to-pink-600",
+    iconColor: "text-orange-600",
+    textGradient: "from-orange-600 to-pink-600",
+    description: "Ensure system reliability, performance, and scalability through engineering practices.",
+  },
+  SOFTWARE_INFRASTRUCTURE: {
+    label: "Software Infrastructure",
+    shortLabel: "Infra",
+    icon: "infra",
+    gradient: "from-slate-600 via-gray-600 to-zinc-600",
+    iconColor: "text-slate-600",
+    textGradient: "from-slate-600 to-zinc-600",
+    description: "Build and maintain the foundational software systems that support applications and services.",
+  },
+  SYSTEMS: {
+    label: "Systems Engineer",
+    shortLabel: "Sys",
+    icon: "systems",
+    gradient: "from-indigo-600 via-purple-600 to-pink-600",
+    iconColor: "text-indigo-600",
+    textGradient: "from-indigo-600 to-pink-600",
+    description: "Design and optimize low-level systems, operating systems, and system-level software.",
+  },
+  EMBEDDED_IOT: {
+    label: "Embedded/IoT",
+    shortLabel: "IoT",
+    icon: "iot",
+    gradient: "from-teal-600 via-green-600 to-emerald-600",
+    iconColor: "text-teal-600",
+    textGradient: "from-teal-600 to-emerald-600",
+    description: "Develop software for embedded systems, IoT devices, and hardware-software integration.",
+  },
   ML_ENGINEERING: {
     label: "ML Engineer",
     shortLabel: "ML Eng",
@@ -217,7 +298,16 @@ const CAREER_PATHS = {
     textGradient: "from-violet-500 to-pink-500",
     description: "Build and deploy machine learning models and AI systems at scale.",
   },
-  DATA_SCIENCE: {
+  ML_RESEARCH: {
+    label: "ML Research",
+    shortLabel: "ML Res",
+    icon: "research",
+    gradient: "from-blue-600 via-indigo-600 to-purple-600",
+    iconColor: "text-blue-600",
+    textGradient: "from-blue-600 to-purple-600",
+    description: "Conduct research in machine learning, develop new algorithms, and advance AI capabilities.",
+  },
+  DATA_SCIENCE_ANALYSIS: {
     label: "Data Scientist",
     shortLabel: "DS",
     icon: "data",
@@ -226,14 +316,104 @@ const CAREER_PATHS = {
     textGradient: "from-amber-500 to-red-500",
     description: "Analyze complex data to extract insights and build predictive models.",
   },
-  MOBILE: {
-    label: "Mobile Developer",
-    shortLabel: "Mobile",
+  DATA_ENGINEERING: {
+    label: "Data Engineer",
+    shortLabel: "DE",
+    icon: "dataeng",
+    gradient: "from-teal-500 via-cyan-500 to-blue-500",
+    iconColor: "text-teal-500",
+    textGradient: "from-teal-500 to-blue-500",
+    description: "Build and maintain data pipelines and infrastructure for large-scale data processing.",
+  },
+  APPLICATION: {
+    label: "Application Developer",
+    shortLabel: "App Dev",
+    icon: "app",
+    gradient: "from-cyan-500 via-blue-500 to-indigo-500",
+    iconColor: "text-cyan-500",
+    textGradient: "from-cyan-500 to-indigo-500",
+    description: "Develop desktop and web applications for various platforms and use cases.",
+  },
+  ANDROID: {
+    label: "Android Developer",
+    shortLabel: "Android",
+    icon: "android",
+    gradient: "from-green-500 via-emerald-500 to-teal-500",
+    iconColor: "text-green-500",
+    textGradient: "from-green-500 to-teal-500",
+    description: "Develop native Android applications using Kotlin or Java.",
+  },
+  IOS: {
+    label: "iOS Developer",
+    shortLabel: "iOS",
+    icon: "ios",
+    gradient: "from-gray-500 via-slate-500 to-zinc-500",
+    iconColor: "text-gray-500",
+    textGradient: "from-gray-500 to-zinc-500",
+    description: "Build native iOS applications using Swift or Objective-C.",
+  },
+  CROSS_PLATFORM_MOBILE: {
+    label: "Cross-Platform Mobile",
+    shortLabel: "X-Mobile",
     icon: "mobile",
     gradient: "from-purple-500 via-pink-500 to-rose-500",
     iconColor: "text-purple-500",
     textGradient: "from-purple-500 to-rose-500",
-    description: "Develop mobile applications for iOS and Android platforms.",
+    description: "Develop mobile applications that work across multiple platforms using frameworks like React Native or Flutter.",
+  },
+  WINDOWS: {
+    label: "Windows Developer",
+    shortLabel: "Windows",
+    icon: "windows",
+    gradient: "from-blue-600 via-sky-600 to-cyan-600",
+    iconColor: "text-blue-600",
+    textGradient: "from-blue-600 to-cyan-600",
+    description: "Develop applications specifically for Windows platforms using .NET, C#, or other Windows technologies.",
+  },
+  MACOS: {
+    label: "macOS Developer",
+    shortLabel: "macOS",
+    icon: "macos",
+    gradient: "from-gray-600 via-slate-600 to-zinc-600",
+    iconColor: "text-gray-600",
+    textGradient: "from-gray-600 to-zinc-600",
+    description: "Build native macOS applications using Swift, Objective-C, or other Apple development tools.",
+  },
+  LINUX: {
+    label: "Linux Developer",
+    shortLabel: "Linux",
+    icon: "linux",
+    gradient: "from-orange-600 via-red-600 to-pink-600",
+    iconColor: "text-orange-600",
+    textGradient: "from-orange-600 to-pink-600",
+    description: "Develop applications and systems for Linux distributions and open-source environments.",
+  },
+  CROSS_PLATFORM_PC: {
+    label: "Cross-Platform PC",
+    shortLabel: "X-PC",
+    icon: "pc",
+    gradient: "from-emerald-600 via-teal-600 to-cyan-600",
+    iconColor: "text-emerald-600",
+    textGradient: "from-emerald-600 to-cyan-600",
+    description: "Create desktop applications that run across multiple operating systems using frameworks like Electron or Qt.",
+  },
+  COMPUTER_SYSTEMS: {
+    label: "Computer Systems",
+    shortLabel: "Comp Sys",
+    icon: "computer",
+    gradient: "from-slate-700 via-gray-700 to-zinc-700",
+    iconColor: "text-slate-700",
+    textGradient: "from-slate-700 to-zinc-700",
+    description: "Work on computer architecture, system design, and low-level system programming.",
+  },
+  COMPILERS: {
+    label: "Compiler Engineer",
+    shortLabel: "Compiler",
+    icon: "compiler",
+    gradient: "from-violet-600 via-indigo-600 to-blue-600",
+    iconColor: "text-violet-600",
+    textGradient: "from-violet-600 to-blue-600",
+    description: "Design and develop compilers, interpreters, and programming language tools.",
   },
   GAME_DEV: {
     label: "Game Developer",
@@ -244,14 +424,77 @@ const CAREER_PATHS = {
     textGradient: "from-red-500 to-purple-500",
     description: "Create interactive games and entertainment software using engines like Unity or Unreal.",
   },
-  CYBERSECURITY: {
-    label: "Cybersecurity",
-    shortLabel: "Cyber",
+  APPLICATION_SECURITY: {
+    label: "App Security",
+    shortLabel: "AppSec",
     icon: "security",
     gradient: "from-red-600 via-orange-600 to-yellow-600",
     iconColor: "text-red-600",
     textGradient: "from-red-600 to-yellow-600",
-    description: "Protect systems and networks from cyber threats and vulnerabilities.",
+    description: "Secure applications by identifying vulnerabilities and implementing security measures.",
+  },
+  PLATFORM_SECURITY: {
+    label: "Platform Security",
+    shortLabel: "PlatSec",
+    icon: "platform",
+    gradient: "from-red-700 via-pink-700 to-purple-700",
+    iconColor: "text-red-700",
+    textGradient: "from-red-700 to-purple-700",
+    description: "Secure entire platforms and infrastructure against threats and vulnerabilities.",
+  },
+  DEVSECOPS: {
+    label: "DevSecOps",
+    shortLabel: "DevSec",
+    icon: "devsecops",
+    gradient: "from-orange-700 via-red-700 to-pink-700",
+    iconColor: "text-orange-700",
+    textGradient: "from-orange-700 to-pink-700",
+    description: "Integrate security practices into DevOps workflows and development processes.",
+  },
+  UI_UX: {
+    label: "UI/UX Designer",
+    shortLabel: "UI/UX",
+    icon: "design",
+    gradient: "from-pink-500 via-rose-500 to-red-500",
+    iconColor: "text-pink-500",
+    textGradient: "from-pink-500 to-red-500",
+    description: "Design user interfaces and experiences that are both beautiful and functional.",
+  },
+  PRODUCT_MANAGEMENT: {
+    label: "Product Manager",
+    shortLabel: "PM",
+    icon: "product",
+    gradient: "from-yellow-500 via-amber-500 to-orange-500",
+    iconColor: "text-yellow-500",
+    textGradient: "from-yellow-500 to-orange-500",
+    description: "Define product strategy and work with engineering teams to build user-focused products.",
+  },
+  PRODUCT_ENGINEERING: {
+    label: "Product Engineer",
+    shortLabel: "PE",
+    icon: "producteng",
+    gradient: "from-amber-600 via-orange-600 to-red-600",
+    iconColor: "text-amber-600",
+    textGradient: "from-amber-600 to-red-600",
+    description: "Bridge product management and engineering to build scalable, user-centric technical solutions.",
+  },
+  TECHNICAL_WRITING: {
+    label: "Technical Writer",
+    shortLabel: "TW",
+    icon: "writing",
+    gradient: "from-indigo-500 via-blue-500 to-cyan-500",
+    iconColor: "text-indigo-500",
+    textGradient: "from-indigo-500 to-cyan-500",
+    description: "Create clear documentation and technical content for developers and users.",
+  },
+  OTHER: {
+    label: "Other",
+    shortLabel: "Other",
+    icon: "other",
+    gradient: "from-gray-500 via-slate-500 to-zinc-500",
+    iconColor: "text-gray-500",
+    textGradient: "from-gray-500 to-zinc-500",
+    description: "Explore other career paths in technology and software development.",
   },
 };
 
@@ -264,10 +507,48 @@ const TOOLS_LIST = [
 ];
 
 const TIME_OPTIONS = [
-  "1 month", "2 months", "3 months", "4 months", "5 months", "6 months",
-  "7 months", "8 months", "9 months", "10 months", "11 months", "12 months",
-  "18 months", "24 months", "30 months", "36 months"
+  { value: 1, label: "1 month" },
+  { value: 2, label: "2 months" },
+  { value: 3, label: "3 months" },
+  { value: 4, label: "4 months" },
+  { value: 5, label: "5 months" },
+  { value: 6, label: "6 months" },
+  { value: 7, label: "7 months" },
+  { value: 8, label: "8 months" },
+  { value: 9, label: "9 months" },
+  { value: 10, label: "10 months" },
+  { value: 11, label: "11 months" },
+  { value: 12, label: "12 months" },
+  { value: 18, label: "18 months" },
+  { value: 24, label: "24 months" },
+  { value: 30, label: "30 months" },
+  { value: 36, label: "36 months" },
+  { value: 42, label: "42 months" },
+  { value: 48, label: "48 months" },
+  { value: 54, label: "54 months" },
+  { value: 60, label: "60 months" },
+  { value: 72, label: "72 months" },
+  { value: 84, label: "84 months" },
+  { value: 96, label: "96 months" },
+  { value: 108, label: "108 months" },
+  { value: 120, label: "120 months" },
 ];
+
+// Helper function to format months into years and months
+const formatTimeDisplay = (months: number): string => {
+  if (months < 12) {
+    return `${months} month${months !== 1 ? 's' : ''}`;
+  }
+  
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  
+  if (remainingMonths === 0) {
+    return `${years} year${years !== 1 ? 's' : ''}`;
+  }
+  
+  return `${years} year${years !== 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+};
 
 const SALARY_RANGES = [
   "1-3 LPA", "3-6 LPA", "6-10 LPA", "10-15 LPA", "15-20 LPA", "20-25 LPA",
@@ -456,7 +737,7 @@ export default function Page() {
     // Career planning fields
     primarySpecialization: "",
     secondarySpecializations: [],
-    timeToUpskill: "",
+    timeToUpskill: 0,
     expectedSalary: "",
     selectedTools: [],
   });
@@ -682,7 +963,8 @@ export default function Page() {
       case 7: // Career Planning
         return state.primarySpecialization !== "" && 
                state.secondarySpecializations.length === 3 && 
-               state.timeToUpskill !== "" && 
+               state.timeToUpskill > 0 && 
+               state.timeToUpskill <= 120 && 
                state.expectedSalary !== "" && 
                state.selectedTools.length > 0;
       default:
@@ -1799,16 +2081,33 @@ export default function Page() {
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
               <h3 className="text-lg font-semibold mb-4 text-foreground">Time to Upskill</h3>
               <p className="text-sm text-muted-foreground mb-4">How much time do you have until you start applying?</p>
-              <Select value={localTimeToUpskill} onValueChange={setLocalTimeToUpskill}>
+              <Select 
+                value={localTimeToUpskill > 0 ? localTimeToUpskill.toString() : ""} 
+                onValueChange={(value) => setLocalTimeToUpskill(parseInt(value))}
+              >
                 <SelectTrigger className="bg-white/10 border-white/20">
-                  <SelectValue placeholder="Select timeframe" />
+                  <SelectValue placeholder="Select timeframe from dropdown" />
                 </SelectTrigger>
                 <SelectContent>
                   {TIME_OPTIONS.map((time) => (
-                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                    <SelectItem key={time.value} value={time.value.toString()}>
+                      {time.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Time Display */}
+              {localTimeToUpskill > 0 && (
+                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-blue-600 font-medium">
+                      That's {formatTimeDisplay(localTimeToUpskill)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
@@ -1851,7 +2150,8 @@ export default function Page() {
               disabled={!(
                 localPrimarySpec !== "" &&
                 localSecondarySpecs.length === 3 &&
-                localTimeToUpskill !== "" &&
+                localTimeToUpskill > 0 &&
+                localTimeToUpskill <= 120 &&
                 localExpectedSalary !== "" &&
                 localSelectedTools.length > 0
               )}
@@ -1979,7 +2279,7 @@ export default function Page() {
                 // Career planning fields
                 primarySpecialization: "",
                 secondarySpecializations: [],
-                timeToUpskill: "",
+                timeToUpskill: 0,
                 expectedSalary: "",
                 selectedTools: [],
               });
