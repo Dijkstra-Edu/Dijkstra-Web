@@ -22,12 +22,32 @@ export function WaitlistSignup() {
           </div>
         </a>
 
-        <p className="text-base sm:text-lg mb-10 text-gray-400">
-          Empowering students to build incredible software.
-        </p>
+        <div>
+          <p className="text-base sm:text-lg mb-2 text-gray-400">
+            Empowering students to build incredible software.
+          </p>
+
+          <p className="text-xs text-gray-500 max-w-m leading-relaxed">
+            By proceeding, you agree to our{" "}
+            <a
+              href="https://dijkstra.org.in/terms"
+              className="underline hover:text-gray-300 transition-colors"
+            >
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://dijkstra.org.in/privacy"
+              className="underline hover:text-gray-300 transition-colors"
+            >
+              Privacy Policy
+            </a>
+            .
+          </p>
+        </div>
 
         {/* Buttons */}
-        <div className="flex gap-4">
+        <div className="flex gap-4 mt-5">
           <a
             href="/onboarding"
             className="px-4 py-2 rounded-lg bg-gray-100 text-gray-900 font-medium hover:bg-gray-200 transition-colors duration-150"
