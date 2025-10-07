@@ -13,6 +13,7 @@ import {
   Sparkles,
   CheckCircle,
   Home,
+  Loader2,
 } from "lucide-react";
 import { IconBrandDiscord, IconBrandLinkedin } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import BackgroundPaths from "../../components/kokonutui/background-paths";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 const steps = [
   {
@@ -113,6 +115,7 @@ const platforms = [
 ];
 
 interface OnboardingState {
+  github: boolean | null;
   gitSetup: boolean | null;
   cliKnowledge: boolean | null;
   discordJoined: boolean | null;
@@ -163,7 +166,9 @@ export default function Page() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [authRedirecting, setAuthRedirecting] = useState(false);
   const [state, setState] = useState<OnboardingState>({
+    github: null,
     gitSetup: null,
     cliKnowledge: null,
     discordJoined: null,
@@ -172,6 +177,43 @@ export default function Page() {
     expandedSections: {},
   });
   const router = useRouter();
+  const { data: session } = useSession();
+  const githubUsername = session?.user?.login || "";
+
+  const handleLogin = async () => {
+    try {
+      const result = await signIn("github", {
+        callbackUrl: "/onboarding?step=2",
+        redirect: false, // Let NextAuth handle the redirect
+      });
+
+      if (result?.error) {
+        console.error("GitHub login failed:", result.error);
+        alert("Login failed. Please try again.");
+        // Show error to user
+      }
+
+      // If login is successful
+      if (result?.ok && result.url) {
+        if (!localStorage.getItem("githubActionsDone")) {
+          try {
+            await fetch("/api/github-actions");
+            localStorage.setItem("githubActionsDone", "true");
+          } catch (err) {
+            console.warn("GitHub actions failed", err);
+          }
+        }
+
+        // Now manually redirect
+        window.location.href = result.url;
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An unexpected error occurred. Please try again later.");
+    }
+  };
+
+
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -229,60 +271,86 @@ export default function Page() {
     setState((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  const toggleSection = useCallback(
-    (section: string) => {
-      updateState({
-        expandedSections: {
-          ...state.expandedSections,
-          [section]: !state.expandedSections[section],
-        },
-      });
-    },
-    [state.expandedSections, updateState]
-  );
+  const toggleSection = useCallback((section: string) => {
+    setState((prev) => ({
+      ...prev,
+      expandedSections: {
+        ...prev.expandedSections,
+        [section]: !prev.expandedSections[section],
+      },
+    }));
+  }, []);
 
   const handleGetStarted = useCallback(() => {
     setShowOnboarding(true);
     setCurrentStep(1); // Start with GitHub step
   }, []);
 
+  const updateUrlStep = useCallback(
+    (step: number) => {
+      router.replace(`/onboarding?step=${step}`, { scroll: false });
+    },
+    [router]
+  );
+
   const nextStep = useCallback(() => {
     if (currentStep < 7) {
-      setCurrentStep(currentStep + 1);
+      const newStep = currentStep + 1;
+      setCurrentStep(newStep);
+      updateUrlStep(newStep);
     }
-  }, [currentStep]);
+  }, [currentStep, updateUrlStep]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const newStep = currentStep - 1;
+      setCurrentStep(newStep);
+      updateUrlStep(newStep);
     } else if (currentStep === 1) {
-      // Go back to welcome page from first step
       setShowOnboarding(false);
       setCurrentStep(0);
+      router.replace("/onboarding", { scroll: false });
     }
-  }, [currentStep]);
+  }, [currentStep, updateUrlStep, router]);
 
-  const goToStep = useCallback((stepIndex: number) => {
-    setCurrentStep(stepIndex);
-  }, []);
+  const goToStep = useCallback(
+    (stepIndex: number) => {
+      setCurrentStep(stepIndex);
+      updateUrlStep(stepIndex);
+    },
+    [updateUrlStep]
+  );
 
   const markStepComplete = useCallback(
     (stepId: string) => {
       if (!completedSteps.includes(stepId)) {
         setCompletedSteps((prev) => [...prev, stepId]);
-        // Auto-advance to next step after a short delay
         setTimeout(() => {
-          if (currentStep < 6) {
-            setCurrentStep(currentStep + 1);
-          } else if (currentStep === 6) {
-            // Go to completion step
-            setCurrentStep(7);
-          }
+          setCurrentStep((prev) => {
+            const stepOrder = steps.map((s) => s.id);
+            const completedIndex = stepOrder.indexOf(stepId);
+
+            const prevIndex = prev;
+
+            if (prevIndex <= completedIndex && prev < 6) {
+              const next = prev + 1;
+              updateUrlStep(next);
+              return next;
+            }
+            // If we're already past, do not change the current step
+            return prev;
+          });
         }, 1000);
       }
     },
-    [completedSteps, currentStep]
+    [completedSteps, updateUrlStep]
   );
+
+  useEffect(() => {
+    if (githubUsername && !completedSteps.includes("github")) {
+      markStepComplete("github");
+    }
+  }, [githubUsername, completedSteps, markStepComplete]);
 
   const canProceed = useCallback(() => {
     switch (currentStep) {
@@ -476,7 +544,7 @@ export default function Page() {
         >
           <Button
             onClick={handleGetStarted}
-            className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-200"
+            className="px-8 py-6 cursor-pointer text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-200"
             size="lg"
           >
             Get Started
@@ -594,14 +662,38 @@ export default function Page() {
           <div className="space-y-4">
             {/* Sign in button */}
             <div className="space-y-3">
-              <Button
-                className="w-full h-12 text-base font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-all duration-200"
-                size="lg"
-                onClick={() => markStepComplete("github")}
-              >
-                <Github className="w-5 h-5 mr-2" />
-                Sign in with GitHub
-              </Button>
+              {githubUsername ? (
+                <Button
+                  className="w-full h-12 text-base cursor-default font-semibold bg-green-600 text-white rounded-xl transition-all duration-200"
+                  size="lg"
+                  disabled
+                >
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  Successfully Signed in @{githubUsername}
+                </Button>
+              ) : (
+                <Button
+                  className="w-full h-12 text-base cursor-pointer font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                  size="lg"
+                  disabled={authRedirecting}
+                  onClick={() => {
+                    setAuthRedirecting(true);
+                    handleLogin();
+                  }}
+                >
+                  {authRedirecting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Redirecting...
+                    </>
+                  ) : (
+                    <>
+                      <Github className="w-5 h-5 mr-2" />
+                      Sign in with GitHub
+                    </>
+                  )}
+                </Button>
+              )}
 
               <p className="text-sm text-gray-500 text-center">
                 We'll redirect you to GitHub's secure sign-in page
@@ -1760,6 +1852,7 @@ export default function Page() {
               setCurrentStep(0);
               setCompletedSteps([]);
               setState({
+                github: null,
                 gitSetup: null,
                 cliKnowledge: null,
                 discordJoined: null,
@@ -1829,6 +1922,16 @@ export default function Page() {
           {/* Main Content */}
           <div className="w-full flex flex-col">
             <div className="flex-1">{renderStep()}</div>
+
+            {/* OAuth Redirect Overlay */}
+            {authRedirecting && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-3xl">
+                <div className="flex items-center gap-3 px-4 py-3 bg-white/10 border border-white/20 rounded-xl">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Redirecting to GitHub…</span>
+                </div>
+              </div>
+            )}
 
             {/* Navigation Buttons - Only show when in onboarding flow */}
             {showOnboarding && currentStep > 0 && currentStep < 7 && (

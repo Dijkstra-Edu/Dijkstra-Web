@@ -203,7 +203,7 @@ export default function Homepage() {
 
   return (
     <div className="relative overflow-hidden transition-colors duration-300">
-      <div className="container mx-auto p-4 relative z-10">
+      <div className="container-max mx-auto p-4 relative z-10">
         {/* Main content */}
         <div className="grid grid-cols-12 gap-6">
           {/* Left sidebar */}
