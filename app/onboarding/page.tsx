@@ -15,6 +15,9 @@ import {
   Home,
   Loader2,
   XCircle,
+  Search,
+  X,
+  Check,
 } from "lucide-react";
 import { IconBrandDiscord, IconBrandLinkedin } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +29,18 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import BackgroundPaths from "../../components/kokonutui/background-paths";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -74,6 +89,12 @@ const steps = [
     icon: "leetcode",
     color: "from-orange-400 to-yellow-500",
   },
+  {
+    id: "career",
+    title: "General Info",
+    icon: "career",
+    color: "from-purple-500 to-pink-500",
+  },
 ];
 
 const platforms = [
@@ -113,6 +134,12 @@ const platforms = [
     icon: "leetcode",
     color: "from-orange-400 to-yellow-500",
   },
+  {
+    id: "career",
+    name: "Career Planning",
+    icon: "career",
+    color: "from-purple-500 to-pink-500",
+  },
 ];
 
 interface OnboardingState {
@@ -123,10 +150,258 @@ interface OnboardingState {
   leetcodeHandle: string;
   linkedinHandle: string;
   expandedSections: Record<string, boolean>;
+  // Career planning fields
+  primarySpecialization: string;
+  secondarySpecializations: string[];
+  timeToUpskill: string;
+  expectedSalary: string;
+  selectedTools: string[];
 }
 
 const STORAGE_KEY = "dijkstra-onboarding-state";
 const COMPLETED_STEPS_KEY = "dijkstra-completed-steps";
+
+// Career planning constants
+const CAREER_PATHS = {
+  FRONTEND: {
+    label: "Frontend Engineer",
+    shortLabel: "F.E",
+    icon: "frontend",
+    gradient: "from-pink-500 via-blue-500 to-purple-500",
+    iconColor: "text-pink-500",
+    textGradient: "from-pink-500 to-purple-500",
+    description: "Build user interfaces and web experiences using modern frameworks like React, Vue, or Angular.",
+  },
+  BACKEND: {
+    label: "Backend Engineer",
+    shortLabel: "B.E",
+    icon: "backend",
+    gradient: "from-green-500 via-teal-500 to-blue-500",
+    iconColor: "text-green-500",
+    textGradient: "from-green-500 to-blue-500",
+    description: "Design and develop server-side applications, APIs, and database systems.",
+  },
+  FULLSTACK: {
+    label: "Fullstack Engineer",
+    shortLabel: "F.S",
+    icon: "fullstack",
+    gradient: "from-orange-500 via-red-500 to-pink-500",
+    iconColor: "text-orange-500",
+    textGradient: "from-orange-500 to-pink-500",
+    description: "Work on both frontend and backend development, handling the complete web application stack.",
+  },
+  DEVOPS: {
+    label: "DevOps Engineer",
+    shortLabel: "DevOps",
+    icon: "devops",
+    gradient: "from-blue-500 via-cyan-500 to-teal-500",
+    iconColor: "text-blue-500",
+    textGradient: "from-blue-500 to-teal-500",
+    description: "Automate deployment pipelines and manage infrastructure for continuous integration and delivery.",
+  },
+  CLOUD: {
+    label: "Cloud Engineer",
+    shortLabel: "Cloud",
+    icon: "cloud",
+    gradient: "from-sky-500 via-blue-500 to-indigo-500",
+    iconColor: "text-sky-500",
+    textGradient: "from-sky-500 to-indigo-500",
+    description: "Design and manage cloud infrastructure using AWS, Azure, or Google Cloud Platform.",
+  },
+  ML_ENGINEERING: {
+    label: "ML Engineer",
+    shortLabel: "ML Eng",
+    icon: "ml",
+    gradient: "from-violet-500 via-purple-500 to-pink-500",
+    iconColor: "text-violet-500",
+    textGradient: "from-violet-500 to-pink-500",
+    description: "Build and deploy machine learning models and AI systems at scale.",
+  },
+  DATA_SCIENCE: {
+    label: "Data Scientist",
+    shortLabel: "DS",
+    icon: "data",
+    gradient: "from-amber-500 via-orange-500 to-red-500",
+    iconColor: "text-amber-500",
+    textGradient: "from-amber-500 to-red-500",
+    description: "Analyze complex data to extract insights and build predictive models.",
+  },
+  MOBILE: {
+    label: "Mobile Developer",
+    shortLabel: "Mobile",
+    icon: "mobile",
+    gradient: "from-purple-500 via-pink-500 to-rose-500",
+    iconColor: "text-purple-500",
+    textGradient: "from-purple-500 to-rose-500",
+    description: "Develop mobile applications for iOS and Android platforms.",
+  },
+  GAME_DEV: {
+    label: "Game Developer",
+    shortLabel: "Game",
+    icon: "game",
+    gradient: "from-red-500 via-pink-500 to-purple-500",
+    iconColor: "text-red-500",
+    textGradient: "from-red-500 to-purple-500",
+    description: "Create interactive games and entertainment software using engines like Unity or Unreal.",
+  },
+  CYBERSECURITY: {
+    label: "Cybersecurity",
+    shortLabel: "Cyber",
+    icon: "security",
+    gradient: "from-red-600 via-orange-600 to-yellow-600",
+    iconColor: "text-red-600",
+    textGradient: "from-red-600 to-yellow-600",
+    description: "Protect systems and networks from cyber threats and vulnerabilities.",
+  },
+};
+
+const TOOLS_LIST = [
+  "JAVA", "C", "CPP", "PYTHON", "CSHARP", "RUST", "JAVASCRIPT", "TYPESCRIPT", "GO", "GROOVY", "RUBY", "PHP", "SWIFT",
+  "REACTJS", "ANGULARJS", "NEXTJS", "VUEJS", "SVELTE", "NODEJS", "DJANGO", "FLASK", "SPRINGBOOT",
+  "GIT", "MARKDOWN", "DOCKER", "KUBERNETES", "HTML", "CSS", "POSTMAN", "FIREBASE", "SUPABASE",
+  "AWS", "AZURE", "GCP", "HEROKU", "DIGITALOCEAN", "VERCEL", "RAILWAY", "NETLIFY", "JENKINS",
+  "REDIS", "MONGODB", "MYSQL", "MSSQL", "POSTGRESQL", "SQLITE", "ELASTICSEARCH", "KAFKA", "RABBITMQ", "GRAPHQL", "COUCHDB", "CASSANDRA"
+];
+
+const TIME_OPTIONS = [
+  "1 month", "2 months", "3 months", "4 months", "5 months", "6 months",
+  "7 months", "8 months", "9 months", "10 months", "11 months", "12 months",
+  "18 months", "24 months", "30 months", "36 months"
+];
+
+const SALARY_RANGES = [
+  "1-3 LPA", "3-6 LPA", "6-10 LPA", "10-15 LPA", "15-20 LPA", "20-25 LPA",
+  "25-30 LPA", "30-40 LPA", "40-50 LPA", "50-60 LPA", "60-80 LPA", "80 LPA+"
+];
+
+// Custom Multiselect Component
+interface MultiSelectProps {
+  options: string[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  placeholder?: string;
+  maxHeight?: string;
+}
+
+const MultiSelect = ({ options, selected, onChange, placeholder = "Select options", maxHeight = "200px" }: MultiSelectProps) => {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredOptions = options.filter(option =>
+    option.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleToggle = (option: string) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter(item => item !== option));
+    } else {
+      onChange([...selected, option]);
+    }
+  };
+
+  const handleRemove = (option: string) => {
+    onChange(selected.filter(item => item !== option));
+  };
+
+  const handleClearAll = () => {
+    onChange([]);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between bg-white/10 border-white/20 hover:bg-white/20"
+        >
+          <div className="flex flex-wrap gap-1 max-w-[calc(100%-2rem)]">
+            {selected.length === 0 ? (
+              <span className="text-muted-foreground">{placeholder}</span>
+            ) : (
+              selected.map((item) => (
+                <Badge
+                  key={item}
+                  variant="secondary"
+                  className="text-xs bg-primary/20 text-primary border-primary/30"
+                >
+                  {item}
+                  <X
+                    className="ml-1 h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(item);
+                    }}
+                  />
+                </Badge>
+              ))
+            )}
+          </div>
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
+        <div className="p-3 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tools..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-white/10 border-white/20"
+            />
+          </div>
+          {selected.length > 0 && (
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-sm text-muted-foreground">
+                {selected.length} selected
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearAll}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="max-h-[200px] overflow-y-auto">
+          {filteredOptions.length === 0 ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              No tools found
+            </div>
+          ) : (
+            <div className="p-1">
+              {filteredOptions.map((option) => (
+                <div
+                  key={option}
+                  className="flex items-center space-x-2 p-2 hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+                  onClick={() => handleToggle(option)}
+                >
+                  <div className="flex items-center space-x-2 flex-1">
+                    <div className={`w-4 h-4 border rounded flex items-center justify-center ${
+                      selected.includes(option) 
+                        ? "bg-primary border-primary text-primary-foreground" 
+                        : "border-muted-foreground"
+                    }`}>
+                      {selected.includes(option) && (
+                        <Check className="h-3 w-3" />
+                      )}
+                    </div>
+                    <span className="text-sm">{option}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 // Custom icon component
 const CustomIcon = ({
@@ -139,14 +414,15 @@ const CustomIcon = ({
   const iconUrls = {
     git: "https://img.icons8.com/?size=100&id=38389&format=png&color=FFFFFF",
     vscode: "https://img.icons8.com/ios_filled/512/FFFFFF/visual-studio.png",
-    leetcode:
-      "https://img.icons8.com/?size=100&id=PZknXs9seWCp&format=png&color=FFFFFF",
+    leetcode: "https://img.icons8.com/?size=100&id=PZknXs9seWCp&format=png&color=FFFFFF",
+    career: "https://img.icons8.com/?size=100&id=123456&format=png&color=FFFFFF",
   };
 
   switch (iconType) {
     case "git":
     case "vscode":
     case "leetcode":
+    case "career":
       return (
         <img
           src={
@@ -177,6 +453,12 @@ export default function Page() {
     leetcodeHandle: "",
     linkedinHandle: "",
     expandedSections: {},
+    // Career planning fields
+    primarySpecialization: "",
+    secondarySpecializations: [],
+    timeToUpskill: "",
+    expectedSalary: "",
+    selectedTools: [],
   });
   const router = useRouter();
   const { data: session } = useSession();
@@ -282,7 +564,7 @@ export default function Page() {
     const stepParam = searchParams.get("step");
     if (stepParam) {
       const stepNumber = Number.parseInt(stepParam);
-      if (stepNumber >= 1 && stepNumber <= 6) {
+      if (stepNumber >= 1 && stepNumber <= 7) {
         setShowOnboarding(true);
         setCurrentStep(stepNumber);
         // Clear the URL parameter after setting the state to avoid interference
@@ -326,7 +608,7 @@ export default function Page() {
   );
 
   const nextStep = useCallback(() => {
-    if (currentStep < 7) {
+    if (currentStep < 8) {
       const newStep = currentStep + 1;
       setCurrentStep(newStep);
       updateUrlStep(newStep);
@@ -364,7 +646,7 @@ export default function Page() {
 
             const prevIndex = prev;
 
-            if (prevIndex <= completedIndex && prev < 6) {
+            if (prevIndex <= completedIndex && prev < 8) {
               const next = prev + 1;
               updateUrlStep(next);
               return next;
@@ -397,10 +679,16 @@ export default function Page() {
         return linkedinConnected;
       case 6: // LeetCode
         return isValidLeetCodeUsername(state.leetcodeHandle);
+      case 7: // Career Planning
+        return state.primarySpecialization !== "" && 
+               state.secondarySpecializations.length === 3 && 
+               state.timeToUpskill !== "" && 
+               state.expectedSalary !== "" && 
+               state.selectedTools.length > 0;
       default:
         return true;
     }
-  }, [currentStep, state.leetcodeHandle, state.linkedinHandle, linkedinConnected, isValidLeetCodeUsername]);
+  }, [currentStep, state.leetcodeHandle, state.linkedinHandle, linkedinConnected, isValidLeetCodeUsername, state.primarySpecialization, state.secondarySpecializations, state.timeToUpskill, state.expectedSalary, state.selectedTools]);
 
   // Step Indicator Component with clickable steps
   const StepIndicator = () => (
@@ -1325,6 +1613,259 @@ export default function Page() {
     );
   };
 
+  // Career Planning Step
+  const CareerPlanningStep = () => {
+    const [localPrimarySpec, setLocalPrimarySpec] = useState(state.primarySpecialization);
+    const [localSecondarySpecs, setLocalSecondarySpecs] = useState(state.secondarySpecializations);
+    const [localTimeToUpskill, setLocalTimeToUpskill] = useState(state.timeToUpskill);
+    const [localExpectedSalary, setLocalExpectedSalary] = useState(state.expectedSalary);
+    const [localSelectedTools, setLocalSelectedTools] = useState(state.selectedTools);
+
+    const handleSave = () => {
+      updateState({
+        primarySpecialization: localPrimarySpec,
+        secondarySpecializations: localSecondarySpecs,
+        timeToUpskill: localTimeToUpskill,
+        expectedSalary: localExpectedSalary,
+        selectedTools: localSelectedTools,
+      });
+      markStepComplete("career");
+    };
+
+    const handlePrimarySpecChange = (spec: string) => {
+      setLocalPrimarySpec(spec);
+      // Remove from secondary if it was there
+      setLocalSecondarySpecs(prev => prev.filter(s => s !== spec));
+    };
+
+    const handleSecondarySpecChange = (spec: string) => {
+      if (localSecondarySpecs.includes(spec)) {
+        setLocalSecondarySpecs(prev => prev.filter(s => s !== spec));
+      } else if (localSecondarySpecs.length < 3) {
+        setLocalSecondarySpecs(prev => [...prev, spec]);
+      }
+    };
+
+    return (
+      <div className="space-y-6 h-[600px] overflow-y-auto">
+        {/* Step Indicator */}
+        <StepIndicator />
+
+        {/* Header Section */}
+        <div className="text-center space-y-4 pt-24">
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, type: "spring", stiffness: 150 }}
+            className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto shadow-2xl"
+          >
+            <CustomIcon iconType="career" className="w-8 h-8" />
+          </motion.div>
+
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">Career Planning</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Let's plan your career path and set your goals
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto space-y-6 px-4">
+          {/* Specializations */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Career Specializations</h3>
+            <p className="text-sm text-muted-foreground mb-6">Choose your primary specialization and 3 secondary areas of interest</p>
+            
+            {/* Selection Status */}
+            <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-foreground">Selection Progress</span>
+                <span className="text-xs text-muted-foreground">
+                  {localPrimarySpec ? "1" : "0"}/1 Primary • {localSecondarySpecs.length}/3 Secondary
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <div className={`flex-1 h-2 rounded-full ${localPrimarySpec ? "bg-primary" : "bg-white/20"}`}></div>
+                <div className={`flex-1 h-2 rounded-full ${localSecondarySpecs.length >= 1 ? "bg-primary" : "bg-white/20"}`}></div>
+                <div className={`flex-1 h-2 rounded-full ${localSecondarySpecs.length >= 2 ? "bg-primary" : "bg-white/20"}`}></div>
+                <div className={`flex-1 h-2 rounded-full ${localSecondarySpecs.length >= 3 ? "bg-primary" : "bg-white/20"}`}></div>
+              </div>
+            </div>
+
+            {/* Career Paths Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Object.entries(CAREER_PATHS).map(([key, path]) => {
+                const isPrimary = localPrimarySpec === key;
+                const isSecondary = localSecondarySpecs.includes(key);
+                const isDisabled = !isPrimary && !isSecondary && localSecondarySpecs.length >= 3 && localPrimarySpec !== "";
+                
+                return (
+                  <div
+                    key={key}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      isPrimary
+                        ? "border-primary bg-primary/10"
+                        : isSecondary
+                        ? "border-blue-500 bg-blue-500/10"
+                        : isDisabled
+                        ? "border-white/10 opacity-50 cursor-not-allowed"
+                        : "border-white/20 hover:border-white/40"
+                    }`}
+                    onClick={() => {
+                      if (isDisabled) return;
+                      
+                      if (!localPrimarySpec) {
+                        // First selection is always primary
+                        handlePrimarySpecChange(key);
+                      } else if (isPrimary) {
+                        // Allow deselection of primary
+                        setLocalPrimarySpec("");
+                      } else if (isSecondary) {
+                        // Deselect secondary
+                        handleSecondarySpecChange(key);
+                      } else {
+                        // Select as secondary (if we have space)
+                        if (localSecondarySpecs.length < 3) {
+                          handleSecondarySpecChange(key);
+                        }
+                      }
+                    }}
+                  >
+                    <div className="text-center">
+                      <div className={`w-8 h-8 mx-auto mb-2 rounded-full bg-gradient-to-r ${path.gradient} flex items-center justify-center`}>
+                        <span className="text-white text-xs font-bold">{path.shortLabel}</span>
+                      </div>
+                      <h4 className="text-sm font-medium text-foreground">{path.label}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">{path.description}</p>
+                      
+                      {/* Selection Indicators */}
+                      <div className="mt-2 flex justify-center gap-1">
+                        {isPrimary && (
+                          <Badge variant="default" className="text-xs bg-primary">
+                            Primary
+                          </Badge>
+                        )}
+                        {isSecondary && (
+                          <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-600">
+                            Secondary
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Instructions */}
+            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-white text-xs font-bold">1</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-blue-600 mb-1">Step 1: Choose Primary Specialization</h4>
+                  <p className="text-xs text-blue-500/80">
+                    {!localPrimarySpec 
+                      ? "Click on any career path to set it as your primary specialization"
+                      : `${CAREER_PATHS[localPrimarySpec as keyof typeof CAREER_PATHS]?.label} is your primary specialization`
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              {localPrimarySpec && (
+                <div className="flex items-start gap-3 mt-3">
+                  <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">2</span>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-green-600 mb-1">Step 2: Choose 3 Secondary Specializations</h4>
+                    <p className="text-xs text-green-500/80">
+                      {localSecondarySpecs.length === 0
+                        ? "Now select 3 additional areas of interest from the remaining options"
+                        : `Selected ${localSecondarySpecs.length}/3 secondary specializations`
+                      }
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Time to Upskill and Expected Salary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-lg font-semibold mb-4 text-foreground">Time to Upskill</h3>
+              <p className="text-sm text-muted-foreground mb-4">How much time do you have until you start applying?</p>
+              <Select value={localTimeToUpskill} onValueChange={setLocalTimeToUpskill}>
+                <SelectTrigger className="bg-white/10 border-white/20">
+                  <SelectValue placeholder="Select timeframe" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIME_OPTIONS.map((time) => (
+                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-lg font-semibold mb-4 text-foreground">Expected Salary</h3>
+              <p className="text-sm text-muted-foreground mb-4">What's your target salary range?</p>
+              <Select value={localExpectedSalary} onValueChange={setLocalExpectedSalary}>
+                <SelectTrigger className="bg-white/10 border-white/20">
+                  <SelectValue placeholder="Select salary range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SALARY_RANGES.map((salary) => (
+                    <SelectItem key={salary} value={salary}>{salary}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Tools Selection */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Tools & Technologies</h3>
+            <p className="text-sm text-muted-foreground mb-4">Select the tools you'd like to upskill in (choose as many as you want)</p>
+            
+            <MultiSelect
+              options={TOOLS_LIST}
+              selected={localSelectedTools}
+              onChange={setLocalSelectedTools}
+              placeholder="Search and select tools..."
+            />
+            
+            <div className="mt-4 text-sm text-muted-foreground">
+              Selected: {localSelectedTools.length} tools
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="text-center">
+            <Button
+              onClick={handleSave}
+              disabled={!(
+                localPrimarySpec !== "" &&
+                localSecondarySpecs.length === 3 &&
+                localTimeToUpskill !== "" &&
+                localExpectedSalary !== "" &&
+                localSelectedTools.length > 0
+              )}
+              className="px-8 py-3"
+              size="lg"
+            >
+              Save Career Plan
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Completion Step
   const CompletionStep = () => (
     <div className="flex items-center justify-center h-[600px]">
@@ -1368,7 +1909,7 @@ export default function Page() {
           className="grid grid-cols-3 gap-6 my-8 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl"
         >
           <div className="text-center">
-            <div className="text-2xl font-bold text-foreground">6</div>
+            <div className="text-2xl font-bold text-foreground">7</div>
             <div className="text-sm text-muted-foreground">Platforms Setup</div>
           </div>
           <div className="text-center">
@@ -1435,6 +1976,12 @@ export default function Page() {
                 leetcodeHandle: "",
                 linkedinHandle: "",
                 expandedSections: {},
+                // Career planning fields
+                primarySpecialization: "",
+                secondarySpecializations: [],
+                timeToUpskill: "",
+                expectedSalary: "",
+                selectedTools: [],
               });
               router.push("/dashboard");
             }}
@@ -1481,6 +2028,8 @@ export default function Page() {
       case 6:
         return <LeetCodeStep />;
       case 7:
+        return <CareerPlanningStep />;
+      case 8:
         return <CompletionStep />;
       default:
         return <WelcomeContent />;
@@ -1510,7 +2059,7 @@ export default function Page() {
             )}
 
             {/* Navigation Buttons - Only show when in onboarding flow */}
-            {showOnboarding && currentStep > 0 && currentStep < 7 && (
+            {showOnboarding && currentStep > 0 && currentStep < 8 && (
               <div className="flex items-center justify-between p-24 border-t border-white/10 mt-6">
                 <Button
                   variant="outline"
