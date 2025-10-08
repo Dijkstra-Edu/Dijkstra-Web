@@ -161,340 +161,394 @@ interface OnboardingState {
 const STORAGE_KEY = "dijkstra-onboarding-state";
 const COMPLETED_STEPS_KEY = "dijkstra-completed-steps";
 
-// Career planning constants
+// Career planning constants organized by factions
 const CAREER_PATHS = {
+  // ========== FACTION 1: DEVELOPERS ==========
   FRONTEND: {
     label: "Frontend Engineer",
     shortLabel: "F.E",
-    icon: "frontend",
-    gradient: "from-pink-500 via-blue-500 to-purple-500",
+    icon: "specializations/Developers/FRONTEND.png",
+    gradient: "from-pink-500 to-purple-500",
     iconColor: "text-pink-500",
     textGradient: "from-pink-500 to-purple-500",
     description: "Build user interfaces and web experiences using modern frameworks like React, Vue, or Angular.",
+    faction: "Developers",
   },
   BACKEND: {
     label: "Backend Engineer",
     shortLabel: "B.E",
-    icon: "backend",
-    gradient: "from-green-500 via-teal-500 to-blue-500",
-    iconColor: "text-green-500",
-    textGradient: "from-green-500 to-blue-500",
+    icon: "specializations/Developers/BACKEND.png",
+    gradient: "from-pink-500 to-purple-500",
+    iconColor: "text-pink-500",
+    textGradient: "from-pink-500 to-purple-500",
     description: "Design and develop server-side applications, APIs, and database systems.",
+    faction: "Developers",
   },
   FULLSTACK: {
     label: "Fullstack Engineer",
     shortLabel: "F.S",
-    icon: "fullstack",
-    gradient: "from-orange-500 via-red-500 to-pink-500",
-    iconColor: "text-orange-500",
-    textGradient: "from-orange-500 to-pink-500",
+    icon: "specializations/Developers/FULLSTACK.png",
+    gradient: "from-pink-500 to-purple-500",
+    iconColor: "text-pink-500",
+    textGradient: "from-pink-500 to-purple-500",
     description: "Work on both frontend and backend development, handling the complete web application stack.",
+    faction: "Developers",
   },
+
+  // ========== FACTION 2: TESTERS ==========
   SDE_TEST: {
     label: "SDE in Test",
     shortLabel: "SDET",
-    icon: "sdet",
-    gradient: "from-purple-500 via-indigo-500 to-blue-500",
-    iconColor: "text-purple-500",
-    textGradient: "from-purple-500 to-blue-500",
+    icon: "specializations/Testers/SDE_TEST.png",
+    gradient: "from-emerald-500 to-teal-500",
+    iconColor: "text-emerald-500",
+    textGradient: "from-emerald-500 to-teal-500",
     description: "Develop automated testing frameworks and ensure software quality through comprehensive testing.",
+    faction: "Testers",
   },
   QUALITY_ASSURANCE: {
     label: "Quality Assurance",
     shortLabel: "QA",
-    icon: "qa",
-    gradient: "from-emerald-500 via-green-500 to-teal-500",
+    icon: "specializations/Testers/QUALITY_ASSURANCE.png",
+    gradient: "from-emerald-500 to-teal-500",
     iconColor: "text-emerald-500",
     textGradient: "from-emerald-500 to-teal-500",
     description: "Ensure software quality through manual and automated testing processes.",
+    faction: "Testers",
   },
   TEST_AUTOMATION: {
     label: "Test Automation",
     shortLabel: "TA",
-    icon: "test",
-    gradient: "from-red-500 via-orange-500 to-yellow-500",
-    iconColor: "text-red-500",
-    textGradient: "from-red-500 to-yellow-500",
+    icon: "specializations/Testers/TEST_AUTOMATION.png",
+    gradient: "from-emerald-500 to-teal-500",
+    iconColor: "text-emerald-500",
+    textGradient: "from-emerald-500 to-teal-500",
     description: "Create and maintain automated testing suites and frameworks for continuous testing.",
+    faction: "Testers",
   },
+
+  // ========== FACTION 3: INFRASTRUCTURE ==========
   DEVOPS: {
     label: "DevOps Engineer",
     shortLabel: "DevOps",
-    icon: "devops",
-    gradient: "from-blue-500 via-cyan-500 to-teal-500",
+    icon: "specializations/Infrastructure/DEVOPS.png",
+    gradient: "from-blue-500 to-cyan-500",
     iconColor: "text-blue-500",
-    textGradient: "from-blue-500 to-teal-500",
+    textGradient: "from-blue-500 to-cyan-500",
     description: "Automate deployment pipelines and manage infrastructure for continuous integration and delivery.",
+    faction: "Infrastructure",
   },
   MLOPS: {
     label: "MLOps Engineer",
     shortLabel: "MLOps",
-    icon: "mlops",
-    gradient: "from-purple-600 via-pink-600 to-red-600",
-    iconColor: "text-purple-600",
-    textGradient: "from-purple-600 to-red-600",
+    icon: "specializations/Infrastructure/MLOPS.png",
+    gradient: "from-blue-500 to-cyan-500",
+    iconColor: "text-blue-500",
+    textGradient: "from-blue-500 to-cyan-500",
     description: "Manage machine learning model deployment, monitoring, and lifecycle in production environments.",
+    faction: "Infrastructure",
   },
   CI_CD: {
     label: "CI/CD Engineer",
     shortLabel: "CI/CD",
-    icon: "cicd",
-    gradient: "from-green-600 via-blue-600 to-purple-600",
-    iconColor: "text-green-600",
-    textGradient: "from-green-600 to-purple-600",
+    icon: "specializations/Infrastructure/CI_CD.png",
+    gradient: "from-blue-500 to-cyan-500",
+    iconColor: "text-blue-500",
+    textGradient: "from-blue-500 to-cyan-500",
     description: "Design and maintain continuous integration and deployment pipelines for software delivery.",
+    faction: "Infrastructure",
   },
   CLOUD: {
     label: "Cloud Engineer",
     shortLabel: "Cloud",
-    icon: "cloud",
-    gradient: "from-sky-500 via-blue-500 to-indigo-500",
-    iconColor: "text-sky-500",
-    textGradient: "from-sky-500 to-indigo-500",
+    icon: "specializations/Infrastructure/CLOUD.png",
+    gradient: "from-blue-500 to-cyan-500",
+    iconColor: "text-blue-500",
+    textGradient: "from-blue-500 to-cyan-500",
     description: "Design and manage cloud infrastructure using AWS, Azure, or Google Cloud Platform.",
+    faction: "Infrastructure",
   },
   SITE_RELIABILITY: {
     label: "Site Reliability",
     shortLabel: "SRE",
-    icon: "sre",
-    gradient: "from-orange-600 via-red-600 to-pink-600",
-    iconColor: "text-orange-600",
-    textGradient: "from-orange-600 to-pink-600",
+    icon: "specializations/Infrastructure/SITE_RELIABILITY.png",
+    gradient: "from-blue-500 to-cyan-500",
+    iconColor: "text-blue-500",
+    textGradient: "from-blue-500 to-cyan-500",
     description: "Ensure system reliability, performance, and scalability through engineering practices.",
+    faction: "Infrastructure",
   },
   SOFTWARE_INFRASTRUCTURE: {
     label: "Software Infrastructure",
     shortLabel: "Infra",
-    icon: "infra",
-    gradient: "from-slate-600 via-gray-600 to-zinc-600",
-    iconColor: "text-slate-600",
-    textGradient: "from-slate-600 to-zinc-600",
+    icon: "specializations/Infrastructure/SOFTWARE_INFRASTRUCTURE.png",
+    gradient: "from-blue-500 to-cyan-500",
+    iconColor: "text-blue-500",
+    textGradient: "from-blue-500 to-cyan-500",
     description: "Build and maintain the foundational software systems that support applications and services.",
+    faction: "Infrastructure",
   },
-  SYSTEMS: {
-    label: "Systems Engineer",
-    shortLabel: "Sys",
-    icon: "systems",
-    gradient: "from-indigo-600 via-purple-600 to-pink-600",
-    iconColor: "text-indigo-600",
-    textGradient: "from-indigo-600 to-pink-600",
-    description: "Design and optimize low-level systems, operating systems, and system-level software.",
+  DISTRIBUTED_SYSTEMS: {
+    label: "Distributed Systems",
+    shortLabel: "Dist Sys",
+    icon: "specializations/Infrastructure/DISTRIBUTED_SYSTEMS.png",
+    gradient: "from-blue-500 to-cyan-500",
+    iconColor: "text-blue-500",
+    textGradient: "from-blue-500 to-cyan-500",
+    description: "Design and optimize distributed systems, microservices, and scalable architectures.",
+    faction: "Infrastructure",
   },
+
+  // ========== FACTION 4: SYSTEMS ==========
   EMBEDDED_IOT: {
     label: "Embedded/IoT",
     shortLabel: "IoT",
-    icon: "iot",
-    gradient: "from-teal-600 via-green-600 to-emerald-600",
-    iconColor: "text-teal-600",
-    textGradient: "from-teal-600 to-emerald-600",
+    icon: "specializations/Systems/EMBEDDED_IOT.png",
+    gradient: "from-slate-600 to-zinc-600",
+    iconColor: "text-slate-600",
+    textGradient: "from-slate-600 to-zinc-600",
     description: "Develop software for embedded systems, IoT devices, and hardware-software integration.",
-  },
-  ML_ENGINEERING: {
-    label: "ML Engineer",
-    shortLabel: "ML Eng",
-    icon: "ml",
-    gradient: "from-violet-500 via-purple-500 to-pink-500",
-    iconColor: "text-violet-500",
-    textGradient: "from-violet-500 to-pink-500",
-    description: "Build and deploy machine learning models and AI systems at scale.",
-  },
-  ML_RESEARCH: {
-    label: "ML Research",
-    shortLabel: "ML Res",
-    icon: "research",
-    gradient: "from-blue-600 via-indigo-600 to-purple-600",
-    iconColor: "text-blue-600",
-    textGradient: "from-blue-600 to-purple-600",
-    description: "Conduct research in machine learning, develop new algorithms, and advance AI capabilities.",
-  },
-  DATA_SCIENCE_ANALYSIS: {
-    label: "Data Scientist",
-    shortLabel: "DS",
-    icon: "data",
-    gradient: "from-amber-500 via-orange-500 to-red-500",
-    iconColor: "text-amber-500",
-    textGradient: "from-amber-500 to-red-500",
-    description: "Analyze complex data to extract insights and build predictive models.",
-  },
-  DATA_ENGINEERING: {
-    label: "Data Engineer",
-    shortLabel: "DE",
-    icon: "dataeng",
-    gradient: "from-teal-500 via-cyan-500 to-blue-500",
-    iconColor: "text-teal-500",
-    textGradient: "from-teal-500 to-blue-500",
-    description: "Build and maintain data pipelines and infrastructure for large-scale data processing.",
-  },
-  APPLICATION: {
-    label: "Application Developer",
-    shortLabel: "App Dev",
-    icon: "app",
-    gradient: "from-cyan-500 via-blue-500 to-indigo-500",
-    iconColor: "text-cyan-500",
-    textGradient: "from-cyan-500 to-indigo-500",
-    description: "Develop desktop and web applications for various platforms and use cases.",
-  },
-  ANDROID: {
-    label: "Android Developer",
-    shortLabel: "Android",
-    icon: "android",
-    gradient: "from-green-500 via-emerald-500 to-teal-500",
-    iconColor: "text-green-500",
-    textGradient: "from-green-500 to-teal-500",
-    description: "Develop native Android applications using Kotlin or Java.",
-  },
-  IOS: {
-    label: "iOS Developer",
-    shortLabel: "iOS",
-    icon: "ios",
-    gradient: "from-gray-500 via-slate-500 to-zinc-500",
-    iconColor: "text-gray-500",
-    textGradient: "from-gray-500 to-zinc-500",
-    description: "Build native iOS applications using Swift or Objective-C.",
-  },
-  CROSS_PLATFORM_MOBILE: {
-    label: "Cross-Platform Mobile",
-    shortLabel: "X-Mobile",
-    icon: "mobile",
-    gradient: "from-purple-500 via-pink-500 to-rose-500",
-    iconColor: "text-purple-500",
-    textGradient: "from-purple-500 to-rose-500",
-    description: "Develop mobile applications that work across multiple platforms using frameworks like React Native or Flutter.",
-  },
-  WINDOWS: {
-    label: "Windows Developer",
-    shortLabel: "Windows",
-    icon: "windows",
-    gradient: "from-blue-600 via-sky-600 to-cyan-600",
-    iconColor: "text-blue-600",
-    textGradient: "from-blue-600 to-cyan-600",
-    description: "Develop applications specifically for Windows platforms using .NET, C#, or other Windows technologies.",
-  },
-  MACOS: {
-    label: "macOS Developer",
-    shortLabel: "macOS",
-    icon: "macos",
-    gradient: "from-gray-600 via-slate-600 to-zinc-600",
-    iconColor: "text-gray-600",
-    textGradient: "from-gray-600 to-zinc-600",
-    description: "Build native macOS applications using Swift, Objective-C, or other Apple development tools.",
-  },
-  LINUX: {
-    label: "Linux Developer",
-    shortLabel: "Linux",
-    icon: "linux",
-    gradient: "from-orange-600 via-red-600 to-pink-600",
-    iconColor: "text-orange-600",
-    textGradient: "from-orange-600 to-pink-600",
-    description: "Develop applications and systems for Linux distributions and open-source environments.",
-  },
-  CROSS_PLATFORM_PC: {
-    label: "Cross-Platform PC",
-    shortLabel: "X-PC",
-    icon: "pc",
-    gradient: "from-emerald-600 via-teal-600 to-cyan-600",
-    iconColor: "text-emerald-600",
-    textGradient: "from-emerald-600 to-cyan-600",
-    description: "Create desktop applications that run across multiple operating systems using frameworks like Electron or Qt.",
+    faction: "Systems",
   },
   COMPUTER_SYSTEMS: {
     label: "Computer Systems",
     shortLabel: "Comp Sys",
-    icon: "computer",
-    gradient: "from-slate-700 via-gray-700 to-zinc-700",
-    iconColor: "text-slate-700",
-    textGradient: "from-slate-700 to-zinc-700",
+    icon: "specializations/Systems/COMPUTER_SYSTEMS.png",
+    gradient: "from-slate-600 to-zinc-600",
+    iconColor: "text-slate-600",
+    textGradient: "from-slate-600 to-zinc-600",
     description: "Work on computer architecture, system design, and low-level system programming.",
+    faction: "Systems",
   },
   COMPILERS: {
     label: "Compiler Engineer",
     shortLabel: "Compiler",
-    icon: "compiler",
-    gradient: "from-violet-600 via-indigo-600 to-blue-600",
-    iconColor: "text-violet-600",
-    textGradient: "from-violet-600 to-blue-600",
+    icon: "specializations/Systems/COMPILERS.png",
+    gradient: "from-slate-600 to-zinc-600",
+    iconColor: "text-slate-600",
+    textGradient: "from-slate-600 to-zinc-600",
     description: "Design and develop compilers, interpreters, and programming language tools.",
+    faction: "Systems",
+  },
+
+  // ========== FACTION 5: AI/ML ==========
+  ML_ENGINEERING: {
+    label: "ML Engineer",
+    shortLabel: "ML Eng",
+    icon: "specializations/AIML/ML_ENGINEERING.png",
+    gradient: "from-violet-500 to-pink-500",
+    iconColor: "text-violet-500",
+    textGradient: "from-violet-500 to-pink-500",
+    description: "Build and deploy machine learning models and AI systems at scale.",
+    faction: "AI/ML",
+  },
+  ML_RESEARCH: {
+    label: "ML Research",
+    shortLabel: "ML Res",
+    icon: "specializations/AIML/ML_RESEARCH.png",
+    gradient: "from-violet-500 to-pink-500",
+    iconColor: "text-violet-500",
+    textGradient: "from-violet-500 to-pink-500",
+    description: "Conduct research in machine learning, develop new algorithms, and advance AI capabilities.",
+    faction: "AI/ML",
+  },
+  DATA_SCIENCE_ANALYSIS: {
+    label: "Data Scientist",
+    shortLabel: "DS",
+    icon: "specializations/AIML/DATA_SCIENCE_ANALYSIS.png",
+    gradient: "from-violet-500 to-pink-500",
+    iconColor: "text-violet-500",
+    textGradient: "from-violet-500 to-pink-500",
+    description: "Analyze complex data to extract insights and build predictive models.",
+    faction: "AI/ML",
+  },
+  DATA_ENGINEERING: {
+    label: "Data Engineer",
+    shortLabel: "DE",
+    icon: "specializations/AIML/DATA_ENGINEERING.png",
+    gradient: "from-violet-500 to-pink-500",
+    iconColor: "text-violet-500",
+    textGradient: "from-violet-500 to-pink-500",
+    description: "Build and maintain data pipelines and infrastructure for large-scale data processing.",
+    faction: "AI/ML",
+  },
+
+  // ========== FACTION 6: MOBILE DEV ==========
+  ANDROID: {
+    label: "Android Developer",
+    shortLabel: "Android",
+    icon: "specializations/Mobile/ANDROID.png",
+    gradient: "from-green-500 to-teal-500",
+    iconColor: "text-green-500",
+    textGradient: "from-green-500 to-teal-500",
+    description: "Develop native Android applications using Kotlin or Java.",
+    faction: "Mobile Dev",
+  },
+  IOS: {
+    label: "iOS Developer",
+    shortLabel: "iOS",
+    icon: "specializations/Mobile/IOS.png",
+    gradient: "from-green-500 to-teal-500",
+    iconColor: "text-green-500",
+    textGradient: "from-green-500 to-teal-500",
+    description: "Build native iOS applications using Swift or Objective-C.",
+    faction: "Mobile Dev",
+  },
+  CROSS_PLATFORM_MOBILE: {
+    label: "Cross-Platform Mobile",
+    shortLabel: "X-Mobile",
+    icon: "specializations/Mobile/CROSS_PLATFORM_MOBILE.png",
+    gradient: "from-green-500 to-teal-500",
+    iconColor: "text-green-500",
+    textGradient: "from-green-500 to-teal-500",
+    description: "Develop mobile applications that work across multiple platforms using frameworks like React Native or Flutter.",
+    faction: "Mobile Dev",
+  },
+
+  // ========== FACTION 7: PC DEV ==========
+  WINDOWS: {
+    label: "Windows Developer",
+    shortLabel: "Windows",
+    icon: "specializations/PC/WINDOWS.png",
+    gradient: "from-amber-500 to-orange-600",
+    iconColor: "text-amber-500",
+    textGradient: "from-amber-500 to-orange-600",
+    description: "Develop applications specifically for Windows platforms using .NET, C#, or other Windows technologies.",
+    faction: "PC Dev",
+  },
+  MACOS: {
+    label: "macOS Developer",
+    shortLabel: "macOS",
+    icon: "specializations/PC/MACOS.png",
+    gradient: "from-amber-500 to-orange-600",
+    iconColor: "text-amber-500",
+    textGradient: "from-amber-500 to-orange-600",
+    description: "Build native macOS applications using Swift, Objective-C, or other Apple development tools.",
+    faction: "PC Dev",
+  },
+  LINUX: {
+    label: "Linux Developer",
+    shortLabel: "Linux",
+    icon: "specializations/PC/LINUX.png",
+    gradient: "from-amber-500 to-orange-600",
+    iconColor: "text-amber-500",
+    textGradient: "from-amber-500 to-orange-600",
+    description: "Develop applications and systems for Linux distributions and open-source environments.",
+    faction: "PC Dev",
+  },
+  CROSS_PLATFORM_PC: {
+    label: "Cross-Platform PC",
+    shortLabel: "X-PC",
+    icon: "specializations/PC/CROSS_PLATFORM_PC.png",
+    gradient: "from-amber-500 to-orange-600",
+    iconColor: "text-amber-500",
+    textGradient: "from-amber-500 to-orange-600",
+    description: "Create desktop applications that run across multiple operating systems using frameworks like Electron or Qt.",
+    faction: "PC Dev",
   },
   GAME_DEV: {
     label: "Game Developer",
     shortLabel: "Game",
-    icon: "game",
-    gradient: "from-red-500 via-pink-500 to-purple-500",
-    iconColor: "text-red-500",
-    textGradient: "from-red-500 to-purple-500",
+    icon: "specializations/PC/GAME_DEV.png",
+    gradient: "from-amber-500 to-orange-600",
+    iconColor: "text-amber-500",
+    textGradient: "from-amber-500 to-orange-600",
     description: "Create interactive games and entertainment software using engines like Unity or Unreal.",
+    faction: "PC Dev",
   },
-  APPLICATION_SECURITY: {
-    label: "App Security",
-    shortLabel: "AppSec",
-    icon: "security",
-    gradient: "from-red-600 via-orange-600 to-yellow-600",
-    iconColor: "text-red-600",
-    textGradient: "from-red-600 to-yellow-600",
-    description: "Secure applications by identifying vulnerabilities and implementing security measures.",
-  },
-  PLATFORM_SECURITY: {
-    label: "Platform Security",
-    shortLabel: "PlatSec",
-    icon: "platform",
-    gradient: "from-red-700 via-pink-700 to-purple-700",
-    iconColor: "text-red-700",
-    textGradient: "from-red-700 to-purple-700",
-    description: "Secure entire platforms and infrastructure against threats and vulnerabilities.",
-  },
-  DEVSECOPS: {
-    label: "DevSecOps",
-    shortLabel: "DevSec",
-    icon: "devsecops",
-    gradient: "from-orange-700 via-red-700 to-pink-700",
-    iconColor: "text-orange-700",
-    textGradient: "from-orange-700 to-pink-700",
-    description: "Integrate security practices into DevOps workflows and development processes.",
+
+  // ========== FACTION 8: ALTERNATIVES ==========
+  QUANT_ENGINEERING: {
+    label: "Quant Engineer",
+    shortLabel: "Quant",
+    icon: "specializations/Alternatives/QUANT_ENGINEER.png",
+    gradient: "from-yellow-500 to-amber-600",
+    iconColor: "text-yellow-500",
+    textGradient: "from-yellow-500 to-amber-600",
+    description: "Develop quantitative models and trading systems for financial markets and algorithmic trading.",
+    faction: "Alternatives",
   },
   UI_UX: {
     label: "UI/UX Designer",
     shortLabel: "UI/UX",
-    icon: "design",
-    gradient: "from-pink-500 via-rose-500 to-red-500",
-    iconColor: "text-pink-500",
-    textGradient: "from-pink-500 to-red-500",
+    icon: "specializations/Alternatives/UI_UX.png",
+    gradient: "from-yellow-500 to-amber-600",
+    iconColor: "text-yellow-500",
+    textGradient: "from-yellow-500 to-amber-600",
     description: "Design user interfaces and experiences that are both beautiful and functional.",
+    faction: "Alternatives",
   },
   PRODUCT_MANAGEMENT: {
     label: "Product Manager",
     shortLabel: "PM",
-    icon: "product",
-    gradient: "from-yellow-500 via-amber-500 to-orange-500",
+    icon: "specializations/Alternatives/PRODUCT_MANAGEMENT.png",
+    gradient: "from-yellow-500 to-amber-600",
     iconColor: "text-yellow-500",
-    textGradient: "from-yellow-500 to-orange-500",
+    textGradient: "from-yellow-500 to-amber-600",
     description: "Define product strategy and work with engineering teams to build user-focused products.",
+    faction: "Alternatives",
   },
   PRODUCT_ENGINEERING: {
     label: "Product Engineer",
     shortLabel: "PE",
-    icon: "producteng",
-    gradient: "from-amber-600 via-orange-600 to-red-600",
-    iconColor: "text-amber-600",
-    textGradient: "from-amber-600 to-red-600",
+    icon: "specializations/Alternatives/PRODUCT_ENGINEERING.png",
+    gradient: "from-yellow-500 to-amber-600",
+    iconColor: "text-yellow-500",
+    textGradient: "from-yellow-500 to-amber-600",
     description: "Bridge product management and engineering to build scalable, user-centric technical solutions.",
+    faction: "Alternatives",
   },
   TECHNICAL_WRITING: {
     label: "Technical Writer",
     shortLabel: "TW",
-    icon: "writing",
-    gradient: "from-indigo-500 via-blue-500 to-cyan-500",
-    iconColor: "text-indigo-500",
-    textGradient: "from-indigo-500 to-cyan-500",
+    icon: "specializations/Alternatives/TECHNICAL_WRITING.png",
+    gradient: "from-yellow-500 to-amber-600",
+    iconColor: "text-yellow-500",
+    textGradient: "from-yellow-500 to-amber-600",
     description: "Create clear documentation and technical content for developers and users.",
+    faction: "Alternatives",
   },
   OTHER: {
     label: "Other",
     shortLabel: "Other",
-    icon: "other",
-    gradient: "from-gray-500 via-slate-500 to-zinc-500",
-    iconColor: "text-gray-500",
-    textGradient: "from-gray-500 to-zinc-500",
+    icon: "icon.png",
+    gradient: "from-yellow-500 to-amber-600",
+    iconColor: "text-yellow-500",
+    textGradient: "from-yellow-500 to-amber-600",
     description: "Explore other career paths in technology and software development.",
+    faction: "Alternatives",
+  },
+
+  // ========== FACTION 9: SECURITY ==========
+  APPLICATION_SECURITY: {
+    label: "App Security",
+    shortLabel: "AppSec",
+    icon: "specializations/Security/APPLICATION_SECURITY.png",
+    gradient: "from-red-600 to-pink-600",
+    iconColor: "text-red-600",
+    textGradient: "from-red-600 to-pink-600",
+    description: "Secure applications by identifying vulnerabilities and implementing security measures.",
+    faction: "Security",
+  },
+  PLATFORM_SECURITY: {
+    label: "Platform Security",
+    shortLabel: "PlatSec",
+    icon: "specializations/Security/PLATFORM_SECURITY.png",
+    gradient: "from-red-600 to-pink-600",
+    iconColor: "text-red-600",
+    textGradient: "from-red-600 to-pink-600",
+    description: "Secure entire platforms and infrastructure against threats and vulnerabilities.",
+    faction: "Security",
+  },
+  DEVSECOPS: {
+    label: "DevSecOps",
+    shortLabel: "DevSec",
+    icon: "specializations/Security/DEVSECOPS.png",
+    gradient: "from-red-600 to-pink-600",
+    iconColor: "text-red-600",
+    textGradient: "from-red-600 to-pink-600",
+    description: "Integrate security practices into DevOps workflows and development processes.",
+    faction: "Security",
   },
 };
 
@@ -2109,65 +2163,108 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Career Paths Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {Object.entries(CAREER_PATHS).map(([key, path]) => {
-                const isPrimary = localPrimarySpec === key;
-                const isSecondary = localSecondarySpecs.includes(key);
-                const isDisabled = !isPrimary && !isSecondary && localSecondarySpecs.length >= 3 && localPrimarySpec !== "";
+            {/* Career Paths Grid - Grouped by Factions */}
+            <div className="space-y-6">
+              {/* Group paths by faction */}
+              {Object.entries(
+                Object.entries(CAREER_PATHS).reduce((acc, [key, path]) => {
+                  const faction = path.faction || "Other";
+                  if (!acc[faction]) acc[faction] = [];
+                  acc[faction].push([key, path]);
+                  return acc;
+                }, {} as Record<string, Array<[string, typeof CAREER_PATHS[keyof typeof CAREER_PATHS]]>>)
+              ).map(([faction, paths]) => {
+                // Get the gradient from the first path in this faction
+                const factionGradient = paths[0][1].gradient;
                 
                 return (
-                  <div
-                    key={key}
-                    className={`p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      isPrimary
-                        ? "border-primary bg-primary/10"
-                        : isSecondary
-                        ? "border-blue-500 bg-blue-500/10"
-                        : isDisabled
-                        ? "border-white/10 opacity-50 cursor-not-allowed"
-                        : "border-white/20 hover:border-white/40"
-                    }`}
-                    onClick={() => {
-                      if (isDisabled) return;
-                      
-                      if (!localPrimarySpec) {
-                        // First selection is always primary
-                        handlePrimarySpecChange(key);
-                      } else if (isPrimary) {
-                        // Allow deselection of primary
-                        setLocalPrimarySpec("");
-                      } else if (isSecondary) {
-                        // Deselect secondary
-                        handleSecondarySpecChange(key);
-                      } else {
-                        // Select as secondary (if we have space)
-                        if (localSecondarySpecs.length < 3) {
-                          handleSecondarySpecChange(key);
-                        }
-                      }
-                    }}
-                  >
-                    <div className="text-center">
-                      <div className={`w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 rounded-full bg-gradient-to-r ${path.gradient} flex items-center justify-center`}>
-                        <span className="text-white text-xs font-bold">{path.shortLabel}</span>
-                      </div>
-                      <h4 className="text-xs sm:text-sm font-medium text-foreground">{path.label}</h4>
-                      <p className="text-xs text-muted-foreground mt-1 hidden sm:block">{path.description}</p>
-                      
-                      {/* Selection Indicators */}
-                      <div className="mt-2 flex justify-center gap-1">
-                        {isPrimary && (
-                          <Badge variant="default" className="text-xs bg-primary">
-                            Primary
-                          </Badge>
-                        )}
-                        {isSecondary && (
-                          <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-600">
-                            Secondary
-                          </Badge>
-                        )}
-                      </div>
+                  <div key={faction} className="space-y-3">
+                    {/* Faction Header */}
+                    <div className={`flex items-center gap-2 pb-2 border-b border-white/20`}>
+                      <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${factionGradient}`}></div>
+                      <h4 className="text-base font-semibold text-foreground">{faction}</h4>
+                      <span className="text-xs text-muted-foreground">({paths.length} paths)</span>
+                    </div>
+                    
+                    {/* Faction Paths Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      {paths.map(([key, path]) => {
+                        const isPrimary = localPrimarySpec === key;
+                        const isSecondary = localSecondarySpecs.includes(key);
+                        const isDisabled = !isPrimary && !isSecondary && localSecondarySpecs.length >= 3 && localPrimarySpec !== "";
+                        
+                        return (
+                          <div
+                            key={key}
+                            className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                              isPrimary
+                                ? "border-primary bg-primary/10 ring-2 ring-primary/50"
+                                : isSecondary
+                                ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/50"
+                                : isDisabled
+                                ? "border-white/10 opacity-50 cursor-not-allowed"
+                                : "border-white/20 hover:border-white/40 hover:bg-white/5"
+                            }`}
+                            onClick={() => {
+                              if (isDisabled) return;
+                              
+                              if (!localPrimarySpec) {
+                                // First selection is always primary
+                                handlePrimarySpecChange(key);
+                              } else if (isPrimary) {
+                                // Allow deselection of primary
+                                setLocalPrimarySpec("");
+                              } else if (isSecondary) {
+                                // Deselect secondary
+                                handleSecondarySpecChange(key);
+                              } else {
+                                // Select as secondary (if we have space)
+                                if (localSecondarySpecs.length < 3) {
+                                  handleSecondarySpecChange(key);
+                                }
+                              }
+                            }}
+                          >
+                            <div className="text-center">
+                              <div className={`w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 rounded-xl bg-gradient-to-br ${path.gradient} flex items-center justify-center p-2 shadow-lg`}>
+                                <img 
+                                  src={`/${path.icon}`} 
+                                  alt={path.label}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    // Fallback to shortLabel if image doesn't exist
+                                    e.currentTarget.style.display = 'none';
+                                    const parent = e.currentTarget.parentElement;
+                                    if (parent) {
+                                      const span = document.createElement('span');
+                                      span.className = 'text-white text-xs font-bold';
+                                      span.textContent = path.shortLabel;
+                                      parent.appendChild(span);
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <h4 className="text-xs font-medium text-foreground mb-1">{path.label}</h4>
+                              
+                              {/* Selection Indicators */}
+                              {(isPrimary || isSecondary) && (
+                                <div className="flex justify-center">
+                                  {isPrimary && (
+                                    <Badge variant="default" className="text-xs bg-primary px-2 py-0.5">
+                                      Primary
+                                    </Badge>
+                                  )}
+                                  {isSecondary && (
+                                    <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-600 px-2 py-0.5">
+                                      Secondary
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
