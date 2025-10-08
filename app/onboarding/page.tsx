@@ -94,7 +94,7 @@ const steps = [
     title: "General Info",
     icon: "career",
     color: "from-purple-500 to-pink-500",
-  },
+  }
 ];
 
 const platforms = [
@@ -773,11 +773,75 @@ export default function Page() {
   });
   const router = useRouter();
   const { data: session } = useSession();
-  const githubUsername = session?.user?.login || "";
-  const linkedinConnected = Boolean((session as any)?.user?.linkedinId);
+  
+  // Get GitHub username from session or localStorage
+  const sessionGithubUsername = session?.user?.login || "";
+  const storedGithubData = localStorage.getItem("githubData");
+  const storedGithubUsername = storedGithubData ? JSON.parse(storedGithubData).login : "";
+  const githubUsername = sessionGithubUsername || storedGithubUsername;
+  
+  // Check both session and localStorage for connection status
+  const githubConnected = Boolean(githubUsername) || Boolean(localStorage.getItem("githubData"));
+  const linkedinConnected = Boolean((session as any)?.user?.linkedinId) || Boolean(localStorage.getItem("linkedinData"));
+
+  // Store account data in localStorage when session changes
+  useEffect(() => {
+    if (session?.user) {
+      const user = session.user as any;
+      
+      // Store GitHub data
+      if (user.id && user.login) {
+        const githubData = {
+          id: user.id,
+          login: user.login,
+          avatar_url: user.avatar_url,
+          bio: user.bio,
+          followers: user.followers,
+          following: user.following,
+          public_repos: user.public_repos,
+          company: user.company,
+          location: user.location,
+          blog: user.blog,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          organization: user.organization,
+          hireable: user.hireable,
+        };
+        localStorage.setItem("githubData", JSON.stringify(githubData));
+        
+        // Also store in server-side cookies for persistence
+        fetch('/api/auth/link-accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: 'github', data: githubData })
+        }).catch(console.error);
+      }
+      
+      // Store LinkedIn data
+      if (user.linkedinId) {
+        const linkedinData = {
+          linkedinId: user.linkedinId,
+          linkedinName: user.linkedinName,
+          linkedinImage: user.linkedinImage,
+        };
+        localStorage.setItem("linkedinData", JSON.stringify(linkedinData));
+        
+        // Also store in server-side cookies for persistence
+        fetch('/api/auth/link-accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: 'linkedin', data: linkedinData })
+        }).catch(console.error);
+      }
+    }
+  }, [session]);
+
 
   const handleLogin = async () => {
     try {
+      // Store current LinkedIn data before GitHub login
+      const currentLinkedInData = localStorage.getItem("linkedinData");
+      
       const result = await signIn("github", {
         callbackUrl: "/onboarding?step=2",
         redirect: false, // Let NextAuth handle the redirect
@@ -800,6 +864,11 @@ export default function Page() {
           }
         }
 
+        // Restore LinkedIn data after GitHub login
+        if (currentLinkedInData) {
+          localStorage.setItem("linkedinData", currentLinkedInData);
+        }
+
         // Now manually redirect
         window.location.href = result.url;
       }
@@ -811,6 +880,9 @@ export default function Page() {
 
   const handleLinkedInLogin = async () => {
     try {
+      // Store current GitHub data before LinkedIn login
+      const currentGitHubData = localStorage.getItem("githubData");
+      
       const result = await signIn("linkedin", {
         callbackUrl: "/onboarding?step=5",
         redirect: false,
@@ -819,9 +891,15 @@ export default function Page() {
       if (result?.error) {
         console.error("LinkedIn login failed:", result.error);
         alert("LinkedIn login failed. Please try again.");
+        return;
       }
 
       if (result?.ok && result.url) {
+        // Restore GitHub data after LinkedIn login
+        if (currentGitHubData) {
+          localStorage.setItem("githubData", currentGitHubData);
+        }
+        
         window.location.href = result.url;
       }
     } catch (error) {
@@ -831,6 +909,32 @@ export default function Page() {
   };
 
 
+
+  // Load account data from server on mount
+  useEffect(() => {
+    const loadAccountData = async () => {
+      try {
+        const response = await fetch('/api/auth/link-accounts');
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Store GitHub data if available
+          if (data.github) {
+            localStorage.setItem("githubData", JSON.stringify(data.github));
+          }
+          
+          // Store LinkedIn data if available
+          if (data.linkedin) {
+            localStorage.setItem("linkedinData", JSON.stringify(data.linkedin));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load account data:', error);
+      }
+    };
+    
+    loadAccountData();
+  }, []);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -972,10 +1076,10 @@ export default function Page() {
   );
 
   useEffect(() => {
-    if (githubUsername && !completedSteps.includes("github")) {
+    if (githubConnected && !completedSteps.includes("github")) {
       markStepComplete("github");
     }
-  }, [githubUsername, completedSteps, markStepComplete]);
+  }, [githubConnected, completedSteps, markStepComplete]);
 
   // Auto-complete LinkedIn when connected via OAuth
   useEffect(() => {
@@ -1247,14 +1351,14 @@ export default function Page() {
           <div className="space-y-4">
             {/* Sign in button */}
             <div className="space-y-3">
-              {githubUsername ? (
+              {githubConnected ? (
                 <Button
                   className="w-full h-12 text-base cursor-default font-semibold bg-green-600 text-white rounded-xl transition-all duration-200"
                   size="lg"
                   disabled
                 >
                   <CheckCircle className="w-5 h-5 mr-2" />
-                  Successfully Signed in @{githubUsername}
+                  GitHub Connected @{githubUsername}
                 </Button>
               ) : (
                 <Button
@@ -1899,7 +2003,7 @@ export default function Page() {
                 )}
 
                 <p className="text-xs text-gray-500 text-center">
-                  Connecting LinkedIn confirms you have a LinkedIn account
+                  Connecting LinkedIn confirms you have a LinkedIn account. Your GitHub connection will be preserved.
                 </p>
               </div>
 
