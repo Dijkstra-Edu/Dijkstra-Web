@@ -1108,8 +1108,8 @@ export default function Page() {
 
   // Step Indicator Component with clickable steps
   const StepIndicator = () => (
-    <div className="flex items-center justify-center mb-6">
-      <div className="flex items-center space-x-2">
+    <div className="flex items-center justify-center mb-4 sm:mb-6 px-4">
+      <div className="flex items-center justify-between w-full max-w-md sm:max-w-lg">
         {steps.slice(1).map((step, index) => {
           const Icon = typeof step.icon === "string" ? null : step.icon;
           const isCompleted = completedSteps.includes(step.id);
@@ -1121,7 +1121,7 @@ export default function Page() {
                 <button
                   onClick={() => goToStep(index + 1)}
                   className={`
-                    w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200 cursor-pointer hover:scale-105
+                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200 cursor-pointer hover:scale-105
                     ${
                       isCompleted
                         ? "bg-green-500 border-green-500 text-white"
@@ -1132,19 +1132,19 @@ export default function Page() {
                   `}
                 >
                   {isCompleted ? (
-                    <CheckCircle className="w-5 h-5" />
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : Icon ? (
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
                     <CustomIcon
                       iconType={step.icon as string}
-                      className="w-5 h-5"
+                      className="w-4 h-4 sm:w-5 sm:h-5"
                     />
                   )}
                 </button>
                 <span
                   className={`
-                    mt-1 text-xs font-medium cursor-pointer
+                    mt-1 text-xs font-medium cursor-pointer text-center leading-tight
                     ${
                       isCompleted || isCurrent
                         ? "text-gray-900 dark:text-white"
@@ -1159,7 +1159,7 @@ export default function Page() {
               {index < steps.slice(1).length - 1 && (
                 <div
                   className={`
-                    w-12 h-0.5 mx-3 transition-all duration-200
+                    flex-1 h-0.5 mx-2 sm:mx-3 transition-all duration-200
                     ${
                       completedSteps.includes(steps[index + 2].id)
                         ? "bg-green-500"
@@ -1194,7 +1194,7 @@ export default function Page() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-4xl font-bold text-foreground"
+          className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground"
         >
           Welcome to Dijkstra
         </motion.h1>
@@ -1204,7 +1204,7 @@ export default function Page() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-lg text-muted-foreground max-w-2xl mx-auto"
+          className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4"
         >
           Let's get you set up with all the essential tools for your coding
           journey
@@ -1271,7 +1271,7 @@ export default function Page() {
           transition={{ delay: 1.2, duration: 0.6 }}
           className="space-y-4"
         >
-          <p className="text-muted-foreground max-w-lg mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto px-4">
             We'll guide you through setting up GitHub, Git, VS Code, Discord,
             LeetCode, and LinkedIn - everything you need to start your
             development journey.
@@ -1287,11 +1287,11 @@ export default function Page() {
         >
           <Button
             onClick={handleGetStarted}
-            className="px-8 py-6 cursor-pointer text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-200"
+            className="px-6 sm:px-8 py-4 sm:py-6 cursor-pointer text-base sm:text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-200"
             size="lg"
           >
             Get Started
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
           </Button>
         </motion.div>
 
@@ -1317,7 +1317,7 @@ export default function Page() {
       <StepIndicator />
 
       {/* Header Section */}
-      <div className="text-center space-y-4 pt-24">
+      <div className="text-center space-y-4 pt-12 sm:pt-16 lg:pt-24">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1333,8 +1333,8 @@ export default function Page() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="space-y-2"
         >
-          <h2 className="text-2xl font-bold text-foreground">Connect GitHub</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Connect GitHub</h2>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
             Connect your GitHub account to get started with your coding journey
           </p>
         </motion.div>
@@ -1441,7 +1441,7 @@ export default function Page() {
       <StepIndicator />
 
       {/* Header Section */}
-      <div className="text-center space-y-4 pt-24">
+      <div className="text-center space-y-4 pt-12 sm:pt-16 lg:pt-24">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1456,36 +1456,36 @@ export default function Page() {
         </motion.div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-foreground">Setup Git</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Setup Git</h2>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
             Ensure Git is properly configured on your system
           </p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-sm mx-auto space-y-4">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+      <div className="max-w-sm mx-auto space-y-4 px-4 sm:px-0">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
           <div className="space-y-4">
             <div>
               <p className="font-medium mb-3 text-gray-900 dark:text-white">
                 Have you set up Git?
               </p>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                 <Button
                   variant={state.gitSetup === true ? "default" : "outline"}
                   onClick={() => {
                     updateState({ gitSetup: true });
                     markStepComplete("git");
                   }}
-                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 h-10 sm:h-9"
                 >
                   Yes
                 </Button>
                 <Button
                   variant={state.gitSetup === false ? "default" : "outline"}
                   onClick={() => updateState({ gitSetup: false })}
-                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 h-10 sm:h-9"
                 >
                   No
                 </Button>
@@ -1576,7 +1576,7 @@ export default function Page() {
       <StepIndicator />
 
       {/* Header Section */}
-      <div className="text-center space-y-4 pt-24">
+      <div className="text-center space-y-4 pt-12 sm:pt-16 lg:pt-24">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1591,36 +1591,36 @@ export default function Page() {
         </motion.div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-foreground">Setup VS Code</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Setup VS Code</h2>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
             Set up your development environment
           </p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-sm mx-auto space-y-4">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+      <div className="max-w-sm mx-auto space-y-4 px-4 sm:px-0">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
           <div className="space-y-4">
             <div>
               <p className="font-medium mb-3 text-gray-900 dark:text-white">
                 Are you familiar with the CLI?
               </p>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                 <Button
                   variant={state.cliKnowledge === true ? "default" : "outline"}
                   onClick={() => {
                     updateState({ cliKnowledge: true });
                     markStepComplete("vscode");
                   }}
-                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 h-10 sm:h-9"
                 >
                   Yes
                 </Button>
                 <Button
                   variant={state.cliKnowledge === false ? "default" : "outline"}
                   onClick={() => updateState({ cliKnowledge: false })}
-                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 h-10 sm:h-9"
                 >
                   No
                 </Button>
@@ -1653,7 +1653,7 @@ export default function Page() {
       <StepIndicator />
 
       {/* Header Section */}
-      <div className="text-center space-y-4 pt-24">
+      <div className="text-center space-y-4 pt-12 sm:pt-16 lg:pt-24">
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1664,29 +1664,29 @@ export default function Page() {
         </motion.div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-foreground">Join Discord</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Join Discord</h2>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
             Join our community for support and collaboration
           </p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-sm mx-auto space-y-4">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+      <div className="max-w-sm mx-auto space-y-4 px-4 sm:px-0">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
           <div className="space-y-4">
             <div>
               <p className="font-medium mb-3 text-gray-900 dark:text-white">
                 Have you joined our Discord?
               </p>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                 <Button
                   variant={state.discordJoined === true ? "default" : "outline"}
                   onClick={() => {
                     updateState({ discordJoined: true });
                     markStepComplete("discord");
                   }}
-                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 h-10 sm:h-9"
                 >
                   Yes
                 </Button>
@@ -1695,7 +1695,7 @@ export default function Page() {
                     state.discordJoined === false ? "default" : "outline"
                   }
                   onClick={() => updateState({ discordJoined: false })}
-                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20"
+                  className="flex-1 bg-white/10 border-white/20 hover:bg-white/20 h-10 sm:h-9"
                 >
                   No
                 </Button>
@@ -1847,7 +1847,7 @@ export default function Page() {
         <StepIndicator />
 
         {/* Header Section */}
-        <div className="text-center space-y-4 pt-24">
+        <div className="text-center space-y-4 pt-12 sm:pt-16 lg:pt-24">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1862,10 +1862,10 @@ export default function Page() {
           </motion.div>
 
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
               Setup LeetCode
             </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
               Practice coding problems and improve your skills
             </p>
           </div>
@@ -1882,13 +1882,13 @@ export default function Page() {
                 >
                   What's your LeetCode handle?
                 </Label>
-                <div className="flex space-x-2 items-center">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
                   <Input
                     id="leetcode-handle"
                     placeholder="Enter your LeetCode username"
                     value={localLeetCodeHandle}
                     onChange={(e) => setLocalLeetCodeHandle(e.target.value)}
-                    className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-gray-900 dark:text-white placeholder:text-gray-500 text-sm"
+                    className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-gray-900 dark:text-white placeholder:text-gray-500 text-sm h-10 sm:h-9"
                   />
                   {localLeetCodeHandle.trim() !== "" && (
                     !isValidLeetCodeUsername(localLeetCodeHandle) ? (
@@ -1904,7 +1904,7 @@ export default function Page() {
                   <Button
                     onClick={handleSave}
                     disabled={!(isValidLeetCodeUsername(localLeetCodeHandle) && exists === true)}
-                    className="px-4"
+                    className="px-4 h-10 sm:h-9 w-full sm:w-auto"
                     size="sm"
                   >
                     Save
@@ -1942,7 +1942,7 @@ export default function Page() {
         <StepIndicator />
 
         {/* Header Section */}
-        <div className="text-center space-y-4 pt-24">
+        <div className="text-center space-y-4 pt-12 sm:pt-16 lg:pt-24">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1953,10 +1953,10 @@ export default function Page() {
           </motion.div>
 
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
               Setup LinkedIn
             </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
               Build your professional network
             </p>
           </div>
@@ -2068,7 +2068,7 @@ export default function Page() {
         <StepIndicator />
 
         {/* Header Section */}
-        <div className="text-center space-y-4 pt-24">
+        <div className="text-center space-y-4 pt-12 sm:pt-16 lg:pt-24">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -2079,17 +2079,17 @@ export default function Page() {
           </motion.div>
 
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">Career Planning</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Career Planning</h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
               Let's plan your career path and set your goals
             </p>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-4xl mx-auto space-y-6 px-4">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-4">
           {/* Specializations */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
             <h3 className="text-lg font-semibold mb-4 text-foreground">Career Specializations</h3>
             <p className="text-sm text-muted-foreground mb-6">Choose your primary specialization and 3 secondary areas of interest</p>
             
@@ -2110,7 +2110,7 @@ export default function Page() {
             </div>
 
             {/* Career Paths Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {Object.entries(CAREER_PATHS).map(([key, path]) => {
                 const isPrimary = localPrimarySpec === key;
                 const isSecondary = localSecondarySpecs.includes(key);
@@ -2119,7 +2119,7 @@ export default function Page() {
                 return (
                   <div
                     key={key}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    className={`p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all ${
                       isPrimary
                         ? "border-primary bg-primary/10"
                         : isSecondary
@@ -2149,11 +2149,11 @@ export default function Page() {
                     }}
                   >
                     <div className="text-center">
-                      <div className={`w-8 h-8 mx-auto mb-2 rounded-full bg-gradient-to-r ${path.gradient} flex items-center justify-center`}>
+                      <div className={`w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 rounded-full bg-gradient-to-r ${path.gradient} flex items-center justify-center`}>
                         <span className="text-white text-xs font-bold">{path.shortLabel}</span>
                       </div>
-                      <h4 className="text-sm font-medium text-foreground">{path.label}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">{path.description}</p>
+                      <h4 className="text-xs sm:text-sm font-medium text-foreground">{path.label}</h4>
+                      <p className="text-xs text-muted-foreground mt-1 hidden sm:block">{path.description}</p>
                       
                       {/* Selection Indicators */}
                       <div className="mt-2 flex justify-center gap-1">
@@ -2211,8 +2211,8 @@ export default function Page() {
           </div>
 
           {/* Time to Upskill and Expected Salary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
               <h3 className="text-lg font-semibold mb-4 text-foreground">Time to Upskill</h3>
               <p className="text-sm text-muted-foreground mb-4">How much time do you have until you start applying?</p>
               <Select 
@@ -2244,7 +2244,7 @@ export default function Page() {
               )}
             </div>
 
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
               <h3 className="text-lg font-semibold mb-4 text-foreground">Expected Salary</h3>
               <p className="text-sm text-muted-foreground mb-4">What's your target salary range?</p>
               <Select value={localExpectedSalary} onValueChange={setLocalExpectedSalary}>
@@ -2263,7 +2263,7 @@ export default function Page() {
           </div>
 
           {/* Tools Selection */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
             <h3 className="text-lg font-semibold mb-4 text-foreground">Tools & Technologies</h3>
             <p className="text-sm text-muted-foreground mb-4">Select the tools you'd like to upskill in (choose as many as you want)</p>
             
@@ -2328,10 +2328,10 @@ export default function Page() {
           transition={{ delay: 0.5, duration: 0.6 }}
           className="space-y-4"
         >
-          <h2 className="text-3xl font-bold text-foreground">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Congratulations! 🎉
           </h2>
-          <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto px-4">
             You've successfully completed the onboarding process. You're now
             ready to start your coding journey with Dijkstra!
           </p>
@@ -2474,12 +2474,12 @@ export default function Page() {
 
   return (
     <BackgroundPaths title="" showButton={false}>
-      <div className="w-full max-w-6xl h-[85vh] relative">
+      <div className="w-full max-w-6xl h-[85vh] sm:h-[90vh] relative mx-auto px-4 sm:px-6 lg:px-8">
         {/* Semi-transparent background rectangle */}
-        <div className="absolute inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl" />
+        <div className="absolute inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl" />
 
         {/* Scrollable content container */}
-        <div className="relative h-full overflow-y-auto p-8 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent flex items-center justify-center">
+        <div className="relative h-full overflow-y-auto p-4 sm:p-6 lg:p-8 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent flex items-center justify-center">
           {/* Main Content */}
           <div className="w-full flex flex-col">
             <div className="flex-1">{renderStep()}</div>
@@ -2496,17 +2496,17 @@ export default function Page() {
 
             {/* Navigation Buttons - Only show when in onboarding flow */}
             {showOnboarding && currentStep > 0 && currentStep < 8 && (
-              <div className="flex items-center justify-between p-24 border-t border-white/10 mt-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 lg:p-8 border-t border-white/10 mt-6 space-y-4 sm:space-y-0">
                 <Button
                   variant="outline"
                   onClick={prevStep}
-                  className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border-white/20 text-gray-700 dark:text-gray-300 hover:bg-white/20 px-6 py-3 rounded-xl transition-all duration-200"
+                  className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border-white/20 text-gray-700 dark:text-gray-300 hover:bg-white/20 px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 w-full sm:w-auto"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Back
                 </Button>
 
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-2 order-first sm:order-none">
                   <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Step {currentStep} of {steps.length - 1}
                   </div>
@@ -2529,7 +2529,7 @@ export default function Page() {
                 <Button
                   onClick={nextStep}
                   disabled={!canProceed()}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 w-full sm:w-auto"
                 >
                   Next
                   <ChevronRight className="w-4 h-4" />
