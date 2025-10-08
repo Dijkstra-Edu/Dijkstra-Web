@@ -72,6 +72,7 @@ import {
   IconTournament,
   IconDeviceImacHeart,
   IconSitemap,
+  IconChartLine,
 } from "@tabler/icons-react";
 
 const CAREER_PATHS = {
