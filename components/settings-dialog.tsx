@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSettings } from "@/app/SettingsProviderWrapper";
+import { useSettings } from "@/components/providers/SettingsProviderWrapper";
 import {
   Bell,
   Code,

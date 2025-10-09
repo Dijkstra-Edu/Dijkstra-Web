@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import SessionProviderWrapper from "./SessionProviderWrapper";
-import ThemeProviderWrapper from "./ThemeProviderWrapper";
-import { SettingsProvider } from "./SettingsProviderWrapper";
+import SessionProviderWrapper from "../components/providers/SessionProviderWrapper";
+import ThemeProviderWrapper from "../components/providers/ThemeProviderWrapper";
+import { SettingsProvider } from "../components/providers/SettingsProviderWrapper";
+import TanstackProviderWrapper from "@/components/providers/TanstackProviderWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +33,9 @@ export default function RootLayout({
       >
         <ThemeProviderWrapper>
           <SessionProviderWrapper>
-            <SettingsProvider>
-              {children}
-            </SettingsProvider>
+            <TanstackProviderWrapper>
+              <SettingsProvider>{children}</SettingsProvider>
+            </TanstackProviderWrapper>
           </SessionProviderWrapper>
         </ThemeProviderWrapper>
       </body>

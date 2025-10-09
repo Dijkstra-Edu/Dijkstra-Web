@@ -3,9 +3,9 @@
 
 import { ThemeProvider } from 'next-themes';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 
-export default function ThemeProviderWrapper({ children }: { children: React.ReactNode }) {
+export default function ThemeProviderWrapper({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
