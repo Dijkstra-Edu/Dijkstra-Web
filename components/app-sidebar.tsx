@@ -20,6 +20,9 @@ import {
   IconTransformPoint,
   IconFidgetSpinner,
   IconArticle,
+  IconCalendarEvent,
+  IconCode,
+  IconQuestionMark,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -151,7 +154,24 @@ const data = {
       icon: IconSearch,
     },
   ],
-  documents: [
+  challenges: [
+    {
+      name: "Quizzes",
+      url: "/challenges/quizzes",
+      icon: IconQuestionMark,
+    },
+    {
+      name: "Weekly Challenges",
+      url: "/challenges/weekly-challenges",
+      icon: IconCalendarEvent,
+    },
+    {
+      name: "Hackathons",
+      url: "/challenges/hackathons",
+      icon: IconCode,
+    },
+  ],
+  opportunities: [
     {
       name: "Projects Hub",
       url: "/opportunities/projects",
@@ -193,7 +213,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+        <NavDocuments items={data.challenges} title="Challenges" />
+        <NavDocuments items={data.opportunities} title="Opportunities" />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

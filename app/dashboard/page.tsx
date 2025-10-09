@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileData } from "@/components/profile-data";
 import Readme from "@/components/readme";
+import { StudentDashboard } from "@/components/student-dashboard";
 
 export default function Page() {
   const [data, setData] = useState<any[]>([]);
@@ -68,7 +69,7 @@ export default function Page() {
                   <TabsTrigger value="readme">Readme</TabsTrigger>
                   <TabsTrigger value="resume">Resume</TabsTrigger>
                   <TabsTrigger value="cv">CV</TabsTrigger>
-                  <TabsTrigger value="achievments">Achievements</TabsTrigger>
+                  <TabsTrigger disabled value="achievments">Achievements</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="stats" className="space-y-4">
@@ -85,7 +86,9 @@ export default function Page() {
                     <DataTable data={data} />
                   )}
                 </TabsContent>
-                <TabsContent value="portfolio">Make changes to your account here.</TabsContent>
+                <TabsContent value="portfolio">
+                  <StudentDashboard />
+                </TabsContent>
                 <TabsContent value="readme"><Readme /></TabsContent>
                 <TabsContent value="resume">Make changes to your account here.</TabsContent>
                 <TabsContent value="cv">Change your password here.</TabsContent>
