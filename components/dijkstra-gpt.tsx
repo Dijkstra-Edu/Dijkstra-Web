@@ -1,11 +1,3 @@
-/**
- * ============================================
- * DIJKSTRA GPT - COMPLETE CHAT INTERFACE
- * ============================================
- * 
- * A full-featured AI chat interface for computer science learning
- */
-
 "use client";
 
 import React from "react";
@@ -16,14 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
-// Icon library
+// Icon library (removed voice & enhance icons)
 import {
-  Mic,
-  MicOff,
   Paperclip,
-  ImageIcon,
+  Image,
   FileText,
-  Sparkles,
   X,
   ArrowUp,
   Copy,
@@ -70,11 +59,12 @@ type ChatSession = {
 // ============================================
 
 export default function DijkstraGPT() {
+  // ============================================
   // STATE MANAGEMENT
+  // ============================================
+
   const [prompt, setPrompt] = useState<string>("");
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [isEnhanced, setIsEnhanced] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
@@ -82,16 +72,26 @@ export default function DijkstraGPT() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
-  // REFS
+  // ============================================
+  // REFS FOR DOM ELEMENTS
+  // ============================================
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // ============================================
   // COMPUTED VALUES
+  // ============================================
+
   const currentSession = chatSessions.find((session) => session.id === currentSessionId);
   const messages = currentSession?.messages || [];
 
+  // ============================================
   // EFFECTS
+  // ============================================
+
+  // Auto-resize textarea based on content
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -99,49 +99,29 @@ export default function DijkstraGPT() {
     }
   }, [prompt]);
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  // Initialize with a default session on mount
   useEffect(() => {
-    try {
-      const savedSessions = localStorage.getItem("dijkstraGPT_sessions");
-      
-      if (savedSessions) {
-        const sessions = JSON.parse(savedSessions).map((s: ChatSession) => ({
-          ...s,
-          createdAt: new Date(s.createdAt),
-          updatedAt: new Date(s.updatedAt),
-          messages: s.messages.map((m: Message) => ({
-            ...m,
-            timestamp: new Date(m.timestamp),
-          })),
-        }));
-        
-        setChatSessions(sessions);
+    const initialSession: ChatSession = {
+      id: Date.now().toString(),
+      title: "New Chat",
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-        if (sessions.length > 0) {
-          setCurrentSessionId(sessions[0].id);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load chat history:", error);
-      toast.error("Failed to load chat history");
-    }
+    setChatSessions([initialSession]);
+    setCurrentSessionId(initialSession.id);
   }, []);
 
-  useEffect(() => {
-    if (chatSessions.length > 0) {
-      try {
-        localStorage.setItem("dijkstraGPT_sessions", JSON.stringify(chatSessions));
-      } catch (error) {
-        console.error("Failed to save chat history:", error);
-        toast.error("Failed to save chat history");
-      }
-    }
-  }, [chatSessions]);
+  // ============================================
+  // SESSION MANAGEMENT FUNCTIONS
+  // ============================================
 
-  // SESSION MANAGEMENT
   const createNewChat = (): void => {
     const newSession: ChatSession = {
       id: Date.now().toString(),
@@ -155,6 +135,7 @@ export default function DijkstraGPT() {
     setCurrentSessionId(newSession.id);
     setPrompt("");
     setUploadedFiles([]);
+    toast.success("New chat created");
   };
 
   const updateSessionTitle = (sessionId: string, firstMessage: string): void => {
@@ -183,6 +164,20 @@ export default function DijkstraGPT() {
     toast.success("Chat deleted");
   };
 
+  const downloadSession = (session: ChatSession): void => {
+    const dataStr = JSON.stringify(session, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${session.title}_${Date.now()}.json`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+    toast.success("Chat downloaded");
+  };
+
   const addMessage = (message: Message): void => {
     setChatSessions((prev) =>
       prev.map((session) => {
@@ -198,10 +193,13 @@ export default function DijkstraGPT() {
     );
   };
 
-  // FILE HANDLING
+  // ============================================
+  // FILE HANDLING FUNCTIONS
+  // ============================================
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const files = Array.from(event.target.files || []);
-    
+
     const validTypes = [
       "application/pdf",
       "image/jpeg",
@@ -213,9 +211,8 @@ export default function DijkstraGPT() {
     ];
 
     const validFiles = files.filter((file) => {
-      const isValid = validTypes.includes(file.type) || 
-                      file.name.match(/\.(jpg|jpeg|png|pdf|txt|doc|docx)$/i);
-      
+      const isValid = validTypes.includes(file.type) || file.name.match(/\.(jpg|jpeg|png|pdf|txt|doc|docx)$/i);
+
       if (!isValid) {
         toast.error(`File type not supported: ${file.name}`);
       }
@@ -223,7 +220,7 @@ export default function DijkstraGPT() {
     });
 
     setUploadedFiles((prev) => [...prev, ...validFiles]);
-    
+
     if (validFiles.length > 0) {
       toast.success(`${validFiles.length} file(s) uploaded`);
     }
@@ -233,16 +230,104 @@ export default function DijkstraGPT() {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // MESSAGE ACTIONS
+  // ============================================
+  // MESSAGE ACTION FUNCTIONS
+  // ============================================
+
   const copyMessage = async (content: string, messageId: string): Promise<void> => {
     try {
       await navigator.clipboard.writeText(content);
       setCopiedMessageId(messageId);
       toast.success("Copied to clipboard");
-      
+
       setTimeout(() => setCopiedMessageId(null), 2000);
     } catch (error) {
       toast.error("Failed to copy");
+    }
+  };
+
+  // Helper to update assistant message content progressively (streaming)
+  const updateAssistantContent = (sessionId: string | null, messageId: string, newContent: string) => {
+    if (!sessionId) return;
+    setChatSessions((prev) =>
+      prev.map((session) => {
+        if (session.id !== sessionId) return session;
+        return {
+          ...session,
+          messages: session.messages.map((m) => (m.id === messageId ? { ...m, content: newContent } : m)),
+          updatedAt: new Date(),
+        };
+      })
+    );
+  };
+
+  // Try to handle streaming from callGemini. If callGemini returns a Response-like object with a body stream,
+  // we read it. Otherwise, if it returns a string, we simulate a typewriter streaming effect.
+  const streamGeminiResponse = async (promptText: string, sessionId: string, assistantMessageId: string) => {
+    try {
+      const res: any = await callGemini(promptText);
+
+      // If it's a fetch Response-like object with a ReadableStream body
+      if (res && res.body && typeof res.body.getReader === "function") {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+        let accumulated = "";
+
+        while (!done) {
+          // eslint-disable-next-line no-await-in-loop
+          const { value, done: d } = await reader.read();
+          if (value) {
+            accumulated += decoder.decode(value, { stream: true });
+            updateAssistantContent(sessionId, assistantMessageId, accumulated);
+          }
+          done = !!d;
+        }
+
+        // finalize (in case any leftovers)
+        updateAssistantContent(sessionId, assistantMessageId, accumulated);
+        return accumulated;
+      }
+
+      // If callGemini returned a string, simulate typing
+      if (typeof res === "string") {
+        const full = res;
+        let i = 0;
+        // A small delay between characters produces a smooth typing effect. Adjust as needed.
+        while (i <= full.length) {
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((r) => setTimeout(r, 12));
+          i += Math.ceil(Math.random() * 3); // append a few chars at a time to feel natural
+          const chunk = full.slice(0, i);
+          updateAssistantContent(sessionId, assistantMessageId, chunk);
+        }
+
+        updateAssistantContent(sessionId, assistantMessageId, full);
+        return full;
+      }
+
+      // If the response shape is unknown but contains text field
+      if (res && typeof res === "object" && typeof res.text === "string") {
+        const text = res.text;
+        let i = 0;
+        while (i <= text.length) {
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((r) => setTimeout(r, 12));
+          i += Math.ceil(Math.random() * 4);
+          updateAssistantContent(sessionId, assistantMessageId, text.slice(0, i));
+        }
+        updateAssistantContent(sessionId, assistantMessageId, text);
+        return text;
+      }
+
+      // Unknown shape -> convert to string and show
+      const fallback = String(res);
+      updateAssistantContent(sessionId, assistantMessageId, fallback);
+      return fallback;
+    } catch (error) {
+      const errStr = "⚠ Error: " + String(error);
+      updateAssistantContent(sessionId, assistantMessageId, errStr);
+      throw error;
     }
   };
 
@@ -250,16 +335,18 @@ export default function DijkstraGPT() {
     setIsLoading(true);
 
     try {
-      const text = await callGemini(userMessage.content);
-      
-      const newMessage: Message = {
-        id: Date.now().toString(),
+      // create placeholder assistant message
+      const assistantMessage: Message = {
+        id: (Date.now() + 2).toString(),
         role: "assistant",
-        content: text,
+        content: "",
         timestamp: new Date(),
       };
 
-      addMessage(newMessage);
+      addMessage(assistantMessage);
+
+      await streamGeminiResponse(userMessage.content, currentSessionId!, assistantMessage.id);
+
       toast.success("Response regenerated");
     } catch (error) {
       toast.error("Failed to regenerate: " + String(error));
@@ -285,39 +372,9 @@ export default function DijkstraGPT() {
     }
   };
 
-  const downloadChat = (): void => {
-    if (!currentSession) return;
-
-    const dataStr = JSON.stringify(currentSession, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${currentSession.title}_${Date.now()}.json`;
-    link.click();
-    
-    URL.revokeObjectURL(url);
-    toast.success("Chat downloaded");
-  };
-
-  // INPUT HANDLING
-  const toggleRecording = (): void => {
-    setIsRecording(!isRecording);
-    toast.info(isRecording ? "Recording stopped" : "Recording started");
-  };
-
-  const enhancePrompt = (): void => {
-    setIsEnhanced(!isEnhanced);
-    
-    if (!isEnhanced) {
-      setPrompt((prev) => `Enhanced: ${prev}`);
-      toast.info("Prompt enhanced");
-    } else {
-      setPrompt((prev) => prev.replace("Enhanced: ", ""));
-      toast.info("Enhancement removed");
-    }
-  };
+  // ============================================
+  // INPUT HANDLING FUNCTIONS
+  // ============================================
 
   const handleSubmit = async (): Promise<void> => {
     if (!prompt.trim() && uploadedFiles.length === 0) return;
@@ -341,35 +398,34 @@ export default function DijkstraGPT() {
 
     setPrompt("");
     setUploadedFiles([]);
-    setIsEnhanced(false);
     setIsLoading(true);
 
     if (currentSession && currentSession.messages.length === 0) {
       updateSessionTitle(currentSessionId!, currentPrompt);
     }
 
+    // Create an assistant placeholder message (will be updated progressively)
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+
+    addMessage(assistantMessage);
+
     try {
-      const text = await callGemini(currentPrompt);
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: text,
-        timestamp: new Date(),
-      };
-
-      addMessage(assistantMessage);
-      
+      await streamGeminiResponse(currentPrompt, currentSessionId!, assistantMessage.id);
     } catch (error) {
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: (Date.now() + 3).toString(),
         role: "assistant",
         content: "⚠ Error: " + String(error),
         timestamp: new Date(),
       };
-      addMessage(errorMessage);
+      // replace the placeholder content with the error
+      updateAssistantContent(currentSessionId, assistantMessage.id, errorMessage.content);
       toast.error("Failed to get response");
-      
     } finally {
       setIsLoading(false);
     }
@@ -378,17 +434,18 @@ export default function DijkstraGPT() {
   const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      handleSubmit();
+      void handleSubmit();
     }
   };
 
+  // ============================================
   // SEARCH & FILTER
+  // ============================================
+
   const filteredSessions = chatSessions.filter(
     (session) =>
       session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      session.messages.some((msg) =>
-        msg.content.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      session.messages.some((msg) => msg.content.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const groupedSessions = filteredSessions.reduce((groups, session) => {
@@ -400,11 +457,15 @@ export default function DijkstraGPT() {
     return groups;
   }, {} as Record<string, ChatSession[]>);
 
-  // RENDER MESSAGE
+  // ============================================
+  // RENDER MESSAGE FUNCTION
+  // ============================================
+
   const renderMessage = (msg: Message, i: number): React.JSX.Element => {
     const isUser = msg.role === "user";
     const isCopied = copiedMessageId === msg.id;
 
+    // Split content by code blocks (```) and preserve formatting
     const parts = msg.content.split(/```/g);
 
     return (
@@ -417,7 +478,7 @@ export default function DijkstraGPT() {
           }`}
         >
           <div className="p-4">
-            
+            {/* File attachments display for user messages */}
             {isUser && msg.files && msg.files.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {msg.files.map((file, idx) => (
@@ -429,9 +490,11 @@ export default function DijkstraGPT() {
               </div>
             )}
 
+            {/* Message content with code block formatting */}
             <div className="space-y-3">
               {parts.map((part, idx) =>
                 idx % 2 === 1 ? (
+                  // Code block (odd indices)
                   <div
                     key={idx}
                     className="relative bg-gray-900 text-green-400 rounded-lg p-3 font-mono text-sm overflow-x-auto"
@@ -439,6 +502,7 @@ export default function DijkstraGPT() {
                     <pre className="whitespace-pre-wrap">{part.trim()}</pre>
                   </div>
                 ) : (
+                  // Regular text with list formatting (even indices)
                   <div key={idx} className="prose prose-sm dark:prose-invert max-w-none">
                     {part.split("\n").map((line, li) => {
                       if (line.trim().match(/^[-*]\s+/)) {
@@ -463,54 +527,49 @@ export default function DijkstraGPT() {
               )}
             </div>
 
-            <p className="text-xs opacity-70 mt-3">
-              {msg.timestamp.toLocaleTimeString()}
-            </p>
+            {/* Timestamp */}
+            <p className="text-xs opacity-70 mt-3">{msg.timestamp.toLocaleTimeString()}</p>
           </div>
 
+          {/* Action buttons for assistant messages - ICONS ONLY */}
           {!isUser && (
             <div className="flex items-center gap-1 px-4 pb-3 border-t border-border/30 pt-2">
-              
+              {/* Copy button - Icon only */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => copyMessage(msg.content, msg.id)}
-                className="h-8 px-2 text-xs"
+                className="h-8 w-8 p-0"
                 aria-label="Copy message"
               >
-                {isCopied ? (
-                  <Check className="h-3 w-3 mr-1" />
-                ) : (
-                  <Copy className="h-3 w-3 mr-1" />
-                )}
-                {isCopied ? "Copied" : "Copy"}
+                {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
 
+              {/* Regenerate button - Icon only */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
                   const userMsg = messages[i - 1];
                   if (userMsg && userMsg.role === "user") {
-                    regenerateMessage(userMsg);
+                    void regenerateMessage(userMsg);
                   }
                 }}
-                className="h-8 px-2 text-xs"
+                className="h-8 w-8 p-0"
                 aria-label="Regenerate response"
               >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Regenerate
+                <RefreshCw className="h-4 w-4" />
               </Button>
 
+              {/* Share button - Icon only */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => shareMessage(msg.content)}
-                className="h-8 px-2 text-xs"
+                className="h-8 w-8 p-0"
                 aria-label="Share message"
               >
-                <Share2 className="h-3 w-3 mr-1" />
-                Share
+                <Share2 className="h-4 w-4" />
               </Button>
             </div>
           )}
@@ -519,7 +578,10 @@ export default function DijkstraGPT() {
     );
   };
 
+  // ============================================
   // EXAMPLE PROMPTS
+  // ============================================
+
   const examplePrompts = [
     "I'm lost. How do I get started with coding to get a job in tech?",
     "What are the steps I can take to become a Computer Science Engineer?",
@@ -529,38 +591,39 @@ export default function DijkstraGPT() {
     "How do I improve my resume for tech jobs?",
   ];
 
-  // COMPONENT RENDER
+  // ============================================
+  // MAIN COMPONENT RENDER
+  // ============================================
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      
+      {/* ==================== MAIN CHAT AREA ==================== */}
       <div className="flex-1 flex flex-col">
-        
+        {/* Messages Container */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto">
-            
+            {/* Empty state with example prompts */}
             {messages.length === 0 && !isLoading ? (
               <div className="space-y-8 pt-20">
-                
+                {/* Header with logo */}
                 <div className="text-center mb-12">
                   <div className="flex justify-center mb-6">
-                    <img 
-                      src="/icon.png" 
-                      alt="Dijkstra GPT" 
-                      className="h-24 w-24"
-                    />
+                    <img src="/icon.png" alt="Dijkstra GPT" className="h-24 w-24" />
                   </div>
                   <h1 className="text-3xl font-bold mb-3">Your Personal CS Prep Assistant</h1>
                   <p className="text-muted-foreground text-base max-w-2xl mx-auto">
-                    Trained on computer science topics, interview prep, and coding resources to help you 
+                    Trained on computer science topics, interview prep, and coding resources to help you
                     excel in your journey to becoming a Computer Science Engineer.
                   </p>
                 </div>
 
+                {/* Instructions */}
                 <div className="text-center mb-6">
                   <h3 className="text-lg font-semibold mb-2">Get started with these examples</h3>
                   <p className="text-sm text-muted-foreground">Click any prompt to try it out</p>
                 </div>
 
+                {/* Example prompt cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {examplePrompts.map((example, index) => (
                     <button
@@ -571,7 +634,7 @@ export default function DijkstraGPT() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Sparkles className="h-4 w-4" />
+                          <MessageSquare className="h-4 w-4" />
                         </div>
                         <span className="text-sm font-medium leading-relaxed">{example}</span>
                       </div>
@@ -581,16 +644,18 @@ export default function DijkstraGPT() {
               </div>
             ) : (
               <>
+                {/* Render all messages */}
                 {messages.map((m, i) => renderMessage(m, i))}
 
+                {/* Loading indicator */}
                 {isLoading && (
                   <div className="flex justify-start mb-6">
                     <div className="bg-background border border-border/50 p-4 rounded-2xl shadow-lg">
                       <div className="flex items-center space-x-2">
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-foreground rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                         </div>
                         <p className="text-sm text-muted-foreground">Thinking...</p>
                       </div>
@@ -604,18 +669,15 @@ export default function DijkstraGPT() {
           </div>
         </div>
 
+        {/* ==================== INPUT AREA ==================== */}
         <div className="flex-shrink-0 p-6 border-t border-border/50">
           <div className="max-w-4xl mx-auto">
-            
+            {/* Uploaded files preview */}
             {uploadedFiles.length > 0 && (
               <div className="mb-4 p-4 bg-muted/50 rounded-2xl border border-border/50">
                 <div className="flex flex-wrap gap-2">
                   {uploadedFiles.map((file, index) => (
-                    <Badge
-                      key={index}
-                      variant="secondary"
-                      className="flex items-center gap-2 px-3 py-2"
-                    >
+                    <Badge key={index} variant="secondary" className="flex items-center gap-2 px-3 py-2">
                       <FileText className="h-3 w-3" />
                       <span className="text-sm font-medium">{file.name}</span>
                       <Button
@@ -633,8 +695,9 @@ export default function DijkstraGPT() {
               </div>
             )}
 
+            {/* Input container */}
             <div className="relative bg-background border border-border/50 rounded-3xl shadow-lg overflow-hidden">
-              
+              {/* Textarea */}
               <Textarea
                 ref={textareaRef}
                 value={prompt}
@@ -646,22 +709,11 @@ export default function DijkstraGPT() {
                 aria-label="Message input"
               />
 
+              {/* Action buttons bar */}
               <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-t border-border/30">
-                
+                {/* Left side - Input tools (removed voice & enhance) */}
                 <div className="flex items-center gap-1">
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleRecording}
-                    className={`h-9 w-9 p-0 rounded-xl ${
-                      isRecording ? "bg-red-500/10 text-red-600" : ""
-                    }`}
-                    aria-label={isRecording ? "Stop recording" : "Start recording"}
-                  >
-                    {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                  </Button>
-
+                  {/* File attachment button */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -672,6 +724,7 @@ export default function DijkstraGPT() {
                     <Paperclip className="h-4 w-4" />
                   </Button>
 
+                  {/* Image upload button */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -680,28 +733,17 @@ export default function DijkstraGPT() {
                       input.type = "file";
                       input.accept = "image/*";
                       input.multiple = true;
-                      input.onchange = (e) => handleFileUpload(e as React.ChangeEvent<HTMLInputElement> & { target: HTMLInputElement });
+                      input.onchange = (e) => handleFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
                       input.click();
                     }}
                     className="h-9 w-9 p-0 rounded-xl"
                     aria-label="Upload image"
                   >
-                    <ImageIcon className="h-4 w-4" />
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={enhancePrompt}
-                    className={`h-9 w-9 p-0 rounded-xl ${
-                      isEnhanced ? "bg-amber-500/10 text-amber-600" : ""
-                    }`}
-                    aria-label={isEnhanced ? "Remove enhancement" : "Enhance prompt"}
-                  >
-                    <Sparkles className="h-4 w-4" />
+                    <Image className="h-4 w-4" />
                   </Button>
                 </div>
 
+                {/* Right side - Send button */}
                 <Button
                   onClick={handleSubmit}
                   disabled={(!prompt.trim() && uploadedFiles.length === 0) || isLoading}
@@ -718,6 +760,7 @@ export default function DijkstraGPT() {
               </div>
             </div>
 
+            {/* Keyboard shortcut hint */}
             <div className="text-center mt-3">
               <p className="text-xs text-muted-foreground">
                 Press <kbd className="px-1.5 py-0.5 bg-muted border border-border/50 rounded text-xs">⌘ Enter</kbd> to send
@@ -727,14 +770,15 @@ export default function DijkstraGPT() {
         </div>
       </div>
 
+      {/* ==================== SIDEBAR - CHAT HISTORY ==================== */}
       <div
         className={`${
           isSidebarOpen ? "w-80" : "w-0"
         } transition-all duration-300 bg-background border-l border-border/50 flex flex-col overflow-hidden relative`}
       >
-        
+        {/* Sidebar header */}
         <div className="p-4 border-b border-border/50">
-          
+          {/* Title and close button */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
@@ -751,27 +795,13 @@ export default function DijkstraGPT() {
             </Button>
           </div>
 
-          <Button 
-            onClick={createNewChat} 
-            className="w-full mb-3"
-            aria-label="Create new chat"
-          >
+          {/* New chat button */}
+          <Button onClick={createNewChat} className="w-full mb-3" aria-label="Create new chat">
             <MessageSquare className="h-4 w-4 mr-2" />
             New Chat
           </Button>
 
-          {currentSession && (
-            <Button
-              onClick={downloadChat}
-              variant="outline"
-              className="w-full mb-3"
-              aria-label="Download current chat"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download Chat
-            </Button>
-          )}
-
+          {/* Search input */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <input
@@ -785,11 +815,12 @@ export default function DijkstraGPT() {
           </div>
         </div>
 
+        {/* Chat sessions list */}
         <div className="flex-1 overflow-y-auto p-2">
-          
+          {/* Grouped by date */}
           {Object.entries(groupedSessions).map(([date, sessions]) => (
             <div key={date} className="mb-4">
-              
+              {/* Date header */}
               <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground font-medium">
                 <Calendar className="h-3 w-3" />
                 {date === new Date().toDateString()
@@ -799,24 +830,24 @@ export default function DijkstraGPT() {
                   : new Date(date).toLocaleDateString()}
               </div>
 
+              {/* Session items */}
               {sessions.map((session) => (
                 <div
                   key={session.id}
                   className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
-                    currentSessionId === session.id
-                      ? "bg-muted border border-border"
-                      : "hover:bg-muted/50"
+                    currentSessionId === session.id ? "bg-muted border border-border" : "hover:bg-muted/50"
                   }`}
                   onClick={() => setCurrentSessionId(session.id)}
                   role="button"
                   tabIndex={0}
                   aria-label={`Select chat: ${session.title}`}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if (e.key === "Enter" || e.key === " ") {
                       setCurrentSessionId(session.id);
                     }
                   }}
                 >
+                  {/* Session info */}
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <div className="min-w-0 flex-1">
@@ -827,23 +858,42 @@ export default function DijkstraGPT() {
                     </div>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive h-6 w-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteSession(session.id);
-                    }}
-                    aria-label={`Delete chat: ${session.title}`}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                  {/* Action buttons - Download and Delete */}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Download button - Icon only */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-foreground h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadSession(session);
+                      }}
+                      aria-label={`Download chat: ${session.title}`}
+                    >
+                      <Download className="h-3 w-3" />
+                    </Button>
+
+                    {/* Delete button - Icon only */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteSession(session.id);
+                      }}
+                      aria-label={`Delete chat: ${session.title}`}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           ))}
 
+          {/* Empty state */}
           {filteredSessions.length === 0 && (
             <div className="text-center text-muted-foreground mt-8 px-4">
               <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-30" />
@@ -853,14 +903,14 @@ export default function DijkstraGPT() {
           )}
         </div>
 
+        {/* Sidebar footer */}
         <div className="p-4 border-t border-border/50 text-xs text-muted-foreground">
-          <p className="text-center">Chat history stored locally in your browser</p>
-          <p className="text-center mt-1">
-            {chatSessions.length} total conversation{chatSessions.length !== 1 ? "s" : ""}
-          </p>
+          <p className="text-center">Chat history stored in memory</p>
+          <p className="text-center mt-1">{chatSessions.length} total conversation{chatSessions.length !== 1 ? "s" : ""}</p>
         </div>
       </div>
 
+      {/* ==================== FLOATING SIDEBAR TOGGLE ==================== */}
       {!isSidebarOpen && (
         <Button
           variant="ghost"
@@ -873,6 +923,7 @@ export default function DijkstraGPT() {
         </Button>
       )}
 
+      {/* ==================== HIDDEN FILE INPUT ==================== */}
       <input
         ref={fileInputRef}
         type="file"
