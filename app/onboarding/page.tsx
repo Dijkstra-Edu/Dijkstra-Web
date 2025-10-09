@@ -45,7 +45,8 @@ import BackgroundPaths from "../../components/kokonutui/background-paths";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { CAREER_PATHS } from "@/data/career-paths";
+import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
+import { CompanyAutoComplete } from "@/components/company-autocomplete";
 
 const steps = [
   {
@@ -157,6 +158,8 @@ interface OnboardingState {
   timeToUpskill: number;
   expectedSalary: string;
   selectedTools: string[];
+  dreamCompany: string;
+  dreamRole: string;
 }
 
 const STORAGE_KEY = "dijkstra-onboarding-state";
@@ -197,6 +200,76 @@ const TIME_OPTIONS = [
   { value: 108, label: "108 months" },
   { value: 120, label: "120 months" },
 ];
+
+// Career Path Card Component for onboarding
+interface CareerPathCardProps {
+  pathKey: CareerPathKey;
+  isPrimary?: boolean;
+  isSecondary?: boolean;
+  onClick: () => void;
+  showBadge?: boolean;
+}
+
+function CareerPathCard({
+  pathKey,
+  isPrimary = false,
+  isSecondary = false,
+  onClick,
+  showBadge = true,
+}: CareerPathCardProps) {
+  const path = CAREER_PATHS[pathKey];
+
+  return (
+    <div
+      className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+        isPrimary
+          ? "border-primary bg-primary/10 ring-2 ring-primary/50"
+          : isSecondary
+          ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/50"
+          : "border-white/20 hover:border-white/40 hover:bg-white/5"
+      }`}
+      onClick={onClick}
+    >
+      <div className="text-center">
+        <div className={`w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br ${path.gradient} flex items-center justify-center p-2 shadow-lg`}>
+          <img 
+            src={`/${path.icon}`} 
+            alt={path.label}
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              // Fallback to shortLabel if image doesn't exist
+              e.currentTarget.style.display = 'none';
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                const span = document.createElement('span');
+                span.className = 'text-white text-xs font-bold';
+                span.textContent = path.shortLabel;
+                parent.appendChild(span);
+              }
+            }}
+          />
+        </div>
+        <h4 className="text-xs font-medium text-foreground mb-1">{path.label}</h4>
+        
+        {/* Selection Indicators */}
+        {showBadge && (isPrimary || isSecondary) && (
+          <div className="flex justify-center">
+            {isPrimary && (
+              <Badge variant="default" className="text-xs bg-primary px-2 py-0.5">
+                Primary
+              </Badge>
+            )}
+            {isSecondary && (
+              <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-600 px-2 py-0.5">
+                Secondary
+              </Badge>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // Helper function to format months into years and months
 const formatTimeDisplay = (months: number): string => {
@@ -434,6 +507,8 @@ export default function Page() {
     timeToUpskill: 0,
     expectedSalary: "",
     selectedTools: [],
+    dreamCompany: "",
+    dreamRole: "",
   });
   const router = useRouter();
   const { data: session } = useSession();
@@ -764,11 +839,13 @@ export default function Page() {
                state.timeToUpskill > 0 && 
                state.timeToUpskill <= 120 && 
                state.expectedSalary !== "" && 
-               state.selectedTools.length > 0;
+               state.selectedTools.length > 0 &&
+               state.dreamCompany !== "" &&
+               state.dreamRole !== "";
       default:
         return true;
     }
-  }, [currentStep, state.leetcodeHandle, state.linkedinHandle, linkedinConnected, isValidLeetCodeUsername, state.primarySpecialization, state.secondarySpecializations, state.timeToUpskill, state.expectedSalary, state.selectedTools]);
+  }, [currentStep, state.leetcodeHandle, state.linkedinHandle, linkedinConnected, isValidLeetCodeUsername, state.primarySpecialization, state.secondarySpecializations, state.timeToUpskill, state.expectedSalary, state.selectedTools, state.dreamCompany, state.dreamRole]);
 
   // Step Indicator Component with clickable steps
   const StepIndicator = () => (
@@ -1700,6 +1777,9 @@ export default function Page() {
     const [localTimeToUpskill, setLocalTimeToUpskill] = useState(state.timeToUpskill);
     const [localExpectedSalary, setLocalExpectedSalary] = useState(state.expectedSalary);
     const [localSelectedTools, setLocalSelectedTools] = useState(state.selectedTools);
+    const [localDreamCompany, setLocalDreamCompany] = useState(state.dreamCompany);
+    const [localDreamRole, setLocalDreamRole] = useState(state.dreamRole);
+    const [selectedCompanyData, setSelectedCompanyData] = useState<{name: string, logo_url?: string} | null>(null);
 
     const handleSave = () => {
       updateState({
@@ -1708,6 +1788,8 @@ export default function Page() {
         timeToUpskill: localTimeToUpskill,
         expectedSalary: localExpectedSalary,
         selectedTools: localSelectedTools,
+        dreamCompany: localDreamCompany,
+        dreamRole: localDreamRole,
       });
       markStepComplete("career");
     };
@@ -1969,6 +2051,57 @@ export default function Page() {
             </div>
           </div>
 
+          {/* Dream Company and Dream Role */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+              <h3 className="text-lg font-semibold mb-4 text-foreground">Dream Company</h3>
+              <p className="text-sm text-muted-foreground mb-4">Which company would you love to work for?</p>
+              <CompanyAutoComplete
+                value={localDreamCompany}
+                onChange={(company) => {
+                  setLocalDreamCompany(company.name);
+                  setSelectedCompanyData(company);
+                }}
+                selectedCompany={selectedCompanyData}
+              />
+              
+              {/* Selected Company Display */}
+              {localDreamCompany && (
+                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {selectedCompanyData?.logo_url ? (
+                      <img 
+                        src={selectedCompanyData.logo_url} 
+                        alt={`${localDreamCompany} logo`}
+                        className="w-8 h-8 rounded-lg object-contain border bg-white"
+                      />
+                    ) : (
+                      <img
+                        src={`/abstract-geometric-shapes.png?key=kh3mj&height=32&width=32&query=${encodeURIComponent(`${localDreamCompany} company logo`)}`}
+                        alt={`${localDreamCompany} logo`}
+                        className="w-8 h-8 rounded-lg object-contain border bg-white"
+                      />
+                    )}
+                    <span className="text-sm text-blue-600 font-medium">
+                      Selected: {localDreamCompany}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
+              <h3 className="text-lg font-semibold mb-4 text-foreground">Dream Role</h3>
+              <p className="text-sm text-muted-foreground mb-4">What's your ideal job title or position?</p>
+              <Input
+                value={localDreamRole}
+                onChange={(e) => setLocalDreamRole(e.target.value)}
+                placeholder="e.g., Senior Software Engineer, Product Manager..."
+                className="bg-white/10 border-white/20"
+              />
+            </div>
+          </div>
+
           {/* Tools Selection */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl">
             <h3 className="text-lg font-semibold mb-4 text-foreground">Tools & Technologies</h3>
@@ -1996,7 +2129,9 @@ export default function Page() {
                 localTimeToUpskill > 0 &&
                 localTimeToUpskill <= 120 &&
                 localExpectedSalary !== "" &&
-                localSelectedTools.length > 0
+                localSelectedTools.length > 0 &&
+                localDreamCompany !== "" &&
+                localDreamRole !== ""
               )}
               className="px-8 py-3"
               size="lg"
@@ -2125,6 +2260,8 @@ export default function Page() {
                 timeToUpskill: 0,
                 expectedSalary: "",
                 selectedTools: [],
+                dreamCompany: "",
+                dreamRole: "",
               });
               router.push("/dashboard");
             }}
