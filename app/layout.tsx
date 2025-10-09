@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProviderWrapper from "../components/providers/SessionProviderWrapper";
 import ThemeProviderWrapper from "../components/providers/ThemeProviderWrapper";
-import { SettingsProvider } from "../components/providers/SettingsProviderWrapper";
 import TanstackProviderWrapper from "@/components/providers/TanstackProviderWrapper";
 
 const geistSans = Geist({
@@ -34,7 +33,7 @@ export default function RootLayout({
         <ThemeProviderWrapper>
           <SessionProviderWrapper>
             <TanstackProviderWrapper>
-              <SettingsProvider>{children}</SettingsProvider>
+              {children}
             </TanstackProviderWrapper>
           </SessionProviderWrapper>
         </ThemeProviderWrapper>

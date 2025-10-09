@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useSettings } from "@/components/providers/SettingsProviderWrapper";
+import { useSettingsStore } from "@/lib/Zustand/settings-store";
+import { useTheme } from "next-themes";
 import {
   Bell,
   Code,
@@ -79,7 +80,7 @@ const data = {
 };
 
 function NotificationsPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -157,7 +158,7 @@ function NotificationsPage() {
 }
 
 function HomePage() {
-  const settings = useSettings()
+  const settings = useSettingsStore()
   const [newPinTitle, setNewPinTitle] = React.useState("")
   const [newPinUrl, setNewPinUrl] = React.useState("")
   const [newPinTooltip, setNewPinTooltip] = React.useState("")
@@ -433,7 +434,7 @@ function HomePage() {
 }
 
 function AccountsPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   const getConnectedAccount = (platform: string) => {
     return settings.connectedAccounts.find((acc) => acc.platform === platform);
@@ -785,7 +786,8 @@ function AccountsPage() {
 }
 
 function AppearancePage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
+  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -824,7 +826,7 @@ function AppearancePage() {
       <div className="space-y-4">
         <div className="space-y-2">
           <Label>Theme</Label>
-          <RadioGroup value={settings.theme} onValueChange={settings.setTheme}>
+          <RadioGroup value={theme} onValueChange={setTheme}>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="light" id="light" />
               <Label htmlFor="light" className="font-normal">
@@ -897,7 +899,7 @@ function AppearancePage() {
 }
 
 function LanguageRegionPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -984,7 +986,7 @@ function LanguageRegionPage() {
 }
 
 function AccessibilityPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -1068,7 +1070,7 @@ function AccessibilityPage() {
 }
 
 function PrivacyVisibilityPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -1154,7 +1156,7 @@ function PrivacyVisibilityPage() {
 }
 
 function DeveloperSettingsPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
   const [showSupabaseKey, setShowSupabaseKey] = React.useState(false);
   const [showGeminiKey, setShowGeminiKey] = React.useState(false);
 
@@ -1388,7 +1390,7 @@ function DeveloperSettingsPage() {
 }
 
 function AdvancedPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
