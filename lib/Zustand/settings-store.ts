@@ -1,14 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { useTheme as useNextTheme } from 'next-themes'
 import type { SettingsStore } from '@/types/lib/Zustand/settings-store-types'
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
       // Initial state
-      theme: 'system',
-      
       // Notifications
       pushNotifications: true,
       emailNotifications: true,
@@ -136,8 +133,6 @@ export const useSettingsStore = create<SettingsStore>()(
       ],
 
       // Actions
-      setTheme: (theme) => set({ theme }),
-      
       setPushNotifications: (value) => set({ pushNotifications: value }),
       setEmailNotifications: (value) => set({ emailNotifications: value }),
       setDesktopNotifications: (value) => set({ desktopNotifications: value }),
@@ -239,7 +234,6 @@ export const useSettingsStore = create<SettingsStore>()(
       name: 'dijkstra-settings',
       // Persist everything to localStorage
       partialize: (state) => ({
-        theme: state.theme,
         pushNotifications: state.pushNotifications,
         emailNotifications: state.emailNotifications,
         desktopNotifications: state.desktopNotifications,
@@ -289,8 +283,3 @@ export const useSettingsStore = create<SettingsStore>()(
     }
   )
 )
-
-// Re-export useTheme from next-themes for theme management
-// Note: The Zustand store also persists theme preference, but next-themes is the source of truth
-export { useTheme as useNextTheme } from 'next-themes'
-

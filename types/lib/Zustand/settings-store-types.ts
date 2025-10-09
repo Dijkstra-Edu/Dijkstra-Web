@@ -24,10 +24,6 @@ export interface CustomPin {
 }
 
 export interface SettingsStore {
-  // Theme
-  theme: string
-  setTheme: (theme: string) => void
-
   // Notifications
   pushNotifications: boolean
   setPushNotifications: (value: boolean) => void
