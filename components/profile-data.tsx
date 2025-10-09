@@ -30,17 +30,15 @@ import {
   IconFileTypeJs,
   IconFlame,
 } from "@tabler/icons-react";
+import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
+import { Badge } from "@/components/ui/badge";
 
 export function ProfileData() {
   const { data: session, status } = useSession();
 
-  // Define goal options with corresponding icons or images
-  const goalOptions = {
-    FRONTEND: "FrontEnd Engineer",
-    BACKEND: "BackEnd Engineer",
-    FULLSTACK: "FullStack Engineer",
-    // Add other options as needed
-  };
+  // Primary career path - this should come from user profile data
+  const primaryPath: CareerPathKey = "FULLSTACK"; // Replace with actual user data
+  const path = CAREER_PATHS[primaryPath];
 
   return (
     <div className="pr-2">
@@ -87,50 +85,70 @@ export function ProfileData() {
           </div>
         </div>
         {/* Three-column section for Rank, Streak, and Goal */}
-        <div className="grid grid-cols-3">
+        <div className="grid grid-cols-3 gap-3">
           {/* Rank Column */}
-          <div className="flex flex-col items-center justify-center bg-muted/30 rounded-lg">
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
             <Image
-              src="/gold.png" // Replace with your actual rank image path
+              src="/Ranks/GOLD_1.png"
               alt="Rank Badge"
-              width={120}
-              height={120}
-              className=""
+              width={80}
+              height={80}
+              className="mb-2"
             />
-            <h2 className="text-center text-lg font-bold mb-6 text-yellow-500">
+            <span className="text-sm font-bold text-yellow-500 text-center">
               GOLD 1
-            </h2>
+            </span>
+            <span className="text-xs text-muted-foreground mt-1">Rank</span>
           </div>
 
           {/* Streak Column */}
-          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg">
-            <div className="flex items-center mb-1">
-              {/* <Image
-                src="/fire.png" // Replace with your actual fire emoji image
-                alt="Streak"
-                width={50}
-                height={50}
-                className="mr-1"
-              /> */}
-              <IconFlame className="h-12 w-12 mb-1 mr-1 text-orange-500" />
-              <span className="text-lg font-bold">12</span>
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+            <div className="relative mb-2">
+              <img
+                src="/fire.png"
+                alt="Fire streak"
+                className="w-25 h-25 object-contain"
+              />
+              <div className="absolute inset-0 flex items-center justify-center pt-2">
+                <span className="text-xl font-bold text-white drop-shadow-lg">12</span>
+              </div>
             </div>
-            <span className="text-xs font-medium">Day Streak</span>
+            <span className="text-xs text-muted-foreground mt-1">Day Streak</span>
           </div>
 
-          {/* Goal Column */}
-          <div
-            className="flex flex-col items-center justify-center p-[2px] rounded-lg border-2 border-transparent 
-                          bg-gradient-to-r from-pink-500 via-blue-500 to-purple-500 bg-origin-border"
-          >
-            <div className="flex flex-col items-center justify-center w-full h-full bg-background rounded-md py-2">
-              <IconFileTypeJs className="h-12 w-12 mb-1 text-pink-500" />
-              <span
-                className="text-xs font-bold text-transparent bg-clip-text 
-                              bg-gradient-to-r from-pink-500 to-purple-500 text-center"
-              >
-                Frontend <br /> Engineer <br /> (F.E)
-              </span>
+          {/* Goal Column - Primary Specialization */}
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+            <div className={`w-28 h-36 p-3 rounded-xl border-2 bg-gradient-to-br ${path.gradient} border-white/20 shadow-xl backdrop-blur-sm`}>
+              <div className="text-center h-full flex flex-col justify-between">
+                <div>
+                  <div className={`w-10 h-10 mx-auto mb-2 rounded-xl bg-white/30 backdrop-blur-sm border border-white/30 flex items-center justify-center p-1.5 shadow-lg`}>
+                    <img 
+                      src={`/${path.icon}`} 
+                      alt={path.label}
+                      className="w-full h-full object-contain filter drop-shadow-sm"
+                      onError={(e) => {
+                        // Fallback to shortLabel if image doesn't exist
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const span = document.createElement('span');
+                          span.className = 'text-white text-[10px] font-bold';
+                          span.textContent = path.shortLabel;
+                          parent.appendChild(span);
+                        }
+                      }}
+                    />
+                  </div>
+                  <h4 className="text-[10px] font-medium text-white drop-shadow-sm leading-tight px-1 break-words">{path.label}</h4>
+                </div>
+                
+                {/* Primary Badge */}
+                <div className="flex justify-center mt-auto">
+                  <Badge variant="default" className="text-[9px] font-semibold px-1.5 py-0.5 bg-white/50 text-white border-white/70 shadow-lg backdrop-blur-sm">
+                    ⭐ Primary
+                  </Badge>
+                </div>
+              </div>
             </div>
           </div>
         </div>
