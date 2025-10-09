@@ -12,6 +12,7 @@ export interface PresetPin {
   icon: string
   color: string
   tooltip: string
+  group: number
 }
 
 export interface CustomPin {

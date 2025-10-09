@@ -2,6 +2,100 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { SettingsStore } from '@/types/lib/Zustand/settings-store-types'
 
+// Default preset pins configuration
+const defaultPresetPins = [
+  {
+    id: "reddit",
+    name: "Reddit",
+    enabled: true,
+    url: "https://www.reddit.com/r/DijkstraEdu/",
+    icon: "reddit",
+    color: "#FF4500",
+    tooltip: "Visit Reddit",
+    group: 1,
+  },
+  {
+    id: "google-scholar",
+    name: "Google Scholar",
+    enabled: true,
+    url: "https://scholar.google.com",
+    icon: "scholar",
+    color: "#4285F4",
+    tooltip: "Search academic papers",
+    group: 1,
+  },
+  {
+    id: "stackoverflow",
+    name: "Stack Overflow",
+    enabled: true,
+    url: "https://stackoverflow.com",
+    icon: "stackoverflow",
+    color: "#F48024",
+    tooltip: "Find programming solutions",
+    group: 1,
+  },
+  {
+    id: "discord",
+    name: "Discord",
+    enabled: true,
+    url: "https://discord.com",
+    icon: "discord",
+    color: "#5865F2",
+    tooltip: "Open Discord",
+    group: 2,
+  },
+  {
+    id: "linkedin",
+    name: "LinkedIn",
+    enabled: true,
+    url: "https://linkedin.com",
+    icon: "linkedin",
+    color: "#0A66C2",
+    tooltip: "Visit LinkedIn",
+    group: 2,
+  },
+  {
+    id: "leetcode",
+    name: "LeetCode",
+    enabled: true,
+    url: "https://leetcode.com",
+    icon: "leetcode",
+    color: "#FFA116",
+    tooltip: "Practice coding problems",
+    group: 2,
+  },
+  {
+    id: "github",
+    name: "GitHub",
+    enabled: true,
+    url: "https://github.com",
+    icon: "github",
+    color: "#000000",
+    tooltip: "Visit GitHub",
+    group: 2,
+  },
+  {
+    id: "personal-website",
+    name: "Personal Website",
+    enabled: true,
+    url: "https://example.com",
+    icon: "world",
+    color: "",
+    tooltip: "Visit Personal Website",
+    group: 3,
+  },
+  {
+    id: "dashboard",
+    name: "Dashboard",
+    enabled: true,
+    url: "/specialization",
+    icon: "dashboard",
+    color: "",
+    tooltip: "Go to Specializations",
+    group: 3,
+  },
+];
+
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
@@ -25,62 +119,7 @@ export const useSettingsStore = create<SettingsStore>()(
       showRecommendations: true,
       itemsPerPage: '20',
 
-      presetPins: [
-        {
-          id: "reddit",
-          name: "Reddit",
-          enabled: false,
-          url: "https://reddit.com",
-          icon: "reddit",
-          color: "#FF4500",
-          tooltip: "Visit Reddit",
-        },
-        {
-          id: "google-scholar",
-          name: "Google Scholar",
-          enabled: false,
-          url: "https://scholar.google.com",
-          icon: "scholar",
-          color: "#fff",
-          tooltip: "Search academic papers",
-        },
-        {
-          id: "stackoverflow",
-          name: "Stack Overflow",
-          enabled: false,
-          url: "https://stackoverflow.com",
-          icon: "stackoverflow",
-          color: "#F48024",
-          tooltip: "Find programming solutions",
-        },
-        {
-          id: "discord",
-          name: "Discord",
-          enabled: false,
-          url: "https://discord.com",
-          icon: "discord",
-          color: "#5865F2",
-          tooltip: "Open Discord",
-        },
-        {
-          id: "linkedin",
-          name: "LinkedIn",
-          enabled: false,
-          url: "https://linkedin.com",
-          icon: "linkedin",
-          color: "#fff",
-          tooltip: "Visit LinkedIn",
-        },
-        {
-          id: "leetcode",
-          name: "LeetCode",
-          enabled: false,
-          url: "https://leetcode.com",
-          icon: "leetcode",
-          color: "#fff",
-          tooltip: "Practice coding problems",
-        },
-      ],
+      presetPins: defaultPresetPins,
 
       customPins: [],
 
@@ -232,6 +271,7 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'dijkstra-settings',
+      version: 1, // Increment this when you need to migrate data
       // Persist everything to localStorage
       partialize: (state) => ({
         pushNotifications: state.pushNotifications,
@@ -280,6 +320,20 @@ export const useSettingsStore = create<SettingsStore>()(
         hardwareAcceleration: state.hardwareAcceleration,
         connectedAccounts: state.connectedAccounts,
       }),
+      migrate: (persistedState: any, version: number) => {
+        // If migrating from version 0 (or no version) to version 1
+        if (version === 0) {
+          // Check if presetPins exist and if they have the old structure (no group property)
+          if (persistedState.presetPins && persistedState.presetPins.length > 0) {
+            const hasGroupProperty = persistedState.presetPins.some((pin: any) => 'group' in pin);
+            // If pins don't have the group property, reset to new defaults
+            if (!hasGroupProperty) {
+              persistedState.presetPins = defaultPresetPins;
+            }
+          }
+        }
+        return persistedState;
+      },
     }
   )
 )
