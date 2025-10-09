@@ -20,6 +20,9 @@ declare module "next-auth" {
       updated_at?: string;
       organization?: string;
       hireable?: boolean;
+      linkedinId?: string;
+      linkedinName?: string;
+      linkedinImage?: string;
     };
   }
 

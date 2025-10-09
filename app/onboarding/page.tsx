@@ -47,6 +47,11 @@ import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { CompanyAutoComplete } from "@/components/company-autocomplete";
+import { useMutation } from "@tanstack/react-query";
+import { onboardUserMutation } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
+import { Domain, Tools, Rank } from "@/types/server/dataforge/User/user";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const steps = [
   {
@@ -722,7 +727,7 @@ export default function Page() {
         setShowOnboarding(true);
         setCurrentStep(stepNumber);
         // Clear the URL parameter after setting the state to avoid interference
-        window.history.replaceState({}, "", "/");
+        window.history.replaceState({}, "", "/onboarding");
       }
     }
   }, [searchParams]);
@@ -1781,17 +1786,44 @@ export default function Page() {
     const [localDreamRole, setLocalDreamRole] = useState(state.dreamRole);
     const [selectedCompanyData, setSelectedCompanyData] = useState<{name: string, logo_url?: string} | null>(null);
 
+    const mutation = useMutation({
+      ...onboardUserMutation,
+      onSuccess: () => {
+        // Save state to localStorage
+        updateState({
+          primarySpecialization: localPrimarySpec,
+          secondarySpecializations: localSecondarySpecs,
+          timeToUpskill: localTimeToUpskill,
+          expectedSalary: localExpectedSalary,
+          selectedTools: localSelectedTools,
+          dreamCompany: localDreamCompany,
+          dreamRole: localDreamRole,
+        });
+        // Mark step complete and advance
+        markStepComplete("career");
+      },
+    });
+
     const handleSave = () => {
-      updateState({
-        primarySpecialization: localPrimarySpec,
-        secondarySpecializations: localSecondarySpecs,
-        timeToUpskill: localTimeToUpskill,
-        expectedSalary: localExpectedSalary,
-        selectedTools: localSelectedTools,
+      const githubUsername = session?.user?.login;
+      
+      if (!githubUsername) {
+        console.error("GitHub username not found in session");
+        return;
+      }
+
+      mutation.mutate({
+        github_user_name: githubUsername,
+        primary_specialization: localPrimarySpec as Domain,
+        secondary_specializations: localSecondarySpecs as Domain[],
+        expected_salary_bucket: localExpectedSalary as any,
+        time_left: localTimeToUpskill,
+        selectedTools: localSelectedTools as Tools[],
         dreamCompany: localDreamCompany,
         dreamRole: localDreamRole,
+        rank: Rank.UNRANKED,
+        streak: 0,
       });
-      markStepComplete("career");
     };
 
     const handlePrimarySpecChange = (spec: string) => {
@@ -2119,6 +2151,19 @@ export default function Page() {
             </div>
           </div>
 
+          {/* Error Alert */}
+          {mutation.isError && (
+            <div className="max-w-2xl mx-auto">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>
+                  {mutation.error instanceof Error ? mutation.error.message : "An error occurred. Please try again"}
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
           {/* Save Button */}
           <div className="text-center">
             <Button
@@ -2132,11 +2177,18 @@ export default function Page() {
                 localSelectedTools.length > 0 &&
                 localDreamCompany !== "" &&
                 localDreamRole !== ""
-              )}
+              ) || mutation.isPending}
               className="px-8 py-3"
               size="lg"
             >
-              Save Career Plan
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                "Save Career Plan"
+              )}
             </Button>
           </div>
         </div>
@@ -2268,7 +2320,7 @@ export default function Page() {
             className="px-8 py-4 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-200"
             size="lg"
           >
-            Start Coding Journey
+            Let's Begin!
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
           <Button
