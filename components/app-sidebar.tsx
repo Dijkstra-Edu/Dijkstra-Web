@@ -40,6 +40,9 @@ import {
 } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { SettingsDialog } from "./settings-dialog";
+import { useState } from "react";
+import { NavSettings } from "./nav-settings";
 
 const data = {
   user: {
@@ -139,11 +142,6 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "/administration/settings",
-      icon: IconSettings,
-    },
-    {
       title: "Get Help",
       url: "/administration/help",
       icon: IconHelp,
@@ -192,6 +190,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession();
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   if (status === "authenticated") {
     data.user.name = session.user.name || "No name";
@@ -215,7 +214,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
         <NavDocuments items={data.challenges} title="Challenges" />
         <NavDocuments items={data.opportunities} title="Opportunities" />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavSettings items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
