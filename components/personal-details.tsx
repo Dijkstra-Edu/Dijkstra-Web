@@ -40,36 +40,83 @@ import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { CompanyAutoComplete } from "@/components/company-autocomplete";
 
 const SALARY_RANGES = [
-  "1-2 LPA",
-  "2-6 LPA",
-  "6-10 LPA",
-  "10-14 LPA",
-  "14-18 LPA",
-  "18-24 LPA",
-  "24-30 LPA",
-  "30-48 LPA",
-  "48-64 LPA",
-  "64 LPA - 1Cr",
-  "1Cr+",
+  { value: "UNRANKED", label: "₹0 L (Unranked)" },
+  { value: "IRON_1", label: "₹0 L - ₹1 L (Iron 1)" },
+  { value: "IRON_2", label: "₹1 L - ₹2 L (Iron 2)" },
+  { value: "IRON_3", label: "₹2 L - ₹3 L (Iron 3)" },
+  { value: "BRONZE_1", label: "₹3 L - ₹4 L (Bronze 1)" },
+  { value: "BRONZE_2", label: "₹4 L - ₹5 L (Bronze 2)" },
+  { value: "BRONZE_3", label: "₹5 L - ₹6 L (Bronze 3)" },
+  { value: "SILVER_1", label: "₹6 L - ₹7 L (Silver 1)" },
+  { value: "SILVER_2", label: "₹7 L - ₹8 L (Silver 2)" },
+  { value: "SILVER_3", label: "₹8 L - ₹10 L (Silver 3)" },
+  { value: "GOLD_1", label: "₹10 L - ₹12 L (Gold 1)" },
+  { value: "GOLD_2", label: "₹12 L - ₹13 L (Gold 2)" },
+  { value: "GOLD_3", label: "₹13 L - ₹14 L (Gold 3)" },
+  { value: "PLATINUM_1", label: "₹14 L - ₹15 L (Platinum 1)" },
+  { value: "PLATINUM_2", label: "₹15 L - ₹16 L (Platinum 2)" },
+  { value: "PLATINUM_3", label: "₹16 L - ₹18 L (Platinum 3)" },
+  { value: "DIAMOND_1", label: "₹18 L - ₹20 L (Diamond 1)" },
+  { value: "DIAMOND_2", label: "₹20 L - ₹22 L (Diamond 2)" },
+  { value: "DIAMOND_3", label: "₹22 L - ₹24 L (Diamond 3)" },
+  { value: "EMERALD_1", label: "₹24 L - ₹26 L (Emerald 1)" },
+  { value: "EMERALD_2", label: "₹26 L - ₹28 L (Emerald 2)" },
+  { value: "EMERALD_3", label: "₹28 L - ₹30 L (Emerald 3)" },
+  { value: "LAPIS_1", label: "₹30 L - ₹35 L (Lapis 1)" },
+  { value: "LAPIS_2", label: "₹35 L - ₹40 L (Lapis 2)" },
+  { value: "LAPIS_3", label: "₹40 L - ₹45 L (Lapis 3)" },
+  { value: "QUARTZ_1", label: "₹45 L - ₹55 L (Quartz 1)" },
+  { value: "QUARTZ_2", label: "₹55 L - ₹60 L (Quartz 2)" },
+  { value: "QUARTZ_3", label: "₹60 L - ₹70 L (Quartz 3)" },
+  { value: "AMETHYST_1", label: "₹70 L - ₹80 L (Amethyst 1)" },
+  { value: "AMETHYST_2", label: "₹80 L - ₹90 L (Amethyst 2)" },
+  { value: "AMETHYST_3", label: "₹90 L - ₹1 Cr (Amethyst 3)" },
+  { value: "OBSIDIAN", label: "₹1 Cr+ (Obsidian)" }
 ];
 
-const TIME_FRAMES = [
-  "6 months",
-  "1 year",
-  "1.5 years",
-  "2 years",
-  "2.5 years",
-  "3 years",
-  "3.5 years",
-  "4 years",
-  "4.5 years",
-  "5 years",
-  "6 years",
-  "7 years",
-  "8 years",
-  "9 years",
-  "10 years",
+const TIME_OPTIONS = [
+  { value: 1, label: "1 month" },
+  { value: 2, label: "2 months" },
+  { value: 3, label: "3 months" },
+  { value: 4, label: "4 months" },
+  { value: 5, label: "5 months" },
+  { value: 6, label: "6 months" },
+  { value: 7, label: "7 months" },
+  { value: 8, label: "8 months" },
+  { value: 9, label: "9 months" },
+  { value: 10, label: "10 months" },
+  { value: 11, label: "11 months" },
+  { value: 12, label: "12 months" },
+  { value: 18, label: "18 months" },
+  { value: 24, label: "24 months" },
+  { value: 30, label: "30 months" },
+  { value: 36, label: "36 months" },
+  { value: 42, label: "42 months" },
+  { value: 48, label: "48 months" },
+  { value: 54, label: "54 months" },
+  { value: 60, label: "60 months" },
+  { value: 72, label: "72 months" },
+  { value: 84, label: "84 months" },
+  { value: 96, label: "96 months" },
+  { value: 108, label: "108 months" },
+  { value: 120, label: "120 months" },
 ];
+
+// Helper function to format months into years and months
+const formatTimeDisplay = (months: number): string => {
+  if (months < 12) {
+    return `${months} month${months !== 1 ? 's' : ''}`;
+  }
+  
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  
+  if (remainingMonths === 0) {
+    return `${years} year${years !== 1 ? 's' : ''}`;
+  }
+  
+  return `${years} year${years !== 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+};
 
 interface CareerPathCardProps {
   pathKey: CareerPathKey;
@@ -122,9 +169,9 @@ function CareerPathCard({
                 }
               }}
             />
-          </div>
+      </div>
           <h4 className={`${displayMode ? 'text-xs font-medium' : 'text-[10px] font-medium'} ${displayMode ? 'text-white drop-shadow-sm' : 'text-foreground'} mb-2 leading-tight px-1 break-words`}>{path.label}</h4>
-        </div>
+    </div>
         
         {/* Selection Indicators */}
         {showBadge && (isPrimary || isSecondary) && (
@@ -143,7 +190,7 @@ function CareerPathCard({
         )}
       </div>
     </div>
-  );
+    );
 }
 
 export function PersonalDetails() {
@@ -160,8 +207,8 @@ export function PersonalDetails() {
     linkedin: "alex-johnson-dev",
     dreamCompany: "Google",
     dreamPosition: "Senior Software Engineer",
-    wantedSalary: "18-24 LPA",
-    timeFrame: "2 years",
+    wantedSalary: "DIAMOND_1",
+    timeFrame: 24,
     primaryPath: "FULLSTACK",
     secondaryPaths: ["FRONTEND", "BACKEND", "ML_ENGINEERING"],
   });
@@ -309,7 +356,7 @@ export function PersonalDetails() {
                     <div>
                       <label className="text-sm font-medium mb-2 block">Dream Company</label>
                       <CompanyAutoComplete
-                        value={profile.dreamCompany}
+                      value={profile.dreamCompany}
                         onChange={(company) => {
                           setProfile({ ...profile, dreamCompany: company.name });
                           setSelectedCompanyData(company);
@@ -317,6 +364,8 @@ export function PersonalDetails() {
                         selectedCompany={selectedCompanyData}
                       />
                     </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Dream Position</label>
                     <Input
                       value={profile.dreamPosition}
                       onChange={(e) =>
@@ -325,8 +374,11 @@ export function PersonalDetails() {
                           dreamPosition: e.target.value,
                         })
                       }
-                      placeholder="Dream Position"
+                        placeholder="e.g., Senior Software Engineer"
                     />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Wanted Salary</label>
                     <Select
                       value={profile.wantedSalary}
                       onValueChange={(value) =>
@@ -334,33 +386,37 @@ export function PersonalDetails() {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Wanted Salary" />
+                          <SelectValue placeholder="Select salary range" />
                       </SelectTrigger>
                       <SelectContent>
-                        {SALARY_RANGES.map((range) => (
-                          <SelectItem key={range} value={range}>
-                            {range}
+                          {SALARY_RANGES.map((salary) => (
+                            <SelectItem key={salary.value} value={salary.value}>
+                              {salary.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Time Frame</label>
                     <Select
-                      value={profile.timeFrame}
+                        value={profile.timeFrame.toString()}
                       onValueChange={(value) =>
-                        setProfile({ ...profile, timeFrame: value })
+                          setProfile({ ...profile, timeFrame: parseInt(value) })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Time Frame" />
+                          <SelectValue placeholder="Select time frame" />
                       </SelectTrigger>
                       <SelectContent>
-                        {TIME_FRAMES.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
+                          {TIME_OPTIONS.map((time) => (
+                            <SelectItem key={time.value} value={time.value.toString()}>
+                              {time.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -426,7 +482,7 @@ export function PersonalDetails() {
                                     }
                                           showBadge={false}
                                   />
-                                      ))}
+                              ))}
                                     </div>
                                 </div>
                                 );
@@ -539,7 +595,7 @@ export function PersonalDetails() {
                                           }
                                                 showBadge={false}
                                         />
-                                            ))}
+                                    ))}
                                         </div>
                                       </div>
                                     );
@@ -618,7 +674,7 @@ export function PersonalDetails() {
                               className="w-8 h-8 rounded-lg object-cover border bg-white"
                             />
                           )}
-                          <p className="font-medium">{profile.dreamCompany}</p>
+                        <p className="font-medium">{profile.dreamCompany}</p>
                         </div>
                       </div>
                       <div>
@@ -631,41 +687,43 @@ export function PersonalDetails() {
                         <span className="text-muted-foreground text-sm">
                           Wanted Salary:
                         </span>
-                        <p className="font-medium">{profile.wantedSalary}</p>
+                        <p className="font-medium">
+                          {SALARY_RANGES.find(s => s.value === profile.wantedSalary)?.label || profile.wantedSalary}
+                        </p>
                       </div>
                       <div>
                         <span className="text-muted-foreground text-sm">
                           Time Frame:
                         </span>
-                        <p className="font-medium">{profile.timeFrame}</p>
+                        <p className="font-medium">{formatTimeDisplay(profile.timeFrame)}</p>
                       </div>
                     </div>
 
                     {/* Career Paths Section */}
-                    <div>
+                      <div>
                       <span className="text-muted-foreground text-sm block mb-4">
                         Career Specializations:
-                      </span>
+                        </span>
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Primary Specialization Column */}
                         <div>
                           <h5 className="text-sm font-semibold text-muted-foreground mb-3">Primary Specialization</h5>
                           <div className="flex justify-center lg:justify-start">
-                            <CareerPathCard
-                              pathKey={profile.primaryPath as CareerPathKey}
+                          <CareerPathCard
+                            pathKey={profile.primaryPath as CareerPathKey}
                               isPrimary={true}
-                              onClick={() => {}}
+                            onClick={() => {}}
                               showBadge={true}
                               displayMode={true}
-                            />
-                          </div>
-                        </div>
-                        
+                          />
+                      </div>
+                    </div>
+
                         {/* Secondary Specializations Column */}
-                        <div>
+                      <div>
                           <h5 className="text-sm font-semibold text-muted-foreground mb-3">Secondary Specializations</h5>
                           <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                            {profile.secondaryPaths.map((pathKey) => (
+                          {profile.secondaryPaths.map((pathKey) => (
                               <CareerPathCard
                                 key={pathKey}
                                 pathKey={pathKey as CareerPathKey}
@@ -674,7 +732,7 @@ export function PersonalDetails() {
                                 showBadge={true}
                                 displayMode={true}
                               />
-                            ))}
+                          ))}
                           </div>
                         </div>
                       </div>
