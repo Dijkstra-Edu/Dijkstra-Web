@@ -27,19 +27,21 @@ import {
 
 export function NavDocuments({
   items,
+  title = "Documents",
 }: {
   items: {
     name: string;
     url: string;
     icon: Icon;
   }[];
+  title?: string;
 }) {
   const { isMobile } = useSidebar();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>
-        <a href="/opportunities">Opportunities</a>
+        <a href={`/${title.toLowerCase().replace(/\s+/g, "-")}`}>{title}</a>
       </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
@@ -82,12 +84,15 @@ export function NavDocuments({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <IconDots className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        
+          <a href={`/${title.toLowerCase().replace(/\s+/g, "-")}`}>
+            <SidebarMenuItem>
+              <SidebarMenuButton className="text-sidebar-foreground/70 cursor-pointer">
+                <IconDots className="text-sidebar-foreground/70" />
+                <span>More</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </a>
       </SidebarMenu>
     </SidebarGroup>
   );

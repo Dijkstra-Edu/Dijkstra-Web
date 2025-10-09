@@ -17,7 +17,7 @@ export default function ProjectsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Promo Banner */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container-max mx-auto px-4 py-8">
         <div className="overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 p-8 text-white">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-4">
@@ -44,7 +44,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Featured Projects Section */}
-      <section className="container mx-auto px-4 py-8 space-y-4">
+      <section className="container-max mx-auto px-4 py-8 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold">Featured Open Source Projects</h2>
@@ -79,7 +79,7 @@ export default function ProjectsPage() {
 
       {/* Frontend Projects Section */}
       <section className="bg-muted/30">
-        <div className="container mx-auto px-4 py-8 space-y-4">
+        <div className="container-max mx-auto px-4 py-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold">Frontend & UI Projects</h2>
@@ -114,7 +114,7 @@ export default function ProjectsPage() {
       </section>
 
       {/* Machine Learning Projects Section */}
-      <section className="container mx-auto px-4 py-8 space-y-4">
+      <section className="container-max mx-auto px-4 py-8 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold">Machine Learning & AI</h2>
@@ -150,7 +150,7 @@ export default function ProjectsPage() {
 
       {/* Good First Issues Section */}
       <section className="bg-muted/30">
-        <div className="container mx-auto px-4 py-8 space-y-4">
+        <div className="container-max mx-auto px-4 py-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold">Good First Issues</h2>
