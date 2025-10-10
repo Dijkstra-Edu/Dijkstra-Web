@@ -133,6 +133,8 @@ export enum Tools {
 export interface OnboardUserRequest {
   // Required fields
   github_user_name: string;
+  linkedin_user_name: string;
+  leetcode_user_name: string;
   primary_specialization: Domain;
   secondary_specializations: Domain[];
   expected_salary_bucket: Rank;

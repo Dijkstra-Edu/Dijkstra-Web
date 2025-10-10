@@ -835,7 +835,7 @@ export default function Page() {
   const canProceed = useCallback(() => {
     switch (currentStep) {
       case 5: // LinkedIn
-        return linkedinConnected;
+        return linkedinConnected && state.linkedinHandle.trim() !== "";
       case 6: // LeetCode
         return isValidLeetCodeUsername(state.leetcodeHandle);
       case 7: // Career Planning
@@ -1680,8 +1680,15 @@ export default function Page() {
     );
   };
 
-  // LinkedIn Step simplified to OAuth-only
+  // LinkedIn Step with username input
   const LinkedInStep = () => {
+    const [localLinkedInHandle, setLocalLinkedInHandle] = useState(state.linkedinHandle);
+
+    const handleSave = () => {
+      updateState({ linkedinHandle: localLinkedInHandle });
+      markStepComplete("linkedin");
+    };
+
     return (
       <div className="space-y-6 h-[600px]">
         {/* Step Indicator */}
@@ -1753,7 +1760,34 @@ export default function Page() {
                 </p>
               </div>
 
-              {/* Removed LinkedIn profile help dropdown */}
+              {/* LinkedIn Username Input */}
+              {linkedinConnected && (
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin-handle" className="text-gray-900 dark:text-white text-sm">
+                    What's your LinkedIn username?
+                  </Label>
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
+                    <Input
+                      id="linkedin-handle"
+                      placeholder="e.g., john-doe (from linkedin.com/in/john-doe)"
+                      value={localLinkedInHandle}
+                      onChange={(e) => setLocalLinkedInHandle(e.target.value)}
+                      className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-gray-900 dark:text-white placeholder:text-gray-500 text-sm h-10 sm:h-9"
+                    />
+                    <Button
+                      onClick={handleSave}
+                      disabled={!localLinkedInHandle.trim()}
+                      className="px-4 h-10 sm:h-9 w-full sm:w-auto"
+                      size="sm"
+                    >
+                      Save
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Enter your custom LinkedIn URL (e.g., "john-doe" from linkedin.com/in/john-doe)
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1812,8 +1846,15 @@ export default function Page() {
         return;
       }
 
+      if (!state.linkedinHandle || !state.leetcodeHandle) {
+        console.error("LinkedIn or LeetCode username not found");
+        return;
+      }
+
       mutation.mutate({
         github_user_name: githubUsername,
+        linkedin_user_name: state.linkedinHandle,
+        leetcode_user_name: state.leetcodeHandle,
         primary_specialization: localPrimarySpec as Domain,
         secondary_specializations: localSecondarySpecs as Domain[],
         expected_salary_bucket: localExpectedSalary as any,
@@ -2292,29 +2333,9 @@ export default function Page() {
         >
           <Button
             onClick={() => {
-              // Clear localStorage and reset to welcome
+              // Clear localStorage now that data is saved to backend
               localStorage.removeItem(STORAGE_KEY);
               localStorage.removeItem(COMPLETED_STEPS_KEY);
-              setShowOnboarding(false);
-              setCurrentStep(0);
-              setCompletedSteps([]);
-              setState({
-                github: null,
-                gitSetup: null,
-                cliKnowledge: null,
-                discordJoined: null,
-                leetcodeHandle: "",
-                linkedinHandle: "",
-                expandedSections: {},
-                // Career planning fields
-                primarySpecialization: "",
-                secondarySpecializations: [],
-                timeToUpskill: 0,
-                expectedSalary: "",
-                selectedTools: [],
-                dreamCompany: "",
-                dreamRole: "",
-              });
               router.push("/dashboard");
             }}
             className="px-8 py-4 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl transition-all duration-200"
@@ -2326,8 +2347,9 @@ export default function Page() {
           <Button
             variant="outline"
             onClick={() => {
-              setShowOnboarding(false);
-              setCurrentStep(0);
+              // Clear localStorage now that data is saved to backend
+              localStorage.removeItem(STORAGE_KEY);
+              localStorage.removeItem(COMPLETED_STEPS_KEY);
               router.push("/");
             }}
             className="px-8 py-4 text-lg font-semibold bg-white/10 backdrop-blur-sm border-white/20 text-foreground hover:bg-white/20 rounded-xl transition-all duration-200"

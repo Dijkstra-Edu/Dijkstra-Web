@@ -30,15 +30,19 @@ export async function GET(request: NextRequest) {
     const response = await fetch(endpoint, { method: "GET" });
 
     if (!response.ok) {
+      // Read response body as text first to avoid "body already read" error
+      const responseText = await response.text();
       let errorData;
+      
       try {
-        errorData = await response.json();
+        // Try to parse the text as JSON
+        errorData = JSON.parse(responseText);
       } catch (e) {
-        const errorText = await response.text();
-        console.error('Backend error (non-JSON):', response.status, errorText);
+        // Response is not JSON
+        console.error('Backend error (non-JSON):', response.status, responseText);
         errorData = { 
           error: 'Backend error',
-          message: errorText || `HTTP ${response.status}: ${response.statusText}`
+          message: responseText || `HTTP ${response.status}: ${response.statusText}`
         };
       }
       
@@ -127,17 +131,19 @@ export async function POST(request: NextRequest) {
 
     // Check if response is ok BEFORE trying to parse JSON
     if (!response.ok) {
-      // Try to parse as JSON, but handle cases where it's not JSON
+      // Read response body as text first to avoid "body already read" error
+      const responseText = await response.text();
       let errorData;
+      
       try {
-        errorData = await response.json();
+        // Try to parse the text as JSON
+        errorData = JSON.parse(responseText);
       } catch (e) {
-        // Response is not JSON, get as text instead
-        const errorText = await response.text();
-        console.error('Backend error (non-JSON):', response.status, errorText);
+        // Response is not JSON
+        console.error('Backend error (non-JSON):', response.status, responseText);
         errorData = { 
           error: 'Backend error',
-          message: errorText || `HTTP ${response.status}: ${response.statusText}`
+          message: responseText || `HTTP ${response.status}: ${response.statusText}`
         };
       }
       
