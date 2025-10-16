@@ -36,501 +36,161 @@ import {
   Github,
   Linkedin,
 } from "lucide-react";
-import {
-  IconBrandJavascript,
-  IconCode,
-  IconTestPipe,
-  IconShieldCheck,
-  IconRobot,
-  IconCloud,
-  IconServer,
-  IconBrain,
-  IconChartBar,
-  IconDatabase,
-  IconDeviceMobile,
-  IconBrandApple,
-  IconDeviceGamepad,
-  IconShield,
-  IconPalette,
-  IconBulb,
-  IconPencil,
-  IconDots,
-  IconActivity,
-  IconApps,
-  IconBrandUbuntu,
-  IconBrandWindows,
-  IconBug,
-  IconCpu,
-  IconDevices,
-  IconGitBranch,
-  IconNetwork,
-  IconSearch,
-  IconSettings,
-  IconShieldCode,
-  IconShieldLock,
-  IconTerminal,
-  IconTournament,
-  IconDeviceImacHeart,
-  IconSitemap,
-} from "@tabler/icons-react";
-
-const CAREER_PATHS = {
-  FRONTEND: {
-    label: "Frontend Engineer",
-    shortLabel: "F.E",
-    icon: IconBrandJavascript,
-    gradient: "from-pink-500 via-blue-500 to-purple-500",
-    iconColor: "text-pink-500",
-    textGradient: "from-pink-500 to-purple-500",
-    description:
-      "Build user interfaces and web experiences using modern frameworks like React, Vue, or Angular.",
-  },
-  BACKEND: {
-    label: "Backend Engineer",
-    shortLabel: "B.E",
-    icon: IconServer,
-    gradient: "from-green-500 via-teal-500 to-blue-500",
-    iconColor: "text-green-500",
-    textGradient: "from-green-500 to-blue-500",
-    description:
-      "Design and develop server-side applications, APIs, and database systems.",
-  },
-  FULLSTACK: {
-    label: "Fullstack Engineer",
-    shortLabel: "F.S",
-    icon: IconCode,
-    gradient: "from-orange-500 via-red-500 to-pink-500",
-    iconColor: "text-orange-500",
-    textGradient: "from-orange-500 to-pink-500",
-    description:
-      "Work on both frontend and backend development, handling the complete web application stack.",
-  },
-  SDE_TEST: {
-    label: "SDE in Test",
-    shortLabel: "SDET",
-    icon: IconTestPipe,
-    gradient: "from-purple-500 via-indigo-500 to-blue-500",
-    iconColor: "text-purple-500",
-    textGradient: "from-purple-500 to-blue-500",
-    description:
-      "Develop automated testing frameworks and ensure software quality through comprehensive testing.",
-  },
-  QUALITY_ASSURANCE: {
-    label: "Quality Assurance",
-    shortLabel: "QA",
-    icon: IconShieldCheck,
-    gradient: "from-emerald-500 via-green-500 to-teal-500",
-    iconColor: "text-emerald-500",
-    textGradient: "from-emerald-500 to-teal-500",
-    description:
-      "Ensure software quality through manual and automated testing processes.",
-  },
-  TEST_AUTOMATION: {
-    label: "Test Automation",
-    shortLabel: "TA",
-    icon: IconBug,
-    gradient: "from-red-500 via-orange-500 to-yellow-500",
-    iconColor: "text-red-500",
-    textGradient: "from-red-500 to-yellow-500",
-    description:
-      "Create and maintain automated testing suites and frameworks for continuous testing.",
-  },
-  DEVOPS: {
-    label: "DevOps Engineer",
-    shortLabel: "DevOps",
-    icon: IconRobot,
-    gradient: "from-blue-500 via-cyan-500 to-teal-500",
-    iconColor: "text-blue-500",
-    textGradient: "from-blue-500 to-teal-500",
-    description:
-      "Automate deployment pipelines and manage infrastructure for continuous integration and delivery.",
-  },
-  MLOPS: {
-    label: "MLOps Engineer",
-    shortLabel: "MLOps",
-    icon: IconGitBranch,
-    gradient: "from-purple-600 via-pink-600 to-red-600",
-    iconColor: "text-purple-600",
-    textGradient: "from-purple-600 to-red-600",
-    description:
-      "Manage machine learning model deployment, monitoring, and lifecycle in production environments.",
-  },
-  CI_CD: {
-    label: "CI/CD Engineer",
-    shortLabel: "CI/CD",
-    icon: IconActivity,
-    gradient: "from-green-600 via-blue-600 to-purple-600",
-    iconColor: "text-green-600",
-    textGradient: "from-green-600 to-purple-600",
-    description:
-      "Design and maintain continuous integration and deployment pipelines for software delivery.",
-  },
-  CLOUD: {
-    label: "Cloud Engineer",
-    shortLabel: "Cloud",
-    icon: IconCloud,
-    gradient: "from-sky-500 via-blue-500 to-indigo-500",
-    iconColor: "text-sky-500",
-    textGradient: "from-sky-500 to-indigo-500",
-    description:
-      "Design and manage cloud infrastructure using AWS, Azure, or Google Cloud Platform.",
-  },
-  SITE_RELIABILITY: {
-    label: "Site Reliability",
-    shortLabel: "SRE",
-    icon: IconActivity,
-    gradient: "from-orange-600 via-red-600 to-pink-600",
-    iconColor: "text-orange-600",
-    textGradient: "from-orange-600 to-pink-600",
-    description:
-      "Ensure system reliability, performance, and scalability through engineering practices.",
-  },
-  SOFTWARE_INFRASTRUCTURE: {
-    label: "Software Infrastructure",
-    shortLabel: "Infra",
-    icon: IconNetwork,
-    gradient: "from-slate-600 via-gray-600 to-zinc-600",
-    iconColor: "text-slate-600",
-    textGradient: "from-slate-600 to-zinc-600",
-    description:
-      "Build and maintain the foundational software systems that support applications and services.",
-  },
-  SYSTEMS: {
-    label: "Systems Engineer",
-    shortLabel: "Sys",
-    icon: IconCpu,
-    gradient: "from-indigo-600 via-purple-600 to-pink-600",
-    iconColor: "text-indigo-600",
-    textGradient: "from-indigo-600 to-pink-600",
-    description:
-      "Design and optimize low-level systems, operating systems, and system-level software.",
-  },
-  EMBEDDED_IOT: {
-    label: "Embedded/IoT",
-    shortLabel: "IoT",
-    icon: IconSitemap,
-    gradient: "from-teal-600 via-green-600 to-emerald-600",
-    iconColor: "text-teal-600",
-    textGradient: "from-teal-600 to-emerald-600",
-    description:
-      "Develop software for embedded systems, IoT devices, and hardware-software integration.",
-  },
-  ML_ENGINEERING: {
-    label: "ML Engineer",
-    shortLabel: "ML Eng",
-    icon: IconBrain,
-    gradient: "from-violet-500 via-purple-500 to-pink-500",
-    iconColor: "text-violet-500",
-    textGradient: "from-violet-500 to-pink-500",
-    description:
-      "Build and deploy machine learning models and AI systems at scale.",
-  },
-  ML_RESEARCH: {
-    label: "ML Research",
-    shortLabel: "ML Res",
-    icon: IconSearch,
-    gradient: "from-blue-600 via-indigo-600 to-purple-600",
-    iconColor: "text-blue-600",
-    textGradient: "from-blue-600 to-purple-600",
-    description:
-      "Conduct research in machine learning, develop new algorithms, and advance AI capabilities.",
-  },
-  DATA_SCIENCE_ANALYSIS: {
-    label: "Data Scientist",
-    shortLabel: "DS",
-    icon: IconChartBar,
-    gradient: "from-amber-500 via-orange-500 to-red-500",
-    iconColor: "text-amber-500",
-    textGradient: "from-amber-500 to-red-500",
-    description:
-      "Analyze complex data to extract insights and build predictive models.",
-  },
-  DATA_ENGINEERING: {
-    label: "Data Engineer",
-    shortLabel: "DE",
-    icon: IconDatabase,
-    gradient: "from-teal-500 via-cyan-500 to-blue-500",
-    iconColor: "text-teal-500",
-    textGradient: "from-teal-500 to-blue-500",
-    description:
-      "Build and maintain data pipelines and infrastructure for large-scale data processing.",
-  },
-  APPLICATION: {
-    label: "Application Developer",
-    shortLabel: "App Dev",
-    icon: IconApps,
-    gradient: "from-cyan-500 via-blue-500 to-indigo-500",
-    iconColor: "text-cyan-500",
-    textGradient: "from-cyan-500 to-indigo-500",
-    description:
-      "Develop desktop and web applications for various platforms and use cases.",
-  },
-  ANDROID: {
-    label: "Android Developer",
-    shortLabel: "Android",
-    icon: IconDeviceMobile,
-    gradient: "from-green-500 via-emerald-500 to-teal-500",
-    iconColor: "text-green-500",
-    textGradient: "from-green-500 to-teal-500",
-    description: "Develop native Android applications using Kotlin or Java.",
-  },
-  IOS: {
-    label: "iOS Developer",
-    shortLabel: "iOS",
-    icon: IconBrandApple,
-    gradient: "from-gray-500 via-slate-500 to-zinc-500",
-    iconColor: "text-gray-500",
-    textGradient: "from-gray-500 to-zinc-500",
-    description: "Build native iOS applications using Swift or Objective-C.",
-  },
-  CROSS_PLATFORM_MOBILE: {
-    label: "Cross-Platform Mobile",
-    shortLabel: "X-Mobile",
-    icon: IconDevices,
-    gradient: "from-purple-500 via-pink-500 to-rose-500",
-    iconColor: "text-purple-500",
-    textGradient: "from-purple-500 to-rose-500",
-    description:
-      "Develop mobile applications that work across multiple platforms using frameworks like React Native or Flutter.",
-  },
-  WINDOWS: {
-    label: "Windows Developer",
-    shortLabel: "Windows",
-    icon: IconBrandWindows,
-    gradient: "from-blue-600 via-sky-600 to-cyan-600",
-    iconColor: "text-blue-600",
-    textGradient: "from-blue-600 to-cyan-600",
-    description:
-      "Develop applications specifically for Windows platforms using .NET, C#, or other Windows technologies.",
-  },
-  MACOS: {
-    label: "macOS Developer",
-    shortLabel: "macOS",
-    icon: IconDeviceImacHeart,
-    gradient: "from-gray-600 via-slate-600 to-zinc-600",
-    iconColor: "text-gray-600",
-    textGradient: "from-gray-600 to-zinc-600",
-    description:
-      "Build native macOS applications using Swift, Objective-C, or other Apple development tools.",
-  },
-  LINUX: {
-    label: "Linux Developer",
-    shortLabel: "Linux",
-    icon: IconBrandUbuntu,
-    gradient: "from-orange-600 via-red-600 to-pink-600",
-    iconColor: "text-orange-600",
-    textGradient: "from-orange-600 to-pink-600",
-    description:
-      "Develop applications and systems for Linux distributions and open-source environments.",
-  },
-  CROSS_PLATFORM_PC: {
-    label: "Cross-Platform PC",
-    shortLabel: "X-PC",
-    icon: IconDevices,
-    gradient: "from-emerald-600 via-teal-600 to-cyan-600",
-    iconColor: "text-emerald-600",
-    textGradient: "from-emerald-600 to-cyan-600",
-    description:
-      "Create desktop applications that run across multiple operating systems using frameworks like Electron or Qt.",
-  },
-  COMPUTER_SYSTEMS: {
-    label: "Computer Systems",
-    shortLabel: "Comp Sys",
-    icon: IconTerminal,
-    gradient: "from-slate-700 via-gray-700 to-zinc-700",
-    iconColor: "text-slate-700",
-    textGradient: "from-slate-700 to-zinc-700",
-    description:
-      "Work on computer architecture, system design, and low-level system programming.",
-  },
-  COMPILERS: {
-    label: "Compiler Engineer",
-    shortLabel: "Compiler",
-    icon: IconTournament,
-    gradient: "from-violet-600 via-indigo-600 to-blue-600",
-    iconColor: "text-violet-600",
-    textGradient: "from-violet-600 to-blue-600",
-    description:
-      "Design and develop compilers, interpreters, and programming language tools.",
-  },
-  GAME_DEV: {
-    label: "Game Developer",
-    shortLabel: "Game",
-    icon: IconDeviceGamepad,
-    gradient: "from-red-500 via-pink-500 to-purple-500",
-    iconColor: "text-red-500",
-    textGradient: "from-red-500 to-purple-500",
-    description:
-      "Create interactive games and entertainment software using engines like Unity or Unreal.",
-  },
-  APPLICATION_SECURITY: {
-    label: "App Security",
-    shortLabel: "AppSec",
-    icon: IconShield,
-    gradient: "from-red-600 via-orange-600 to-yellow-600",
-    iconColor: "text-red-600",
-    textGradient: "from-red-600 to-yellow-600",
-    description:
-      "Secure applications by identifying vulnerabilities and implementing security measures.",
-  },
-  PLATFORM_SECURITY: {
-    label: "Platform Security",
-    shortLabel: "PlatSec",
-    icon: IconShieldLock,
-    gradient: "from-red-700 via-pink-700 to-purple-700",
-    iconColor: "text-red-700",
-    textGradient: "from-red-700 to-purple-700",
-    description:
-      "Secure entire platforms and infrastructure against threats and vulnerabilities.",
-  },
-  DEVSECOPS: {
-    label: "DevSecOps",
-    shortLabel: "DevSec",
-    icon: IconShieldCode,
-    gradient: "from-orange-700 via-red-700 to-pink-700",
-    iconColor: "text-orange-700",
-    textGradient: "from-orange-700 to-pink-700",
-    description:
-      "Integrate security practices into DevOps workflows and development processes.",
-  },
-  UI_UX: {
-    label: "UI/UX Designer",
-    shortLabel: "UI/UX",
-    icon: IconPalette,
-    gradient: "from-pink-500 via-rose-500 to-red-500",
-    iconColor: "text-pink-500",
-    textGradient: "from-pink-500 to-red-500",
-    description:
-      "Design user interfaces and experiences that are both beautiful and functional.",
-  },
-  PRODUCT_MANAGEMENT: {
-    label: "Product Manager",
-    shortLabel: "PM",
-    icon: IconBulb,
-    gradient: "from-yellow-500 via-amber-500 to-orange-500",
-    iconColor: "text-yellow-500",
-    textGradient: "from-yellow-500 to-orange-500",
-    description:
-      "Define product strategy and work with engineering teams to build user-focused products.",
-  },
-  PRODUCT_ENGINEERING: {
-    label: "Product Engineer",
-    shortLabel: "PE",
-    icon: IconSettings,
-    gradient: "from-amber-600 via-orange-600 to-red-600",
-    iconColor: "text-amber-600",
-    textGradient: "from-amber-600 to-red-600",
-    description:
-      "Bridge product management and engineering to build scalable, user-centric technical solutions.",
-  },
-  TECHNICAL_WRITING: {
-    label: "Technical Writer",
-    shortLabel: "TW",
-    icon: IconPencil,
-    gradient: "from-indigo-500 via-blue-500 to-cyan-500",
-    iconColor: "text-indigo-500",
-    textGradient: "from-indigo-500 to-cyan-500",
-    description:
-      "Create clear documentation and technical content for developers and users.",
-  },
-  OTHER: {
-    label: "Other",
-    shortLabel: "Other",
-    icon: IconDots,
-    gradient: "from-gray-500 via-slate-500 to-zinc-500",
-    iconColor: "text-gray-500",
-    textGradient: "from-gray-500 to-zinc-500",
-    description:
-      "Explore other career paths in technology and software development.",
-  },
-};
+import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
+import { CompanyAutoComplete } from "@/components/company-autocomplete";
 
 const SALARY_RANGES = [
-  "1-2 LPA",
-  "2-6 LPA",
-  "6-10 LPA",
-  "10-14 LPA",
-  "14-18 LPA",
-  "18-24 LPA",
-  "24-30 LPA",
-  "30-48 LPA",
-  "48-64 LPA",
-  "64 LPA - 1Cr",
-  "1Cr+",
+  { value: "UNRANKED", label: "₹0 L (Unranked)" },
+  { value: "IRON_1", label: "₹0 L - ₹1 L (Iron 1)" },
+  { value: "IRON_2", label: "₹1 L - ₹2 L (Iron 2)" },
+  { value: "IRON_3", label: "₹2 L - ₹3 L (Iron 3)" },
+  { value: "BRONZE_1", label: "₹3 L - ₹4 L (Bronze 1)" },
+  { value: "BRONZE_2", label: "₹4 L - ₹5 L (Bronze 2)" },
+  { value: "BRONZE_3", label: "₹5 L - ₹6 L (Bronze 3)" },
+  { value: "SILVER_1", label: "₹6 L - ₹7 L (Silver 1)" },
+  { value: "SILVER_2", label: "₹7 L - ₹8 L (Silver 2)" },
+  { value: "SILVER_3", label: "₹8 L - ₹10 L (Silver 3)" },
+  { value: "GOLD_1", label: "₹10 L - ₹12 L (Gold 1)" },
+  { value: "GOLD_2", label: "₹12 L - ₹13 L (Gold 2)" },
+  { value: "GOLD_3", label: "₹13 L - ₹14 L (Gold 3)" },
+  { value: "PLATINUM_1", label: "₹14 L - ₹15 L (Platinum 1)" },
+  { value: "PLATINUM_2", label: "₹15 L - ₹16 L (Platinum 2)" },
+  { value: "PLATINUM_3", label: "₹16 L - ₹18 L (Platinum 3)" },
+  { value: "DIAMOND_1", label: "₹18 L - ₹20 L (Diamond 1)" },
+  { value: "DIAMOND_2", label: "₹20 L - ₹22 L (Diamond 2)" },
+  { value: "DIAMOND_3", label: "₹22 L - ₹24 L (Diamond 3)" },
+  { value: "EMERALD_1", label: "₹24 L - ₹26 L (Emerald 1)" },
+  { value: "EMERALD_2", label: "₹26 L - ₹28 L (Emerald 2)" },
+  { value: "EMERALD_3", label: "₹28 L - ₹30 L (Emerald 3)" },
+  { value: "LAPIS_1", label: "₹30 L - ₹35 L (Lapis 1)" },
+  { value: "LAPIS_2", label: "₹35 L - ₹40 L (Lapis 2)" },
+  { value: "LAPIS_3", label: "₹40 L - ₹45 L (Lapis 3)" },
+  { value: "QUARTZ_1", label: "₹45 L - ₹55 L (Quartz 1)" },
+  { value: "QUARTZ_2", label: "₹55 L - ₹60 L (Quartz 2)" },
+  { value: "QUARTZ_3", label: "₹60 L - ₹70 L (Quartz 3)" },
+  { value: "AMETHYST_1", label: "₹70 L - ₹80 L (Amethyst 1)" },
+  { value: "AMETHYST_2", label: "₹80 L - ₹90 L (Amethyst 2)" },
+  { value: "AMETHYST_3", label: "₹90 L - ₹1 Cr (Amethyst 3)" },
+  { value: "OBSIDIAN", label: "₹1 Cr+ (Obsidian)" }
 ];
 
-const TIME_FRAMES = [
-  "6 months",
-  "1 year",
-  "1.5 years",
-  "2 years",
-  "2.5 years",
-  "3 years",
-  "3.5 years",
-  "4 years",
-  "4.5 years",
-  "5 years",
-  "6 years",
-  "7 years",
-  "8 years",
-  "9 years",
-  "10 years",
+const TIME_OPTIONS = [
+  { value: 1, label: "1 month" },
+  { value: 2, label: "2 months" },
+  { value: 3, label: "3 months" },
+  { value: 4, label: "4 months" },
+  { value: 5, label: "5 months" },
+  { value: 6, label: "6 months" },
+  { value: 7, label: "7 months" },
+  { value: 8, label: "8 months" },
+  { value: 9, label: "9 months" },
+  { value: 10, label: "10 months" },
+  { value: 11, label: "11 months" },
+  { value: 12, label: "12 months" },
+  { value: 18, label: "18 months" },
+  { value: 24, label: "24 months" },
+  { value: 30, label: "30 months" },
+  { value: 36, label: "36 months" },
+  { value: 42, label: "42 months" },
+  { value: 48, label: "48 months" },
+  { value: 54, label: "54 months" },
+  { value: 60, label: "60 months" },
+  { value: 72, label: "72 months" },
+  { value: 84, label: "84 months" },
+  { value: 96, label: "96 months" },
+  { value: 108, label: "108 months" },
+  { value: 120, label: "120 months" },
 ];
 
-type CareerPathKey = keyof typeof CAREER_PATHS;
+// Helper function to format months into years and months
+const formatTimeDisplay = (months: number): string => {
+  if (months < 12) {
+    return `${months} month${months !== 1 ? 's' : ''}`;
+  }
+  
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  
+  if (remainingMonths === 0) {
+    return `${years} year${years !== 1 ? 's' : ''}`;
+  }
+  
+  return `${years} year${years !== 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+};
 
 interface CareerPathCardProps {
   pathKey: CareerPathKey;
-  isSelected: boolean;
+  isPrimary?: boolean;
+  isSecondary?: boolean;
   onClick: () => void;
-  showTooltip?: boolean;
+  showBadge?: boolean;
+  displayMode?: boolean; // New prop for display vs edit mode
 }
 
 function CareerPathCard({
   pathKey,
-  isSelected,
+  isPrimary = false,
+  isSecondary = false,
   onClick,
-  showTooltip = true,
+  showBadge = true,
+  displayMode = false,
 }: CareerPathCardProps) {
   const path = CAREER_PATHS[pathKey];
-  const IconComponent = path.icon;
 
-  const card = (
+  return (
     <div
-      className={`flex flex-col items-center justify-center p-[2px] rounded-lg border-2 cursor-pointer transition-all
-                  ${isSelected ? "border-primary" : "border-transparent"}
-                  bg-gradient-to-r ${
-                    path.gradient
-                  } bg-origin-border hover:scale-105`}
+      className={`${displayMode ? 'w-32 h-40 p-4' : 'w-auto h-auto p-3'} rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
+        displayMode
+          ? `bg-gradient-to-br ${path.gradient} border-white/20 ${isPrimary ? 'shadow-2xl ring-2 ring-white/50' : 'shadow-lg'} backdrop-blur-sm`
+          : isPrimary
+          ? "border-primary bg-primary/10 ring-2 ring-primary/50"
+          : isSecondary
+          ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/50"
+          : "border-white/20 hover:border-white/40 hover:bg-white/5"
+      }`}
       onClick={onClick}
     >
-      <div className="flex flex-col items-center justify-center w-full h-full bg-background rounded-md py-2 px-3">
-        <IconComponent className={`h-12 w-12 mb-1 ${path.iconColor}`} />
-        <span
-          className={`text-xs font-bold text-transparent bg-clip-text text-center
-                     bg-gradient-to-r ${path.textGradient}`}
-        >
-          {path.shortLabel}
-        </span>
+      <div className="text-center h-full flex flex-col justify-between">
+        <div>
+          <div className={`${displayMode ? 'w-12 h-12' : 'w-12 h-12'} mx-auto mb-3 rounded-2xl ${displayMode ? 'bg-white/30 backdrop-blur-sm border border-white/30' : `bg-gradient-to-br ${path.gradient}`} flex items-center justify-center p-2 shadow-lg`}>
+            <img 
+              src={`/${path.icon}`} 
+              alt={path.label}
+              className="w-full h-full object-contain filter drop-shadow-sm"
+              onError={(e) => {
+                // Fallback to shortLabel if image doesn't exist
+                e.currentTarget.style.display = 'none';
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  const span = document.createElement('span');
+                  span.className = `text-white ${displayMode ? 'text-xs font-bold' : 'text-xs font-bold'}`;
+                  span.textContent = path.shortLabel;
+                  parent.appendChild(span);
+                }
+              }}
+            />
+      </div>
+          <h4 className={`${displayMode ? 'text-xs font-medium' : 'text-[10px] font-medium'} ${displayMode ? 'text-white drop-shadow-sm' : 'text-foreground'} mb-2 leading-tight px-1 break-words`}>{path.label}</h4>
+    </div>
+        
+        {/* Selection Indicators */}
+        {showBadge && (isPrimary || isSecondary) && (
+          <div className="flex justify-center mt-auto">
+            {isPrimary && (
+              <Badge variant="default" className={`text-[10px] font-semibold px-2 py-0.5 ${displayMode ? 'bg-white/50 text-white border-white/70 shadow-lg backdrop-blur-sm' : 'bg-primary'}`}>
+                ⭐ Primary
+              </Badge>
+            )}
+            {isSecondary && (
+              <Badge variant="secondary" className={`text-[10px] font-semibold px-2 py-0.5 ${displayMode ? 'bg-white/40 text-white border-white/50 shadow-md backdrop-blur-sm' : 'bg-blue-500/20 text-blue-600'}`}>
+                Secondary
+              </Badge>
+            )}
+          </div>
+        )}
       </div>
     </div>
-  );
-
-  if (showTooltip) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>{card}</TooltipTrigger>
-        <TooltipContent>
-          <div className="max-w-xs">
-            <p className="font-semibold">{path.label}</p>
-            <p className="text-sm text-muted-foreground">{path.description}</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
     );
-  }
-
-  return card;
 }
 
 export function PersonalDetails() {
@@ -547,11 +207,15 @@ export function PersonalDetails() {
     linkedin: "alex-johnson-dev",
     dreamCompany: "Google",
     dreamPosition: "Senior Software Engineer",
-    wantedSalary: "18-24 LPA",
-    timeFrame: "2 years",
+    wantedSalary: "DIAMOND_1",
+    timeFrame: 24,
     primaryPath: "FULLSTACK",
     secondaryPaths: ["FRONTEND", "BACKEND", "ML_ENGINEERING"],
   });
+
+  const [selectedCompanyData, setSelectedCompanyData] = useState<{name: string, logo_url?: string} | null>(
+    profile.dreamCompany ? { name: profile.dreamCompany } : null
+  );
 
   const [pathSelectionOpen, setPathSelectionOpen] = useState<
     "primary" | "secondary" | null
@@ -689,13 +353,19 @@ export function PersonalDetails() {
                   <h4 className="text-lg font-semibold">Career Goals</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Dream Company</label>
+                      <CompanyAutoComplete
                       value={profile.dreamCompany}
-                      onChange={(e) =>
-                        setProfile({ ...profile, dreamCompany: e.target.value })
-                      }
-                      placeholder="Dream Company"
-                    />
+                        onChange={(company) => {
+                          setProfile({ ...profile, dreamCompany: company.name });
+                          setSelectedCompanyData(company);
+                        }}
+                        selectedCompany={selectedCompanyData}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Dream Position</label>
                     <Input
                       value={profile.dreamPosition}
                       onChange={(e) =>
@@ -704,8 +374,11 @@ export function PersonalDetails() {
                           dreamPosition: e.target.value,
                         })
                       }
-                      placeholder="Dream Position"
+                        placeholder="e.g., Senior Software Engineer"
                     />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Wanted Salary</label>
                     <Select
                       value={profile.wantedSalary}
                       onValueChange={(value) =>
@@ -713,33 +386,37 @@ export function PersonalDetails() {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Wanted Salary" />
+                          <SelectValue placeholder="Select salary range" />
                       </SelectTrigger>
                       <SelectContent>
-                        {SALARY_RANGES.map((range) => (
-                          <SelectItem key={range} value={range}>
-                            {range}
+                          {SALARY_RANGES.map((salary) => (
+                            <SelectItem key={salary.value} value={salary.value}>
+                              {salary.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Time Frame</label>
                     <Select
-                      value={profile.timeFrame}
+                        value={profile.timeFrame.toString()}
                       onValueChange={(value) =>
-                        setProfile({ ...profile, timeFrame: value })
+                          setProfile({ ...profile, timeFrame: parseInt(value) })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Time Frame" />
+                          <SelectValue placeholder="Select time frame" />
                       </SelectTrigger>
                       <SelectContent>
-                        {TIME_FRAMES.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
+                          {TIME_OPTIONS.map((time) => (
+                            <SelectItem key={time.value} value={time.value.toString()}>
+                              {time.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -758,32 +435,58 @@ export function PersonalDetails() {
                             <div className="w-24 h-24 cursor-pointer">
                               <CareerPathCard
                                 pathKey={profile.primaryPath as CareerPathKey}
-                                isSelected={true}
+                                isPrimary={true}
                                 onClick={() => setPathSelectionOpen("primary")}
-                                showTooltip={false}
+                                showBadge={false}
                               />
                             </div>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[420px] p-4">
-                            <h4 className="font-medium mb-3">
+                          <PopoverContent className="w-[600px] p-4 max-h-[600px] overflow-y-auto">
+                            <h4 className="font-medium mb-4">
                               Select Primary Career Path
                             </h4>
-                            <div className="grid grid-cols-4 gap-4 max-h-80 overflow-y-auto p-2">
-                              {Object.keys(CAREER_PATHS).map((pathKey) => (
-                                <div key={pathKey} className="w-20 h-20">
+                            <div className="space-y-4">
+                              {/* Group paths by faction */}
+                              {Object.entries(
+                                Object.entries(CAREER_PATHS).reduce((acc, [key, path]) => {
+                                  const faction = path.faction || "Other";
+                                  if (!acc[faction]) acc[faction] = [];
+                                  acc[faction].push([key, path]);
+                                  return acc;
+                                }, {} as Record<string, Array<[string, typeof CAREER_PATHS[keyof typeof CAREER_PATHS]]>>)
+                              ).map(([faction, paths]) => {
+                                // Get the gradient from the first path in this faction
+                                const factionGradient = paths[0][1].gradient;
+                                
+                                return (
+                                  <div key={faction} className="space-y-2">
+                                    {/* Faction Header */}
+                                    <div className={`flex items-center gap-2 pb-1 border-b border-border`}>
+                                      <div className={`w-1 h-4 rounded-full bg-gradient-to-b ${factionGradient}`}></div>
+                                      <h5 className="text-sm font-semibold">{faction}</h5>
+                                      <span className="text-xs text-muted-foreground">({paths.length})</span>
+                                    </div>
+                                    
+                                    {/* Faction Paths Grid */}
+                                    <div className="grid grid-cols-5 gap-2">
+                                      {paths.map(([key, path]) => (
                                   <CareerPathCard
-                                    pathKey={pathKey as CareerPathKey}
-                                    isSelected={profile.primaryPath === pathKey}
+                                          key={key}
+                                          pathKey={key as CareerPathKey}
+                                          isPrimary={profile.primaryPath === key}
                                     onClick={() =>
                                       handlePathSelection(
                                         "primary",
-                                        pathKey as CareerPathKey
+                                              key as CareerPathKey
                                       )
                                     }
-                                    showTooltip={false}
+                                          showBadge={false}
                                   />
-                                </div>
                               ))}
+                                    </div>
+                                </div>
+                                );
+                              })}
                             </div>
                           </PopoverContent>
                         </Popover>
@@ -797,13 +500,13 @@ export function PersonalDetails() {
                           {profile.secondaryPaths.map((pathKey, index) => (
                             <div
                               key={pathKey}
-                              className="relative group w-20 h-20"
+                              className="relative group w-24 h-24"
                             >
                               <CareerPathCard
                                 pathKey={pathKey as CareerPathKey}
-                                isSelected={true}
+                                isSecondary={true}
                                 onClick={() => {}}
-                                showTooltip={false}
+                                showBadge={false}
                               />
                               <Button
                                 size="sm"
@@ -834,47 +537,69 @@ export function PersonalDetails() {
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
-                                  className="w-20 h-20 border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 bg-transparent hover:bg-muted/50 transition-all duration-200"
+                                  className="w-24 h-24 border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 bg-transparent hover:bg-muted/50 transition-all duration-200"
                                   onClick={() =>
                                     setPathSelectionOpen("secondary")
                                   }
                                 >
                                   <div className="flex flex-col items-center gap-1">
-                                    <IconDots className="w-6 h-6 text-muted-foreground" />
+                                    <X className="w-6 h-6 text-muted-foreground rotate-45" />
                                     <span className="text-xs text-muted-foreground">
                                       Add
                                     </span>
                                   </div>
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent className="w-[420px] p-4">
-                                <h4 className="font-medium mb-3">
+                              <PopoverContent className="w-[600px] p-4 max-h-[600px] overflow-y-auto">
+                                <h4 className="font-medium mb-4">
                                   Add Secondary Career Path
                                 </h4>
-                                <div className="grid grid-cols-4 gap-4 max-h-80 overflow-y-auto p-2">
-                                  {Object.keys(CAREER_PATHS)
-                                    .filter(
-                                      (pathKey) =>
-                                        pathKey !== profile.primaryPath &&
-                                        !profile.secondaryPaths.includes(
-                                          pathKey
-                                        )
-                                    )
-                                    .map((pathKey) => (
-                                      <div key={pathKey} className="w-20 h-20">
+                                <div className="space-y-4">
+                                  {/* Group paths by faction */}
+                                  {Object.entries(
+                                    Object.entries(CAREER_PATHS).reduce((acc, [key, path]) => {
+                                      const faction = path.faction || "Other";
+                                      if (!acc[faction]) acc[faction] = [];
+                                      acc[faction].push([key, path]);
+                                      return acc;
+                                    }, {} as Record<string, Array<[string, typeof CAREER_PATHS[keyof typeof CAREER_PATHS]]>>)
+                                  ).map(([faction, paths]) => {
+                                    // Get the gradient from the first path in this faction
+                                    const factionGradient = paths[0][1].gradient;
+                                    
+                                    return (
+                                      <div key={faction} className="space-y-2">
+                                        {/* Faction Header */}
+                                        <div className={`flex items-center gap-2 pb-1 border-b border-border`}>
+                                          <div className={`w-1 h-4 rounded-full bg-gradient-to-b ${factionGradient}`}></div>
+                                          <h5 className="text-sm font-semibold">{faction}</h5>
+                                          <span className="text-xs text-muted-foreground">({paths.length})</span>
+                                        </div>
+                                        
+                                        {/* Faction Paths Grid */}
+                                        <div className="grid grid-cols-5 gap-2">
+                                          {paths
+                                            .filter(([key]) => 
+                                              key !== profile.primaryPath &&
+                                              !profile.secondaryPaths.includes(key)
+                                            )
+                                            .map(([key, path]) => (
                                         <CareerPathCard
-                                          pathKey={pathKey as CareerPathKey}
-                                          isSelected={false}
+                                                key={key}
+                                                pathKey={key as CareerPathKey}
                                           onClick={() =>
                                             handlePathSelection(
                                               "secondary",
-                                              pathKey as CareerPathKey
+                                                    key as CareerPathKey
                                             )
                                           }
-                                          showTooltip={false}
+                                                showBadge={false}
                                         />
-                                      </div>
                                     ))}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </PopoverContent>
                             </Popover>
@@ -928,25 +653,30 @@ export function PersonalDetails() {
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold">Career Goals</h4>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    {/* Column 1: Dream Company and Wanted Salary */}
-                    <div className="space-y-4">
+                  <div className="space-y-6">
+                    {/* Dream Company and Position Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <span className="text-muted-foreground text-sm">
                           Dream Company:
                         </span>
+                        <div className="flex items-center gap-3 mt-1">
+                          {selectedCompanyData?.logo_url ? (
+                            <img 
+                              src={selectedCompanyData.logo_url} 
+                              alt={`${profile.dreamCompany} logo`}
+                              className="w-8 h-8 rounded-lg object-contain border bg-white"
+                            />
+                          ) : (
+                            <img
+                              src={`/abstract-geometric-shapes.png?key=kh3mj&height=32&width=32&query=${encodeURIComponent(`${profile.dreamCompany} company logo`)}`}
+                              alt={`${profile.dreamCompany} logo`}
+                              className="w-8 h-8 rounded-lg object-cover border bg-white"
+                            />
+                          )}
                         <p className="font-medium">{profile.dreamCompany}</p>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground text-sm">
-                          Wanted Salary:
-                        </span>
-                        <p className="font-medium">{profile.wantedSalary}</p>
-                      </div>
-                    </div>
-
-                    {/* Column 2: Dream Position and Time Frame */}
-                    <div className="space-y-4">
                       <div>
                         <span className="text-muted-foreground text-sm">
                           Dream Position:
@@ -955,44 +685,55 @@ export function PersonalDetails() {
                       </div>
                       <div>
                         <span className="text-muted-foreground text-sm">
+                          Wanted Salary:
+                        </span>
+                        <p className="font-medium">
+                          {SALARY_RANGES.find(s => s.value === profile.wantedSalary)?.label || profile.wantedSalary}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-sm">
                           Time Frame:
                         </span>
-                        <p className="font-medium">{profile.timeFrame}</p>
+                        <p className="font-medium">{formatTimeDisplay(profile.timeFrame)}</p>
                       </div>
                     </div>
 
-                    {/* Column 3: Primary Career Path */}
-                    <div className="space-y-4">
+                    {/* Career Paths Section */}
                       <div>
-                        <span className="text-muted-foreground text-sm block mb-3">
-                          Primary Career Path:
+                      <span className="text-muted-foreground text-sm block mb-4">
+                        Career Specializations:
                         </span>
-                        <div className="w-24 h-24">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Primary Specialization Column */}
+                        <div>
+                          <h5 className="text-sm font-semibold text-muted-foreground mb-3">Primary Specialization</h5>
+                          <div className="flex justify-center lg:justify-start">
                           <CareerPathCard
                             pathKey={profile.primaryPath as CareerPathKey}
-                            isSelected={false}
+                              isPrimary={true}
                             onClick={() => {}}
+                              showBadge={true}
+                              displayMode={true}
                           />
-                        </div>
                       </div>
                     </div>
 
-                    {/* Column 4: Secondary Career Paths */}
-                    <div className="space-y-4">
+                        {/* Secondary Specializations Column */}
                       <div>
-                        <span className="text-muted-foreground text-sm block mb-3">
-                          Secondary Career Paths:
-                        </span>
-                        <div className="flex flex-wrap gap-3">
+                          <h5 className="text-sm font-semibold text-muted-foreground mb-3">Secondary Specializations</h5>
+                          <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
                           {profile.secondaryPaths.map((pathKey) => (
-                            <div key={pathKey} className="w-20 h-20">
                               <CareerPathCard
+                                key={pathKey}
                                 pathKey={pathKey as CareerPathKey}
-                                isSelected={false}
+                                isSecondary={true}
                                 onClick={() => {}}
+                                showBadge={true}
+                                displayMode={true}
                               />
-                            </div>
                           ))}
+                          </div>
                         </div>
                       </div>
                     </div>
