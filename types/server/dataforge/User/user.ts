@@ -67,3 +67,5 @@ export interface GetUserBasicResponse {
   updated_at: string;
 }
 
+export { Domain, Tools, Rank };
+
