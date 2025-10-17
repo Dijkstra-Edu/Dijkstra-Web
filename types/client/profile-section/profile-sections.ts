@@ -21,6 +21,8 @@ export type Degree = 'BTECH' | 'BSC' | 'BE' | 'BCA' | 'BSCHONS' | 'BDES' | 'BPHI
 
 export type TestScoreType = 'GRE' | 'GMAT' | 'CGPA' | 'TENTH' | 'TWELFTH';
 
+export type SkillCategory = 'PROGRAMMING_LANGUAGES' | 'FRAMEWORKS_AND_LIBRARIES' | 'DATABASES' | 'CLOUD_DEVOPS' | 'TOOLS_AND_TECHNOLOGIES' | 'OTHER';
+
 export interface Company {
   name: string;
   logo_url?: string;
@@ -135,7 +137,8 @@ export interface SkillsData {
   profileId: string;
 
   skill: Tools;
-  domain?: Domain;
+  domain?: Domain[];
+  category?: SkillCategory;
 
   proficiency?: number;
   yearsOfExperience?: number;

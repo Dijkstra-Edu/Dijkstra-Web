@@ -2,10 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Code2 } from "lucide-react";
-import { useSkills, useAddSkill, useUpdateSkill, useDeleteSkill } from "@/hooks/profile/use-skills";
-import { SkillsForm } from "./forms/skills-form";
+import { useSkills } from "@/hooks/profile/use-skills";
 import { SkillsDisplay } from "./display/skills-display";
-import { EditControls } from "../shared/edit-controls";
 import { SkillsSkeleton } from "../shared/section-skeleton";
 import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
