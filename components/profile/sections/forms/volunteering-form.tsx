@@ -27,21 +27,14 @@ import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { volunteeringSchema, type VolunteeringFormData } from "@/lib/profile/schemas";
 import { parseSkillsString } from "@/lib/profile/profile-utils";
-import type { VolunteeringData, Cause } from "@/types/client/profile-section/profile-sections";
+import type { VolunteeringData, Cause, Tools } from "@/types/client/profile-section/profile-sections";
 
 const CAUSES: { value: Cause; label: string }[] = [
   { value: "EDUCATION", label: "Education" },
-  { value: "HEALTHCARE", label: "Healthcare" },
   { value: "ENVIRONMENT", label: "Environment" },
-  { value: "ANIMAL_WELFARE", label: "Animal Welfare" },
-  { value: "HUMAN_RIGHTS", label: "Human Rights" },
-  { value: "POVERTY_ALLEVIATION", label: "Poverty Alleviation" },
-  { value: "DISASTER_RELIEF", label: "Disaster Relief" },
-  { value: "COMMUNITY_DEVELOPMENT", label: "Community Development" },
+  { value: "SOCIAL_CAUSES", label: "Social Causes" },
   { value: "SCIENCE_TECHNOLOGY", label: "Science & Technology" },
-  { value: "ARTS_CULTURE", label: "Arts & Culture" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "OTHER", label: "Other" },
+  { value: "HUMAN_RIGHT", label: "Human Rights" },
 ];
 
 interface VolunteeringFormProps {
@@ -89,7 +82,14 @@ export function VolunteeringForm({
 
   const onSubmit = (data: VolunteeringFormData) => {
     try {
-      onAdd(data);
+      onAdd({
+        ...data,
+        cause: data.cause as Cause,
+        tools: data.tools as Tools[],
+        description: data.description || "",
+        endDate: data.endDate || "",
+        organizationLogo: data.organizationLogo || "",
+      });
       toast.success("Volunteering experience added successfully!");
       form.reset();
       setIsAddingNew(false);
@@ -101,7 +101,14 @@ export function VolunteeringForm({
   const onEditSubmit = (data: VolunteeringFormData) => {
     if (!editingId) return;
     try {
-      onUpdate({ id: editingId, data });
+      onUpdate({ 
+        id: editingId, 
+        data: {
+          ...data,
+          cause: data.cause as Cause,
+          tools: data.tools as Tools[],
+        }
+      });
       toast.success("Volunteering experience updated successfully!");
       editForm.reset();
       setEditingId(null);
@@ -305,7 +312,7 @@ export function VolunteeringForm({
                     <FormControl>
                       <Input
                         placeholder="REACTJS, NODEJS, MONGODB"
-                        value={field.value.join(", ")}
+                        value={field.value?.join(", ") || ""}
                         onChange={(e) => handleToolsChange(e.target.value)}
                       />
                     </FormControl>
@@ -454,7 +461,7 @@ export function VolunteeringForm({
                       <FormControl>
                         <Input
                           placeholder="REACTJS, NODEJS, MONGODB"
-                          value={field.value.join(", ")}
+                          value={field.value?.join(", ") || ""}
                           onChange={(e) => handleEditToolsChange(e.target.value)}
                         />
                       </FormControl>
@@ -506,7 +513,7 @@ export function VolunteeringForm({
               </div>
               <p className="text-sm text-muted-foreground">{volunteering.description}</p>
               <div className="flex flex-wrap gap-1">
-                {volunteering.tools.map((tool) => (
+                {volunteering.tools?.map((tool) => (
                   <span
                     key={tool}
                     className="px-2 py-1 bg-muted rounded-md text-xs"

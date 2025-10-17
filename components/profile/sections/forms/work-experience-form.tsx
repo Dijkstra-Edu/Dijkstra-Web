@@ -22,7 +22,7 @@ import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { workExperienceSchema, type WorkExperienceFormData } from "@/lib/profile/schemas";
 import { parseSkillsString } from "@/lib/profile/profile-utils";
-import type { WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import type { WorkExperienceData, EmploymentType, WorkLocationType, Domain, Tools } from "@/types/client/profile-section/profile-sections";
 
 interface WorkExperienceFormProps {
   experiences: WorkExperienceData[];
@@ -78,7 +78,14 @@ export function WorkExperienceForm({
 
   const onSubmit = (data: WorkExperienceFormData) => {
     try {
-      onAdd(data);
+      onAdd({
+        ...data,
+        employmentType: data.employmentType as EmploymentType,
+        locationType: data.locationType as WorkLocationType,
+        domain: data.domain as Domain[],
+        toolsUsed: data.toolsUsed as Tools[],
+        profileId: "", // This will be set by the parent component
+      });
       toast.success("Work experience added successfully!");
       form.reset();
       setSelectedCompanyData(null);
@@ -91,7 +98,16 @@ export function WorkExperienceForm({
   const onEditSubmit = (data: WorkExperienceFormData) => {
     if (!editingId) return;
     try {
-      onUpdate({ id: editingId, data });
+      onUpdate({ 
+        id: editingId, 
+        data: {
+          ...data,
+          employmentType: data.employmentType as EmploymentType,
+          locationType: data.locationType as WorkLocationType,
+          domain: data.domain as Domain[],
+          toolsUsed: data.toolsUsed as Tools[],
+        }
+      });
       toast.success("Work experience updated successfully!");
       editForm.reset();
       setEditingId(null);
@@ -317,15 +333,15 @@ export function WorkExperienceForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
-                    name="company"
+                    name="companyName"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Company</FormLabel>
                         <FormControl>
                           <CompanyAutoComplete
-                            value={field.value?.name || ""}
+                            value={field.value || ""}
                             onChange={(company) => {
-                              field.onChange(company);
+                              field.onChange(company.name);
                               setSelectedCompanyData(company);
                             }}
                             selectedCompany={selectedCompanyData}
@@ -338,7 +354,7 @@ export function WorkExperienceForm({
                   
                   <FormField
                     control={editForm.control}
-                    name="position"
+                    name="title"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Position</FormLabel>
@@ -354,14 +370,16 @@ export function WorkExperienceForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
-                    name="startDate"
+                    name="startDateMonth"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
                         <FormControl>
-                          <MonthPicker
-                            date={field.value}
-                            onDateChange={field.onChange}
+                          <MonthYearPicker
+                            month={editForm.watch("startDateMonth")}
+                            year={editForm.watch("startDateYear")}
+                            onMonthChange={(month) => editForm.setValue("startDateMonth", month)}
+                            onYearChange={(year) => editForm.setValue("startDateYear", year)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -371,15 +389,17 @@ export function WorkExperienceForm({
                   
                   <FormField
                     control={editForm.control}
-                    name="endDate"
+                    name="endDateMonth"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>End Date</FormLabel>
                         <FormControl>
-                          <MonthPicker
-                            date={field.value || undefined}
-                            onDateChange={(date) => field.onChange(date || null)}
-                            disabled={editForm.watch("current")}
+                          <MonthYearPicker
+                            month={editForm.watch("endDateMonth") || new Date().getMonth() + 1}
+                            year={editForm.watch("endDateYear") || new Date().getFullYear()}
+                            onMonthChange={(month) => editForm.setValue("endDateMonth", month)}
+                            onYearChange={(year) => editForm.setValue("endDateYear", year)}
+                            disabled={editForm.watch("currentlyWorking")}
                           />
                         </FormControl>
                         <FormMessage />
@@ -390,7 +410,7 @@ export function WorkExperienceForm({
 
                 <FormField
                   control={editForm.control}
-                  name="current"
+                  name="currentlyWorking"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                       <FormControl>
@@ -399,7 +419,8 @@ export function WorkExperienceForm({
                           onCheckedChange={(checked) => {
                             field.onChange(!!checked);
                             if (checked) {
-                              editForm.setValue("endDate", null);
+                              editForm.setValue("endDateMonth", undefined);
+                              editForm.setValue("endDateYear", undefined);
                             }
                           }}
                         />
@@ -413,7 +434,7 @@ export function WorkExperienceForm({
 
                 <FormField
                   control={editForm.control}
-                  name="description"
+                  name="descriptionGeneral"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
@@ -431,15 +452,19 @@ export function WorkExperienceForm({
 
                 <FormField
                   control={editForm.control}
-                  name="skills"
+                  name="toolsUsed"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Skills (comma-separated)</FormLabel>
+                      <FormLabel>Tools & Technologies (comma-separated)</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="React, Node.js, TypeScript"
-                          value={field.value.join(", ")}
-                          onChange={(e) => handleEditSkillsChange(e.target.value)}
+                          value={Array.isArray(field.value) ? field.value.join(", ") : field.value || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            const tools = value ? parseSkillsString(value) : [];
+                            field.onChange(tools);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />

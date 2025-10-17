@@ -18,42 +18,51 @@ export function ProjectsDisplay({ data }: ProjectsDisplayProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6 md:grid-cols-2">
       {data.map((project) => (
-        <div key={project.id} className="border rounded-lg p-6 space-y-4">
-          {/* Header */}
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h5 className="text-lg font-semibold">{project.name}</h5>
-                {project.organizationLogo && (
-                  <img 
-                    src={project.organizationLogo} 
-                    alt={`${project.organization} logo`}
-                    className="w-6 h-6 rounded object-contain"
-                  />
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">{project.githubAbout}</p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Github className="w-4 h-4" />
-                  {project.owner}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Star className="w-4 h-4" />
-                  {project.githubStars}
-                </span>
-                <span className="flex items-center gap-1">
-                  <GitFork className="w-4 h-4" />
-                  {project.githubForks}
-                </span>
-                {project.githubOpenIssues > 0 && (
-                  <span className="flex items-center gap-1 text-orange-500">
-                    <AlertCircle className="w-4 h-4" />
-                    {project.githubOpenIssues} issues
+        <div key={project.id} className="border rounded-lg p-4 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              {project.projectOrganizationLogo ? (
+                <img
+                  src={project.projectOrganizationLogo.includes('logo.dev') ? `${project.projectOrganizationLogo}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : project.projectOrganizationLogo}
+                  alt={`${project.organization} logo`}
+                  className="w-16 h-16 rounded-lg object-contain border bg-white"
+                />
+              ) : project.organization ? (
+                <img
+                  src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${project.organization} company logo`)}`}
+                  alt={`${project.organization} logo`}
+                  className="w-16 h-16 rounded-lg object-cover border"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-lg border bg-muted flex items-center justify-center">
+                  <span className="text-lg font-semibold text-muted-foreground">?</span>
+                </div>
+              )}
+              <div className="space-y-1">
+                <h4 className="font-semibold text-lg">{project.name}</h4>
+                <p className="text-primary font-medium">{project.organization}</p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Github className="w-4 h-4" />
+                    {project.owner}
                   </span>
-                )}
+                  <span className="flex items-center gap-1">
+                    <Star className="w-4 h-4" />
+                    {project.githubStars}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <GitFork className="w-4 h-4" />
+                    {project.githubForks}
+                  </span>
+                  {project.githubOpenIssues > 0 && (
+                    <span className="flex items-center gap-1 text-orange-500">
+                      <AlertCircle className="w-4 h-4" />
+                      {project.githubOpenIssues} issues
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="text-right">
@@ -73,29 +82,23 @@ export function ProjectsDisplay({ data }: ProjectsDisplayProps) {
 
           {/* Topics */}
           {project.topics && project.topics.length > 0 && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">Topics</h6>
-              <div className="flex flex-wrap gap-2">
-                {project.topics.map((topic) => (
-                  <Badge key={topic} variant="outline" className="text-xs">
-                    {topic}
-                  </Badge>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {project.topics.map((topic) => (
+                <Badge key={topic} variant="outline" className="text-xs">
+                  {topic}
+                </Badge>
+              ))}
             </div>
           )}
 
           {/* Tools */}
           {project.tools && project.tools.length > 0 && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">Technologies</h6>
-              <div className="flex flex-wrap gap-2">
-                {project.tools.map((tool) => (
-                  <Badge key={tool} variant="secondary" className="text-xs">
-                    {tool}
-                  </Badge>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {project.tools.map((tool) => (
+                <Badge key={tool} variant="secondary" className="text-xs">
+                  {tool}
+                </Badge>
+              ))}
             </div>
           )}
 
@@ -163,7 +166,7 @@ export function ProjectsDisplay({ data }: ProjectsDisplayProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-muted-foreground">Lines of Code:</span>
-              <p className="font-medium">{project.totalLinesContributed.toLocaleString()}</p>
+              <p className="font-medium">{project.totalLinesContributed?.toLocaleString() || 'N/A'}</p>
             </div>
             <div>
               <span className="text-muted-foreground">Organization:</span>

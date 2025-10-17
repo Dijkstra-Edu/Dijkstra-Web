@@ -6,7 +6,7 @@ import { usePersonalDetails, useUpdatePersonalDetails } from "@/hooks/profile/us
 import { PersonalDetailsForm } from "./forms/personal-details-form";
 import { PersonalDetailsDisplay } from "./display/personal-details-display";
 import { EditControls } from "../shared/edit-controls";
-import { PersonalDetailsSkeleton, PersonalDetailsError } from "../shared/section-skeleton";
+import { PersonalDetailsSkeleton } from "../shared/section-skeleton";
 import { PersonalDetailsError as ErrorComponent } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
@@ -48,12 +48,12 @@ export function PersonalDetailsSection({ profileId, isEditing, onToggleEdit }: P
         {isEditing ? (
           <PersonalDetailsForm 
             data={personalDetails}
-            onUpdate={updateMutation.mutate}
+            onUpdate={(data) => updateMutation.mutate({ userId: profileId, data })}
             onCancel={onToggleEdit}
             isLoading={updateMutation.isPending}
           />
         ) : (
-          <PersonalDetailsDisplay data={personalDetails} />
+          <PersonalDetailsDisplay data={personalDetails || undefined} />
         )}
       </CardContent>
     </Card>

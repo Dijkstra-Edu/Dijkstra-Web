@@ -59,7 +59,7 @@ export const mockWorkExperience: WorkExperienceData[] = [
     employmentType: "INTERNSHIP" as EmploymentType,
     domain: ["FULLSTACK" as Domain, "FRONTEND" as Domain],
     companyName: "TechCorp Solutions",
-    companyLogo: "https://logo.clearbit.com/techcorp.com",
+    companyLogo: undefined,
     currentlyWorking: false,
     location: {
       id: "location_002",
@@ -86,8 +86,8 @@ export const mockWorkExperience: WorkExperienceData[] = [
     title: "Frontend Developer",
     employmentType: "PART_TIME" as EmploymentType,
     domain: ["FRONTEND" as Domain],
-    companyName: "StartupXYZ",
-    companyLogo: "https://logo.clearbit.com/startupxyz.com",
+    companyName: "Zara IT",
+    companyLogo: "https://img.logo.dev/zara.com",
     currentlyWorking: true,
     location: {
       id: "location_003",
@@ -150,7 +150,7 @@ export const mockEducation: EducationData[] = [
     id: "edu_001",
     profileId: "profile_001",
     schoolName: "Stanford University",
-    schoolLogoUrl: "https://logo.clearbit.com/stanford.edu",
+    schoolLogoUrl: "https://img.logo.dev/stanford.edu",
     schoolType: "UNIVERSITY" as SchoolType,
     degree: "BTECH" as Degree,
     courseFieldName: "Computer Science",
@@ -204,7 +204,7 @@ export const mockProjects: ProjectsData[] = [
     complexityRating: 7.5,
     testingFrameworkPresent: true,
     testingFramework: "Jest",
-    projectOrganizationLogo: "https://logo.clearbit.com/personal.com",
+    projectOrganizationLogo: undefined,
   },
   {
     id: "proj_002",
@@ -232,7 +232,7 @@ export const mockProjects: ProjectsData[] = [
     complexityRating: 8.2,
     testingFrameworkPresent: true,
     testingFramework: "Pytest",
-    projectOrganizationLogo: "https://logo.clearbit.com/stanford.edu",
+    projectOrganizationLogo: undefined,
   },
 ];
 
@@ -249,7 +249,7 @@ export const mockCertifications: CertificationsData[] = [
     credentialId: "AWS-DEV-123456",
     credentialUrl: "https://aws.amazon.com/verification",
     tools: ["AWS" as Tools, "CLOUD" as Tools],
-    issuingOrganizationLogo: "https://logo.clearbit.com/aws.amazon.com",
+    issuingOrganizationLogo: "https://img.logo.dev/aws.amazon.com",
   },
   {
     id: "cert_002",
@@ -261,7 +261,7 @@ export const mockCertifications: CertificationsData[] = [
     credentialId: "REACT-META-789012",
     credentialUrl: "https://meta.com/certification",
     tools: ["REACTJS" as Tools, "JAVASCRIPT" as Tools],
-    issuingOrganizationLogo: "https://logo.clearbit.com/meta.com",
+    issuingOrganizationLogo: "https://img.logo.dev/meta.com",
   },
 ];
 
@@ -277,7 +277,7 @@ export const mockPublications: PublicationsData[] = [
     publicationUrl: "https://medium.com/@alexjohnson/react-performance-optimization",
     description: "A comprehensive guide to improving React application performance using various memoization techniques including React.memo, useMemo, and useCallback.",
     tools: ["REACTJS" as Tools, "JAVASCRIPT" as Tools],
-    publisherLogo: "https://logo.clearbit.com/medium.com",
+    publisherLogo: "https://img.logo.dev/medium.com",
   },
 ];
 
@@ -294,7 +294,7 @@ export const mockVolunteering: VolunteeringData[] = [
     currentlyVolunteering: false,
     description: "Led development of educational platform for underprivileged children to learn programming basics.",
     tools: ["REACTJS" as Tools, "NODEJS" as Tools, "MONGODB" as Tools],
-    organizationLogo: "https://logo.clearbit.com/codeforgood.org",
+    organizationLogo: "https://img.logo.dev/codeforgood.org",
   },
   {
     id: "vol_002",
@@ -306,6 +306,7 @@ export const mockVolunteering: VolunteeringData[] = [
     currentlyVolunteering: true,
     description: "Mentoring aspiring developers in web development and providing career guidance.",
     tools: ["REACTJS" as Tools, "PYTHON" as Tools],
+    organizationLogo: undefined
   },
 ];
 

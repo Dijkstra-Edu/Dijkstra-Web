@@ -24,7 +24,7 @@ import { Edit, Trash2, Save, X, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { skillsSchema, type SkillsFormData } from "@/lib/profile/schemas";
 import { SKILL_CATEGORIES } from "@/constants/profile-constants";
-import type { SkillsData } from "@/types/client/profile-section/profile-sections";
+import type { SkillsData, Tools, Domain } from "@/types/client/profile-section/profile-sections";
 
 interface SkillsFormProps {
   skills: SkillsData[];
@@ -53,8 +53,8 @@ export function SkillsForm({
   const form = useForm<SkillsFormData>({
     resolver: zodResolver(skillsSchema),
     defaultValues: {
-      name: "",
-      category: "",
+      skill: "",
+      domain: "",
       proficiency: 50,
       yearsOfExperience: 0,
     },
@@ -66,7 +66,12 @@ export function SkillsForm({
 
   const onSubmit = (data: SkillsFormData) => {
     try {
-      onAdd(data);
+      onAdd({
+        ...data,
+        skill: data.skill as Tools,
+        domain: data.domain as Domain,
+        profileId: "", // This will be set by the parent component
+      });
       toast.success("Skill added successfully!");
       form.reset();
       setIsAddingNew(false);
@@ -78,7 +83,14 @@ export function SkillsForm({
   const onEditSubmit = (data: SkillsFormData) => {
     if (!editingId) return;
     try {
-      onUpdate({ id: editingId, data });
+      onUpdate({ 
+        id: editingId, 
+        data: {
+          ...data,
+          skill: data.skill as Tools,
+          domain: data.domain as Domain,
+        }
+      });
       toast.success("Skill updated successfully!");
       editForm.reset();
       setEditingId(null);
@@ -90,8 +102,8 @@ export function SkillsForm({
   const handleEdit = (skill: SkillsData) => {
     setEditingId(skill.id);
     editForm.reset({
-      name: skill.name,
-      category: skill.category,
+      skill: skill.skill,
+      domain: skill.domain,
       proficiency: skill.proficiency,
       yearsOfExperience: skill.yearsOfExperience,
     });
@@ -104,12 +116,13 @@ export function SkillsForm({
     }
   };
 
-  // Group skills by category
+  // Group skills by domain
   const skillsByCategory = skills.reduce((acc, skill) => {
-    if (!acc[skill.category]) {
-      acc[skill.category] = [];
+    const domain = skill.domain || "Other";
+    if (!acc[domain]) {
+      acc[domain] = [];
     }
-    acc[skill.category].push(skill);
+    acc[domain].push(skill);
     return acc;
   }, {} as Record<string, SkillsData[]>);
 
@@ -124,7 +137,7 @@ export function SkillsForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="skill"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Skill Name</FormLabel>
@@ -138,14 +151,14 @@ export function SkillsForm({
                 
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="domain"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel>Domain</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
+                            <SelectValue placeholder="Select domain" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -233,7 +246,7 @@ export function SkillsForm({
                     <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-3">
                       <FormField
                         control={editForm.control}
-                        name="name"
+                        name="skill"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-sm">Name</FormLabel>
@@ -247,10 +260,10 @@ export function SkillsForm({
                       
                       <FormField
                         control={editForm.control}
-                        name="category"
+                        name="domain"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm">Category</FormLabel>
+                            <FormLabel className="text-sm">Domain</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
@@ -334,7 +347,7 @@ export function SkillsForm({
                   // Display Mode
                   <div className="space-y-2">
                     <div className="flex justify-between items-start">
-                      <h5 className="font-medium">{skill.name}</h5>
+                      <h5 className="font-medium">{skill.skill}</h5>
                       <div className="flex gap-1">
                         <Button
                           size="sm"

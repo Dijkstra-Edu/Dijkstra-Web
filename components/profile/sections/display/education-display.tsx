@@ -20,73 +20,63 @@ export function EducationDisplay({ data }: EducationDisplayProps) {
   return (
     <div className="space-y-6">
       {data.map((education) => (
-        <div key={education.id} className="border rounded-lg p-6 space-y-4">
-          {/* Header */}
-          <div className="flex justify-between items-start">
-            <div>
-              <h5 className="text-lg font-semibold">{education.schoolName}</h5>
-              <div className="flex items-center gap-2 mt-1">
+        <div key={education.id} className="relative border-l-2 border-muted pl-6 pb-6 last:pb-0">
+          <div className="absolute w-3 h-3 bg-primary rounded-full -left-2 top-1.5" />
+          
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
                 {education.schoolLogoUrl ? (
-                  <img 
-                    src={education.schoolLogoUrl} 
+                  <img
+                    src={education.schoolLogoUrl.includes('logo.dev') ? `${education.schoolLogoUrl}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : education.schoolLogoUrl}
                     alt={`${education.schoolName} logo`}
-                    className="w-6 h-6 rounded object-contain"
+                    className="w-16 h-16 rounded-lg object-contain border bg-white"
                   />
-                ) : null}
-                <span className="text-muted-foreground">{education.degree} in {education.courseFieldName}</span>
+                ) : (
+                  <img
+                    src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${education.schoolName || 'school'} school logo`)}`}
+                    alt={`${education.schoolName || 'school'} logo`}
+                    className="w-16 h-16 rounded-lg object-cover border"
+                  />
+                )}
+                <div>
+                  <h4 className="font-semibold text-lg">
+                    {education.degree} in {education.courseFieldName}
+                  </h4>
+                  <p className="text-primary font-medium">{education.schoolName}</p>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                    <span>
+                      {formatMonthYearRange(
+                        education.startDateMonth, 
+                        education.startDateYear, 
+                        education.endDateMonth, 
+                        education.endDateYear, 
+                        education.currentlyStudying
+                      )}
+                    </span>
+                    <span>GPA: {education.cgpa}</span>
+                    {education.currentlyStudying && <Badge variant="secondary">Current</Badge>}
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium">
-                {formatMonthYearRange(
-                  education.startDateMonth, 
-                  education.startDateYear, 
-                  education.endDateMonth, 
-                  education.endDateYear, 
-                  education.currentlyStudying
-                )}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {education.location.city}, {education.location.country}
-              </p>
-            </div>
-          </div>
 
-          {/* Description */}
-          {education.descriptionGeneral && (
-            <p className="text-muted-foreground">{education.descriptionGeneral}</p>
-          )}
+            {/* Description */}
+            {education.descriptionGeneral && (
+              <p className="text-muted-foreground">{education.descriptionGeneral}</p>
+            )}
 
-          {/* CGPA */}
-          {education.cgpa && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">CGPA</h6>
-              <Badge variant="secondary" className="text-sm">
-                {education.cgpa}/4.0
-              </Badge>
-            </div>
-          )}
-
-          {/* Tools Used */}
-          {education.toolsUsed && education.toolsUsed.length > 0 && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">Technologies & Tools</h6>
+            {/* Tools Used */}
+            {education.toolsUsed && education.toolsUsed.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {education.toolsUsed.map((tool) => (
-                  <Badge key={tool} variant="secondary" className="text-xs">
+                  <Badge key={tool} variant="outline">
                     {tool}
                   </Badge>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Status Badge */}
-          {education.currentlyStudying && (
-            <Badge variant="default" className="w-fit">
-              Currently Studying
-            </Badge>
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>

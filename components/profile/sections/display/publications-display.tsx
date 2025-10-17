@@ -20,30 +20,39 @@ export function PublicationsDisplay({ data }: PublicationsDisplayProps) {
   return (
     <div className="space-y-6">
       {data.map((publication) => (
-        <div key={publication.id} className="border rounded-lg p-6 space-y-4">
-          {/* Header */}
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h5 className="text-lg font-semibold">{publication.title}</h5>
-                {publication.publisherLogo && (
-                  <img 
-                    src={publication.publisherLogo} 
-                    alt={`${publication.publisher} logo`}
-                    className="w-6 h-6 rounded object-contain"
-                  />
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">{publication.publisher}</p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  {publication.authors.join(', ')}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {new Date(publication.publicationDate).toLocaleDateString()}
-                </span>
+        <div key={publication.id} className="border rounded-lg p-4 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              {publication.publisherLogo ? (
+                <img
+                  src={publication.publisherLogo.includes('logo.dev') ? `${publication.publisherLogo}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : publication.publisherLogo}
+                  alt={`${publication.publisher} logo`}
+                  className="w-16 h-16 rounded-lg object-contain border bg-white"
+                />
+              ) : publication.publisher ? (
+                <img
+                  src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${publication.publisher} publisher logo`)}`}
+                  alt={`${publication.publisher} logo`}
+                  className="w-16 h-16 rounded-lg object-cover border"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-lg border bg-muted flex items-center justify-center">
+                  <span className="text-lg font-semibold text-muted-foreground">?</span>
+                </div>
+              )}
+              <div className="space-y-1">
+                <h4 className="font-semibold text-lg">{publication.title}</h4>
+                <p className="text-primary font-medium">{publication.publisher}</p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    {publication.authors.join(', ')}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(publication.publicationDate).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -55,15 +64,12 @@ export function PublicationsDisplay({ data }: PublicationsDisplayProps) {
 
           {/* Tools */}
           {publication.tools && publication.tools.length > 0 && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">Technologies</h6>
-              <div className="flex flex-wrap gap-2">
-                {publication.tools.map((tool) => (
-                  <Badge key={tool} variant="secondary" className="text-xs">
-                    {tool}
-                  </Badge>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {publication.tools.map((tool) => (
+                <Badge key={tool} variant="outline">
+                  {tool}
+                </Badge>
+              ))}
             </div>
           )}
 

@@ -20,63 +20,62 @@ export function VolunteeringDisplay({ data }: VolunteeringDisplayProps) {
   return (
     <div className="space-y-6">
       {data.map((volunteering) => (
-        <div key={volunteering.id} className="border rounded-lg p-6 space-y-4">
-          {/* Header */}
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h5 className="text-lg font-semibold">{volunteering.organization}</h5>
-                {volunteering.organizationLogo && (
-                  <img 
-                    src={volunteering.organizationLogo} 
+        <div key={volunteering.id} className="relative border-l-2 border-muted pl-6 pb-6 last:pb-0">
+          <div className="absolute w-3 h-3 bg-primary rounded-full -left-2 top-1.5" />
+          
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                {volunteering.organizationLogo ? (
+                  <img
+                    src={volunteering.organizationLogo.includes('logo.dev') ? `${volunteering.organizationLogo}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : volunteering.organizationLogo}
                     alt={`${volunteering.organization} logo`}
-                    className="w-6 h-6 rounded object-contain"
+                    className="w-16 h-16 rounded-lg object-contain border bg-white"
+                  />
+                ) : (
+                  <img
+                    src={`/abstract-geometric-shapes.png?key=flpqa&height=48&width=48&query=${encodeURIComponent(`${volunteering.organization || 'organization'} organization logo`)}`}
+                    alt={`${volunteering.organization || 'organization'} logo`}
+                    className="w-16 h-16 rounded-lg object-cover border"
                   />
                 )}
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">{volunteering.role}</p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Heart className="w-4 h-4" />
-                  {volunteering.cause}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {new Date(volunteering.startDate).toLocaleDateString()} - {
-                    volunteering.endDate 
-                      ? new Date(volunteering.endDate).toLocaleDateString()
-                      : 'Present'
-                  }
-                </span>
+                <div>
+                  <h4 className="font-semibold text-lg">{volunteering.role}</h4>
+                  <p className="text-primary font-medium">{volunteering.organization}</p>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                    <span>
+                      {new Date(volunteering.startDate).toLocaleDateString()} - {
+                        volunteering.endDate 
+                          ? new Date(volunteering.endDate).toLocaleDateString()
+                          : 'Present'
+                      }
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-4 h-4" />
+                      {volunteering.cause}
+                    </span>
+                    {volunteering.currentlyVolunteering && <Badge variant="secondary">Ongoing</Badge>}
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              {volunteering.currentlyVolunteering && (
-                <Badge variant="default" className="mb-2">
-                  Currently Volunteering
-                </Badge>
-              )}
-            </div>
-          </div>
 
-          {/* Description */}
-          {volunteering.description && (
-            <p className="text-muted-foreground">{volunteering.description}</p>
-          )}
+            {/* Description */}
+            {volunteering.description && (
+              <p className="text-muted-foreground">{volunteering.description}</p>
+            )}
 
-          {/* Tools */}
-          {volunteering.tools && volunteering.tools.length > 0 && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">Technologies Used</h6>
+            {/* Tools */}
+            {volunteering.tools && volunteering.tools.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {volunteering.tools.map((tool) => (
-                  <Badge key={tool} variant="secondary" className="text-xs">
+                  <Badge key={tool} variant="outline">
                     {tool}
                   </Badge>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>

@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Calendar, Award } from "lucide-react";
 import type { CertificationsData } from "@/types/client/profile-section/profile-sections";
-
+import { TOOLS_OPTIONS } from "@/constants/enum-constants";
 interface CertificationsDisplayProps {
   data: CertificationsData[];
 }
@@ -20,91 +20,66 @@ export function CertificationsDisplay({ data }: CertificationsDisplayProps) {
   return (
     <div className="space-y-6">
       {data.map((certification) => (
-        <div key={certification.id} className="border rounded-lg p-6 space-y-4">
-          {/* Header */}
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h5 className="text-lg font-semibold">{certification.name}</h5>
-                {certification.issuingOrganizationLogo && (
-                  <img 
-                    src={certification.issuingOrganizationLogo} 
-                    alt={`${certification.issuingOrganization} logo`}
-                    className="w-6 h-6 rounded object-contain"
-                  />
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">{certification.issuingOrganization}</p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Award className="w-4 h-4" />
-                  {certification.type}
-                </span>
-                {certification.credentialId && (
-                  <span className="flex items-center gap-1">
-                    <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                      {certification.credentialId}
-                    </span>
-                  </span>
-                )}
+        <div key={certification.id} className="border rounded-lg p-4 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              {certification.issuingOrganizationLogo ? (
+                <img
+                  src={certification.issuingOrganizationLogo.includes('logo.dev') ? `${certification.issuingOrganizationLogo}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : certification.issuingOrganizationLogo}
+                  alt={`${certification.issuingOrganization} logo`}
+                  className="w-16 h-16 rounded-lg object-contain border bg-white"
+                />
+              ) : (
+                <img
+                  src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48&query=${encodeURIComponent(`${certification.issuingOrganization || 'organization'} company logo`)}`}
+                  alt={`${certification.issuingOrganization || 'organization'} logo`}
+                  className="w-16 h-16 rounded-lg object-cover border"
+                />
+              )}
+              <div className="space-y-1">
+                <h4 className="font-semibold text-lg">{certification.name}</h4>
+                <p className="text-primary font-medium">{certification.issuingOrganization}</p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>Issued: {new Date(certification.issueDate).toLocaleDateString()}</span>
+                  <span>Expires: {certification.expiryDate ? new Date(certification.expiryDate).toLocaleDateString() : "No Expiry"}</span>
+                  {certification.expiryDate && new Date(certification.expiryDate) <= new Date() && (
+                    <Badge variant="destructive">Expired</Badge>
+                  )}
+                </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                <Calendar className="w-4 h-4" />
-                <span>Issued: {new Date(certification.issueDate).toLocaleDateString()}</span>
-              </div>
-              {certification.expiryDate && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  <span>Expires: {new Date(certification.expiryDate).toLocaleDateString()}</span>
-                </div>
+              {certification.credentialId && (
+                <p className="text-sm text-muted-foreground mb-1">
+                  ID: {certification.credentialId}
+                </p>
+              )}
+              {certification.credentialUrl && (
+                <a
+                  href={certification.credentialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Verify
+                </a>
               )}
             </div>
           </div>
 
           {/* Tools */}
           {certification.tools && certification.tools.length > 0 && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">Technologies</h6>
-              <div className="flex flex-wrap gap-2">
-                {certification.tools.map((tool) => (
-                  <Badge key={tool} variant="secondary" className="text-xs">
-                    {tool}
+            <div className="flex flex-wrap gap-2">
+              {certification.tools.map((tool) => {
+                const toolOption = TOOLS_OPTIONS.find(option => option.value === tool);
+                return (
+                  <Badge key={tool} variant="outline">
+                    {toolOption?.label || tool}
                   </Badge>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          )}
-
-          {/* Links */}
-          {certification.credentialUrl && (
-            <div className="flex flex-wrap gap-4">
-              <a
-                href={certification.credentialUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <ExternalLink className="w-4 h-4" />
-                View Credential
-              </a>
-            </div>
-          )}
-
-          {/* Status Badge */}
-          {certification.expiryDate && new Date(certification.expiryDate) > new Date() ? (
-            <Badge variant="default" className="w-fit">
-              Valid
-            </Badge>
-          ) : certification.expiryDate ? (
-            <Badge variant="destructive" className="w-fit">
-              Expired
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="w-fit">
-              No Expiry
-            </Badge>
           )}
         </div>
       ))}

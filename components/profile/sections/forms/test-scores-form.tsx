@@ -32,12 +32,7 @@ const TEST_SCORE_TYPES: { value: TestScoreType; label: string }[] = [
   { value: "TWELFTH", label: "12th Grade" },
   { value: "CGPA", label: "CGPA" },
   { value: "GRE", label: "GRE" },
-  { value: "GMAT", label: "GMAT" },
-  { value: "TOEFL", label: "TOEFL" },
-  { value: "IELTS", label: "IELTS" },
-  { value: "SAT", label: "SAT" },
-  { value: "ACT", label: "ACT" },
-  { value: "OTHER", label: "Other" },
+  { value: "GMAT", label: "GMAT" }
 ];
 
 interface TestScoresFormProps {
@@ -81,7 +76,10 @@ export function TestScoresForm({
 
   const onSubmit = (data: TestScoresFormData) => {
     try {
-      onAdd(data);
+      onAdd({
+        ...data,
+        type: data.type as TestScoreType,
+      });
       toast.success("Test score added successfully!");
       form.reset();
       setIsAddingNew(false);
@@ -93,7 +91,13 @@ export function TestScoresForm({
   const onEditSubmit = (data: TestScoresFormData) => {
     if (!editingId) return;
     try {
-      onUpdate({ id: editingId, data });
+      onUpdate({ 
+        id: editingId, 
+        data: {
+          ...data,
+          type: data.type as TestScoreType,
+        }
+      });
       toast.success("Test score updated successfully!");
       editForm.reset();
       setEditingId(null);

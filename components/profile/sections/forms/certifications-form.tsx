@@ -27,16 +27,12 @@ import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { certificationsSchema, type CertificationsFormData } from "@/lib/profile/schemas";
 import { parseSkillsString } from "@/lib/profile/profile-utils";
-import type { CertificationsData, CertificationType } from "@/types/client/profile-section/profile-sections";
+import type { CertificationsData, CertificationType, Tools } from "@/types/client/profile-section/profile-sections";
 
 const CERTIFICATION_TYPES: { value: CertificationType; label: string }[] = [
   { value: "CERTIFICATION", label: "Certification" },
   { value: "CERTIFICATE", label: "Certificate" },
-  { value: "BADGE", label: "Badge" },
-  { value: "LICENSE", label: "License" },
-  { value: "DEGREE", label: "Degree" },
-  { value: "DIPLOMA", label: "Diploma" },
-  { value: "OTHER", label: "Other" },
+  { value: "LICENSE", label: "License" }
 ];
 
 interface CertificationsFormProps {
@@ -84,7 +80,14 @@ export function CertificationsForm({
 
   const onSubmit = (data: CertificationsFormData) => {
     try {
-      onAdd(data);
+      onAdd({
+        ...data,
+        type: data.type as CertificationType,
+        tools: data.tools as Tools[],
+        credentialId: data.credentialId || "",
+        credentialUrl: data.credentialUrl || "",
+        issuingOrganizationLogo: data.issuingOrganizationLogo || "",
+      });
       toast.success("Certification added successfully!");
       form.reset();
       setIsAddingNew(false);
@@ -96,7 +99,14 @@ export function CertificationsForm({
   const onEditSubmit = (data: CertificationsFormData) => {
     if (!editingId) return;
     try {
-      onUpdate({ id: editingId, data });
+      onUpdate({ 
+        id: editingId, 
+        data: {
+          ...data,
+          type: data.type as CertificationType,
+          tools: data.tools as Tools[],
+        }
+      });
       toast.success("Certification updated successfully!");
       editForm.reset();
       setEditingId(null);
@@ -285,7 +295,7 @@ export function CertificationsForm({
                     <FormControl>
                       <Input
                         placeholder="AWS, CLOUD, PYTHON"
-                        value={field.value.join(", ")}
+                        value={field.value?.join(", ") || ""}
                         onChange={(e) => handleToolsChange(e.target.value)}
                       />
                     </FormControl>
@@ -397,7 +407,7 @@ export function CertificationsForm({
                       <FormControl>
                         <Input
                           placeholder="AWS, CLOUD, PYTHON"
-                          value={field.value.join(", ")}
+                          value={field.value?.join(", ") || ""}
                           onChange={(e) => handleEditToolsChange(e.target.value)}
                         />
                       </FormControl>
@@ -448,7 +458,7 @@ export function CertificationsForm({
                 </div>
               </div>
               <div className="flex flex-wrap gap-1">
-                {certification.tools.map((tool) => (
+                {certification.tools?.map((tool) => (
                   <span
                     key={tool}
                     className="px-2 py-1 bg-muted rounded-md text-xs"

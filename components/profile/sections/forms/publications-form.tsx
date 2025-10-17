@@ -19,7 +19,7 @@ import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { publicationsSchema, type PublicationsFormData } from "@/lib/profile/schemas";
 import { parseSkillsString } from "@/lib/profile/profile-utils";
-import type { PublicationsData } from "@/types/client/profile-section/profile-sections";
+import type { PublicationsData, Tools } from "@/types/client/profile-section/profile-sections";
 
 interface PublicationsFormProps {
   publications: PublicationsData[];
@@ -65,7 +65,13 @@ export function PublicationsForm({
 
   const onSubmit = (data: PublicationsFormData) => {
     try {
-      onAdd(data);
+      onAdd({
+        ...data,
+        tools: data.tools as Tools[],
+        publicationUrl: data.publicationUrl || "",
+        publisherLogo: data.publisherLogo || "",
+        description: data.description || "",
+      });
       toast.success("Publication added successfully!");
       form.reset();
       setIsAddingNew(false);
@@ -77,7 +83,13 @@ export function PublicationsForm({
   const onEditSubmit = (data: PublicationsFormData) => {
     if (!editingId) return;
     try {
-      onUpdate({ id: editingId, data });
+      onUpdate({ 
+        id: editingId, 
+        data: {
+          ...data,
+          tools: data.tools as Tools[],
+        }
+      });
       toast.success("Publication updated successfully!");
       editForm.reset();
       setEditingId(null);
@@ -189,7 +201,7 @@ export function PublicationsForm({
                       <FormControl>
                         <Input
                           placeholder="Alex Johnson, Dr. Sarah Chen"
-                          value={field.value.join(", ")}
+                          value={field.value?.join(", ") || ""}
                           onChange={(e) => handleAuthorsChange(e.target.value)}
                         />
                       </FormControl>
@@ -254,7 +266,7 @@ export function PublicationsForm({
                     <FormControl>
                       <Input
                         placeholder="REACTJS, JAVASCRIPT, PERFORMANCE"
-                        value={field.value.join(", ")}
+                        value={field.value?.join(", ") || ""}
                         onChange={(e) => handleToolsChange(e.target.value)}
                       />
                     </FormControl>
@@ -339,7 +351,7 @@ export function PublicationsForm({
                       <FormControl>
                         <Input
                           placeholder="Alex Johnson, Dr. Sarah Chen"
-                          value={field.value.join(", ")}
+                          value={field.value?.join(", ") || ""}
                           onChange={(e) => handleEditAuthorsChange(e.target.value)}
                         />
                       </FormControl>
@@ -405,7 +417,7 @@ export function PublicationsForm({
               </div>
               <p className="text-sm text-muted-foreground">{publication.description}</p>
               <div className="flex flex-wrap gap-1">
-                {publication.tools.map((tool) => (
+                {publication.tools?.map((tool) => (
                   <span
                     key={tool}
                     className="px-2 py-1 bg-muted rounded-md text-xs"

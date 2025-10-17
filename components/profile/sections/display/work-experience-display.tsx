@@ -20,69 +20,71 @@ export function WorkExperienceDisplay({ data }: WorkExperienceDisplayProps) {
   return (
     <div className="space-y-6">
       {data.map((experience) => (
-        <div key={experience.id} className="border rounded-lg p-6 space-y-4">
-          {/* Header */}
-          <div className="flex justify-between items-start">
-            <div>
-              <h5 className="text-lg font-semibold">{experience.title}</h5>
-              <div className="flex items-center gap-2 mt-1">
+        <div key={experience.id} className="relative border-l-2 border-muted pl-6 pb-6 last:pb-0">
+          <div className="absolute w-3 h-3 bg-primary rounded-full -left-2 top-1.5" />
+          
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
                 {experience.companyLogo ? (
-                  <img 
-                    src={experience.companyLogo} 
+                  <img
+                    src={experience.companyLogo.includes('logo.dev') ? `${experience.companyLogo}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : experience.companyLogo}
                     alt={`${experience.companyName} logo`}
-                    className="w-6 h-6 rounded object-contain"
+                    className="w-16 h-16 rounded-lg object-contain border bg-white"
                   />
-                ) : null}
-                <span className="text-muted-foreground">{experience.companyName}</span>
+                ) : (
+                  <img
+                    src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48`}
+                    alt={`${experience.companyName || 'company'} logo`}
+                    className="w-16 h-16 rounded-lg object-cover border"
+                  />
+                )}
+                <div>
+                  <h4 className="font-semibold text-lg">{experience.title}</h4>
+                  <p className="text-primary font-medium">{experience.companyName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatMonthYearRange(
+                      experience.startDateMonth, 
+                      experience.startDateYear, 
+                      experience.endDateMonth, 
+                      experience.endDateYear, 
+                      experience.currentlyWorking
+                    )}
+                    {experience.currentlyWorking && (
+                      <Badge variant="secondary" className="ml-2">
+                        Current
+                      </Badge>
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {calculateExperience(
+                      `${experience.startDateYear}-${experience.startDateMonth.toString().padStart(2, '0')}-01`,
+                      experience.endDateYear && experience.endDateMonth 
+                        ? `${experience.endDateYear}-${experience.endDateMonth.toString().padStart(2, '0')}-01`
+                        : null,
+                      experience.currentlyWorking
+                    )} experience
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium">
-                {formatMonthYearRange(
-                  experience.startDateMonth, 
-                  experience.startDateYear, 
-                  experience.endDateMonth, 
-                  experience.endDateYear, 
-                  experience.currentlyWorking
-                )}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {calculateExperience(
-                  `${experience.startDateYear}-${experience.startDateMonth.toString().padStart(2, '0')}-01`,
-                  experience.endDateYear && experience.endDateMonth 
-                    ? `${experience.endDateYear}-${experience.endDateMonth.toString().padStart(2, '0')}-01`
-                    : null,
-                  experience.currentlyWorking
-                )}
-              </p>
-            </div>
-          </div>
 
-          {/* Description */}
-          {experience.descriptionGeneral && (
-            <p className="text-muted-foreground">{experience.descriptionGeneral}</p>
-          )}
+            {/* Description */}
+            {experience.descriptionGeneral && (
+              <p className="text-muted-foreground">{experience.descriptionGeneral}</p>
+            )}
 
-          {/* Skills */}
-          {experience.toolsUsed && experience.toolsUsed.length > 0 && (
-            <div>
-              <h6 className="text-sm font-medium mb-2">Skills & Technologies</h6>
+            {/* Skills */}
+            {experience.toolsUsed && experience.toolsUsed.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {experience.toolsUsed.map((tool) => (
-                  <Badge key={tool} variant="secondary" className="text-xs">
+                  <Badge key={tool} variant="outline">
                     {tool}
                   </Badge>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Status Badge */}
-          {experience.currentlyWorking && (
-            <Badge variant="default" className="w-fit">
-              Current Position
-            </Badge>
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>
