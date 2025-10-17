@@ -16,12 +16,13 @@ export function SkillsDisplay({ data }: SkillsDisplayProps) {
     );
   }
 
-  // Group skills by category
-  const skillsByCategory = data.reduce((acc, skill) => {
-    if (!acc[skill.category]) {
-      acc[skill.category] = [];
+  // Group skills by domain (mapped from database field)
+  const skillsByDomain = data.reduce((acc, skill) => {
+    const domain = skill.domain || 'Other';
+    if (!acc[domain]) {
+      acc[domain] = [];
     }
-    acc[skill.category].push(skill);
+    acc[domain].push(skill);
     return acc;
   }, {} as Record<string, SkillsData[]>);
 
@@ -40,17 +41,17 @@ export function SkillsDisplay({ data }: SkillsDisplayProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {Object.entries(skillsByCategory).map(([category, skills]) => (
-          <div key={category} className="space-y-4">
-            <h4 className="font-semibold text-lg border-b pb-2">{category}</h4>
+        {Object.entries(skillsByDomain).map(([domain, skills]) => (
+          <div key={domain} className="space-y-4">
+            <h4 className="font-semibold text-lg border-b pb-2">{domain}</h4>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
                 <div
                   key={skill.id}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium ${getExperienceColor(skill.yearsOfExperience)}`}
-                  title={`${skill.name} - ${skill.proficiency}/100 proficiency (${getProficiencyLabel(skill.proficiency)})`}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium ${getExperienceColor(skill.yearsOfExperience || 0)}`}
+                  title={`${skill.skill} - ${skill.proficiency || 0}/100 proficiency (${getProficiencyLabel(skill.proficiency || 0)})`}
                 >
-                  {skill.name} | {skill.yearsOfExperience}y
+                  {skill.skill} | {skill.yearsOfExperience || 0}y
                 </div>
               ))}
             </div>

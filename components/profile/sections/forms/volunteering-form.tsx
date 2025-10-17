@@ -1,4 +1,4 @@
-// Work Experience Form Component
+// Volunteering Form Component
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form,
   FormControl,
   FormField,
@@ -16,18 +23,31 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { MonthYearPicker } from "../../shared/month-year-picker";
-import { CompanyAutoComplete } from "@/components/company-autocomplete";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { workExperienceSchema, type WorkExperienceFormData } from "@/lib/profile/schemas";
+import { volunteeringSchema, type VolunteeringFormData } from "@/lib/profile/schemas";
 import { parseSkillsString } from "@/lib/profile/profile-utils";
-import type { WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import type { VolunteeringData, Cause } from "@/types/client/profile-section/profile-sections";
 
-interface WorkExperienceFormProps {
-  experiences: WorkExperienceData[];
-  onAdd: (data: Omit<WorkExperienceData, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => void;
-  onUpdate: (data: { id: string; data: Partial<WorkExperienceData> }) => void;
+const CAUSES: { value: Cause; label: string }[] = [
+  { value: "EDUCATION", label: "Education" },
+  { value: "HEALTHCARE", label: "Healthcare" },
+  { value: "ENVIRONMENT", label: "Environment" },
+  { value: "ANIMAL_WELFARE", label: "Animal Welfare" },
+  { value: "HUMAN_RIGHTS", label: "Human Rights" },
+  { value: "POVERTY_ALLEVIATION", label: "Poverty Alleviation" },
+  { value: "DISASTER_RELIEF", label: "Disaster Relief" },
+  { value: "COMMUNITY_DEVELOPMENT", label: "Community Development" },
+  { value: "SCIENCE_TECHNOLOGY", label: "Science & Technology" },
+  { value: "ARTS_CULTURE", label: "Arts & Culture" },
+  { value: "SPORTS", label: "Sports" },
+  { value: "OTHER", label: "Other" },
+];
+
+interface VolunteeringFormProps {
+  volunteerings: VolunteeringData[];
+  onAdd: (data: Omit<VolunteeringData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
+  onUpdate: (data: { id: string; data: Partial<VolunteeringData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
   isUpdating: boolean;
@@ -35,9 +55,8 @@ interface WorkExperienceFormProps {
   onCancel: () => void;
 }
 
-
-export function WorkExperienceForm({
-  experiences,
+export function VolunteeringForm({
+  volunteerings,
   onAdd,
   onUpdate,
   onDelete,
@@ -45,129 +64,101 @@ export function WorkExperienceForm({
   isUpdating,
   isDeleting,
   onCancel,
-}: WorkExperienceFormProps) {
+}: VolunteeringFormProps) {
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [selectedCompanyData, setSelectedCompanyData] = useState<{name: string, logo_url?: string} | null>(null);
 
-  const form = useForm<WorkExperienceFormData>({
-    resolver: zodResolver(workExperienceSchema),
+  const form = useForm<VolunteeringFormData>({
+    resolver: zodResolver(volunteeringSchema),
     defaultValues: {
-      title: "",
-      employmentType: "FULL_TIME",
-      domain: [],
-      companyName: "",
-      companyLogo: "",
-      currentlyWorking: false,
-      locationType: "ON_SITE",
-      startDateMonth: new Date().getMonth() + 1,
-      startDateYear: new Date().getFullYear(),
-      endDateMonth: undefined,
-      endDateYear: undefined,
-      descriptionGeneral: "",
-      descriptionDetailed: "",
-      descriptionLess: "",
-      workDone: "",
-      toolsUsed: [],
+      organization: "",
+      role: "",
+      cause: "EDUCATION",
+      startDate: "",
+      endDate: "",
+      currentlyVolunteering: false,
+      description: "",
+      tools: [],
+      organizationLogo: "",
     },
   });
 
-  const editForm = useForm<WorkExperienceFormData>({
-    resolver: zodResolver(workExperienceSchema),
+  const editForm = useForm<VolunteeringFormData>({
+    resolver: zodResolver(volunteeringSchema),
   });
 
-  const onSubmit = (data: WorkExperienceFormData) => {
+  const onSubmit = (data: VolunteeringFormData) => {
     try {
       onAdd(data);
-      toast.success("Work experience added successfully!");
+      toast.success("Volunteering experience added successfully!");
       form.reset();
-      setSelectedCompanyData(null);
       setIsAddingNew(false);
     } catch (error) {
-      toast.error("Failed to add work experience");
+      toast.error("Failed to add volunteering experience");
     }
   };
 
-  const onEditSubmit = (data: WorkExperienceFormData) => {
+  const onEditSubmit = (data: VolunteeringFormData) => {
     if (!editingId) return;
     try {
       onUpdate({ id: editingId, data });
-      toast.success("Work experience updated successfully!");
+      toast.success("Volunteering experience updated successfully!");
       editForm.reset();
       setEditingId(null);
     } catch (error) {
-      toast.error("Failed to update work experience");
+      toast.error("Failed to update volunteering experience");
     }
   };
 
-  const handleEdit = (experience: WorkExperienceData) => {
-    setEditingId(experience.id);
+  const handleEdit = (volunteering: VolunteeringData) => {
+    setEditingId(volunteering.id);
     editForm.reset({
-      title: experience.title,
-      employmentType: experience.employmentType,
-      domain: experience.domain,
-      companyName: experience.companyName,
-      companyLogo: experience.companyLogo,
-      currentlyWorking: experience.currentlyWorking,
-      locationType: experience.locationType,
-      startDateMonth: experience.startDateMonth,
-      startDateYear: experience.startDateYear,
-      endDateMonth: experience.endDateMonth,
-      endDateYear: experience.endDateYear,
-      descriptionGeneral: experience.descriptionGeneral,
-      descriptionDetailed: experience.descriptionDetailed,
-      descriptionLess: experience.descriptionLess,
-      workDone: experience.workDone,
-      toolsUsed: experience.toolsUsed,
-    });
-    setSelectedCompanyData({
-      name: experience.companyName,
-      logo_url: experience.companyLogo,
+      organization: volunteering.organization,
+      role: volunteering.role,
+      cause: volunteering.cause,
+      startDate: volunteering.startDate,
+      endDate: volunteering.endDate || "",
+      currentlyVolunteering: volunteering.currentlyVolunteering,
+      description: volunteering.description || "",
+      tools: volunteering.tools,
+      organizationLogo: volunteering.organizationLogo || "",
     });
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this work experience?")) {
+    if (confirm("Are you sure you want to delete this volunteering experience?")) {
       onDelete(id);
-      toast.success("Work experience deleted successfully!");
+      toast.success("Volunteering experience deleted successfully!");
     }
   };
 
-  const handleSkillsChange = (skillsString: string) => {
-    const skills = parseSkillsString(skillsString);
-    form.setValue("toolsUsed", skills);
+  const handleToolsChange = (toolsString: string) => {
+    const tools = parseSkillsString(toolsString);
+    form.setValue("tools", tools);
   };
 
-  const handleEditSkillsChange = (skillsString: string) => {
-    const skills = parseSkillsString(skillsString);
-    editForm.setValue("toolsUsed", skills);
+  const handleEditToolsChange = (toolsString: string) => {
+    const tools = parseSkillsString(toolsString);
+    editForm.setValue("tools", tools);
   };
 
   return (
     <div className="space-y-6">
-      {/* Add New Experience */}
+      {/* Add New Volunteering Experience */}
       {isAddingNew && (
         <div className="border rounded-lg p-4 space-y-4">
-          <h4 className="font-medium">Add New Work Experience</h4>
+          <h4 className="font-medium">Add New Volunteering Experience</h4>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="companyName"
+                  name="organization"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company</FormLabel>
+                      <FormLabel>Organization</FormLabel>
                       <FormControl>
-                        <CompanyAutoComplete
-                          value={field.value}
-                          onChange={(company) => {
-                            field.onChange(company.name);
-                            form.setValue("companyLogo", company.logo_url || "");
-                            setSelectedCompanyData(company);
-                          }}
-                          selectedCompany={selectedCompanyData}
-                        />
+                        <Input placeholder="e.g., Code for Good" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -176,12 +167,12 @@ export function WorkExperienceForm({
                 
                 <FormField
                   control={form.control}
-                  name="title"
+                  name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Position</FormLabel>
+                      <FormLabel>Role</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Software Engineer" {...field} />
+                        <Input placeholder="e.g., Lead Developer" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -192,17 +183,53 @@ export function WorkExperienceForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="startDateMonth"
+                  name="cause"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cause</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select cause" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {CAUSES.map((cause) => (
+                            <SelectItem key={cause.value} value={cause.value}>
+                              {cause.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="organizationLogo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Organization Logo URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com/logo.png" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startDate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Start Date</FormLabel>
                       <FormControl>
-                        <MonthYearPicker
-                          month={form.watch("startDateMonth")}
-                          year={form.watch("startDateYear")}
-                          onMonthChange={(month) => form.setValue("startDateMonth", month)}
-                          onYearChange={(year) => form.setValue("startDateYear", year)}
-                        />
+                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -211,17 +238,15 @@ export function WorkExperienceForm({
                 
                 <FormField
                   control={form.control}
-                  name="endDateMonth"
+                  name="endDate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>End Date</FormLabel>
                       <FormControl>
-                        <MonthYearPicker
-                          month={form.watch("endDateMonth") || new Date().getMonth() + 1}
-                          year={form.watch("endDateYear") || new Date().getFullYear()}
-                          onMonthChange={(month) => form.setValue("endDateMonth", month)}
-                          onYearChange={(year) => form.setValue("endDateYear", year)}
-                          disabled={form.watch("currentlyWorking")}
+                        <Input 
+                          type="date" 
+                          {...field}
+                          disabled={form.watch("currentlyVolunteering")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -232,7 +257,7 @@ export function WorkExperienceForm({
 
               <FormField
                 control={form.control}
-                name="currentlyWorking"
+                name="currentlyVolunteering"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
@@ -241,14 +266,13 @@ export function WorkExperienceForm({
                         onCheckedChange={(checked) => {
                           field.onChange(!!checked);
                           if (checked) {
-                            form.setValue("endDateMonth", undefined);
-                            form.setValue("endDateYear", undefined);
+                            form.setValue("endDate", "");
                           }
                         }}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Currently working here</FormLabel>
+                      <FormLabel>Currently volunteering here</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -256,13 +280,13 @@ export function WorkExperienceForm({
 
               <FormField
                 control={form.control}
-                name="descriptionGeneral"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe your role and achievements..."
+                        placeholder="Describe your volunteering work and impact..."
                         rows={3}
                         {...field}
                       />
@@ -274,15 +298,15 @@ export function WorkExperienceForm({
 
               <FormField
                 control={form.control}
-                name="toolsUsed"
+                name="tools"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tools Used (comma-separated)</FormLabel>
+                    <FormLabel>Technologies Used (comma-separated)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="React, Node.js, TypeScript"
+                        placeholder="REACTJS, NODEJS, MONGODB"
                         value={field.value.join(", ")}
-                        onChange={(e) => handleSkillsChange(e.target.value)}
+                        onChange={(e) => handleToolsChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -292,12 +316,11 @@ export function WorkExperienceForm({
 
               <div className="flex gap-2">
                 <Button type="submit" disabled={isAdding}>
-                  {isAdding ? 'Adding...' : 'Add Experience'}
+                  {isAdding ? 'Adding...' : 'Add Volunteering Experience'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => {
                   setIsAddingNew(false);
                   form.reset();
-                  setSelectedCompanyData(null);
                 }}>
                   Cancel
                 </Button>
@@ -307,29 +330,22 @@ export function WorkExperienceForm({
         </div>
       )}
 
-      {/* Existing Experiences */}
-      {experiences.map((experience) => (
-        <div key={experience.id} className="border rounded-lg p-4 space-y-4">
-          {editingId === experience.id ? (
+      {/* Existing Volunteering Entries */}
+      {volunteerings.map((volunteering) => (
+        <div key={volunteering.id} className="border rounded-lg p-4 space-y-4">
+          {editingId === volunteering.id ? (
             // Edit Form
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
-                    name="company"
+                    name="organization"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company</FormLabel>
+                        <FormLabel>Organization</FormLabel>
                         <FormControl>
-                          <CompanyAutoComplete
-                            value={field.value?.name || ""}
-                            onChange={(company) => {
-                              field.onChange(company);
-                              setSelectedCompanyData(company);
-                            }}
-                            selectedCompany={selectedCompanyData}
-                          />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -338,12 +354,12 @@ export function WorkExperienceForm({
                   
                   <FormField
                     control={editForm.control}
-                    name="position"
+                    name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Position</FormLabel>
+                        <FormLabel>Role</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Software Engineer" {...field} />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -354,16 +370,24 @@ export function WorkExperienceForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}
-                    name="startDate"
+                    name="cause"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Start Date</FormLabel>
-                        <FormControl>
-                          <MonthPicker
-                            date={field.value}
-                            onDateChange={field.onChange}
-                          />
-                        </FormControl>
+                        <FormLabel>Cause</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {CAUSES.map((cause) => (
+                              <SelectItem key={cause.value} value={cause.value}>
+                                {cause.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -371,16 +395,12 @@ export function WorkExperienceForm({
                   
                   <FormField
                     control={editForm.control}
-                    name="endDate"
+                    name="startDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>End Date</FormLabel>
+                        <FormLabel>Start Date</FormLabel>
                         <FormControl>
-                          <MonthPicker
-                            date={field.value || undefined}
-                            onDateChange={(date) => field.onChange(date || null)}
-                            disabled={editForm.watch("current")}
-                          />
+                          <Input type="date" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -390,7 +410,7 @@ export function WorkExperienceForm({
 
                 <FormField
                   control={editForm.control}
-                  name="current"
+                  name="currentlyVolunteering"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                       <FormControl>
@@ -399,13 +419,13 @@ export function WorkExperienceForm({
                           onCheckedChange={(checked) => {
                             field.onChange(!!checked);
                             if (checked) {
-                              editForm.setValue("endDate", null);
+                              editForm.setValue("endDate", "");
                             }
                           }}
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Currently working here</FormLabel>
+                        <FormLabel>Currently volunteering here</FormLabel>
                       </div>
                     </FormItem>
                   )}
@@ -418,11 +438,7 @@ export function WorkExperienceForm({
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder="Describe your role and achievements..."
-                          rows={3}
-                          {...field}
-                        />
+                        <Textarea rows={3} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -431,15 +447,15 @@ export function WorkExperienceForm({
 
                 <FormField
                   control={editForm.control}
-                  name="skills"
+                  name="tools"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Skills (comma-separated)</FormLabel>
+                      <FormLabel>Technologies Used (comma-separated)</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="React, Node.js, TypeScript"
+                          placeholder="REACTJS, NODEJS, MONGODB"
                           value={field.value.join(", ")}
-                          onChange={(e) => handleEditSkillsChange(e.target.value)}
+                          onChange={(e) => handleEditToolsChange(e.target.value)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -455,7 +471,6 @@ export function WorkExperienceForm({
                   <Button type="button" variant="outline" onClick={() => {
                     setEditingId(null);
                     editForm.reset();
-                    setSelectedCompanyData(null);
                   }}>
                     <X className="w-4 h-4 mr-2" />
                     Cancel
@@ -468,30 +483,30 @@ export function WorkExperienceForm({
             <div className="space-y-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <h5 className="font-medium">{experience.title}</h5>
-                  <p className="text-sm text-muted-foreground">{experience.companyName}</p>
+                  <h5 className="font-medium">{volunteering.organization}</h5>
+                  <p className="text-sm text-muted-foreground">{volunteering.role}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleEdit(experience)}
+                    onClick={() => handleEdit(volunteering)}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleDelete(experience.id)}
+                    onClick={() => handleDelete(volunteering.id)}
                     disabled={isDeleting}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">{experience.descriptionGeneral}</p>
+              <p className="text-sm text-muted-foreground">{volunteering.description}</p>
               <div className="flex flex-wrap gap-1">
-                {experience.toolsUsed.map((tool) => (
+                {volunteering.tools.map((tool) => (
                   <span
                     key={tool}
                     className="px-2 py-1 bg-muted rounded-md text-xs"
@@ -512,7 +527,7 @@ export function WorkExperienceForm({
           onClick={() => setIsAddingNew(true)}
           className="w-full"
         >
-          Add Work Experience
+          Add Volunteering Experience
         </Button>
       )}
 

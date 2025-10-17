@@ -18,9 +18,9 @@ export function useAddTestScore() {
   
   return useMutation({
     ...addTestScoreMutation,
-    onSuccess: (_, { userId }) => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.testScores(userId) 
+        queryKey: profileQueryKeys.testScores.list(profileId) 
       });
     },
   });
@@ -31,9 +31,9 @@ export function useUpdateTestScore() {
   
   return useMutation({
     ...updateTestScoreMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.testScores.list(profileId) 
       });
     },
   });
@@ -44,9 +44,9 @@ export function useDeleteTestScore() {
   
   return useMutation({
     ...deleteTestScoreMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.testScores.list(profileId) 
       });
     },
   });

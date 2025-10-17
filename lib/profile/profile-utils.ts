@@ -160,3 +160,46 @@ export const generateId = (): string => {
 export const getCurrentTimestamp = (): string => {
   return new Date().toISOString();
 };
+
+/**
+ * Convert month/year numbers to a Date object
+ */
+export const monthYearToDate = (month: number, year: number): Date => {
+  return new Date(year, month - 1, 1); // month is 0-indexed in Date constructor
+};
+
+/**
+ * Convert Date object to month/year numbers
+ */
+export const dateToMonthYear = (date: Date): { month: number; year: number } => {
+  return {
+    month: date.getMonth() + 1, // Convert to 1-indexed
+    year: date.getFullYear(),
+  };
+};
+
+/**
+ * Format month/year numbers to display string
+ */
+export const formatMonthYear = (month: number, year: number): string => {
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return `${monthNames[month - 1]} ${year}`;
+};
+
+/**
+ * Format month/year range for display
+ */
+export const formatMonthYearRange = (
+  startMonth: number, 
+  startYear: number, 
+  endMonth?: number, 
+  endYear?: number, 
+  isCurrent?: boolean
+): string => {
+  const start = formatMonthYear(startMonth, startYear);
+  const end = isCurrent ? 'Present' : (endMonth && endYear ? formatMonthYear(endMonth, endYear) : 'Present');
+  return `${start} - ${end}`;
+};

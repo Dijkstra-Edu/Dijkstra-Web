@@ -12,22 +12,9 @@ import type { ProfileSectionProps } from "@/types/client/profile-section/profile
 
 export function SkillsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
   const { data: skills, isLoading, error, refetch } = useSkills(profileId);
-  const addMutation = useAddSkill();
-  const updateMutation = useUpdateSkill();
-  const deleteMutation = useDeleteSkill();
 
   if (isLoading) return <SkillsSkeleton />;
   if (error) return <GenericSectionError error={error} onRetry={() => refetch()} title="Skills" />;
-
-  const handleSave = () => {
-    // Save is handled by the form component
-    onToggleEdit();
-  };
-
-  const handleCancel = () => {
-    // Cancel is handled by the form component
-    onToggleEdit();
-  };
 
   return (
     <Card>
@@ -37,29 +24,10 @@ export function SkillsSection({ profileId, isEditing, onToggleEdit }: ProfileSec
             <Code2 className="w-5 h-5" />
             Skills
           </CardTitle>
-          <EditControls 
-            isEditing={isEditing}
-            onToggleEdit={onToggleEdit}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
         </div>
       </CardHeader>
       <CardContent>
-        {isEditing ? (
-          <SkillsForm 
-            skills={skills || []}
-            onAdd={addMutation.mutate}
-            onUpdate={updateMutation.mutate}
-            onDelete={deleteMutation.mutate}
-            isAdding={addMutation.isPending}
-            isUpdating={updateMutation.isPending}
-            isDeleting={deleteMutation.isPending}
-            onCancel={onToggleEdit}
-          />
-        ) : (
-          <SkillsDisplay data={skills || []} />
-        )}
+        <SkillsDisplay data={skills || []} />
       </CardContent>
     </Card>
   );

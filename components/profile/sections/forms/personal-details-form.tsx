@@ -21,7 +21,7 @@ import { CareerPathSelector } from "../../shared/career-path-selector";
 import { CareerPathCard } from "../../shared/career-path-card";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { X } from "lucide-react";
-import type { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
+import type { PersonalDetailsData, Rank, Domain, Tools } from "@/types/client/profile-section/profile-sections";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -49,27 +49,39 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
   const form = useForm<PersonalDetailsFormData>({
     resolver: zodResolver(personalDetailsSchema),
     defaultValues: {
-      name: data?.name || "",
-      title: data?.title || "",
+      firstName: data?.firstName || "",
+      lastName: data?.lastName || "",
       bio: data?.bio || "",
       location: data?.location || "",
-      email: data?.email || "",
-      phone: data?.phone || "",
+      primaryEmail: data?.primaryEmail || "",
+      secondaryEmail: data?.secondaryEmail || "",
+      universityEmail: data?.universityEmail || "",
+      workEmail: data?.workEmail || "",
       website: data?.website || "",
-      github: data?.github || "",
-      linkedin: data?.linkedin || "",
+      githubUserName: data?.githubUserName || "",
+      linkedinUserName: data?.linkedinUserName || "",
+      orcidUserName: data?.orcidUserName || "",
+      leetcodeUserName: data?.leetcodeUserName || "",
       dreamCompany: data?.dreamCompany || "",
+      dreamCompanyLogo: data?.dreamCompanyLogo || "",
       dreamPosition: data?.dreamPosition || "",
-      wantedSalary: data?.wantedSalary || "",
-      timeFrame: data?.timeFrame || 12,
-      primaryPath: data?.primaryPath || "FULLSTACK",
-      secondaryPaths: data?.secondaryPaths || [],
+      expectedSalaryBucket: data?.expectedSalaryBucket || "UNRANKED",
+      timeLeft: data?.timeLeft || 12,
+      primarySpecialization: data?.primarySpecialization || "FULLSTACK",
+      secondarySpecializations: data?.secondarySpecializations || [],
+      toolsToLearn: data?.toolsToLearn || [],
     },
   });
 
   const onSubmit = (formData: PersonalDetailsFormData) => {
     try {
-      onUpdate(formData);
+      onUpdate({
+        ...formData,
+        expectedSalaryBucket: formData.expectedSalaryBucket as Rank,
+        primarySpecialization: formData.primarySpecialization as Domain,
+        secondarySpecializations: formData.secondarySpecializations as Domain[],
+        toolsToLearn: formData.toolsToLearn as Tools[],
+      });
       toast.success("Personal details updated successfully!");
       onCancel();
     } catch (error) {
@@ -79,9 +91,9 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
 
   const handlePathSelection = (type: 'primary' | 'secondary', pathKey: CareerPathKey) => {
     if (type === "primary") {
-      form.setValue("primaryPath", pathKey);
+      form.setValue("primarySpecialization", pathKey);
     } else {
-      const currentSecondaryPaths = form.getValues("secondaryPaths");
+      const currentSecondaryPaths = form.getValues("secondarySpecializations");
       const newSecondaryPaths = [...currentSecondaryPaths];
       const index = newSecondaryPaths.indexOf(pathKey);
       if (index > -1) {
@@ -89,15 +101,15 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
       } else if (newSecondaryPaths.length < 3) {
         newSecondaryPaths.push(pathKey);
       }
-      form.setValue("secondaryPaths", newSecondaryPaths);
+      form.setValue("secondarySpecializations", newSecondaryPaths);
     }
     setPathSelectionOpen(null);
   };
 
   const removeSecondaryPath = (index: number) => {
-    const currentSecondaryPaths = form.getValues("secondaryPaths");
+    const currentSecondaryPaths = form.getValues("secondarySpecializations");
     const newSecondaryPaths = currentSecondaryPaths.filter((_, i) => i !== index);
-    form.setValue("secondaryPaths", newSecondaryPaths);
+    form.setValue("secondarySpecializations", newSecondaryPaths);
   };
 
   return (
@@ -105,33 +117,35 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
         <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your full name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title/Position</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Software Engineer, Student" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your first name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your last name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           
           <FormField
             control={form.control}
@@ -170,10 +184,10 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
           
           <FormField
             control={form.control}
-            name="email"
+            name="primaryEmail"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Primary Email (Linked to GitHub)</FormLabel>
                 <FormControl>
                   <Input placeholder="your.email@example.com" {...field} />
                 </FormControl>
@@ -184,12 +198,40 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
           
           <FormField
             control={form.control}
-            name="phone"
+            name="secondaryEmail"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone (Optional)</FormLabel>
+                <FormLabel>Secondary Email (Optional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="+1 (555) 123-4567" {...field} />
+                  <Input placeholder="secondary@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="universityEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>University Email (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="student@university.edu" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="workEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Work Email (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="work@company.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -212,7 +254,7 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
           
           <FormField
             control={form.control}
-            name="github"
+            name="githubUserName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>GitHub Username</FormLabel>
@@ -226,10 +268,24 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
           
           <FormField
             control={form.control}
-            name="linkedin"
+            name="linkedinUserName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>LinkedIn Username</FormLabel>
+                <FormLabel>LinkedIn Username (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="yourusername" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="leetcodeUserName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>LeetCode Username (Optional)</FormLabel>
                 <FormControl>
                   <Input placeholder="yourusername" {...field} />
                 </FormControl>
@@ -257,6 +313,7 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
                       value={field.value}
                       onChange={(company) => {
                         field.onChange(company.name);
+                        form.setValue("dreamCompanyLogo", company.logo_url || "");
                         setSelectedCompanyData(company);
                       }}
                       selectedCompany={selectedCompanyData}
@@ -283,10 +340,10 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
             
             <FormField
               control={form.control}
-              name="wantedSalary"
+              name="expectedSalaryBucket"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Wanted Salary</FormLabel>
+                  <FormLabel>Expected Salary Bucket</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -308,10 +365,10 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
             
             <FormField
               control={form.control}
-              name="timeFrame"
+              name="timeLeft"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Time Frame</FormLabel>
+                  <FormLabel>Time Left</FormLabel>
                   <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
                     <FormControl>
                       <SelectTrigger>
@@ -342,8 +399,8 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
                 </FormLabel>
                 <CareerPathSelector
                   type="primary"
-                  selectedPath={form.watch("primaryPath") as CareerPathKey}
-                  selectedPaths={form.watch("secondaryPaths") as CareerPathKey[]}
+                  selectedPath={form.watch("primarySpecialization") as CareerPathKey}
+                  selectedPaths={form.watch("secondarySpecializations") as CareerPathKey[]}
                   onSelect={(pathKey) => handlePathSelection('primary', pathKey)}
                   onClose={() => setPathSelectionOpen(null)}
                   isOpen={pathSelectionOpen === 'primary'}
@@ -357,7 +414,7 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
                   Secondary Career Paths (up to 3)
                 </FormLabel>
                 <div className="flex flex-wrap gap-3">
-                  {form.watch("secondaryPaths").map((pathKey, index) => (
+                  {form.watch("secondarySpecializations").map((pathKey, index) => (
                     <div key={pathKey} className="relative group w-24 h-24">
                       <CareerPathCard
                         pathKey={pathKey as CareerPathKey}
@@ -375,11 +432,11 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
                       </Button>
                     </div>
                   ))}
-                  {form.watch("secondaryPaths").length < 3 && (
+                  {form.watch("secondarySpecializations").length < 3 && (
                     <CareerPathSelector
                       type="secondary"
-                      selectedPath={form.watch("primaryPath") as CareerPathKey}
-                      selectedPaths={form.watch("secondaryPaths") as CareerPathKey[]}
+                      selectedPath={form.watch("primarySpecialization") as CareerPathKey}
+                      selectedPaths={form.watch("secondarySpecializations") as CareerPathKey[]}
                       onSelect={(pathKey) => handlePathSelection('secondary', pathKey)}
                       onClose={() => setPathSelectionOpen(null)}
                       isOpen={pathSelectionOpen === 'secondary'}

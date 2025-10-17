@@ -1,20 +1,31 @@
-// Publications Section Component (Placeholder)
+// Publications Section Component
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
+import { usePublications, useAddPublication, useUpdatePublication, useDeletePublication } from "@/hooks/profile/use-publications";
+import { PublicationsForm } from "./forms/publications-form";
+import { PublicationsDisplay } from "./display/publications-display";
 import { EditControls } from "../shared/edit-controls";
 import { GenericSectionSkeleton } from "../shared/section-skeleton";
+import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function PublicationsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
-  // TODO: Implement publications section with TanStack Query
-  // This is a placeholder component
-  
+  const { data: publications, isLoading, error, refetch } = usePublications(profileId);
+  const addMutation = useAddPublication();
+  const updateMutation = useUpdatePublication();
+  const deleteMutation = useDeletePublication();
+
+  if (isLoading) return <GenericSectionSkeleton />;
+  if (error) return <GenericSectionError error={error} onRetry={() => refetch()} title="Publications" />;
+
   const handleSave = () => {
+    // Save is handled by the form component
     onToggleEdit();
   };
 
   const handleCancel = () => {
+    // Cancel is handled by the form component
     onToggleEdit();
   };
 
@@ -35,10 +46,20 @@ export function PublicationsSection({ profileId, isEditing, onToggleEdit }: Prof
         </div>
       </CardHeader>
       <CardContent>
-        <GenericSectionSkeleton />
-        <p className="text-center text-muted-foreground mt-4">
-          Publications section will be implemented here
-        </p>
+        {isEditing ? (
+          <PublicationsForm 
+            publications={publications || []}
+            onAdd={(data) => addMutation.mutate({ profileId, data })}
+            onUpdate={(data) => updateMutation.mutate({ profileId, id: data.id, data: data.data })}
+            onDelete={(id) => deleteMutation.mutate({ profileId, id })}
+            isAdding={addMutation.isPending}
+            isUpdating={updateMutation.isPending}
+            isDeleting={deleteMutation.isPending}
+            onCancel={onToggleEdit}
+          />
+        ) : (
+          <PublicationsDisplay data={publications || []} />
+        )}
       </CardContent>
     </Card>
   );

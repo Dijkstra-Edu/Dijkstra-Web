@@ -31,10 +31,9 @@ export function useUpdateWorkExperience() {
   
   return useMutation({
     ...updateWorkExperienceMutation,
-    onSuccess: (_, { id }) => {
-      // Find userId from the updated experience and invalidate
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.workExperience.list(profileId) 
       });
     },
   });
@@ -45,10 +44,9 @@ export function useDeleteWorkExperience() {
   
   return useMutation({
     ...deleteWorkExperienceMutation,
-    onSuccess: (_, id) => {
-      // Find userId from the deleted experience and invalidate
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.workExperience.list(profileId) 
       });
     },
   });

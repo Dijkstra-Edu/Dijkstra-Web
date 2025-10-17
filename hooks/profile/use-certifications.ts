@@ -18,9 +18,9 @@ export function useAddCertification() {
   
   return useMutation({
     ...addCertificationMutation,
-    onSuccess: (_, { userId }) => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.certifications(userId) 
+        queryKey: profileQueryKeys.certifications.list(profileId) 
       });
     },
   });
@@ -31,9 +31,9 @@ export function useUpdateCertification() {
   
   return useMutation({
     ...updateCertificationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.certifications.list(profileId) 
       });
     },
   });
@@ -44,9 +44,9 @@ export function useDeleteCertification() {
   
   return useMutation({
     ...deleteCertificationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.certifications.list(profileId) 
       });
     },
   });

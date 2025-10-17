@@ -1,20 +1,31 @@
-// Projects Section Component (Placeholder)
+// Projects Section Component
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderGit2 } from "lucide-react";
+import { useProjects, useAddProject, useUpdateProject, useDeleteProject } from "@/hooks/profile/use-projects";
+import { ProjectsForm } from "./forms/projects-form";
+import { ProjectsDisplay } from "./display/projects-display";
 import { EditControls } from "../shared/edit-controls";
 import { GenericSectionSkeleton } from "../shared/section-skeleton";
+import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function ProjectsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
-  // TODO: Implement projects section with TanStack Query
-  // This is a placeholder component
-  
+  const { data: projects, isLoading, error, refetch } = useProjects(profileId);
+  const addMutation = useAddProject();
+  const updateMutation = useUpdateProject();
+  const deleteMutation = useDeleteProject();
+
+  if (isLoading) return <GenericSectionSkeleton  />;
+  if (error) return <GenericSectionError error={error} onRetry={() => refetch()} title="Projects" />;
+
   const handleSave = () => {
+    // Save is handled by the form component
     onToggleEdit();
   };
 
   const handleCancel = () => {
+    // Cancel is handled by the form component
     onToggleEdit();
   };
 
@@ -35,10 +46,20 @@ export function ProjectsSection({ profileId, isEditing, onToggleEdit }: ProfileS
         </div>
       </CardHeader>
       <CardContent>
-        <GenericSectionSkeleton />
-        <p className="text-center text-muted-foreground mt-4">
-          Projects section will be implemented here
-        </p>
+        {isEditing ? (
+          <ProjectsForm 
+            projects={projects || []}
+            onAdd={(data) => addMutation.mutate({ profileId, data })}
+            onUpdate={(data) => updateMutation.mutate({ profileId, id: data.id, data: data.data })}
+            onDelete={(id) => deleteMutation.mutate({ profileId, id })}
+            isAdding={addMutation.isPending}
+            isUpdating={updateMutation.isPending}
+            isDeleting={deleteMutation.isPending}
+            onCancel={onToggleEdit}
+          />
+        ) : (
+          <ProjectsDisplay data={projects || []} />
+        )}
       </CardContent>
     </Card>
   );

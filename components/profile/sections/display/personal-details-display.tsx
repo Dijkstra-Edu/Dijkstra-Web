@@ -29,35 +29,58 @@ export function PersonalDetailsDisplay({ data }: PersonalDetailsDisplayProps) {
     );
   }
 
-  const selectedCompanyData = data.dreamCompany ? { name: data.dreamCompany } : null;
-  const salaryRange = SALARY_RANGES.find(s => s.value === data.wantedSalary);
+  // Map database fields to display fields
+  const displayName = data.firstName && data.lastName 
+    ? `${data.firstName} ${data.lastName}` 
+    : data.githubUserName || 'User';
+  
+  const selectedCompanyData = data.dreamCompany ? { 
+    name: data.dreamCompany, 
+    logo_url: data.dreamCompanyLogo 
+  } : null;
+  
+  const salaryRange = SALARY_RANGES.find(s => s.value === data.expectedSalaryBucket);
 
   return (
     <div className="space-y-6">
       {/* Basic Information */}
       <div>
-        <h3 className="text-2xl font-bold">{data.name}</h3>
+        <h3 className="text-2xl font-bold">{displayName}</h3>
         <Badge variant="secondary" className="mt-1">
-          {data.title}
+          Computer Science Student
         </Badge>
       </div>
 
-      <p className="text-muted-foreground">{data.bio}</p>
+      {data.bio && <p className="text-muted-foreground">{data.bio}</p>}
 
       {/* Contact Information */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-muted-foreground" />
-          <span>{data.location}</span>
-        </div>
+        {data.location && (
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-muted-foreground" />
+            <span>{data.location}</span>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-muted-foreground" />
-          <span>{data.email}</span>
+          <span>{data.primaryEmail} (Linked to GitHub)</span>
         </div>
-        {data.phone && (
+        {data.secondaryEmail && (
           <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-muted-foreground" />
-            <span>{data.phone}</span>
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            <span>{data.secondaryEmail}</span>
+          </div>
+        )}
+        {data.universityEmail && (
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            <span>{data.universityEmail}</span>
+          </div>
+        )}
+        {data.workEmail && (
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            <span>{data.workEmail}</span>
           </div>
         )}
         {data.website && (
@@ -68,12 +91,14 @@ export function PersonalDetailsDisplay({ data }: PersonalDetailsDisplayProps) {
         )}
         <div className="flex items-center gap-2">
           <Github className="w-4 h-4 text-muted-foreground" />
-          <span>github.com/{data.github}</span>
+          <span>github.com/{data.githubUserName}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Linkedin className="w-4 h-4 text-muted-foreground" />
-          <span>linkedin.com/in/{data.linkedin}</span>
-        </div>
+        {data.linkedinUserName && (
+          <div className="flex items-center gap-2">
+            <Linkedin className="w-4 h-4 text-muted-foreground" />
+            <span>linkedin.com/in/{data.linkedinUserName}</span>
+          </div>
+        )}
       </div>
 
       <Separator />
@@ -110,12 +135,12 @@ export function PersonalDetailsDisplay({ data }: PersonalDetailsDisplayProps) {
           <div>
             <span className="text-muted-foreground text-sm">Wanted Salary:</span>
             <p className="font-medium">
-              {salaryRange?.label || data.wantedSalary}
+              {salaryRange?.label || data.expectedSalaryBucket}
             </p>
           </div>
           <div>
             <span className="text-muted-foreground text-sm">Time Frame:</span>
-            <p className="font-medium">{formatTimeDisplay(data.timeFrame)}</p>
+            <p className="font-medium">{formatTimeDisplay(data.timeLeft)}</p>
           </div>
         </div>
 
@@ -130,7 +155,7 @@ export function PersonalDetailsDisplay({ data }: PersonalDetailsDisplayProps) {
               <h5 className="text-sm font-semibold text-muted-foreground mb-3">Primary Specialization</h5>
               <div className="flex justify-center lg:justify-start">
                 <CareerPathCard
-                  pathKey={data.primaryPath as CareerPathKey}
+                  pathKey={data.primarySpecialization as CareerPathKey}
                   isPrimary={true}
                   onClick={() => {}}
                   showBadge={true}
@@ -143,7 +168,7 @@ export function PersonalDetailsDisplay({ data }: PersonalDetailsDisplayProps) {
             <div>
               <h5 className="text-sm font-semibold text-muted-foreground mb-3">Secondary Specializations</h5>
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                {data.secondaryPaths.map((pathKey) => (
+                {data.secondarySpecializations.map((pathKey) => (
                   <CareerPathCard
                     key={pathKey}
                     pathKey={pathKey as CareerPathKey}

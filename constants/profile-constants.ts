@@ -100,6 +100,31 @@ export const TEST_TYPES = [
   "Other"
 ] as const;
 
+export const MONTH_OPTIONS = [
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" },
+] as const;
+
+// Generate year options (current year - 70 to current year + 10)
+const currentYear = new Date().getFullYear();
+export const YEAR_OPTIONS = Array.from(
+  { length: 81 },
+  (_, i) => ({
+    value: currentYear - 70 + i,
+    label: (currentYear - 70 + i).toString(),
+  })
+).reverse(); // Most recent years first
+
 // Type exports
 export type SalaryRange = typeof SALARY_RANGES[number]['value'];
 export type TimeOption = typeof TIME_OPTIONS[number]['value'];

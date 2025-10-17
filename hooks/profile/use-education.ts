@@ -18,9 +18,9 @@ export function useAddEducation() {
   
   return useMutation({
     ...addEducationMutation,
-    onSuccess: (_, { userId }) => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.education(userId) 
+        queryKey: profileQueryKeys.education.list(profileId) 
       });
     },
   });
@@ -31,9 +31,9 @@ export function useUpdateEducation() {
   
   return useMutation({
     ...updateEducationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.education.list(profileId) 
       });
     },
   });
@@ -44,9 +44,9 @@ export function useDeleteEducation() {
   
   return useMutation({
     ...deleteEducationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.education.list(profileId) 
       });
     },
   });

@@ -18,9 +18,9 @@ export function useAddVolunteering() {
   
   return useMutation({
     ...addVolunteeringMutation,
-    onSuccess: (_, { userId }) => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.volunteering(userId) 
+        queryKey: profileQueryKeys.volunteering.list(profileId) 
       });
     },
   });
@@ -31,9 +31,9 @@ export function useUpdateVolunteering() {
   
   return useMutation({
     ...updateVolunteeringMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.volunteering.list(profileId) 
       });
     },
   });
@@ -44,9 +44,9 @@ export function useDeleteVolunteering() {
   
   return useMutation({
     ...deleteVolunteeringMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.volunteering.list(profileId) 
       });
     },
   });

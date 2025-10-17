@@ -49,9 +49,9 @@ export function WorkExperienceSection({ profileId, isEditing, onToggleEdit }: Pr
         {isEditing ? (
           <WorkExperienceForm 
             experiences={experiences || []}
-            onAdd={addMutation.mutate}
-            onUpdate={updateMutation.mutate}
-            onDelete={deleteMutation.mutate}
+            onAdd={(data) => addMutation.mutate({ profileId, data })}
+            onUpdate={(data) => updateMutation.mutate({ profileId, id: data.id, data: data.data })}
+            onDelete={(id) => deleteMutation.mutate({ profileId, id })}
             isAdding={addMutation.isPending}
             isUpdating={updateMutation.isPending}
             isDeleting={deleteMutation.isPending}

@@ -18,9 +18,9 @@ export function useAddPublication() {
   
   return useMutation({
     ...addPublicationMutation,
-    onSuccess: (_, { userId }) => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.publications(userId) 
+        queryKey: profileQueryKeys.publications.list(profileId) 
       });
     },
   });
@@ -31,9 +31,9 @@ export function useUpdatePublication() {
   
   return useMutation({
     ...updatePublicationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.publications.list(profileId) 
       });
     },
   });
@@ -44,9 +44,9 @@ export function useDeletePublication() {
   
   return useMutation({
     ...deletePublicationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.publications.list(profileId) 
       });
     },
   });

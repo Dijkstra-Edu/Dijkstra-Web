@@ -18,9 +18,9 @@ export function useAddProject() {
   
   return useMutation({
     ...addProjectMutation,
-    onSuccess: (_, { userId }) => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.projects(userId) 
+        queryKey: profileQueryKeys.projects.list(profileId) 
       });
     },
   });
@@ -31,9 +31,9 @@ export function useUpdateProject() {
   
   return useMutation({
     ...updateProjectMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.projects.list(profileId) 
       });
     },
   });
@@ -44,9 +44,9 @@ export function useDeleteProject() {
   
   return useMutation({
     ...deleteProjectMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.all 
+        queryKey: profileQueryKeys.projects.list(profileId) 
       });
     },
   });
