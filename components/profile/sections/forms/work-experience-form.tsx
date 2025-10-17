@@ -22,7 +22,7 @@ import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { workExperienceSchema, type WorkExperienceFormData } from "@/lib/profile/schemas";
 import { parseSkillsString } from "@/lib/profile/profile-utils";
-import type { WorkExperienceData } from "@/types/profile-sections";
+import type { WorkExperienceData } from "@/types/client/profile-section/profile-sections";
 
 interface WorkExperienceFormProps {
   experiences: WorkExperienceData[];

@@ -14,7 +14,7 @@ import type {
   CreateMutationData,
   UpdateMutationData,
   DeleteMutationData
-} from '@/types/profile-sections';
+} from '@/types/client/profile-section/profile-sections';
 import { mockProfileData } from '@/data/mock-profile-data';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';

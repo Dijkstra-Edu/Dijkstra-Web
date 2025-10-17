@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { EditControls } from "../shared/edit-controls";
 import { GenericSectionSkeleton } from "../shared/section-skeleton";
-import type { ProfileSectionProps } from "@/types/profile-sections";
+import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function VolunteeringSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
   // TODO: Implement volunteering section with TanStack Query

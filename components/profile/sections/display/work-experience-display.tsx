@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { calculateExperience, formatDateRange } from "@/lib/profile/profile-utils";
-import type { WorkExperienceData } from "@/types/profile-sections";
+import type { WorkExperienceData } from "@/types/client/profile-section/profile-sections";
 
 interface WorkExperienceDisplayProps {
   data: WorkExperienceData[];

@@ -24,93 +24,135 @@ export type TestScoreType = 'GRE' | 'GMAT' | 'CGPA' | 'TENTH' | 'TWELFTH';
 export interface Company {
   name: string;
   logo_url?: string;
+  website?: string;
 }
 
 export interface Institution {
   name: string;
   logo_url?: string;
+  website?: string;
+}
+
+export interface Location {
+  id: string;
+  country: string;
+  state?: string;
+  city: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+// Side Profile Card Data
+export interface SideProfileCardData {
+  githubUserName: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  bio?: string;
+  rank: Rank;
+  streak?: number;
+  primarySpecialization: Domain;
+  linkedinUserName?: string;
+  leetcodeUserName?: string;
+  personalWebsite?: string;
+  ProjectDetails: CurrentProjectData;
+}
+
+export interface CurrentProjectData {
+  department: string;
+  team: string;
+  projectName: string;
+  role: string;
+  memberSince: string;
 }
 
 // Personal Details - matches User table
 export interface PersonalDetailsData {
-  id: string;
-  userId: string;
+  githubUserName: string;
   firstName?: string;
   middleName?: string;
   lastName?: string;
-  githubUserName: string;
-  rank: Rank;
-  streak?: number;
-  primarySpecialization: Domain;
-  secondarySpecializations: Domain[];
-  expectedSalaryBucket: Rank;
-  timeLeft: number;
-  onboardingComplete: boolean;
-  dataLoaded: boolean;
   bio?: string;
-  location?: string; // UUID reference to Location table
+  location?: string; //Not Editable Directly
+  primaryEmail: string; //Taken From GitHUb by default, can be changed by the user
+  
+  secondaryEmail?: string;
+  universityEmail?: string;
+  workEmail?: string;
+  website?: string;
+  
+  linkedinUserName?: string;
+  orcidUserName?: string;
+  leetcodeUserName?: string;
+  
   dreamCompany?: string;
   dreamCompanyLogo?: string;
   dreamPosition?: string;
+  expectedSalaryBucket: Rank;
+  timeLeft: number;
+  primarySpecialization: Domain;
+  secondarySpecializations: Domain[];
   toolsToLearn: Tools[];
-  createdAt: string;
-  updatedAt: string;
+  
+  rank: Rank;
+  streak?: number;
+  
+  onboardingComplete: boolean;
+  onboardingJourneyCompleted: boolean;
+  dataLoaded: boolean;
 }
 
 // Work Experience - matches WorkExperience table
 export interface WorkExperienceData {
   id: string;
   profileId: string;
+
   title: string;
   employmentType: EmploymentType;
   domain: Domain[];
   companyName: string;
   companyLogo?: string;
   currentlyWorking: boolean;
-  location?: string; // UUID reference to Location table
+  location?: Location; // UUID reference to Location table
   locationType: WorkLocationType;
+
   startDateMonth: number;
   startDateYear: number;
   endDateMonth?: number;
   endDateYear?: number;
+
   descriptionGeneral: string;
   descriptionDetailed?: string;
-  descriptionLess?: string;
+  descriptionLess?: string;  
   workDone?: string;
-  companyScore?: number;
-  timeSpentMultiplier?: number;
-  workDoneMultiplier?: number;
+
   toolsUsed: Tools[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Skills - matches Skills table
 export interface SkillsData {
   id: string;
   profileId: string;
+
   skill: Tools;
   domain?: Domain;
+
   proficiency?: number;
   yearsOfExperience?: number;
-  associatedExperience?: string[];
-  associatedCertifications?: string[];
-  associatedEducations?: string[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Education - matches Education table
 export interface EducationData {
   id: string;
   profileId: string;
+
   schoolName: string;
   schoolLogoUrl?: string;
   schoolType: SchoolType;
   degree: Degree;
   courseFieldName: string;
   currentlyStudying: boolean;
-  location: string; // UUID reference to Location table
+  location: Location;
   locationType: WorkLocationType;
   startDateMonth: number;
   startDateYear: number;
@@ -120,17 +162,16 @@ export interface EducationData {
   descriptionDetailed?: string;
   descriptionLess?: string;
   workDone?: string;
-  schoolScoreMultiplier?: number;
+
   cgpa?: number;
   toolsUsed: Tools[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Projects - matches Projects table
 export interface ProjectsData {
   id: string;
   profileId: string;
+
   name: string;
   organization?: string;
   owner: string; // GitHub username
@@ -157,14 +198,13 @@ export interface ProjectsData {
   testingFrameworkPresent: boolean;
   testingFramework?: string;
   projectOrganizationLogo?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Certifications - matches Certifications table
 export interface CertificationsData {
   id: string;
   profileId: string;
+
   name: string;
   type: CertificationType;
   issuingOrganization: string;
@@ -174,14 +214,13 @@ export interface CertificationsData {
   credentialUrl: string;
   tools?: Tools[];
   issuingOrganizationLogo?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Publications - matches Publications table
 export interface PublicationsData {
   id: string;
   profileId: string;
+
   title: string;
   publisher: string;
   authors: string[];
@@ -190,14 +229,13 @@ export interface PublicationsData {
   description: string;
   tools?: Tools[];
   publisherLogo?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Volunteering - matches Volunteering table
 export interface VolunteeringData {
   id: string;
   profileId: string;
+
   organization: string;
   role: string;
   cause: Cause;
@@ -207,26 +245,24 @@ export interface VolunteeringData {
   description?: string;
   tools?: Tools[];
   organizationLogo?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Test Scores - matches TestScores table
 export interface TestScoresData {
   id: string;
   profileId: string;
+
   title: string;
   type: TestScoreType;
   score: string;
   testDate: string; // date field
   description?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Common interfaces for forms and display
 export interface ProfileSectionProps {
   profileId: string;
+  githubUserName: string;
   isEditing: boolean;
   onToggleEdit: () => void;
 }

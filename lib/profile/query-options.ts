@@ -24,7 +24,7 @@ import type {
   PersonalDetailsData, 
   WorkExperienceData, 
   SkillsData 
-} from '@/types/profile-sections';
+} from '@/types/client/profile-section/profile-sections';
 
 // Personal Details Query Options - matches User table
 export const personalDetailsQuery = (userId: string) =>

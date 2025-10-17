@@ -1,7 +1,7 @@
 // Skills Display Component
 
 import { getExperienceColor, getProficiencyLabel } from "@/lib/profile/profile-utils";
-import type { SkillsData } from "@/types/profile-sections";
+import type { SkillsData } from "@/types/client/profile-section/profile-sections";
 
 interface SkillsDisplayProps {
   data: SkillsData[];

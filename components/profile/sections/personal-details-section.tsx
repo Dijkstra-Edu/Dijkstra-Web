@@ -8,7 +8,7 @@ import { PersonalDetailsDisplay } from "./display/personal-details-display";
 import { EditControls } from "../shared/edit-controls";
 import { PersonalDetailsSkeleton, PersonalDetailsError } from "../shared/section-skeleton";
 import { PersonalDetailsError as ErrorComponent } from "../shared/section-error";
-import type { ProfileSectionProps } from "@/types/profile-sections";
+import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function PersonalDetailsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
   const { data: personalDetails, isLoading, error, refetch } = usePersonalDetails(profileId);

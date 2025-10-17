@@ -13,7 +13,7 @@ import {
 import { CareerPathCard } from "../../shared/career-path-card";
 import { SALARY_RANGES } from "@/constants/profile-constants";
 import { formatTimeDisplay } from "@/lib/profile/profile-utils";
-import type { PersonalDetailsData } from "@/types/profile-sections";
+import type { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 
 interface PersonalDetailsDisplayProps {

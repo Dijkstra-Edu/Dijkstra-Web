@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
 import { EditControls } from "../shared/edit-controls";
 import { GenericSectionSkeleton } from "../shared/section-skeleton";
-import type { ProfileSectionProps } from "@/types/profile-sections";
+import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function PublicationsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
   // TODO: Implement publications section with TanStack Query

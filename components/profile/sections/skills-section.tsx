@@ -8,7 +8,7 @@ import { SkillsDisplay } from "./display/skills-display";
 import { EditControls } from "../shared/edit-controls";
 import { SkillsSkeleton } from "../shared/section-skeleton";
 import { GenericSectionError } from "../shared/section-error";
-import type { ProfileSectionProps } from "@/types/profile-sections";
+import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function SkillsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
   const { data: skills, isLoading, error, refetch } = useSkills(profileId);

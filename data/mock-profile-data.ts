@@ -18,31 +18,36 @@ import type {
   CertificationType,
   Cause,
   TestScoreType
-} from "@/types/profile-sections";
+} from "@/types/client/profile-section/profile-sections";
 
 // Mock Personal Details Data - matches User table
 export const mockPersonalDetails: PersonalDetailsData = {
-  id: "user_001",
-  userId: "user_001",
+  githubUserName: "alexjohnson",
   firstName: "Alex",
   lastName: "Johnson",
-  githubUserName: "alexjohnson",
-  rank: "DIAMOND_1" as Rank,
-  streak: 15,
-  primarySpecialization: "FULLSTACK" as Domain,
-  secondarySpecializations: ["FRONTEND" as Domain, "BACKEND" as Domain, "ML_ENGINEERING" as Domain],
-  expectedSalaryBucket: "DIAMOND_1" as Rank,
-  timeLeft: 24,
-  onboardingComplete: true,
-  dataLoaded: true,
   bio: "Passionate computer science student with a focus on full-stack development and machine learning. Always eager to learn new technologies and contribute to meaningful projects.",
-  location: "location_001", // UUID reference
+  location: "San Francisco, CA", // Not editable directly
+  primaryEmail: "alex.johnson@gmail.com", // Taken from GitHub by default
+  secondaryEmail: "alex.personal@outlook.com",
+  universityEmail: "alex.johnson@stanford.edu",
+  workEmail: "alex.johnson@startupxyz.com",
+  website: "https://alexjohnson.dev",
+  linkedinUserName: "alexjohnson",
+  orcidUserName: "0000-0000-0000-0000",
+  leetcodeUserName: "alexjohnson",
   dreamCompany: "Google",
   dreamCompanyLogo: "https://logo.clearbit.com/google.com",
   dreamPosition: "Senior Software Engineer",
+  expectedSalaryBucket: "DIAMOND_1" as Rank,
+  timeLeft: 24,
+  primarySpecialization: "FULLSTACK" as Domain,
+  secondarySpecializations: ["FRONTEND" as Domain, "BACKEND" as Domain, "ML_ENGINEERING" as Domain],
   toolsToLearn: ["RUST" as Tools, "KUBERNETES" as Tools, "GRAPHQL" as Tools],
-  createdAt: "2024-01-15T00:00:00.000Z",
-  updatedAt: "2024-12-01T00:00:00.000Z",
+  rank: "DIAMOND_1" as Rank,
+  streak: 15,
+  onboardingComplete: true,
+  onboardingJourneyCompleted: true,
+  dataLoaded: true,
 };
 
 // Mock Work Experience Data - matches WorkExperience table
@@ -56,7 +61,14 @@ export const mockWorkExperience: WorkExperienceData[] = [
     companyName: "TechCorp Solutions",
     companyLogo: "https://logo.clearbit.com/techcorp.com",
     currentlyWorking: false,
-    location: "location_002",
+    location: {
+      id: "location_002",
+      country: "United States",
+      state: "California",
+      city: "San Francisco",
+      latitude: 37.7749,
+      longitude: -122.4194,
+    },
     locationType: "HYBRID" as WorkLocationType,
     startDateMonth: 6,
     startDateYear: 2023,
@@ -64,13 +76,9 @@ export const mockWorkExperience: WorkExperienceData[] = [
     endDateYear: 2023,
     descriptionGeneral: "Developed full-stack web applications using React and Node.js",
     descriptionDetailed: "Worked on multiple client projects, implementing responsive UI components and RESTful APIs. Collaborated with senior developers to optimize database queries and improve application performance.",
+    descriptionLess: "Built web applications with React and Node.js",
     workDone: "Built 3 web applications, reduced load times by 40%, implemented automated testing",
-    companyScore: 8.5,
-    timeSpentMultiplier: 1.2,
-    workDoneMultiplier: 1.1,
     toolsUsed: ["REACTJS" as Tools, "NODEJS" as Tools, "MONGODB" as Tools, "GIT" as Tools],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
   {
     id: "we_002",
@@ -81,19 +89,22 @@ export const mockWorkExperience: WorkExperienceData[] = [
     companyName: "StartupXYZ",
     companyLogo: "https://logo.clearbit.com/startupxyz.com",
     currentlyWorking: true,
-    location: "location_003",
+    location: {
+      id: "location_003",
+      country: "United States",
+      state: "California",
+      city: "San Francisco",
+      latitude: 37.7749,
+      longitude: -122.4194,
+    },
     locationType: "REMOTE" as WorkLocationType,
     startDateMonth: 9,
     startDateYear: 2023,
     descriptionGeneral: "Building modern web applications with React and TypeScript",
     descriptionDetailed: "Leading frontend development for a fintech startup. Implementing complex data visualizations and ensuring excellent user experience across all devices.",
+    descriptionLess: "Frontend development with React and TypeScript",
     workDone: "Developed 5+ React components, improved user engagement by 25%",
-    companyScore: 9.0,
-    timeSpentMultiplier: 1.5,
-    workDoneMultiplier: 1.3,
     toolsUsed: ["REACTJS" as Tools, "TYPESCRIPT" as Tools, "CSS" as Tools, "GIT" as Tools],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
 ];
 
@@ -106,11 +117,6 @@ export const mockSkills: SkillsData[] = [
     domain: "FRONTEND" as Domain,
     proficiency: 85,
     yearsOfExperience: 2.5,
-    associatedExperience: ["we_001", "we_002"],
-    associatedCertifications: ["cert_001"],
-    associatedEducations: ["edu_001"],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
   {
     id: "skill_002",
@@ -119,10 +125,6 @@ export const mockSkills: SkillsData[] = [
     domain: "FRONTEND" as Domain,
     proficiency: 90,
     yearsOfExperience: 2.0,
-    associatedExperience: ["we_001", "we_002"],
-    associatedEducations: ["edu_001"],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
   {
     id: "skill_003",
@@ -131,10 +133,6 @@ export const mockSkills: SkillsData[] = [
     domain: "BACKEND" as Domain,
     proficiency: 75,
     yearsOfExperience: 1.5,
-    associatedExperience: ["we_001"],
-    associatedEducations: ["edu_001"],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
   {
     id: "skill_004",
@@ -143,9 +141,6 @@ export const mockSkills: SkillsData[] = [
     domain: "BACKEND" as Domain,
     proficiency: 70,
     yearsOfExperience: 1.0,
-    associatedExperience: ["we_001"],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
 ];
 
@@ -160,7 +155,14 @@ export const mockEducation: EducationData[] = [
     degree: "BTECH" as Degree,
     courseFieldName: "Computer Science",
     currentlyStudying: true,
-    location: "location_004",
+    location: {
+      id: "location_004",
+      country: "United States",
+      state: "California",
+      city: "Stanford",
+      latitude: 37.4241,
+      longitude: -122.1661,
+    },
     locationType: "ON_SITE" as WorkLocationType,
     startDateMonth: 9,
     startDateYear: 2022,
@@ -168,11 +170,8 @@ export const mockEducation: EducationData[] = [
     descriptionDetailed: "Comprehensive curriculum covering algorithms, data structures, software engineering principles, and machine learning. Active in computer science clubs and hackathons.",
     descriptionLess: "CS student passionate about building innovative solutions",
     workDone: "Completed 15+ programming projects, won 3 hackathons",
-    schoolScoreMultiplier: 1.2,
     cgpa: 3.8,
     toolsUsed: ["PYTHON" as Tools, "JAVA" as Tools, "C" as Tools, "GIT" as Tools],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
 ];
 
@@ -205,8 +204,7 @@ export const mockProjects: ProjectsData[] = [
     complexityRating: 7.5,
     testingFrameworkPresent: true,
     testingFramework: "Jest",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
+    projectOrganizationLogo: "https://logo.clearbit.com/personal.com",
   },
   {
     id: "proj_002",
@@ -234,8 +232,7 @@ export const mockProjects: ProjectsData[] = [
     complexityRating: 8.2,
     testingFrameworkPresent: true,
     testingFramework: "Pytest",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
+    projectOrganizationLogo: "https://logo.clearbit.com/stanford.edu",
   },
 ];
 
@@ -253,8 +250,6 @@ export const mockCertifications: CertificationsData[] = [
     credentialUrl: "https://aws.amazon.com/verification",
     tools: ["AWS" as Tools, "CLOUD" as Tools],
     issuingOrganizationLogo: "https://logo.clearbit.com/aws.amazon.com",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
   {
     id: "cert_002",
@@ -267,8 +262,6 @@ export const mockCertifications: CertificationsData[] = [
     credentialUrl: "https://meta.com/certification",
     tools: ["REACTJS" as Tools, "JAVASCRIPT" as Tools],
     issuingOrganizationLogo: "https://logo.clearbit.com/meta.com",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
 ];
 
@@ -285,8 +278,6 @@ export const mockPublications: PublicationsData[] = [
     description: "A comprehensive guide to improving React application performance using various memoization techniques including React.memo, useMemo, and useCallback.",
     tools: ["REACTJS" as Tools, "JAVASCRIPT" as Tools],
     publisherLogo: "https://logo.clearbit.com/medium.com",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
 ];
 
@@ -304,8 +295,6 @@ export const mockVolunteering: VolunteeringData[] = [
     description: "Led development of educational platform for underprivileged children to learn programming basics.",
     tools: ["REACTJS" as Tools, "NODEJS" as Tools, "MONGODB" as Tools],
     organizationLogo: "https://logo.clearbit.com/codeforgood.org",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
   {
     id: "vol_002",
@@ -317,8 +306,6 @@ export const mockVolunteering: VolunteeringData[] = [
     currentlyVolunteering: true,
     description: "Mentoring aspiring developers in web development and providing career guidance.",
     tools: ["REACTJS" as Tools, "PYTHON" as Tools],
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
 ];
 
@@ -332,8 +319,6 @@ export const mockTestScores: TestScoresData[] = [
     score: "1520/1600",
     testDate: "2022-05-15",
     description: "Standardized test score for college admissions",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
   {
     id: "test_002",
@@ -343,8 +328,6 @@ export const mockTestScores: TestScoresData[] = [
     score: "3.8/4.0",
     testDate: "2024-12-01",
     description: "Current GPA in Computer Science major",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    updatedAt: "2024-12-01T00:00:00.000Z",
   },
 ];
 

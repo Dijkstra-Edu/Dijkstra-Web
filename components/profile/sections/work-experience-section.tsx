@@ -8,7 +8,7 @@ import { WorkExperienceDisplay } from "./display/work-experience-display";
 import { EditControls } from "../shared/edit-controls";
 import { WorkExperienceSkeleton } from "../shared/section-skeleton";
 import { GenericSectionError } from "../shared/section-error";
-import type { ProfileSectionProps } from "@/types/profile-sections";
+import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function WorkExperienceSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
   const { data: experiences, isLoading, error, refetch } = useWorkExperience(profileId);

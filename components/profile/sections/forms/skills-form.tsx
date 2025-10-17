@@ -24,7 +24,7 @@ import { Edit, Trash2, Save, X, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { skillsSchema, type SkillsFormData } from "@/lib/profile/schemas";
 import { SKILL_CATEGORIES } from "@/constants/profile-constants";
-import type { SkillsData } from "@/types/profile-sections";
+import type { SkillsData } from "@/types/client/profile-section/profile-sections";
 
 interface SkillsFormProps {
   skills: SkillsData[];

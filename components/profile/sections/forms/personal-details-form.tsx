@@ -21,7 +21,7 @@ import { CareerPathSelector } from "../../shared/career-path-selector";
 import { CareerPathCard } from "../../shared/career-path-card";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { X } from "lucide-react";
-import type { PersonalDetailsData } from "@/types/profile-sections";
+import type { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {

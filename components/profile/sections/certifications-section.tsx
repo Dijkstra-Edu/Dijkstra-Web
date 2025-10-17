@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Award } from "lucide-react";
 import { EditControls } from "../shared/edit-controls";
 import { GenericSectionSkeleton } from "../shared/section-skeleton";
-import type { ProfileSectionProps } from "@/types/profile-sections";
+import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function CertificationsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
   // TODO: Implement certifications section with TanStack Query
