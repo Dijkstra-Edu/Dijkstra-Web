@@ -13,14 +13,15 @@ export function useSkills(profileId: string) {
   return useQuery(skillsQuery(profileId));
 }
 
+/* Skills is managed from the Backend, cannot be updated by the user
 export function useAddSkill() {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...addSkillMutation,
-    onSuccess: (_, { userId }) => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.skills(userId) 
+        queryKey: profileQueryKeys.skills.list(profileId) 
       });
     },
   });
@@ -51,3 +52,4 @@ export function useDeleteSkill() {
     },
   });
 }
+*/

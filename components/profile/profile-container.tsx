@@ -65,6 +65,7 @@ export function ProfileContainer() {
           <SectionComponent
             key={id}
             profileId="profile_001" // TODO: Get actual profile ID from user session
+            githubUserName="JRS296" // TODO: Get actual github user name from user session
             isEditing={editingSections.has(id)}
             onToggleEdit={() => toggleEdit(id)}
           />

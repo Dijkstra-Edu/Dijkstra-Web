@@ -60,7 +60,7 @@ export async function fetchWorkExperience(profileId: string): Promise<WorkExperi
   return Promise.resolve(mockProfileData.workExperience);
 }
 
-export async function addWorkExperience(profileId: string, data: Omit<WorkExperienceData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<WorkExperienceData> {
+export async function addWorkExperience(profileId: string, data: Omit<WorkExperienceData, 'id' | 'profileId'>): Promise<WorkExperienceData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -69,8 +69,6 @@ export async function addWorkExperience(profileId: string, data: Omit<WorkExperi
     ...data,
     id: `we_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newExperience);
@@ -118,7 +116,7 @@ export async function fetchSkills(profileId: string): Promise<SkillsData[]> {
   return Promise.resolve(mockProfileData.skills);
 }
 
-export async function addSkill(profileId: string, data: Omit<SkillsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<SkillsData> {
+export async function addSkill(profileId: string, data: Omit<SkillsData, 'id' | 'profileId'>): Promise<SkillsData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -127,8 +125,6 @@ export async function addSkill(profileId: string, data: Omit<SkillsData, 'id' | 
     ...data,
     id: `skill_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newSkill);
@@ -176,7 +172,7 @@ export async function fetchEducation(profileId: string): Promise<EducationData[]
   return Promise.resolve(mockProfileData.education);
 }
 
-export async function addEducation(profileId: string, data: Omit<EducationData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<EducationData> {
+export async function addEducation(profileId: string, data: Omit<EducationData, 'id' | 'profileId'>): Promise<EducationData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -185,8 +181,6 @@ export async function addEducation(profileId: string, data: Omit<EducationData, 
     ...data,
     id: `edu_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newEducation);
@@ -234,7 +228,7 @@ export async function fetchProjects(profileId: string): Promise<ProjectsData[]> 
   return Promise.resolve(mockProfileData.projects);
 }
 
-export async function addProject(profileId: string, data: Omit<ProjectsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<ProjectsData> {
+export async function addProject(profileId: string, data: Omit<ProjectsData, 'id' | 'profileId'>): Promise<ProjectsData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -243,8 +237,6 @@ export async function addProject(profileId: string, data: Omit<ProjectsData, 'id
     ...data,
     id: `proj_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newProject);
@@ -292,7 +284,7 @@ export async function fetchCertifications(profileId: string): Promise<Certificat
   return Promise.resolve(mockProfileData.certifications);
 }
 
-export async function addCertification(profileId: string, data: Omit<CertificationsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<CertificationsData> {
+export async function addCertification(profileId: string, data: Omit<CertificationsData, 'id' | 'profileId'>): Promise<CertificationsData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -301,8 +293,6 @@ export async function addCertification(profileId: string, data: Omit<Certificati
     ...data,
     id: `cert_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newCertification);
@@ -350,7 +340,7 @@ export async function fetchPublications(profileId: string): Promise<Publications
   return Promise.resolve(mockProfileData.publications);
 }
 
-export async function addPublication(profileId: string, data: Omit<PublicationsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<PublicationsData> {
+export async function addPublication(profileId: string, data: Omit<PublicationsData, 'id' | 'profileId'>): Promise<PublicationsData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -359,8 +349,6 @@ export async function addPublication(profileId: string, data: Omit<PublicationsD
     ...data,
     id: `pub_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newPublication);
@@ -408,7 +396,7 @@ export async function fetchVolunteering(profileId: string): Promise<Volunteering
   return Promise.resolve(mockProfileData.volunteering);
 }
 
-export async function addVolunteering(profileId: string, data: Omit<VolunteeringData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<VolunteeringData> {
+export async function addVolunteering(profileId: string, data: Omit<VolunteeringData, 'id' | 'profileId'>): Promise<VolunteeringData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -417,8 +405,6 @@ export async function addVolunteering(profileId: string, data: Omit<Volunteering
     ...data,
     id: `vol_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newVolunteering);
@@ -466,7 +452,7 @@ export async function fetchTestScores(profileId: string): Promise<TestScoresData
   return Promise.resolve(mockProfileData.testScores);
 }
 
-export async function addTestScore(profileId: string, data: Omit<TestScoresData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>): Promise<TestScoresData> {
+export async function addTestScore(profileId: string, data: Omit<TestScoresData, 'id' | 'profileId'>): Promise<TestScoresData> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
@@ -475,8 +461,6 @@ export async function addTestScore(profileId: string, data: Omit<TestScoresData,
     ...data,
     id: `test_${Date.now()}`,
     profileId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
   
   return Promise.resolve(newTestScore);
