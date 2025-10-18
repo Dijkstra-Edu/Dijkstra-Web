@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+
 import { useSettingsStore } from "@/lib/Zustand/settings-store";
 import { useTheme } from "next-themes";
+
 import {
   Bell,
   Code,
@@ -82,6 +84,7 @@ const data = {
 };
 
 function NotificationsPage() {
+  
   const settings = useSettingsStore();
 
   return (
