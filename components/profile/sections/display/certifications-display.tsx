@@ -1,6 +1,7 @@
 // Certifications Display Component
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Award } from "lucide-react";
 import type { CertificationsData } from "@/types/client/profile-section/profile-sections";
 import { TOOLS_OPTIONS } from "@/constants/enum-constants";
@@ -55,15 +56,17 @@ export function CertificationsDisplay({ data }: CertificationsDisplayProps) {
                 </p>
               )}
               {certification.credentialUrl && (
-                <a
-                  href={certification.credentialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Verify
-                </a>
+                <Button variant="outline" size="sm" className="text-gray-600 hover:text-gray-800 border-gray-600" asChild>
+                  <a
+                    href={certification.credentialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Verify
+                  </a>
+                </Button>
               )}
             </div>
           </div>

@@ -1,6 +1,7 @@
 // Publications Display Component
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Users } from "lucide-react";
 import type { PublicationsData } from "@/types/client/profile-section/profile-sections";
 
@@ -76,15 +77,17 @@ export function PublicationsDisplay({ data }: PublicationsDisplayProps) {
           {/* Links */}
           {publication.publicationUrl && (
             <div className="flex flex-wrap gap-4">
-              <a
-                href={publication.publicationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Read Publication
-              </a>
+              <Button variant="outline" size="sm" className="text-gray-600 hover:text-gray-800 border-gray-600" asChild>
+                <a
+                  href={publication.publicationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Read Publication
+                </a>
+              </Button>
             </div>
           )}
         </div>
