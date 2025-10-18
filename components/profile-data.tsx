@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pencil,
   Linkedin,
@@ -23,6 +24,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 import {
   IconBrandLeetcode,
   IconBrandLinkedin,
@@ -32,13 +34,127 @@ import {
 } from "@tabler/icons-react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { Badge } from "@/components/ui/badge";
+import { getUserQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
+import { Domain, Rank } from "@/types/server/dataforge/enums";
+
+// Utility function to get rank image path
+const getRankImagePath = (rank: Rank): string => { 
+  return `/Ranks/${rank}.png`;
+};
+
+// Utility function to format rank display name
+const formatRankDisplay = (rank: Rank): string => {
+  return rank.replace(/_/g, ' ');
+};
+
+// Utility function to get rank color
+const getRankColor = (rank: Rank): string => {
+  const rankColors: Record<Rank, string> = {
+    [Rank.UNRANKED]: "text-gray-500",
+    [Rank.IRON_1]: "text-gray-400",
+    [Rank.IRON_2]: "text-gray-400", 
+    [Rank.IRON_3]: "text-gray-400",
+    [Rank.BRONZE_1]: "text-amber-600",
+    [Rank.BRONZE_2]: "text-amber-600",
+    [Rank.BRONZE_3]: "text-amber-600",
+    [Rank.SILVER_1]: "text-gray-300",
+    [Rank.SILVER_2]: "text-gray-300",
+    [Rank.SILVER_3]: "text-gray-300",
+    [Rank.GOLD_1]: "text-yellow-500",
+    [Rank.GOLD_2]: "text-yellow-500",
+    [Rank.GOLD_3]: "text-yellow-500",
+    [Rank.PLATINUM_1]: "text-blue-300",
+    [Rank.PLATINUM_2]: "text-blue-300",
+    [Rank.PLATINUM_3]: "text-blue-300",
+    [Rank.DIAMOND_1]: "text-cyan-400",
+    [Rank.DIAMOND_2]: "text-cyan-400",
+    [Rank.DIAMOND_3]: "text-cyan-400",
+    [Rank.EMERALD_1]: "text-green-400",
+    [Rank.EMERALD_2]: "text-green-400",
+    [Rank.EMERALD_3]: "text-green-400",
+    [Rank.LAPIS_1]: "text-blue-400",
+    [Rank.LAPIS_2]: "text-blue-400",
+    [Rank.LAPIS_3]: "text-blue-400",
+    [Rank.QUARTZ_1]: "text-purple-400",
+    [Rank.QUARTZ_2]: "text-purple-400",
+    [Rank.QUARTZ_3]: "text-purple-400",
+    [Rank.SAPHIRE_1]: "text-blue-500",
+    [Rank.SAPHIRE_2]: "text-blue-500",
+    [Rank.SAPHIRE_3]: "text-blue-500",
+    [Rank.OBSIDIAN]: "text-gray-800",
+  };
+  
+  return rankColors[rank] || "text-gray-500";
+};
 
 export function ProfileData() {
   const { data: session, status } = useSession();
 
-  // Primary career path - this should come from user profile data
-  const primaryPath: CareerPathKey = "FULLSTACK"; // Replace with actual user data
+  // Fetch user data from backend
+  const { data: userData, isLoading, error } = useQuery(
+    getUserQuery(session?.user.login || '', false)
+  );
+
+  // Primary career path from user data with fallback
+  const primaryPath: CareerPathKey = (userData?.primary_specialization as CareerPathKey) || "FULLSTACK";
   const path = CAREER_PATHS[primaryPath];
+
+  // Loading skeleton component
+  if (isLoading) {
+    return (
+      <div className="pr-2">
+        <Card className="@container/card p-6 rounded-2xl shadow-md">
+          <div className="flex flex-col space-y-4 items-center text-center">
+            <Skeleton className="w-36 h-36 rounded-full" />
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-9 w-32" />
+            
+            <div className="flex justify-center gap-8 mt-4">
+              <div className="text-center">
+                <Skeleton className="h-6 w-12 mb-1" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="text-center">
+                <Skeleton className="h-6 w-12 mb-1" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="text-center">
+                <Skeleton className="h-6 w-12 mb-1" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Three-column skeleton */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+              <Skeleton className="w-20 h-20 mb-2 rounded-full" />
+              <Skeleton className="h-4 w-16 mb-1" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+            <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+              <Skeleton className="w-20 h-20 mb-2 rounded-full" />
+              <Skeleton className="h-4 w-16 mb-1" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+            <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+              <Skeleton className="w-20 h-20 mb-2 rounded-full" />
+              <Skeleton className="h-4 w-16 mb-1" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    console.error("Error fetching user data:", error);
+    // Continue with fallback data
+  }
 
   return (
     <div className="pr-2">
@@ -89,14 +205,18 @@ export function ProfileData() {
           {/* Rank Column */}
           <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
             <Image
-              src="/Ranks/GOLD_1.png"
+              src={userData?.rank ? getRankImagePath(userData.rank) : "/Ranks/UNRANKED.png"}
               alt="Rank Badge"
               width={80}
               height={80}
               className="mb-2"
+              onError={(e) => {
+                // Fallback to UNRANKED image if rank image doesn't exist
+                e.currentTarget.src = "/Ranks/UNRANKED.png";
+              }}
             />
-            <span className="text-sm font-bold text-yellow-500 text-center">
-              GOLD 1
+            <span className={`text-sm font-bold text-center ${userData?.rank ? getRankColor(userData.rank) : "text-gray-500"}`}>
+              {userData?.rank ? formatRankDisplay(userData.rank) : "UNRANKED"}
             </span>
             <span className="text-xs text-muted-foreground mt-1">Rank</span>
           </div>
@@ -110,7 +230,7 @@ export function ProfileData() {
                 className="w-25 h-25 object-contain"
               />
               <div className="absolute inset-0 flex items-center justify-center pt-2">
-                <span className="text-xl font-bold text-white drop-shadow-lg">12</span>
+                <span className="text-xl font-bold text-white drop-shadow-lg">{userData?.streak ?? 0}</span>
               </div>
             </div>
             <span className="text-xs text-muted-foreground mt-1">Day Streak</span>
