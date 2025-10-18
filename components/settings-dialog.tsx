@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useSettings } from "@/app/SettingsProviderWrapper";
+
+import { useSettingsStore } from "@/lib/Zustand/settings-store";
+import { useTheme } from "next-themes";
+
 import {
   Bell,
   Code,
@@ -62,6 +65,8 @@ import {
   IconBrandLeetcode,
   IconBrandLinkedin,
   IconSettings,
+  IconWorldWww,
+  IconLayoutDashboard,
 } from "@tabler/icons-react";
 
 const data = {
@@ -79,7 +84,8 @@ const data = {
 };
 
 function NotificationsPage() {
-  const settings = useSettings();
+  
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -157,7 +163,7 @@ function NotificationsPage() {
 }
 
 function HomePage() {
-  const settings = useSettings()
+  const settings = useSettingsStore()
   const [newPinTitle, setNewPinTitle] = React.useState("")
   const [newPinUrl, setNewPinUrl] = React.useState("")
   const [newPinTooltip, setNewPinTooltip] = React.useState("")
@@ -182,7 +188,11 @@ function HomePage() {
   }
 
   const getPinIcon = (iconName: string, color: string) => {
-    const iconProps = { className: "h-5 w-5", style: { color } }
+    const iconProps = { 
+      className: "h-5 w-5", 
+      style: { color },
+      size: 20
+    }
 
     switch (iconName) {
       case "reddit":
@@ -233,6 +243,18 @@ function HomePage() {
             className="w-8 h-8 object-contain"
           />
         )
+      case "github":
+        return (
+          <img
+            src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+            alt="GitHub"
+            className="w-6 h-6 object-contain"
+          />
+        )
+      case "world":
+        return <IconWorldWww className="h-5 w-5" style={{ color }} />
+      case "dashboard":
+        return <IconLayoutDashboard className="h-5 w-5" style={{ color }} />
       default:
         return null
     }
@@ -299,33 +321,38 @@ function HomePage() {
 
           <div className="space-y-3">
             <h5 className="text-sm font-medium">Preset Pins</h5>
-            {settings.presetPins.map((pin) => (
-              <div key={pin.id} className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded"
-                    style={{ backgroundColor: pin.color }}
-                  >
-                    {getPinIcon(pin.icon, "#ffffff")}                    
+            {settings.presetPins.map((pin) => {
+              const hasBackgroundColor = pin.color && pin.color !== "";
+              const iconColor = hasBackgroundColor ? "#ffffff" : "currentColor";
+              
+              return (
+                <div key={pin.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded"
+                      style={hasBackgroundColor ? { backgroundColor: pin.color } : undefined}
+                    >
+                      {getPinIcon(pin.icon, iconColor)}                    
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{pin.name}</p>
+                      {pin.enabled && (
+                        <Input
+                          placeholder="Enter URL"
+                          value={pin.url}
+                          onChange={(e) => settings.updatePresetPin(pin.id, { url: e.target.value })}
+                          className="mt-1 h-8 text-xs"
+                        />
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{pin.name}</p>
-                    {pin.enabled && (
-                      <Input
-                        placeholder="Enter URL"
-                        value={pin.url}
-                        onChange={(e) => settings.updatePresetPin(pin.id, { url: e.target.value })}
-                        className="mt-1 h-8 text-xs"
-                      />
-                    )}
-                  </div>
+                  <Switch
+                    checked={pin.enabled}
+                    onCheckedChange={(enabled) => settings.updatePresetPin(pin.id, { enabled })}
+                  />
                 </div>
-                <Switch
-                  checked={pin.enabled}
-                  onCheckedChange={(enabled) => settings.updatePresetPin(pin.id, { enabled })}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <Separator />
@@ -433,7 +460,7 @@ function HomePage() {
 }
 
 function AccountsPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   const getConnectedAccount = (platform: string) => {
     return settings.connectedAccounts.find((acc) => acc.platform === platform);
@@ -785,7 +812,8 @@ function AccountsPage() {
 }
 
 function AppearancePage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
+  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -824,7 +852,7 @@ function AppearancePage() {
       <div className="space-y-4">
         <div className="space-y-2">
           <Label>Theme</Label>
-          <RadioGroup value={settings.theme} onValueChange={settings.setTheme}>
+          <RadioGroup value={theme} onValueChange={setTheme}>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="light" id="light" />
               <Label htmlFor="light" className="font-normal">
@@ -897,7 +925,7 @@ function AppearancePage() {
 }
 
 function LanguageRegionPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -984,7 +1012,7 @@ function LanguageRegionPage() {
 }
 
 function AccessibilityPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -1068,7 +1096,7 @@ function AccessibilityPage() {
 }
 
 function PrivacyVisibilityPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">
@@ -1154,7 +1182,7 @@ function PrivacyVisibilityPage() {
 }
 
 function DeveloperSettingsPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
   const [showSupabaseKey, setShowSupabaseKey] = React.useState(false);
   const [showGeminiKey, setShowGeminiKey] = React.useState(false);
 
@@ -1388,7 +1416,7 @@ function DeveloperSettingsPage() {
 }
 
 function AdvancedPage() {
-  const settings = useSettings();
+  const settings = useSettingsStore();
 
   return (
     <div className="space-y-6">

@@ -15,32 +15,6 @@ import Readme from "@/components/readme";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function Page() {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getCertificateData().then((fetchedData) => {
-      if (fetchedData) {
-        setData(fetchedData);
-      }
-      setLoading(false);
-    });
-  }, []);
-
-  async function getCertificateData() {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Dijkstra/test/certificate/data/`
-      );
-      if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-      return await res.json();
-    } catch (error) {
-      console.error("Error fetching certificate data:", error);
-      return null;
-    }
-  }
-
-  const { data: session, status } = useSession();
 
   return (
     <SidebarProvider
