@@ -14,6 +14,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@floating-ui/react": "^0.27.13",
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -70,6 +71,7 @@
     "react-calendar-heatmap": "^1.10.0",
     "react-day-picker": "^9.9.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.65.0",
     "react-tooltip": "^5.29.1",
     "recharts": "^3.0.0",
     "sonner": "^2.0.5",
@@ -78,7 +80,7 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.177.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.67"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
