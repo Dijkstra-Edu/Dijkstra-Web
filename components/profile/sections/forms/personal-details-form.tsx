@@ -16,7 +16,7 @@ import {
 import { toast } from "sonner";
 import { personalDetailsSchema, type PersonalDetailsFormData } from "@/lib/profile/schemas";
 import { SALARY_RANGES, TIME_OPTIONS } from "@/constants/profile-constants";
-import { CompanyAutoComplete } from "@/components/company-autocomplete";
+import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
 import { CareerPathSelector } from "../../shared/career-path-selector";
 import { CareerPathCard } from "../../shared/career-path-card";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";

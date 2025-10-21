@@ -46,7 +46,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
-import { CompanyAutoComplete } from "@/components/company-autocomplete";
+import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { onboardUserMutation, checkOnboardingStatusQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
 import { Domain, Tools, Rank } from "@/types/server/dataforge/enums";

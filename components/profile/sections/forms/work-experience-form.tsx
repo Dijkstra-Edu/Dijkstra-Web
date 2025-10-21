@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MonthYearPicker } from "../../shared/month-year-picker";
-import { CompanyAutoComplete } from "@/components/company-autocomplete";
+import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { workExperienceSchema, type WorkExperienceFormData } from "@/lib/profile/schemas";

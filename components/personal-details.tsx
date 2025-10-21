@@ -37,7 +37,7 @@ import {
   Linkedin,
 } from "lucide-react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
-import { CompanyAutoComplete } from "@/components/company-autocomplete";
+import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
 
 const SALARY_RANGES = [
   { value: "UNRANKED", label: "₹0 L (Unranked)" },
