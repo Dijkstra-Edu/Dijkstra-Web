@@ -13,17 +13,41 @@ import {
   updateSkill,
   deleteSkill,
   fetchEducation,
+  addEducation,
+  updateEducation,
+  deleteEducation,
   fetchProjects,
+  addProject,
+  updateProject,
+  deleteProject,
   fetchCertifications,
+  addCertification,
+  updateCertification,
+  deleteCertification,
   fetchPublications,
+  addPublication,
+  updatePublication,
+  deletePublication,
   fetchVolunteering,
-  fetchTestScores
-} from './api';
+  addVolunteering,
+  updateVolunteering,
+  deleteVolunteering,
+  fetchTestScores,
+  addTestScore,
+  updateTestScore,
+  deleteTestScore
+} from './api-client';
 import { profileQueryKeys } from './query-keys';
 import type { 
   PersonalDetailsData, 
   WorkExperienceData, 
-  SkillsData 
+  SkillsData,
+  EducationData,
+  ProjectsData,
+  CertificationsData,
+  PublicationsData,
+  VolunteeringData,
+  TestScoresData
 } from '@/types/client/profile-section/profile-sections';
 
 // Personal Details Query Options - matches User table
@@ -119,94 +143,98 @@ export const testScoresQuery = (profileId: string) =>
     queryFn: () => fetchTestScores(profileId),
   });
 
-// Placeholder mutation options for other sections (to be implemented)
-export const addCertificationMutation = {
-  mutationFn: ({ profileId, data }: { profileId: string; data: any }) => 
-    Promise.resolve(), // Placeholder
-};
-
-export const updateCertificationMutation = {
-  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: any }) => 
-    Promise.resolve(), // Placeholder
-};
-
-export const deleteCertificationMutation = {
-  mutationFn: ({ profileId, id }: { profileId: string; id: string }) => 
-    Promise.resolve(), // Placeholder
-};
-
-export const addPublicationMutation = {
-  mutationFn: ({ profileId, data }: { profileId: string; data: any }) => 
-    Promise.resolve(), // Placeholder
-};
-
-export const updatePublicationMutation = {
-  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: any }) => 
-    Promise.resolve(), // Placeholder
-};
-
-export const deletePublicationMutation = {
-  mutationFn: ({ profileId, id }: { profileId: string; id: string }) => 
-    Promise.resolve(), // Placeholder
-};
-
-// Additional mutation options for other sections
+// Education mutation options
 export const addEducationMutation = {
-  mutationFn: ({ profileId, data }: { profileId: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, data }: { profileId: string; data: Omit<EducationData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'> }) =>
+    addEducation(profileId, data),
 };
 
 export const updateEducationMutation = {
-  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: Partial<EducationData> }) =>
+    updateEducation(profileId, id, data),
 };
 
 export const deleteEducationMutation = {
-  mutationFn: ({ profileId, id }: { profileId: string; id: string }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id }: { profileId: string; id: string }) =>
+    deleteEducation(profileId, id),
 };
 
+// Projects mutation options
 export const addProjectMutation = {
-  mutationFn: ({ profileId, data }: { profileId: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, data }: { profileId: string; data: Omit<ProjectsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'> }) =>
+    addProject(profileId, data),
 };
 
 export const updateProjectMutation = {
-  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: Partial<ProjectsData> }) =>
+    updateProject(profileId, id, data),
 };
 
 export const deleteProjectMutation = {
-  mutationFn: ({ profileId, id }: { profileId: string; id: string }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id }: { profileId: string; id: string }) =>
+    deleteProject(profileId, id),
 };
 
+// Certifications mutation options
+export const addCertificationMutation = {
+  mutationFn: ({ profileId, data }: { profileId: string; data: Omit<CertificationsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'> }) =>
+    addCertification(profileId, data),
+};
+
+export const updateCertificationMutation = {
+  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: Partial<CertificationsData> }) =>
+    updateCertification(profileId, id, data),
+};
+
+export const deleteCertificationMutation = {
+  mutationFn: ({ profileId, id }: { profileId: string; id: string }) =>
+    deleteCertification(profileId, id),
+};
+
+// Publications mutation options
+export const addPublicationMutation = {
+  mutationFn: ({ profileId, data }: { profileId: string; data: Omit<PublicationsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'> }) =>
+    addPublication(profileId, data),
+};
+
+export const updatePublicationMutation = {
+  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: Partial<PublicationsData> }) =>
+    updatePublication(profileId, id, data),
+};
+
+export const deletePublicationMutation = {
+  mutationFn: ({ profileId, id }: { profileId: string; id: string }) =>
+    deletePublication(profileId, id),
+};
+
+// Volunteering mutation options
 export const addVolunteeringMutation = {
-  mutationFn: ({ profileId, data }: { profileId: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, data }: { profileId: string; data: Omit<VolunteeringData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'> }) =>
+    addVolunteering(profileId, data),
 };
 
 export const updateVolunteeringMutation = {
-  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: Partial<VolunteeringData> }) =>
+    updateVolunteering(profileId, id, data),
 };
 
 export const deleteVolunteeringMutation = {
-  mutationFn: ({ profileId, id }: { profileId: string; id: string }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id }: { profileId: string; id: string }) =>
+    deleteVolunteering(profileId, id),
 };
 
+// Test Scores mutation options
 export const addTestScoreMutation = {
-  mutationFn: ({ profileId, data }: { profileId: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, data }: { profileId: string; data: Omit<TestScoresData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'> }) =>
+    addTestScore(profileId, data),
 };
 
 export const updateTestScoreMutation = {
-  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: any }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id, data }: { profileId: string; id: string; data: Partial<TestScoresData> }) =>
+    updateTestScore(profileId, id, data),
 };
 
 export const deleteTestScoreMutation = {
-  mutationFn: ({ profileId, id }: { profileId: string; id: string }) => 
-    Promise.resolve(), // Placeholder
+  mutationFn: ({ profileId, id }: { profileId: string; id: string }) =>
+    deleteTestScore(profileId, id),
 };

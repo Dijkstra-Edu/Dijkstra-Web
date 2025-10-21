@@ -47,9 +47,9 @@ import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { CompanyAutoComplete } from "@/components/company-autocomplete";
-import { useMutation } from "@tanstack/react-query";
-import { onboardUserMutation } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
-import { Domain, Tools, Rank } from "@/types/server/dataforge/User/user";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { onboardUserMutation, checkOnboardingStatusQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
+import { Domain, Tools, Rank } from "@/types/server/dataforge/enums";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -1819,6 +1819,12 @@ export default function Page() {
     const [localDreamCompany, setLocalDreamCompany] = useState(state.dreamCompany);
     const [localDreamRole, setLocalDreamRole] = useState(state.dreamRole);
     const [selectedCompanyData, setSelectedCompanyData] = useState<{name: string, logo_url?: string} | null>(null);
+
+    // Check onboarding status for current user
+    const { data: onboardingStatus, isLoading: isCheckingStatus } = useQuery({
+      ...checkOnboardingStatusQuery(session?.user?.login || ''),
+      enabled: !!session?.user?.login,
+    });
 
     const mutation = useMutation({
       ...onboardUserMutation,

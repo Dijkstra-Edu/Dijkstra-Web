@@ -1,67 +1,96 @@
-import type { OnboardUserRequest, OnboardUserResponse, CheckOnboardingStatusResponse, GetUserBasicResponse } from "@/types/server/dataforge/User/user";
+import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
+import { fetchDataForge } from "../client";
 
-export const checkOnboardingStatus = async (username: string): Promise<CheckOnboardingStatusResponse> => {
-    const response = await fetch(`/api/onboarding?check=true&username=${encodeURIComponent(username)}`, {
-        method: "GET",
+export interface OnboardUserRequest {
+    // Required fields
+    github_user_name: string;
+    linkedin_user_name: string;
+    leetcode_user_name: string;
+    primary_specialization: Domain;
+    secondary_specializations: Domain[];
+    expected_salary_bucket: Rank;
+    time_left: number;
+    selectedTools: Tools[];
+    dreamCompany: string;
+    dreamRole: string;
+    
+    // Optional fields
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
+    rank?: Rank;
+    streak?: number;
+  }
+  
+  export interface OnboardUserResponse {
+    id: string;
+    github_user_name: string;
+    first_name: string | null;
+    middle_name: string | null;
+    last_name: string | null;
+    rank: Rank;
+    streak: number;
+    primary_specialization: Domain;
+    secondary_specializations: Domain[];
+    expected_salary_bucket: Rank;
+    time_left: number;
+    selectedTools: Tools[];
+    dreamCompany: string;
+    dreamRole: string;
+    onboarding_complete: boolean;
+    data_loaded: boolean;
+    created_at: string;
+    updated_at: string;
+  }
+  
+  export interface CheckOnboardingStatusResponse {
+    onboarded: boolean;
+    user_id: string | null;
+  }
+  
+  export interface GetUserBasicResponse {
+    id: string;
+    github_user_name: string;
+    first_name: string | null;
+    middle_name: string | null;
+    last_name: string | null;
+    rank: Rank;
+    streak: number | null;
+    primary_specialization: Domain;
+    secondary_specializations: Domain[];
+    expected_salary_bucket: Rank;
+    time_left: number;
+    onboarding_complete: boolean;
+    data_loaded: boolean;
+    created_at: string;
+    updated_at: string;
+  }
+
+
+/**
+ * Check onboarding status for a username
+ */
+export async function checkOnboardingStatus(username: string): Promise<CheckOnboardingStatusResponse> {
+    return fetchDataForge<CheckOnboardingStatusResponse>(
+      `/Dijkstra/v1/u/onboard?check=true&username=${encodeURIComponent(username)}`
+    );
+  }
+  
+  /**
+   * Submit onboarding data
+   */
+  export async function submitOnboarding(data: OnboardUserRequest): Promise<OnboardUserResponse> {
+    return fetchDataForge<OnboardUserResponse>('/Dijkstra/v1/u/onboard', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-        throw new Error("Failed to check onboarding status");
-    }
-
-    return response.json();
-}
-
-export const onboardUser = async (data: OnboardUserRequest): Promise<OnboardUserResponse> => {
-    // Call our Next.js API route instead of the backend directly
-    // This avoids CORS issues and keeps the backend URL server-side only
-    const response = await fetch('/api/onboarding', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        
-        if (response.status === 409) {
-            throw new Error("This GitHub account has already been registered");
-        } else if (response.status === 400) {
-            throw new Error("Invalid data. Please check your selections");
-        } else if (response.status === 503) {
-            throw new Error("Backend service is currently unavailable. Please Try Again Later. For more information, kindly check dijkstra.org.in/status");
-        } else if (response.status === 401) {
-            throw new Error("Your session has expired. Please refresh the page and try again.");
-        } else {
-            throw new Error(errorData.message || errorData.error || "An error occurred. Please try again");
-        }
-    }
-
-    return response.json();
-}
-
-export const getUserByGithubUsername = async (username: string, allData: boolean = false): Promise<GetUserBasicResponse> => {
-    // Call our Next.js API route instead of the backend directly
-    // This avoids CORS issues and keeps the backend URL server-side only
-    const response = await fetch(`/api/user?username=${encodeURIComponent(username)}&all_data=${allData}`, {
-        method: "GET",
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        
-        if (response.status === 404) {
-            throw new Error("User not found");
-        } else if (response.status === 401) {
-            throw new Error("Unauthorized access");
-        } else if (response.status === 503) {
-            throw new Error("Backend service is currently unavailable. Please try again later.");
-        } else {
-            throw new Error(errorData.message || errorData.error || "Failed to fetch user data");
-        }
-    }
-
-    return response.json();
-}
+  }
+  
+  /**
+   * Get user data by GitHub username
+   */
+  export async function getUserByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
+    return fetchDataForge<GetUserBasicResponse>(
+      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+    );
+  }

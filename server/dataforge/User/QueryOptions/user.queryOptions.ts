@@ -1,9 +1,9 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import { onboardUser, checkOnboardingStatus, getUserByGithubUsername } from "../user";
-import type { OnboardUserRequest } from "@/types/server/dataforge/User/user";
+import type { OnboardUserRequest } from "../user";
+import { submitOnboarding, checkOnboardingStatus, getUserByGithubUsername } from "../user";
 
 export const onboardUserMutation = mutationOptions({
-    mutationFn: (data: OnboardUserRequest) => onboardUser(data),
+    mutationFn: (data: OnboardUserRequest) => submitOnboarding(data),
 });
 
 export const checkOnboardingStatusQuery = (username: string) => queryOptions({

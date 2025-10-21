@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/authOptions';
+import { checkOnboardingStatus, submitOnboarding } from '@/server/dataforge/User/user';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,57 +13,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
 
-    const baseUrl = process.env.DATAFORGE_SERVICE_URL;
-    
-    if (!baseUrl) {
-      console.error('DATAFORGE_SERVICE_URL not configured');
-      return NextResponse.json({ 
-        error: 'Backend service not configured',
-        message: 'DATAFORGE_SERVICE_URL environment variable is not set' 
-      }, { status: 500 });
-    }
-
-    const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
-    const endpoint = `${cleanBaseUrl}/Dijkstra/v1/u/onboard?check=true&username=${encodeURIComponent(username)}`;
-
-    console.log('Checking onboarding status:', endpoint);
-
-    const response = await fetch(endpoint, { method: "GET" });
-
-    if (!response.ok) {
-      // Read response body as text first to avoid "body already read" error
-      const responseText = await response.text();
-      let errorData;
-      
-      try {
-        // Try to parse the text as JSON
-        errorData = JSON.parse(responseText);
-      } catch (e) {
-        // Response is not JSON
-        console.error('Backend error (non-JSON):', response.status, responseText);
-        errorData = { 
-          error: 'Backend error',
-          message: responseText || `HTTP ${response.status}: ${response.statusText}`
-        };
-      }
-      
-      console.error('Backend error:', response.status, errorData);
-      return NextResponse.json(errorData, { status: response.status });
-    }
-
-    const data = await response.json();
+    const data = await checkOnboardingStatus(username);
     console.log('Onboarding status check result:', data);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Onboarding status check error:', error);
     
     if (error instanceof Error) {
-      if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+      if (error.message.includes('Backend service unavailable')) {
         return NextResponse.json(
           { 
             error: 'Backend service unavailable',
             message: 'Unable to connect to the backend server. Please ensure the DataForge service is running.',
-            details: `Connection to ${process.env.DATAFORGE_SERVICE_URL} failed`
+            details: error.message
           }, 
           { status: 503 }
         );
@@ -95,23 +58,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const baseUrl = process.env.DATAFORGE_SERVICE_URL;
-    
-    if (!baseUrl) {
-      console.error('DATAFORGE_SERVICE_URL not configured');
-      return NextResponse.json({ 
-        error: 'Backend service not configured',
-        message: 'DATAFORGE_SERVICE_URL environment variable is not set' 
-      }, { status: 500 });
-    }
-
     const body = await request.json();
 
-    // Remove trailing slash from baseUrl to avoid double slashes
-    const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
-    const endpoint = `${cleanBaseUrl}/Dijkstra/v1/u/onboard`;
-
-    console.log('Calling backend:', endpoint);
+    console.log('Calling backend for onboarding submission');
     console.log('Request data:', { 
       github_user_name: body.github_user_name,
       primary_specialization: body.primary_specialization,
@@ -121,38 +70,7 @@ export async function POST(request: NextRequest) {
       dreamRole: body.dreamRole,
     });
     
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    // Check if response is ok BEFORE trying to parse JSON
-    if (!response.ok) {
-      // Read response body as text first to avoid "body already read" error
-      const responseText = await response.text();
-      let errorData;
-      
-      try {
-        // Try to parse the text as JSON
-        errorData = JSON.parse(responseText);
-      } catch (e) {
-        // Response is not JSON
-        console.error('Backend error (non-JSON):', response.status, responseText);
-        errorData = { 
-          error: 'Backend error',
-          message: responseText || `HTTP ${response.status}: ${response.statusText}`
-        };
-      }
-      
-      console.error('Backend error:', response.status, errorData);
-      return NextResponse.json(errorData, { status: response.status });
-    }
-
-    // Response is ok, now parse the JSON
-    const data = await response.json();
+    const data = await submitOnboarding(body);
     console.log('User onboarded successfully:', data.id);
     return NextResponse.json(data);
   } catch (error) {
@@ -161,12 +79,12 @@ export async function POST(request: NextRequest) {
     // Handle specific error types
     if (error instanceof Error) {
       // Connection refused or network errors
-      if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+      if (error.message.includes('Backend service unavailable')) {
         return NextResponse.json(
           { 
             error: 'Backend service unavailable',
             message: 'Unable to connect to the backend server. Please ensure the DataForge service is running.',
-            details: `Connection to ${process.env.DATAFORGE_SERVICE_URL} failed`
+            details: error.message
           }, 
           { status: 503 }
         );
