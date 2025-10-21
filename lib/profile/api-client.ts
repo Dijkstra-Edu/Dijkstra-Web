@@ -27,8 +27,8 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
 }
 
 // Personal Details API
-export async function fetchPersonalDetails(userId: string): Promise<PersonalDetailsData> {
-  const response = await fetch(`${API_BASE}/api/profile/personal-details?userId=${encodeURIComponent(userId)}`);
+export async function fetchPersonalDetails(githubUserName: string): Promise<PersonalDetailsData> {
+  const response = await fetch(`${API_BASE}/api/profile/personal-details?githubUserName=${encodeURIComponent(githubUserName)}`);
   return handleApiResponse<PersonalDetailsData>(response);
 }
 

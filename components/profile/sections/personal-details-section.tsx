@@ -2,17 +2,34 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from "lucide-react";
-import { usePersonalDetails, useUpdatePersonalDetails } from "@/hooks/profile/use-personal-details";
 import { PersonalDetailsForm } from "./forms/personal-details-form";
 import { PersonalDetailsDisplay } from "./display/personal-details-display";
 import { EditControls } from "../shared/edit-controls";
 import { PersonalDetailsSkeleton } from "../shared/section-skeleton";
 import { PersonalDetailsError as ErrorComponent } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
+import { getPersonalDetailsByGithubUsername } from "@/server/dataforge/User/user";
+import { getPersonalDetailsQuery, updatePersonalDetailsMutation } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { profileQueryKeys } from "@/lib/profile/query-keys";
 
-export function PersonalDetailsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
-  const { data: personalDetails, isLoading, error, refetch } = usePersonalDetails(profileId);
-  const updateMutation = useUpdatePersonalDetails();
+export function PersonalDetailsSection({ profileId, githubUserName, isEditing, onToggleEdit }: ProfileSectionProps) {
+  /*const { data: personalDetails, isLoading, error, refetch } = usePersonalDetails(githubUserName); Old Way*/
+  const queryClient = useQueryClient();
+
+  const { data: personalDetails, isLoading: isLoading, error: error, refetch } = useQuery(
+    getPersonalDetailsQuery(githubUserName)
+  );
+  //const updateMutation = useUpdatePersonalDetails();
+  const updateMutation = useMutation({
+    ...updatePersonalDetailsMutation,
+    onSuccess: () => {
+      // Use the same query key format as the server-side query
+      queryClient.invalidateQueries({ 
+        queryKey: ['personal-details', githubUserName] 
+      });
+    },
+  });
 
   if (isLoading) return <PersonalDetailsSkeleton />;
   if (error) return <ErrorComponent error={error} onRetry={() => refetch()} />;
@@ -48,7 +65,7 @@ export function PersonalDetailsSection({ profileId, isEditing, onToggleEdit }: P
         {isEditing ? (
           <PersonalDetailsForm 
             data={personalDetails}
-            onUpdate={(data) => updateMutation.mutate({ userId: profileId, data })}
+            onUpdate={(data) => updateMutation.mutate({ username: githubUserName, data })}
             onCancel={onToggleEdit}
             isLoading={updateMutation.isPending}
           />

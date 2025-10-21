@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchPersonalDetails, updatePersonalDetails } from '@/server/profile/mock';
+import { updatePersonalDetails } from '@/server/profile/mock';
+import { getPersonalDetailsQuery } from '@/server/dataforge/User/QueryOptions/user.queryOptions';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId') || 'default-user';
+    const username = searchParams.get('username') || 'default-user';
     
-    const data = await fetchPersonalDetails(userId);
+    const data = await getPersonalDetailsQuery(username);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Personal details fetch error:', error);
@@ -20,10 +21,10 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId') || 'default-user';
+    const username = searchParams.get('username') || 'default-user';
     const body = await request.json();
     
-    const data = await updatePersonalDetails(userId, body);
+    const data = await updatePersonalDetails(username, body);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Personal details update error:', error);

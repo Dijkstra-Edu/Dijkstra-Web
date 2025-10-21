@@ -1,6 +1,9 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
+import { GetPersonalDetailsResponse } from "@/types/server/dataforge/User/profile";
+import { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
+import { transformPersonalDetails, transformPersonalDetailsUpdateRequest } from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -112,19 +115,30 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
   /**
    * Get Personal Details by GitHub username
    */
-  export async function getPersonalDetailsByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
-    return fetchDataForge<GetUserBasicResponse>(
-      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+  export async function getPersonalDetailsByGithubUsername(username: string): Promise<PersonalDetailsData> {
+    console.log(`Getting personal details for ${username}`);
+    const response = await fetchDataForge<GetPersonalDetailsResponse>(
+      `/Dijkstra/v1/u/personal-details/${encodeURIComponent(username)}`
     );
+    return transformPersonalDetails(response);
   }
 
   /**
    * Update Personal Details by GitHub username
    */
-  export async function updatePersonalDetailsByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
-    return fetchDataForge<GetUserBasicResponse>(
-      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+  export async function updatePersonalDetailsByGithubUsername(username: string, data: Partial<PersonalDetailsData>): Promise<PersonalDetailsData> {
+    console.log(`Updating personal details for ${username}`);
+    console.log(data);
+    const request = transformPersonalDetailsUpdateRequest(data);
+    console.log(request);
+    const response = await fetchDataForge<GetPersonalDetailsResponse>(
+      `/Dijkstra/v1/u/personal-details/${encodeURIComponent(username)}`, {
+        method: 'PUT',
+        body: JSON.stringify(request),
+      }
     );
+    console.log(response);
+    return transformPersonalDetails(response);
   }
 
   

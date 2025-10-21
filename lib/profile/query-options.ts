@@ -2,7 +2,6 @@
 
 import { queryOptions } from '@tanstack/react-query';
 import { 
-  fetchPersonalDetails, 
   updatePersonalDetails,
   fetchWorkExperience,
   addWorkExperience,
@@ -35,7 +34,8 @@ import {
   fetchTestScores,
   addTestScore,
   updateTestScore,
-  deleteTestScore
+  deleteTestScore,
+  fetchPersonalDetails
 } from './api-client';
 import { profileQueryKeys } from './query-keys';
 import type { 
@@ -49,12 +49,13 @@ import type {
   VolunteeringData,
   TestScoresData
 } from '@/types/client/profile-section/profile-sections';
+import { getPersonalDetailsByGithubUsername } from '@/server/dataforge/User/user';
 
 // Personal Details Query Options - matches User table
-export const personalDetailsQuery = (userId: string) =>
+export const personalDetailsQuery = (githubUserName: string) =>
   queryOptions({
-    queryKey: profileQueryKeys.personalDetails(userId),
-    queryFn: () => fetchPersonalDetails(userId),
+    queryKey: profileQueryKeys.personalDetails(githubUserName),
+    queryFn: () => fetchPersonalDetails(githubUserName),
   });
 
 export const updatePersonalDetailsMutation = {

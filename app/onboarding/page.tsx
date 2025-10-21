@@ -1858,6 +1858,10 @@ export default function Page() {
       }
 
       mutation.mutate({
+        // TODO Can add a smart serializer to handle this better
+        first_name: session?.user?.name?.split(" ")[0] || session?.user?.name,
+        middle_name: session?.user?.name?.split(" ")[1] || undefined,
+        last_name: session?.user?.name?.split(" ")[2] || undefined,
         github_user_name: githubUsername,
         linkedin_user_name: state.linkedinHandle,
         leetcode_user_name: state.leetcodeHandle,
