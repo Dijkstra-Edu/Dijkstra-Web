@@ -1,6 +1,6 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import type { OnboardUserRequest } from "../user";
-import { submitOnboarding, checkOnboardingStatus, getUserByGithubUsername } from "../user";
+import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername } from "../user";
 
 export const onboardUserMutation = mutationOptions({
     mutationFn: (data: OnboardUserRequest) => submitOnboarding(data),
@@ -19,4 +19,21 @@ export const getUserQuery = (username: string, allData: boolean = false) => quer
     staleTime: 1000 * 60 * 5, // avoid instant refetch
     gcTime: 1000 * 60 * 30, // keep data cached longer
 });
+
+export const getUserSideCardQuery = (username: string) => queryOptions({
+    queryKey: ['user-side-card', username],
+    queryFn: () => getSideCardDetailsByGithubUsername(username),
+    enabled: !!username,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
+});
+
+export const getPersonalDetailsQuery = (username: string, allData: boolean = false) => queryOptions({
+    queryKey: ['personal-details', username, allData],
+    queryFn: () => getPersonalDetailsByGithubUsername(username, allData),
+    enabled: !!username,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
+});
+
 

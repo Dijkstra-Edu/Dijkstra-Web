@@ -1,5 +1,6 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
+import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -10,9 +11,10 @@ export interface OnboardUserRequest {
     secondary_specializations: Domain[];
     expected_salary_bucket: Rank;
     time_left: number;
-    selectedTools: Tools[];
-    dreamCompany: string;
-    dreamRole: string;
+    primary_email: string;
+    tools_to_learn: Tools[];
+    dream_company: string;
+    dream_position: string;
     
     // Optional fields
     first_name?: string;
@@ -20,6 +22,7 @@ export interface OnboardUserRequest {
     last_name?: string;
     rank?: Rank;
     streak?: number;
+    dream_company_logo?: string;
   }
   
   export interface OnboardUserResponse {
@@ -72,7 +75,7 @@ export interface OnboardUserRequest {
  */
 export async function checkOnboardingStatus(username: string): Promise<CheckOnboardingStatusResponse> {
     return fetchDataForge<CheckOnboardingStatusResponse>(
-      `/Dijkstra/v1/u/onboard?check=true&username=${encodeURIComponent(username)}`
+      `/Dijkstra/v1/u/onboard?username=${encodeURIComponent(username)}`
     );
   }
   
@@ -88,9 +91,40 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
   
   /**
    * Get user data by GitHub username
-   */
+   
+  */
   export async function getUserByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
     return fetchDataForge<GetUserBasicResponse>(
       `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
     );
   }
+
+
+  /**
+   * Get Side Card Details by GitHub username
+   */
+  export async function getSideCardDetailsByGithubUsername(username: string): Promise<GetUserSideCardResponse> {
+    return fetchDataForge<GetUserSideCardResponse>(
+      `/Dijkstra/v1/u/card/${encodeURIComponent(username)}`
+    );
+  }
+
+  /**
+   * Get Personal Details by GitHub username
+   */
+  export async function getPersonalDetailsByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
+    return fetchDataForge<GetUserBasicResponse>(
+      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+    );
+  }
+
+  /**
+   * Update Personal Details by GitHub username
+   */
+  export async function updatePersonalDetailsByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
+    return fetchDataForge<GetUserBasicResponse>(
+      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+    );
+  }
+
+  

@@ -67,5 +67,22 @@ export interface GetUserBasicResponse {
   updated_at: string;
 }
 
+export interface GetUserSideCardResponse {
+  github_user_name: string;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  bio: string | null;
+  rank: Rank;
+  streak: number | null;
+  primary_specialization: Domain;
+  secondary_specializations: Domain[];
+  expected_salary_bucket: Rank;
+  time_left: number;
+  linkedin_link: string | null;
+  portfolio_link: string | null;
+  leetcode_link: string | null;
+}
+
 export { Domain, Tools, Rank };
 

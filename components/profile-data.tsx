@@ -34,7 +34,7 @@ import {
 } from "@tabler/icons-react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { Badge } from "@/components/ui/badge";
-import { getUserQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
+import { getUserSideCardQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
 import { Domain, Rank } from "@/types/server/dataforge/enums";
 
 // Utility function to get rank image path
@@ -92,7 +92,7 @@ export function ProfileData() {
 
   // Fetch user data from backend
   const { data: userData, isLoading, error } = useQuery(
-    getUserQuery(session?.user.login || '', false)
+    getUserSideCardQuery(session?.user.login || '')
   );
 
   // Primary career path from user data with fallback
@@ -178,7 +178,7 @@ export function ProfileData() {
             </a>
           </p>
           <p className="text-sm mt-2 text-muted-foreground">
-            {session?.user.bio || "Bio unavailable"}
+            {userData?.bio || session?.user.bio}
           </p>
           <Button variant="outline" size="sm" className="mt-3">
             <Pencil className="h-4 w-4 mr-2" />
@@ -225,7 +225,7 @@ export function ProfileData() {
           <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
             <div className="relative mb-2">
               <img
-                src="/fire.png"
+                src={userData?.streak == 0 ? "/fire_0.png" : "/fire.png"}
                 alt="Fire streak"
                 className="w-25 h-25 object-contain"
               />
@@ -285,7 +285,7 @@ export function ProfileData() {
           <div className="flex flex-row items-center justify-center gap-2 pt-3">
             <Button variant="default" className="w-1/3">
               <a
-                href="https://www.linkedin.com/in/jrs2002/"
+                href={userData?.linkedin_link || "https://www.linkedin.com/"}
                 target="_blank"
                 className="w-full flex justify-center"
               >
@@ -294,7 +294,7 @@ export function ProfileData() {
             </Button>
             <Button variant="default" className="w-1/3">
               <a
-                href="https://leetcode.com/u/JRS296/"
+                href={userData?.leetcode_link || "https://leetcode.com/"}
                 target="_blank"
                 className="w-full flex justify-center"
               >
@@ -303,7 +303,7 @@ export function ProfileData() {
             </Button>
             <Button variant="default" className="w-1/3">
               <a
-                href="https://jrs-studios.web.cern.ch/"
+                href={userData?.portfolio_link || "https://github.com/" + session?.user.login}
                 target="_blank"
                 className="w-full flex justify-center"
               >
@@ -314,7 +314,7 @@ export function ProfileData() {
         </div>
         <Separator className="my-1" />
 
-        {/* Current Project & Team Card f0f5f0 */}
+        {/* Current Project & Team Card f0f5f0 - TODO: Needs to be updated */}
         <Card className="bg-[#f0f5f0] dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-0 shadow-md">
           <CardContent className="py-2 space-y-4">
             <div className="text-center">
