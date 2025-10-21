@@ -9,7 +9,11 @@ export function transformPersonalDetails(personalDetails: GetPersonalDetailsResp
         middleName: personalDetails.middle_name,
         lastName: personalDetails.last_name,
         bio: personalDetails.bio,
-        location: personalDetails.location, //Not Editable Directly
+        locationCity: personalDetails.location_city,
+        locationState: personalDetails.location_state,
+        locationCountry: personalDetails.location_country,
+        locationLatitude: personalDetails.location_latitude,
+        locationLongitude: personalDetails.location_longitude,
         primaryEmail: personalDetails.primary_email || "", //Taken From GitHUb by default, can be changed by the user
         
         secondaryEmail: personalDetails.secondary_email,
@@ -45,7 +49,11 @@ export function transformPersonalDetailsUpdateRequest(personalDetails: Partial<P
         middle_name: personalDetails.middleName,
         last_name: personalDetails.lastName,
         bio: personalDetails.bio,
-        location: undefined,
+        location_city: personalDetails.locationCity,
+        location_state: personalDetails.locationState,
+        location_country: personalDetails.locationCountry,
+        location_latitude: personalDetails.locationLatitude,
+        location_longitude: personalDetails.locationLongitude,
         primary_email: personalDetails.primaryEmail,
         secondary_email: personalDetails.secondaryEmail,
         school_email: personalDetails.universityEmail,

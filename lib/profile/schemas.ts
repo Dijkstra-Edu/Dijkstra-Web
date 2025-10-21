@@ -17,12 +17,25 @@ export const institutionSchema = z.object({
   website: z.string().url().optional().or(z.literal('')),
 });
 
+export const locationSchema = z.object({
+  country: z.string().min(1, 'Country is required'),
+  state: z.string().optional(),
+  city: z.string().min(1, 'City is required'),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+});
+
 // Personal Details schema (for form data, mapped to database fields)
 export const personalDetailsSchema = z.object({
   firstName: z.string().optional(),
+  middleName: z.string().optional(),
   lastName: z.string().optional(),
   bio: z.string().min(10, 'Bio must be at least 10 characters').optional(),
-  location: z.string().optional(),
+  locationCity: z.string().optional(),
+  locationState: z.string().optional(),
+  locationCountry: z.string().optional(),
+  locationLatitude: z.number().optional(),
+  locationLongitude: z.number().optional(),
   primaryEmail: z.string().email('Invalid email address'),
   secondaryEmail: z.string().email('Invalid email address').optional().or(z.literal('')),
   universityEmail: z.string().email('Invalid email address').optional().or(z.literal('')),

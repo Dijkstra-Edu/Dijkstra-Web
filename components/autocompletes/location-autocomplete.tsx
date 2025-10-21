@@ -1,8 +1,8 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover"
-import { Command, CommandInput, CommandItem, CommandList, CommandEmpty, CommandGroup } from "./ui/command"
-import { Button } from "./ui/button"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { Command, CommandInput, CommandItem, CommandList, CommandEmpty, CommandGroup } from "@/components/ui/command"
+import { Button } from "@/components/ui/button"
 import { Check, ChevronsUpDown, Plus, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 

@@ -6,7 +6,11 @@ export interface GetPersonalDetailsResponse {
     middle_name?: string
     last_name?: string
     bio?: string
-    location?: UUID
+    location_city?: string
+    location_state?: string
+    location_country?: string
+    location_latitude?: number
+    location_longitude?: number
     primary_email?: string
     secondary_email?: string
     school_email?: string
@@ -35,7 +39,11 @@ export interface UpdatePersonalDetailsRequest {
     middle_name?: string
     last_name?: string
     bio?: string
-    location?: UUID
+    location_city?: string
+    location_state?: string
+    location_country?: string
+    location_latitude?: number
+    location_longitude?: number
     primary_email?: string
     secondary_email?: string
     school_email?: string

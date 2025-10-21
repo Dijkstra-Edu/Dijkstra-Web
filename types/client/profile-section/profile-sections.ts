@@ -75,7 +75,11 @@ export interface PersonalDetailsData {
   middleName?: string;
   lastName?: string;
   bio?: string;
-  location?: string; //Not Editable Directly
+  locationCity?: string;
+  locationState?: string;
+  locationCountry?: string;
+  locationLatitude?: number;
+  locationLongitude?: number;
   primaryEmail: string; //Taken From GitHUb by default, can be changed by the user
   
   secondaryEmail?: string;

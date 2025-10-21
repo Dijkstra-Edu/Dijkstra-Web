@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { personalDetailsSchema, type PersonalDetailsFormData } from "@/lib/profile/schemas";
 import { SALARY_RANGES, TIME_OPTIONS } from "@/constants/profile-constants";
 import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
+import { LocationAutoComplete } from "@/components/autocompletes/location-autocomplete";
 import { CareerPathSelector } from "../../shared/career-path-selector";
 import { CareerPathCard } from "../../shared/career-path-card";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
@@ -44,15 +45,37 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
   const [selectedCompanyData, setSelectedCompanyData] = useState<{name: string, logo_url?: string} | null>(
     data?.dreamCompany ? { name: data.dreamCompany } : null
   );
+  const [selectedLocationData, setSelectedLocationData] = useState<{
+    city: string, 
+    state?: string, 
+    country: string,
+    latitude?: number,
+    longitude?: number
+  } | null>(
+    data?.locationCity && data?.locationCountry 
+      ? { 
+          city: data.locationCity, 
+          state: data.locationState,
+          country: data.locationCountry,
+          latitude: data.locationLatitude,
+          longitude: data.locationLongitude
+        } 
+      : null
+  );
   const [pathSelectionOpen, setPathSelectionOpen] = useState<'primary' | 'secondary' | null>(null);
 
   const form = useForm<PersonalDetailsFormData>({
     resolver: zodResolver(personalDetailsSchema),
     defaultValues: {
       firstName: data?.firstName || "",
+      middleName: data?.middleName || "",
       lastName: data?.lastName || "",
       bio: data?.bio || "",
-      location: data?.location || "",
+      locationCity: data?.locationCity || "",
+      locationState: data?.locationState || "",
+      locationCountry: data?.locationCountry || "",
+      locationLatitude: data?.locationLatitude || undefined,
+      locationLongitude: data?.locationLongitude || undefined,
       primaryEmail: data?.primaryEmail || "",
       secondaryEmail: data?.secondaryEmail || "",
       universityEmail: data?.universityEmail || "",
@@ -131,6 +154,20 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="middleName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Middle Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your middle name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <FormField
               control={form.control}
@@ -168,19 +205,23 @@ export function PersonalDetailsForm({ data, onUpdate, onCancel, isLoading }: Per
 
         {/* Contact Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl>
-                  <Input placeholder="City, Country" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="md:col-span-2">
+            <FormLabel>Location</FormLabel>
+            <LocationAutoComplete
+              value={selectedLocationData ? 
+                `${selectedLocationData.city}, ${selectedLocationData.state ? selectedLocationData.state + ', ' : ''}${selectedLocationData.country}` 
+                : ""}
+              onChange={(location) => {
+                form.setValue("locationCity", location.city);
+                form.setValue("locationState", location.state || "");
+                form.setValue("locationCountry", location.country);
+                form.setValue("locationLatitude", location.latitude);
+                form.setValue("locationLongitude", location.longitude);
+                setSelectedLocationData(location);
+              }}
+              selectedLocation={selectedLocationData}
+            />
+          </div>
           
           <FormField
             control={form.control}

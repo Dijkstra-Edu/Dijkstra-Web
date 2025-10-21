@@ -55,12 +55,16 @@ export function PersonalDetailsDisplay({ data }: PersonalDetailsDisplayProps) {
 
       {/* Contact Information */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-        {data.location && (
+        {data.locationCity && data.locationCountry && (
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-muted-foreground" />
-            <span>{data.location}</span>
+            <span>{data.locationCity}, {data.locationState}, {data.locationCountry}</span>
           </div>
-        )}
+        ) || 
+        (<div className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-muted-foreground" />
+          <span>No location set</span>
+        </div>)}
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-muted-foreground" />
           <span><a href={`mailto:${data.primaryEmail}`}>{data.primaryEmail}</a> (Linked to GitHub)</span>
