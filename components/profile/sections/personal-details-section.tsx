@@ -24,10 +24,14 @@ export function PersonalDetailsSection({ profileId, githubUserName, isEditing, o
   const updateMutation = useMutation({
     ...updatePersonalDetailsMutation,
     onSuccess: () => {
-      // Use the same query key format as the server-side query
-      queryClient.invalidateQueries({ 
-        queryKey: ['personal-details', githubUserName] 
-      });
+      Promise.all([
+        queryClient.invalidateQueries({ 
+          queryKey: ['personal-details', githubUserName]
+        }),
+        queryClient.invalidateQueries({ 
+          queryKey: ['user-side-card', githubUserName]
+        })
+      ]);
     },
   });
 

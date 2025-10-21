@@ -63,40 +63,40 @@ export function PersonalDetailsDisplay({ data }: PersonalDetailsDisplayProps) {
         )}
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-muted-foreground" />
-          <span>{data.primaryEmail} (Linked to GitHub)</span>
+          <span><a href={`mailto:${data.primaryEmail}`}>{data.primaryEmail}</a> (Linked to GitHub)</span>
         </div>
         {data.secondaryEmail && (
           <div className="flex items-center gap-2">
             <Mail className="w-4 h-4 text-muted-foreground" />
-            <span>{data.secondaryEmail}</span>
+            <span><a href={`mailto:${data.secondaryEmail}`}>{data.secondaryEmail}</a></span>
           </div>
         )}
         {data.universityEmail && (
           <div className="flex items-center gap-2">
             <Mail className="w-4 h-4 text-muted-foreground" />
-            <span>{data.universityEmail}</span>
+            <span><a href={`mailto:${data.universityEmail}`}>{data.universityEmail}</a></span>
           </div>
         )}
         {data.workEmail && (
           <div className="flex items-center gap-2">
             <Mail className="w-4 h-4 text-muted-foreground" />
-            <span>{data.workEmail}</span>
+            <span><a href={`mailto:${data.workEmail}`}>{data.workEmail}</a></span>
           </div>
         )}
         {data.website && (
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-muted-foreground" />
-            <span>{data.website}</span>
+            <span><a href={data.website} target="_blank" rel="noopener noreferrer">{data.website}</a></span>
           </div>
         )}
         <div className="flex items-center gap-2">
           <Github className="w-4 h-4 text-muted-foreground" />
-          <span>github.com/{data.githubUserName}</span>
+          <span><a href={`https://github.com/${data.githubUserName}`} target="_blank" rel="noopener noreferrer">github.com/{data.githubUserName}</a></span>
         </div>
         {data.linkedinUserName && (
           <div className="flex items-center gap-2">
             <Linkedin className="w-4 h-4 text-muted-foreground" />
-            <span>linkedin.com/in/{data.linkedinUserName}</span>
+            <span><a href={`https://linkedin.com/in/${data.linkedinUserName}`} target="_blank" rel="noopener noreferrer">linkedin.com/in/{data.linkedinUserName}</a></span>
           </div>
         )}
       </div>

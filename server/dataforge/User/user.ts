@@ -127,17 +127,13 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    * Update Personal Details by GitHub username
    */
   export async function updatePersonalDetailsByGithubUsername(username: string, data: Partial<PersonalDetailsData>): Promise<PersonalDetailsData> {
-    console.log(`Updating personal details for ${username}`);
-    console.log(data);
     const request = transformPersonalDetailsUpdateRequest(data);
-    console.log(request);
     const response = await fetchDataForge<GetPersonalDetailsResponse>(
       `/Dijkstra/v1/u/personal-details/${encodeURIComponent(username)}`, {
         method: 'PUT',
         body: JSON.stringify(request),
       }
     );
-    console.log(response);
     return transformPersonalDetails(response);
   }
 
