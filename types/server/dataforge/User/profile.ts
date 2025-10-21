@@ -1,5 +1,14 @@
 import { UUID } from "crypto"
-import { Domain, Rank, Tools } from "../enums"
+import { Domain, EmploymentType, Rank, Tools, WorkLocationType } from "../enums"
+
+export interface GetLocationResponse {
+    id: UUID
+    city: string
+    state: string
+    country: string    
+    latitude: number
+    longitude: number
+}
 
 export interface GetPersonalDetailsResponse {
     first_name?: string
@@ -59,4 +68,29 @@ export interface UpdatePersonalDetailsRequest {
     tools_to_learn?: Tools[]
     primary_specialization?: Domain
     secondary_specializations?: Domain[]
+}
+
+export interface GetWorkExperienceResponse {
+    id: UUID
+    profile_id: UUID
+    title: string
+    employment_type: EmploymentType
+    domain?: Domain[]
+    company_name: string
+    company_logo?: string
+    currently_working: boolean
+    location?: GetLocationResponse
+    location_type: WorkLocationType
+    start_date_month: number
+    start_date_year: number
+    end_date_month?: number
+    end_date_year?: number
+    description_general: string
+    description_detailed?: string
+    description_less?: string
+    work_done?: string
+    company_score?: number
+    time_spent_multiplier?: number
+    work_done_multiplier?: number
+    tools_used?: Tools[]
 }

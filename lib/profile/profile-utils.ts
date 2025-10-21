@@ -203,3 +203,40 @@ export const formatMonthYearRange = (
   const end = isCurrent ? 'Present' : (endMonth && endYear ? formatMonthYear(endMonth, endYear) : 'Present');
   return `${start} - ${end}`;
 };
+
+/**
+ * Generic interface for objects with date-based sorting
+ */
+export interface DateSortable {
+  startDateMonth: number;
+  startDateYear: number;
+  endDateMonth?: number;
+  endDateYear?: number;
+  currentlyWorking?: boolean;
+}
+
+/**
+ * Sort an array of objects by their end date (most recent first)
+ * Generic function that works with any object implementing DateSortable interface
+ */
+export const sortByEndDate = <T extends DateSortable>(items: T[]): T[] => {
+  return [...items].sort((a, b) => {
+    // Helper function to get the effective end date for sorting
+    const getEndDate = (item: T): Date => {
+      if (item.currentlyWorking) {
+        return new Date(); // Current date for ongoing positions
+      }
+      if (item.endDateYear && item.endDateMonth) {
+        return new Date(item.endDateYear, item.endDateMonth - 1, 1);
+      }
+      // Fallback to start date if no end date
+      return new Date(item.startDateYear, item.startDateMonth - 1, 1);
+    };
+
+    const endDateA = getEndDate(a);
+    const endDateB = getEndDate(b);
+
+    // Sort by end date (most recent first)
+    return endDateB.getTime() - endDateA.getTime();
+  });
+};

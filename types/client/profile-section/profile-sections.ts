@@ -1,5 +1,7 @@
 // Profile section types for modular architecture - Updated to match database schema
 
+import { UUID } from "crypto";
+
 // Database Enums
 export type Rank = 'UNRANKED' | 'IRON_1' | 'IRON_2' | 'IRON_3' | 'BRONZE_1' | 'BRONZE_2' | 'BRONZE_3' | 'SILVER_1' | 'SILVER_2' | 'SILVER_3' | 'GOLD_1' | 'GOLD_2' | 'GOLD_3' | 'PLATINUM_1' | 'PLATINUM_2' | 'PLATINUM_3' | 'DIAMOND_1' | 'DIAMOND_2' | 'DIAMOND_3' | 'EMERALD_1' | 'EMERALD_2' | 'EMERALD_3' | 'LAPIS_1' | 'LAPIS_2' | 'LAPIS_3' | 'QUARTZ_1' | 'QUARTZ_2' | 'QUARTZ_3' | 'SAPHIRE_1' | 'SAPHIRE_2' | 'SAPHIRE_3' | 'OBSIDIAN';
 
@@ -36,7 +38,7 @@ export interface Institution {
 }
 
 export interface Location {
-  id: string;
+  id: UUID;
   country: string;
   state?: string;
   city: string;

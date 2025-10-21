@@ -1,6 +1,7 @@
-import { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
-import { GetPersonalDetailsResponse, UpdatePersonalDetailsRequest } from "./User/profile";
-import { Domain, Rank, Tools } from "./enums";
+import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import { GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest } from "./User/profile";
+import { Domain, EmploymentType, Rank, Tools, WorkLocationType } from "./enums";
+import { UUID } from "crypto";
 
 export function transformPersonalDetails(personalDetails: GetPersonalDetailsResponse): PersonalDetailsData {
     return {
@@ -69,5 +70,40 @@ export function transformPersonalDetailsUpdateRequest(personalDetails: Partial<P
         tools_to_learn: personalDetails.toolsToLearn as Tools[],
         primary_specialization: personalDetails.primarySpecialization as Domain,
         secondary_specializations: personalDetails.secondarySpecializations as Domain[],
+    }
+}
+
+export function transformWorkExperienceArray(workExperience: GetWorkExperienceResponse[]): WorkExperienceData[] {
+    return workExperience.map((workExperience) => transformWorkExperience(workExperience));
+}
+
+export function transformWorkExperience(workExperience: GetWorkExperienceResponse): WorkExperienceData {
+    return {
+        id: workExperience.id,
+        profileId: workExperience.profile_id,
+        title: workExperience.title,
+        employmentType: workExperience.employment_type as EmploymentType,
+        domain: workExperience.domain as Domain[],
+        companyName: workExperience.company_name,
+        companyLogo: workExperience.company_logo,
+        currentlyWorking: workExperience.currently_working,
+        location: workExperience.location ? {
+            id: workExperience.location.id as UUID,
+            country: workExperience.location.country as string,
+            state: workExperience.location.state as string,
+            city: workExperience.location.city as string,
+            latitude: workExperience.location.latitude as number,
+            longitude: workExperience.location.longitude as number,
+        } : undefined,
+        locationType: workExperience.location_type as WorkLocationType,
+        startDateMonth: workExperience.start_date_month,
+        startDateYear: workExperience.start_date_year,
+        endDateMonth: workExperience.end_date_month || undefined,
+        endDateYear: workExperience.end_date_year || undefined,
+        descriptionGeneral: workExperience.description_general,
+        descriptionDetailed: workExperience.description_detailed || undefined,
+        descriptionLess: workExperience.description_less || undefined,
+        workDone: workExperience.work_done || undefined,
+        toolsUsed: workExperience.tools_used || [],
     }
 }

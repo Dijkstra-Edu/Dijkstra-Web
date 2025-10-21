@@ -1,9 +1,9 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetPersonalDetailsResponse } from "@/types/server/dataforge/User/profile";
-import { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
-import { transformPersonalDetails, transformPersonalDetailsUpdateRequest } from "@/types/server/dataforge/transformers";
+import { GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
+import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import { transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperienceArray } from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -137,4 +137,13 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
     return transformPersonalDetails(response);
   }
 
-  
+  /**
+   * Get Work Experience by GitHub username
+   */
+  export async function getWorkExperienceByGithubUsername(username: string): Promise<WorkExperienceData[]> {
+    const response = await fetchDataForge<GetWorkExperienceResponse[]>(
+      `/Dijkstra/v1/wp/${encodeURIComponent(username)}`
+    );
+    return transformWorkExperienceArray(response);
+  }
+

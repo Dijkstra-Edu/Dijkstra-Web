@@ -9,9 +9,13 @@ import { EditControls } from "../shared/edit-controls";
 import { WorkExperienceSkeleton } from "../shared/section-skeleton";
 import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
+import { useQuery } from "@tanstack/react-query";
+import { getWorkExperienceQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
 
-export function WorkExperienceSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
-  const { data: experiences, isLoading, error, refetch } = useWorkExperience(profileId);
+export function WorkExperienceSection({ profileId, githubUserName, isEditing, onToggleEdit }: ProfileSectionProps) {
+  /*const { data: experiences, isLoading, error, refetch } = useWorkExperience(profileId);*/
+  const { data: experiences, isLoading, error, refetch } = useQuery(getWorkExperienceQuery(githubUserName));
+  console.log(experiences);
   const addMutation = useAddWorkExperience();
   const updateMutation = useUpdateWorkExperience();
   const deleteMutation = useDeleteWorkExperience();

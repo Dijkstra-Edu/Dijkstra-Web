@@ -1,7 +1,7 @@
 // Work Experience Display Component
 
 import { Badge } from "@/components/ui/badge";
-import { calculateExperience, formatMonthYearRange } from "@/lib/profile/profile-utils";
+import { calculateExperience, formatMonthYearRange, sortByEndDate } from "@/lib/profile/profile-utils";
 import type { WorkExperienceData } from "@/types/client/profile-section/profile-sections";
 
 interface WorkExperienceDisplayProps {
@@ -17,9 +17,12 @@ export function WorkExperienceDisplay({ data }: WorkExperienceDisplayProps) {
     );
   }
 
+  // Sort work experience from most recent to least recent
+  const sortedData = sortByEndDate(data);
+
   return (
     <div className="space-y-6">
-      {data.map((experience) => (
+      {sortedData.map((experience) => (
         <div key={experience.id} className="relative border-l-2 border-muted pl-6 pb-6 last:pb-0">
           <div className="absolute w-3 h-3 bg-primary rounded-full -left-2 top-1.5" />
           
@@ -58,9 +61,9 @@ export function WorkExperienceDisplay({ data }: WorkExperienceDisplayProps) {
                   </p>
                   <p className="text-sm text-muted-foreground font-medium">
                     {calculateExperience(
-                      `${experience.startDateYear}-${experience.startDateMonth.toString().padStart(2, '0')}-01`,
+                      `${experience.startDateYear}-${experience.startDateMonth?.toString().padStart(2, '0')}-01`,
                       experience.endDateYear && experience.endDateMonth 
-                        ? `${experience.endDateYear}-${experience.endDateMonth.toString().padStart(2, '0')}-01`
+                        ? `${experience.endDateYear}-${experience.endDateMonth?.toString().padStart(2, '0')}-01`
                         : null,
                       experience.currentlyWorking
                     )} experience

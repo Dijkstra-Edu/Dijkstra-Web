@@ -1,6 +1,6 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import type { OnboardUserRequest } from "../user";
-import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername } from "../user";
+import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getWorkExperienceByGithubUsername } from "../user";
 import { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
 
 
@@ -42,3 +42,12 @@ export const updatePersonalDetailsMutation = mutationOptions({
     mutationFn: ({ username, data }: { username: string; data: Partial<PersonalDetailsData> }) => 
         updatePersonalDetailsByGithubUsername(username, data),
 });
+
+export const getWorkExperienceQuery = (username: string) => queryOptions({
+    queryKey: ['work-experience', username],
+    queryFn: () => getWorkExperienceByGithubUsername(username),
+    enabled: !!username,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
+});
+
