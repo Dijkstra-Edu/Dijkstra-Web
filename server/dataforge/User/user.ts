@@ -53,6 +53,12 @@ export interface OnboardUserRequest {
     onboarded: boolean;
     user_id: string | null;
   }
+
+  export interface GetAuthDataResponse {
+    user_id: string;
+    profile_id: string;
+    github_user_name: string;
+  }
   
   export interface GetUserBasicResponse {
     id: string;
@@ -145,5 +151,14 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
       `/Dijkstra/v1/wp/${encodeURIComponent(username)}`
     );
     return transformWorkExperienceArray(response);
+  }
+
+  /**
+   * Get Auth Data by GitHub username
+   */
+  export async function getAuthDataByGithubUsername(username: string): Promise<GetAuthDataResponse> {
+    return fetchDataForge<GetAuthDataResponse>(
+      `/Dijkstra/v1/u/auth/${encodeURIComponent(username)}`
+    );
   }
 

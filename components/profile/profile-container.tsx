@@ -51,6 +51,8 @@ export function ProfileContainer() {
     });
   };
 
+  console.log("Session", session);
+
   return (
     <div className="max-w-8xl mx-auto space-y-6">
       {/* Header */}
@@ -64,7 +66,7 @@ export function ProfileContainer() {
         {PROFILE_SECTIONS.map(({ id, component: SectionComponent }) => (
           <SectionComponent
             key={id}
-            profileId="profile_001" // TODO: Get actual profile ID from user session
+            profileId={session?.user?.profile_id || ""}
             githubUserName={session?.user?.login || ""}
             isEditing={editingSections.has(id)}
             onToggleEdit={() => toggleEdit(id)}

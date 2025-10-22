@@ -2,6 +2,8 @@
 import GitHub from "next-auth/providers/github";
 import LinkedIn from "next-auth/providers/linkedin";
 import type { NextAuthOptions } from "next-auth";
+import { fetchDataForge } from "@/server/dataforge/client";
+import { checkOnboardingStatus, getAuthDataByGithubUsername } from "@/server/dataforge/User/user";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -103,6 +105,12 @@ export const authOptions: NextAuthOptions = {
           u.linkedinName = (token as any).linkedinName as string | undefined;
           u.linkedinImage = (token as any).linkedinImage as string | undefined;
         }
+        
+        // Add DataForge auth data
+        u.github_user_name = (token as any).github_user_name;
+        u.user_id = (token as any).user_id;
+        u.profile_id = (token as any).profile_id;
+        u.requires_onboarding = (token as any).requires_onboarding;
       }
       
       return session;
@@ -110,6 +118,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, profile, account, user }) {
       // Handle GitHub login
       if (profile && account?.provider === "github") {
+        const githubUsername = (profile as any).login;
+        
         // Create a new token with GitHub data
         const newToken = {
           ...token,
@@ -128,6 +138,31 @@ export const authOptions: NextAuthOptions = {
           organization: (profile as any).organization,
           hireable: (profile as any).hireable,
         };
+        
+        try {
+          // Check onboarding status first
+          const onboardingStatus = await checkOnboardingStatus(githubUsername);
+          
+          if (onboardingStatus.onboarded) {
+            // User is onboarded - fetch auth credentials
+            const authData = await getAuthDataByGithubUsername(githubUsername);
+            
+            newToken.user_id = authData.user_id;
+            newToken.profile_id = authData.profile_id;
+            newToken.github_user_name = githubUsername;
+            newToken.requires_onboarding = false;
+          } else {
+            // User not onboarded - set flag for redirect
+            newToken.github_user_name = githubUsername;
+            newToken.requires_onboarding = true;
+            // Don't set user_id/profile_id for non-onboarded users
+          }
+        } catch (error) {
+          console.error('Failed to fetch DataForge auth data:', error);
+          // Assume requires onboarding if we can't check
+          newToken.requires_onboarding = true;
+          newToken.github_user_name = githubUsername;
+        }
         
         // Preserve LinkedIn data if it exists
         if (token.linkedinId) {

@@ -4,8 +4,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { checkOnboardingStatusQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -20,28 +18,24 @@ export function LoginForm({
   
   // Check if we just came back from OAuth
   const justLoggedIn = searchParams.get('callback') === 'true';
-  const githubUsername = (session?.user as any)?.login;
 
-  // Query onboarding status after successful OAuth
-  const { data: onboardingStatus, isLoading: isCheckingStatus } = useQuery({
-    ...checkOnboardingStatusQuery(githubUsername),
-    enabled: !!githubUsername && justLoggedIn,
-  });
-
-  // Redirect based on onboarding status
+  // Redirect based on onboarding status from session
   useEffect(() => {
-    if (justLoggedIn && onboardingStatus) {
-      console.log('🔍 Login verification:', { githubUsername, onboarded: onboardingStatus.onboarded });
+    if (justLoggedIn && session?.user) {
+      console.log('Login verification:', { 
+        githubUsername: session.user.github_user_name,
+        requiresOnboarding: session.user.requires_onboarding 
+      });
       
-      if (onboardingStatus.onboarded) {
-        console.log('✅ User onboarded, redirecting to dashboard');
-        window.location.href = '/dashboard';
-      } else {
-        console.log('➡️ User not onboarded, redirecting to onboarding');
+      if (session.user.requires_onboarding) {
+        console.log('User not onboarded, redirecting to onboarding');
         window.location.href = '/onboarding';
+      } else {
+        console.log('User onboarded, redirecting to dashboard');
+        window.location.href = '/dashboard';
       }
     }
-  }, [onboardingStatus, justLoggedIn, githubUsername]);
+  }, [session, justLoggedIn]);
 
   const handleLogin = async () => {
     try {
@@ -80,7 +74,7 @@ export function LoginForm({
   };
 
   // Show loading state during callback verification
-  if (justLoggedIn && githubUsername) {
+  if (justLoggedIn && session?.user?.github_user_name) {
     return (
       <div className={cn("flex flex-col gap-6", className)}>
         <div className="flex flex-col items-center gap-2 text-center">
@@ -114,14 +108,9 @@ export function LoginForm({
           variant="outline"
           className="w-full cursor-pointer"
           onClick={handleLogin}
-          disabled={isLoggingIn || isCheckingStatus}
+          disabled={isLoggingIn}
         >
-          {isCheckingStatus ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Verifying your account...
-            </>
-          ) : isLoggingIn ? (
+          {isLoggingIn ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Redirecting to GitHub...
