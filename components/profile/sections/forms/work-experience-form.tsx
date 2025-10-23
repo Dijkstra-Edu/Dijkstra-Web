@@ -22,7 +22,7 @@ import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { workExperienceSchema, type WorkExperienceFormData } from "@/lib/profile/schemas";
 import { parseSkillsString } from "@/lib/profile/profile-utils";
-import type { WorkExperienceData, EmploymentType, WorkLocationType, Domain, Tools } from "@/types/client/profile-section/profile-sections";
+import type { WorkExperienceData, EmploymentType, WorkLocationType, Domain, Tools, Location } from "@/types/client/profile-section/profile-sections";
 
 interface WorkExperienceFormProps {
   experiences: WorkExperienceData[];
@@ -59,6 +59,13 @@ export function WorkExperienceForm({
       companyName: "",
       companyLogo: "",
       currentlyWorking: false,
+      location: {
+        country: "",
+        city: "",
+        state: "",
+        latitude: undefined,
+        longitude: undefined,
+      },
       locationType: "ON_SITE",
       startDateMonth: new Date().getMonth() + 1,
       startDateYear: new Date().getFullYear(),
@@ -77,11 +84,13 @@ export function WorkExperienceForm({
   });
 
   const onSubmit = (data: WorkExperienceFormData) => {
+    console.log("Adding work experience", data);
     try {
       onAdd({
         ...data,
         employmentType: data.employmentType as EmploymentType,
         locationType: data.locationType as WorkLocationType,
+        location: data.location as Location,
         domain: data.domain as Domain[],
         toolsUsed: data.toolsUsed as Tools[],
         profileId: "", // This will be set by the parent component
@@ -104,6 +113,7 @@ export function WorkExperienceForm({
           ...data,
           employmentType: data.employmentType as EmploymentType,
           locationType: data.locationType as WorkLocationType,
+          location: data.location as Location,
           domain: data.domain as Domain[],
           toolsUsed: data.toolsUsed as Tools[],
         }
@@ -126,6 +136,7 @@ export function WorkExperienceForm({
       companyLogo: experience.companyLogo,
       currentlyWorking: experience.currentlyWorking,
       locationType: experience.locationType,
+      location: experience.location as Location,
       startDateMonth: experience.startDateMonth,
       startDateYear: experience.startDateYear,
       endDateMonth: experience.endDateMonth,

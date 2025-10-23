@@ -3,7 +3,7 @@ import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
 import { GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
 import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperienceArray } from "@/types/server/dataforge/transformers";
+import { transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray } from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -144,6 +144,15 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
   }
 
   /**
+ * Get Auth Data by GitHub username
+ */
+  export async function getAuthDataByGithubUsername(username: string): Promise<GetAuthDataResponse> {
+    return fetchDataForge<GetAuthDataResponse>(
+      `/Dijkstra/v1/u/auth/${encodeURIComponent(username)}`
+    );
+  }
+
+  /**
    * Get Work Experience by GitHub username
    */
   export async function getWorkExperienceByGithubUsername(username: string): Promise<WorkExperienceData[]> {
@@ -154,11 +163,38 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
   }
 
   /**
-   * Get Auth Data by GitHub username
+   * Add Work Experience by GitHub username
    */
-  export async function getAuthDataByGithubUsername(username: string): Promise<GetAuthDataResponse> {
-    return fetchDataForge<GetAuthDataResponse>(
-      `/Dijkstra/v1/u/auth/${encodeURIComponent(username)}`
+  export async function addWorkExperienceByGithubUsername(username: string, data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkExperienceData> {
+    const response = await fetchDataForge<GetWorkExperienceResponse>(
+      `/Dijkstra/v1/wp/`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
     );
+    return transformWorkExperience(response);
   }
 
+  /**
+   * Update Work Experience by Work Experience ID
+   */
+  export async function updateWorkExperienceByWorkExperienceId(workExperienceId: string, data: Partial<WorkExperienceData>): Promise<WorkExperienceData> {
+    const response = await fetchDataForge<GetWorkExperienceResponse>(
+      `/Dijkstra/v1/wp/${encodeURIComponent(workExperienceId)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    );
+    return transformWorkExperience(response);
+  }
+  
+  /**
+   * Delete Work Experience by Work Experience ID
+   */
+  export async function deleteWorkExperienceByWorkExperienceId(workExperienceId: string): Promise<void> {
+    await fetchDataForge<void>(
+      `/Dijkstra/v1/wp/${encodeURIComponent(workExperienceId)}`, {
+        method: 'DELETE',
+      }
+    );
+  }

@@ -121,7 +121,8 @@ export interface WorkExperienceData {
   companyName: string;
   companyLogo?: string;
   currentlyWorking: boolean;
-  location?: Location; // UUID reference to Location table
+  
+  location?: Location;
   locationType: WorkLocationType;
 
   startDateMonth: number;

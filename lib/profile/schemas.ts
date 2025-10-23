@@ -66,6 +66,7 @@ export const workExperienceSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
   companyLogo: z.string().optional(),
   currentlyWorking: z.boolean(),
+  location: locationSchema,
   locationType: z.string().min(1, 'Location type is required'),
   startDateMonth: z.number().min(1).max(12, 'Invalid month'),
   startDateYear: z.number().min(1900).max(2100, 'Invalid year'),
