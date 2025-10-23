@@ -19,8 +19,8 @@ import {
 import { MonthYearPicker } from "../../shared/month-year-picker";
 import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
 import { LocationAutoComplete } from "@/components/autocompletes/location-autocomplete";
-import { ToolsMultiSelect } from "@/components/autocompletes/tools-multi-select";
-import { DomainMultiSelect } from "@/components/autocompletes/domain-multi-select";
+import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
+import { DomainMultiSelect } from "@/components/multiselects/domain-multi-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2, Save, X } from "lucide-react";
@@ -792,12 +792,27 @@ export function WorkExperienceForm({
           ) : (
             // Display Mode
             <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h5 className="font-medium">{experience.title}</h5>
-                  <p className="text-sm text-muted-foreground">{experience.companyName}</p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                  {experience.companyLogo ? (
+                    <img
+                      src={experience.companyLogo.includes('logo.dev') ? `${experience.companyLogo}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : experience.companyLogo}
+                      alt={`${experience.companyName} logo`}
+                      className="w-16 h-16 rounded-lg object-contain border bg-white flex-shrink-0"
+                    />
+                  ) : (
+                    <img
+                      src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48`}
+                      alt={`${experience.companyName || 'company'} logo`}
+                      className="w-16 h-16 rounded-lg object-cover border flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h5 className="font-medium">{experience.title}</h5>
+                    <p className="text-sm text-muted-foreground">{experience.companyName}</p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button
                     size="sm"
                     variant="outline"
@@ -815,17 +830,23 @@ export function WorkExperienceForm({
                   </Button>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">{experience.descriptionGeneral}</p>
-              <div className="flex flex-wrap gap-1">
-                {experience.toolsUsed.map((tool) => (
-                  <span
-                    key={tool}
-                    className="px-2 py-1 bg-muted rounded-md text-xs"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
+              {experience.descriptionGeneral && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {experience.descriptionGeneral}
+                </p>
+              )}
+              {experience.toolsUsed && experience.toolsUsed.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {experience.toolsUsed.map((tool) => (
+                    <span
+                      key={tool}
+                      className="px-2 py-1 bg-muted rounded-md text-xs"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
