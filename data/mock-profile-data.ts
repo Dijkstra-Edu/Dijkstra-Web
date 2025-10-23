@@ -27,7 +27,6 @@ export const mockPersonalDetails: PersonalDetailsData = {
   firstName: "Alex",
   lastName: "Johnson",
   bio: "Passionate computer science student with a focus on full-stack development and machine learning. Always eager to learn new technologies and contribute to meaningful projects.",
-  location: "San Francisco, CA", // Not editable directly
   primaryEmail: "alex.johnson@gmail.com", // Taken from GitHub by default
   secondaryEmail: "alex.personal@outlook.com",
   universityEmail: "alex.johnson@stanford.edu",
@@ -63,7 +62,7 @@ export const mockWorkExperience: WorkExperienceData[] = [
     companyLogo: undefined,
     currentlyWorking: false,
     location: {
-      id: "location_002",
+      id: "0002-0002-0002-0002-0002",
       country: "United States",
       state: "California",
       city: "San Francisco",
@@ -91,7 +90,7 @@ export const mockWorkExperience: WorkExperienceData[] = [
     companyLogo: "https://img.logo.dev/zara.com",
     currentlyWorking: true,
     location: {
-      id: "location_003",
+      id: "0003-0003-0003-0003-0003",
       country: "United States",
       state: "California",
       city: "San Francisco",
@@ -305,7 +304,7 @@ export const mockEducation: EducationData[] = [
     courseFieldName: "Computer Science",
     currentlyStudying: true,
     location: {
-      id: "location_004",
+      id: "0004-0004-0004-0004-0004",
       country: "United States",
       state: "California",
       city: "Stanford",

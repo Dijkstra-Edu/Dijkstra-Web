@@ -96,9 +96,11 @@ export function EducationForm({
       courseFieldName: "",
       currentlyStudying: false,
       location: {
-        id: "",
         country: "",
         city: "",
+        state: undefined,
+        latitude: undefined,
+        longitude: undefined,
       },
       locationType: "ON_SITE" as WorkLocationType,
       startDateMonth: new Date().getMonth() + 1,
@@ -126,6 +128,7 @@ export function EducationForm({
         degree: data.degree as Degree,
         locationType: data.locationType as WorkLocationType,
         toolsUsed: data.toolsUsed as Tools[],
+        location: data.location as Location,
       });
       toast.success("Education added successfully!");
       form.reset();
@@ -147,6 +150,7 @@ export function EducationForm({
           degree: data.degree as Degree,
           locationType: data.locationType as WorkLocationType,
           toolsUsed: data.toolsUsed as Tools[],
+          location: data.location as Location,
         }
       });
       toast.success("Education updated successfully!");
