@@ -1,53 +1,46 @@
 // Custom hook for work experience
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  workExperienceQuery, 
-  addWorkExperienceMutation, 
-  updateWorkExperienceMutation, 
-  deleteWorkExperienceMutation 
-} from '@/lib/profile/query-options';
-import { profileQueryKeys } from '@/lib/profile/query-keys';
+import { addWorkExperienceMutation, deleteWorkExperienceMutation, updateWorkExperienceMutation } from '@/server/dataforge/User/QueryOptions/user.queryOptions';
 
-export function useWorkExperience(profileId: string) {
-  return useQuery(workExperienceQuery(profileId));
-}
-
-export function useAddWorkExperience() {
+export const useAddWorkExperienceMutation = (username: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...addWorkExperienceMutation,
-    onSuccess: (_, { profileId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.workExperience.list(profileId) 
-      });
-    },
+      ...addWorkExperienceMutation,
+      onSuccess: () => {
+          // Invalidate and refetch work experience data
+          queryClient.invalidateQueries({ 
+              queryKey: ['work-experience', username] 
+          });
+      },
   });
-}
+};
 
-export function useUpdateWorkExperience() {
+export const useUpdateWorkExperienceMutation = (username: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...updateWorkExperienceMutation,
-    onSuccess: (_, { profileId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.workExperience.list(profileId) 
-      });
-    },
+      ...updateWorkExperienceMutation,
+      onSuccess: () => {
+          // Invalidate and refetch work experience data
+          queryClient.invalidateQueries({ 
+              queryKey: ['work-experience', username] 
+          });
+      },
   });
-}
+};
 
-export function useDeleteWorkExperience() {
+export const useDeleteWorkExperienceMutation = (username: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...deleteWorkExperienceMutation,
-    onSuccess: (_, { profileId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.workExperience.list(profileId) 
-      });
-    },
+      ...deleteWorkExperienceMutation,
+      onSuccess: () => {
+          // Invalidate and refetch work experience data
+          queryClient.invalidateQueries({ 
+              queryKey: ['work-experience', username] 
+          });
+      },
   });
-}
+};

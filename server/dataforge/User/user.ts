@@ -3,7 +3,7 @@ import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
 import { GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
 import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray } from "@/types/server/dataforge/transformers";
+import { transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest } from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -165,11 +165,13 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
   /**
    * Add Work Experience by GitHub username
    */
-  export async function addWorkExperienceByGithubUsername(username: string, data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkExperienceData> {
+  export async function addWorkExperienceByGithubUsername( data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkExperienceData> {
+    console.log('Adding work experience data', data);
+    const request = transformWorkExperienceToRequest(data);
     const response = await fetchDataForge<GetWorkExperienceResponse>(
       `/Dijkstra/v1/wp/`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(request),
       }
     );
     return transformWorkExperience(response);
@@ -179,10 +181,11 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    * Update Work Experience by Work Experience ID
    */
   export async function updateWorkExperienceByWorkExperienceId(workExperienceId: string, data: Partial<WorkExperienceData>): Promise<WorkExperienceData> {
+    const request = transformWorkExperienceUpdateRequest(data);
     const response = await fetchDataForge<GetWorkExperienceResponse>(
       `/Dijkstra/v1/wp/${encodeURIComponent(workExperienceId)}`, {
         method: 'PUT',
-        body: JSON.stringify(data),
+        body: JSON.stringify(request),
       }
     );
     return transformWorkExperience(response);

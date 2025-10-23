@@ -107,3 +107,63 @@ export function transformWorkExperience(workExperience: GetWorkExperienceRespons
         toolsUsed: workExperience.tools_used || [],
     }
 }
+
+export function transformWorkExperienceToRequest(workExperience: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetWorkExperienceResponse, 'id'> {
+    return {
+        profile_id: workExperience.profileId as UUID,
+        title: workExperience.title,
+        employment_type: workExperience.employmentType as EmploymentType,
+        domain: workExperience.domain as Domain[],
+        company_name: workExperience.companyName,
+        company_logo: workExperience.companyLogo,
+        currently_working: workExperience.currentlyWorking,
+        location: workExperience.location ? {
+            id: workExperience.location.id as UUID,
+            country: workExperience.location.country,
+            state: workExperience.location.state || "",
+            city: workExperience.location.city,
+            latitude: workExperience.location.latitude || 0,
+            longitude: workExperience.location.longitude || 0,
+        } : undefined,
+        location_type: workExperience.locationType as WorkLocationType,
+        start_date_month: workExperience.startDateMonth,
+        start_date_year: workExperience.startDateYear,
+        end_date_month: workExperience.endDateMonth,
+        end_date_year: workExperience.endDateYear,
+        description_general: workExperience.descriptionGeneral,
+        description_detailed: workExperience.descriptionDetailed,
+        description_less: workExperience.descriptionLess,
+        work_done: workExperience.workDone,
+        tools_used: workExperience.toolsUsed as Tools[],
+    }
+}
+
+export function transformWorkExperienceUpdateRequest(workExperience: Partial<WorkExperienceData>): Partial<GetWorkExperienceResponse> {
+    return {
+        profile_id: workExperience.profileId as UUID,
+        title: workExperience.title,
+        employment_type: workExperience.employmentType as EmploymentType,
+        domain: workExperience.domain as Domain[],
+        company_name: workExperience.companyName,
+        company_logo: workExperience.companyLogo,
+        currently_working: workExperience.currentlyWorking,
+        location: workExperience.location ? {
+            id: workExperience.location.id as UUID,
+            country: workExperience.location.country,
+            state: workExperience.location.state || "",
+            city: workExperience.location.city,
+            latitude: workExperience.location.latitude || 0,
+            longitude: workExperience.location.longitude || 0,
+        } : undefined,
+        location_type: workExperience.locationType as WorkLocationType,
+        start_date_month: workExperience.startDateMonth,
+        start_date_year: workExperience.startDateYear,
+        end_date_month: workExperience.endDateMonth,
+        end_date_year: workExperience.endDateYear,
+        description_general: workExperience.descriptionGeneral,
+        description_detailed: workExperience.descriptionDetailed,
+        description_less: workExperience.descriptionLess,
+        work_done: workExperience.workDone,
+        tools_used: workExperience.toolsUsed as Tools[],
+    }
+}

@@ -1,4 +1,4 @@
-import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import { mutationOptions, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { OnboardUserRequest } from "../user";
 import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getWorkExperienceByGithubUsername, addWorkExperienceByGithubUsername, updateWorkExperienceByWorkExperienceId, deleteWorkExperienceByWorkExperienceId } from "../user";
 import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
@@ -43,6 +43,8 @@ export const updatePersonalDetailsMutation = mutationOptions({
         updatePersonalDetailsByGithubUsername(username, data),
 });
 
+// Work Experience Query Options
+
 export const getWorkExperienceQuery = (username: string) => queryOptions({
     queryKey: ['work-experience', username],
     queryFn: () => getWorkExperienceByGithubUsername(username),
@@ -52,8 +54,9 @@ export const getWorkExperienceQuery = (username: string) => queryOptions({
 });
 
 export const addWorkExperienceMutation = mutationOptions({
-    mutationFn: ({ username, data }: { username: string; data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'> }) => 
-        addWorkExperienceByGithubUsername(username, data),
+    mutationFn: ({ data }: { data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'> }) => {
+        return addWorkExperienceByGithubUsername(data);
+    },
 });
 
 export const updateWorkExperienceMutation = mutationOptions({
@@ -65,4 +68,3 @@ export const deleteWorkExperienceMutation = mutationOptions({
     mutationFn: ({ workExperienceId }: { workExperienceId: string }) => 
         deleteWorkExperienceByWorkExperienceId(workExperienceId),
 });
-

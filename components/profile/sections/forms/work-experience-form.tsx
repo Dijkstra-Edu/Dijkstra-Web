@@ -18,15 +18,21 @@ import {
 } from "@/components/ui/form";
 import { MonthYearPicker } from "../../shared/month-year-picker";
 import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
+import { LocationAutoComplete } from "@/components/autocompletes/location-autocomplete";
+import { ToolsMultiSelect } from "@/components/autocompletes/tools-multi-select";
+import { DomainMultiSelect } from "@/components/autocompletes/domain-multi-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { workExperienceSchema, type WorkExperienceFormData } from "@/lib/profile/schemas";
-import { parseSkillsString } from "@/lib/profile/profile-utils";
+import { EMPLOYMENT_TYPE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/constants/enum-constants";
 import type { WorkExperienceData, EmploymentType, WorkLocationType, Domain, Tools, Location } from "@/types/client/profile-section/profile-sections";
 
 interface WorkExperienceFormProps {
+  profileId: string;
   experiences: WorkExperienceData[];
-  onAdd: (data: Omit<WorkExperienceData, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => void;
+  onAdd: (data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>) => void;
   onUpdate: (data: { id: string; data: Partial<WorkExperienceData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
@@ -37,6 +43,7 @@ interface WorkExperienceFormProps {
 
 
 export function WorkExperienceForm({
+  profileId,
   experiences,
   onAdd,
   onUpdate,
@@ -79,6 +86,13 @@ export function WorkExperienceForm({
     },
   });
 
+  const stripLogoDevToken = (url: string): string => {
+    if (url.includes('logo.dev') && url.includes('?token=')) {
+      return url.split('?token=')[0];
+    }
+    return url;
+  };
+
   const editForm = useForm<WorkExperienceFormData>({
     resolver: zodResolver(workExperienceSchema),
   });
@@ -93,7 +107,8 @@ export function WorkExperienceForm({
         location: data.location as Location,
         domain: data.domain as Domain[],
         toolsUsed: data.toolsUsed as Tools[],
-        profileId: "", // This will be set by the parent component
+        companyLogo: stripLogoDevToken(data.companyLogo || ""),
+        profileId: profileId,
       });
       toast.success("Work experience added successfully!");
       form.reset();
@@ -116,6 +131,8 @@ export function WorkExperienceForm({
           location: data.location as Location,
           domain: data.domain as Domain[],
           toolsUsed: data.toolsUsed as Tools[],
+          companyLogo: stripLogoDevToken(data.companyLogo || ""),
+          profileId: profileId,
         }
       });
       toast.success("Work experience updated successfully!");
@@ -160,15 +177,6 @@ export function WorkExperienceForm({
     }
   };
 
-  const handleSkillsChange = (skillsString: string) => {
-    const skills = parseSkillsString(skillsString);
-    form.setValue("toolsUsed", skills);
-  };
-
-  const handleEditSkillsChange = (skillsString: string) => {
-    const skills = parseSkillsString(skillsString);
-    editForm.setValue("toolsUsed", skills);
-  };
 
   return (
     <div className="space-y-6">
@@ -215,6 +223,96 @@ export function WorkExperienceForm({
                   )}
                 />
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="employmentType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Employment Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select employment type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {EMPLOYMENT_TYPE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="domain"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Domain</FormLabel>
+                      <FormControl>
+                        <DomainMultiSelect
+                          value={field.value as Domain[] || []}
+                          onChange={field.onChange}
+                          placeholder="Select domains"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <LocationAutoComplete
+                        value={field.value ? `${field.value.city}, ${field.value.country}` : ""}
+                        onChange={(location) => {
+                          field.onChange(location);
+                        }}
+                        selectedLocation={field.value}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="locationType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Work Location Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select work location type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {WORK_LOCATION_TYPE_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -288,8 +386,61 @@ export function WorkExperienceForm({
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
+                      <Tabs defaultValue="general" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="general">General</TabsTrigger>
+                          <TabsTrigger value="short">Short</TabsTrigger>
+                          <TabsTrigger value="detailed">Detailed</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="general" className="mt-4">
+                          <Textarea
+                            placeholder="Describe your role and achievements..."
+                            rows={3}
+                            {...field}
+                          />
+                        </TabsContent>
+                        <TabsContent value="short" className="mt-4">
+                          <FormField
+                            control={form.control}
+                            name="descriptionLess"
+                            render={({ field: shortField }) => (
+                              <Textarea
+                                placeholder="Brief description..."
+                                rows={3}
+                                {...shortField}
+                              />
+                            )}
+                          />
+                        </TabsContent>
+                        <TabsContent value="detailed" className="mt-4">
+                          <FormField
+                            control={form.control}
+                            name="descriptionDetailed"
+                            render={({ field: detailedField }) => (
+                              <Textarea
+                                placeholder="Detailed description..."
+                                rows={5}
+                                {...detailedField}
+                              />
+                            )}
+                          />
+                        </TabsContent>
+                      </Tabs>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="workDone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Work Done</FormLabel>
+                    <FormControl>
                       <Textarea
-                        placeholder="Describe your role and achievements..."
+                        placeholder="Describe the specific work you accomplished..."
                         rows={3}
                         {...field}
                       />
@@ -304,12 +455,12 @@ export function WorkExperienceForm({
                 name="toolsUsed"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tools Used (comma-separated)</FormLabel>
+                    <FormLabel>Tools & Technologies</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="React, Node.js, TypeScript"
-                        value={field.value.join(", ")}
-                        onChange={(e) => handleSkillsChange(e.target.value)}
+                      <ToolsMultiSelect
+                        value={field.value as Tools[] || []}
+                        onChange={field.onChange}
+                        placeholder="Select tools and technologies"
                       />
                     </FormControl>
                     <FormMessage />
@@ -377,6 +528,96 @@ export function WorkExperienceForm({
                     )}
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={editForm.control}
+                    name="employmentType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Employment Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select employment type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {EMPLOYMENT_TYPE_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={editForm.control}
+                    name="domain"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Domain</FormLabel>
+                        <FormControl>
+                          <DomainMultiSelect
+                            value={field.value as Domain[] || []}
+                            onChange={field.onChange}
+                            placeholder="Select domains"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={editForm.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <LocationAutoComplete
+                          value={field.value ? `${field.value.city}, ${field.value.country}` : ""}
+                          onChange={(location) => {
+                            field.onChange(location);
+                          }}
+                          selectedLocation={field.value}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="locationType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Work Location Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select work location type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {WORK_LOCATION_TYPE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -450,8 +691,61 @@ export function WorkExperienceForm({
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
+                        <Tabs defaultValue="general" className="w-full">
+                          <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="general">General</TabsTrigger>
+                            <TabsTrigger value="short">Short</TabsTrigger>
+                            <TabsTrigger value="detailed">Detailed</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="general" className="mt-4">
+                            <Textarea
+                              placeholder="Describe your role and achievements..."
+                              rows={3}
+                              {...field}
+                            />
+                          </TabsContent>
+                          <TabsContent value="short" className="mt-4">
+                            <FormField
+                              control={editForm.control}
+                              name="descriptionLess"
+                              render={({ field: shortField }) => (
+                                <Textarea
+                                  placeholder="Brief description..."
+                                  rows={3}
+                                  {...shortField}
+                                />
+                              )}
+                            />
+                          </TabsContent>
+                          <TabsContent value="detailed" className="mt-4">
+                            <FormField
+                              control={editForm.control}
+                              name="descriptionDetailed"
+                              render={({ field: detailedField }) => (
+                                <Textarea
+                                  placeholder="Detailed description..."
+                                  rows={5}
+                                  {...detailedField}
+                                />
+                              )}
+                            />
+                          </TabsContent>
+                        </Tabs>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="workDone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Work Done</FormLabel>
+                      <FormControl>
                         <Textarea
-                          placeholder="Describe your role and achievements..."
+                          placeholder="Describe the specific work you accomplished..."
                           rows={3}
                           {...field}
                         />
@@ -466,16 +760,12 @@ export function WorkExperienceForm({
                   name="toolsUsed"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tools & Technologies (comma-separated)</FormLabel>
+                      <FormLabel>Tools & Technologies</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="React, Node.js, TypeScript"
-                          value={Array.isArray(field.value) ? field.value.join(", ") : field.value || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const tools = value ? parseSkillsString(value) : [];
-                            field.onChange(tools);
-                          }}
+                        <ToolsMultiSelect
+                          value={field.value as Tools[] || []}
+                          onChange={field.onChange}
+                          placeholder="Select tools and technologies"
                         />
                       </FormControl>
                       <FormMessage />
