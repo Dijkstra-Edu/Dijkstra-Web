@@ -9,10 +9,13 @@ export async function POST(req: Request) {
   
   // Allow this in any environment for cleanup purposes
   try {
+    const url = new URL(req.url);
+    const isSecure = url.protocol === "https:";
+    
     const cookieOptions = {
       path: "/",
       httpOnly: true,
-      secure: ENV === "QA",
+      secure: ENV === "QA" ? true : isSecure,
       sameSite: "lax" as const,
       maxAge: 0,
       expires: new Date(0),
@@ -33,11 +36,11 @@ export async function POST(req: Request) {
     res.headers.set("Set-Cookie", cookieHeader);
     
     // Alternative approach: set multiple cookies with different variations
-    res.headers.append("Set-Cookie", serialize("qa_verified", "", {
+    /* res.headers.append("Set-Cookie", serialize("qa_verified", "", {
       path: "/",
       maxAge: 0,
       expires: new Date(0),
-    }));
+    }));*/
     
     console.log("QA cookie cleared successfully");
     return res;
