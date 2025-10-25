@@ -148,18 +148,6 @@ function issueSuccessResponse(note: string, req: Request) {
     maxAge: 60 * 60 * 8, // 8 hours
   };
 
-  // Set domain based on hostname
-  /*if (hostname === 'localhost') {
-    console.log("Localhost detected - no domain set");
-  } else if (hostname.includes("vercel.app")) {
-    console.log("Vercel deployment detected - no domain set");
-  } else if (DOMAIN && hostname.includes(DOMAIN)) {
-    cookieOptions.domain = `${DOMAIN}`;
-    console.log(`Production domain detected - setting domain to ${DOMAIN}`);
-  } else {
-    console.log("Unknown deployment - no domain set");
-  }*/
-
   // Additional debug logging
   console.log("Setting cookie with options:", {
     ...cookieOptions,
