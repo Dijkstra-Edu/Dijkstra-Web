@@ -111,7 +111,7 @@ export const educationSchema = z.object({
   descriptionDetailed: z.string().optional(),
   descriptionLess: z.string().optional(),
   workDone: z.string().optional(),
-  cgpa: z.number().min(0).max(4, 'CGPA must be between 0 and 4').optional(),
+  cgpa: z.number().min(0).max(10, 'CGPA must be between 0 and 10').optional(),
   toolsUsed: z.array(z.string()).min(1, 'At least one tool is required'),
 });
 

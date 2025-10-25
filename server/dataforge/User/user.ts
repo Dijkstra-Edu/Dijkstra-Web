@@ -216,7 +216,9 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    * Add Education by GitHub username
    */
   export async function addEducationByGithubUsername( data: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>): Promise<EducationData> {
+    console.log('Adding education data', data);
     const request = transformEducationToRequest(data);
+    console.log('Request', request);
     const response = await fetchDataForge<GetEducationResponse>(
       `/Dijkstra/v1/education/`, {
         method: 'POST',

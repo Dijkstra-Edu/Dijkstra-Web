@@ -47,7 +47,8 @@ export function EducationSection({ profileId, githubUserName, isEditing, onToggl
       </CardHeader>
       <CardContent>
         {isEditing ? (
-          <EducationForm 
+          <EducationForm
+            profileId={profileId}
             educations={educations || []}
             onAdd={(data) => addMutation.mutate({ data })}
             onUpdate={(data) => updateMutation.mutate({ educationId: data.id, data: data.data })}
