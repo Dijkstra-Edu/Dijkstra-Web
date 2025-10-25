@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
-import { StackedProjectsTable } from "@/components/Resume and CV/stacked-projects-table";
+import { StackedDocumentsTable } from "@/components/Resume and CV/stacked-documents-table";
 import AddResumeModal from "./AddResumeModal";
 import ResumeBuilder from "@/components/Resume and CV/ResumeBuilder/ResumeBuilder";
 import { ResumeStorageService } from "@/services/ResumeStorageService";
@@ -292,7 +292,7 @@ const Resume = ({
           }}
         />
 
-        <StackedProjectsTable
+        <StackedDocumentsTable
           projects={stackedProjects}
           onProjectClick={handleProjectClick}
           onDelete={handleDeleteResume}
