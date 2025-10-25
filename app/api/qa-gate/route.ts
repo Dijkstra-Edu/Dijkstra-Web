@@ -7,7 +7,7 @@ import { SECRETKEY } from "@/lib/constants";
 import { GHTOKEN } from "@/lib/constants";
 import { TEAMNAMES } from "@/lib/constants";
 import { ORG } from "@/lib/constants";
-import { DOMAIN } from "@/lib/constants";
+// import { DOMAIN } from "@/lib/constants";
 
 export async function POST(req: Request) {
   console.log("QA Gate API called, ENV:", ENV);
@@ -147,18 +147,6 @@ function issueSuccessResponse(note: string, req: Request) {
     sameSite: "lax" as const,
     maxAge: 60 * 60 * 8, // 8 hours
   };
-
-  // Set domain based on hostname
-  if (hostname === 'localhost') {
-    console.log("Localhost detected - no domain set");
-  } else if (hostname.includes("vercel.app")) {
-    console.log("Vercel deployment detected - no domain set");
-  } else if (DOMAIN && hostname.includes(DOMAIN)) {
-    cookieOptions.domain = `${DOMAIN}`;
-    console.log(`Production domain detected - setting domain to ${DOMAIN}`);
-  } else {
-    console.log("Unknown deployment - no domain set");
-  }
 
   // Additional debug logging
   console.log("Setting cookie with options:", {
