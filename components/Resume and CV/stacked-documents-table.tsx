@@ -15,14 +15,14 @@ interface ProjectItem {
   resumeData?: SavedResumeData;
 }
 
-interface StackedProjectsTableProps {
+interface StackedDocumentsTableProps {
   projects: ProjectItem[];
   onProjectClick?: (project: ProjectItem) => void;
   onDelete?: (projectId: string) => void;
   onBulkDelete?: (projectIds: string[]) => void;
 }
 
-export const StackedProjectsTable = ({ projects, onProjectClick, onDelete, onBulkDelete }: StackedProjectsTableProps) => {
+export const StackedDocumentsTable = ({ projects, onProjectClick, onDelete, onBulkDelete }: StackedDocumentsTableProps) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const handleSelectAll = (checked: boolean) => {
