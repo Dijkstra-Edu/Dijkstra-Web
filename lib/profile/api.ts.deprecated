@@ -1,0 +1,18 @@
+// DEPRECATED: This file has been replaced by lib/profile/api-client.ts
+// The new implementation routes calls through Next.js API routes to server-side mocks
+// 
+// Migration completed: All profile hooks now use api-client.ts → API routes → server/profile/mock.ts
+// 
+// This file is kept for reference but should not be imported anywhere.
+// 
+// Old implementation (DEPRECATED):
+// - Client-side mock data with simulated delays
+// - Direct function calls from hooks
+//
+// New implementation (ACTIVE):
+// - Server-side mock data in server/profile/mock.ts
+// - API routes in app/api/profile/*/route.ts
+// - Client-side API client in lib/profile/api-client.ts
+// - TanStack Query hooks in hooks/profile/use-*.ts
+
+export const DEPRECATED_MESSAGE = "This file is deprecated. Use lib/profile/api-client.ts instead.";

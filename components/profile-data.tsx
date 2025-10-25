@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pencil,
   Linkedin,
@@ -23,6 +24,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
 import {
   IconBrandLeetcode,
   IconBrandLinkedin,
@@ -30,17 +32,129 @@ import {
   IconFileTypeJs,
   IconFlame,
 } from "@tabler/icons-react";
+import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
+import { Badge } from "@/components/ui/badge";
+import { getUserSideCardQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
+import { Domain, Rank } from "@/types/server/dataforge/enums";
+
+// Utility function to get rank image path
+const getRankImagePath = (rank: Rank): string => { 
+  return `/Ranks/${rank}.png`;
+};
+
+// Utility function to format rank display name
+const formatRankDisplay = (rank: Rank): string => {
+  return rank.replace(/_/g, ' ');
+};
+
+// Utility function to get rank color
+const getRankColor = (rank: Rank): string => {
+  const rankColors: Record<Rank, string> = {
+    [Rank.UNRANKED]: "text-gray-500",
+    [Rank.IRON_1]: "text-gray-400",
+    [Rank.IRON_2]: "text-gray-400", 
+    [Rank.IRON_3]: "text-gray-400",
+    [Rank.BRONZE_1]: "text-amber-600",
+    [Rank.BRONZE_2]: "text-amber-600",
+    [Rank.BRONZE_3]: "text-amber-600",
+    [Rank.SILVER_1]: "text-gray-300",
+    [Rank.SILVER_2]: "text-gray-300",
+    [Rank.SILVER_3]: "text-gray-300",
+    [Rank.GOLD_1]: "text-yellow-500",
+    [Rank.GOLD_2]: "text-yellow-500",
+    [Rank.GOLD_3]: "text-yellow-500",
+    [Rank.PLATINUM_1]: "text-blue-300",
+    [Rank.PLATINUM_2]: "text-blue-300",
+    [Rank.PLATINUM_3]: "text-blue-300",
+    [Rank.DIAMOND_1]: "text-cyan-400",
+    [Rank.DIAMOND_2]: "text-cyan-400",
+    [Rank.DIAMOND_3]: "text-cyan-400",
+    [Rank.EMERALD_1]: "text-green-400",
+    [Rank.EMERALD_2]: "text-green-400",
+    [Rank.EMERALD_3]: "text-green-400",
+    [Rank.LAPIS_1]: "text-blue-400",
+    [Rank.LAPIS_2]: "text-blue-400",
+    [Rank.LAPIS_3]: "text-blue-400",
+    [Rank.QUARTZ_1]: "text-purple-400",
+    [Rank.QUARTZ_2]: "text-purple-400",
+    [Rank.QUARTZ_3]: "text-purple-400",
+    [Rank.SAPHIRE_1]: "text-blue-500",
+    [Rank.SAPHIRE_2]: "text-blue-500",
+    [Rank.SAPHIRE_3]: "text-blue-500",
+    [Rank.OBSIDIAN]: "text-gray-800",
+  };
+  
+  return rankColors[rank] || "text-gray-500";
+};
 
 export function ProfileData() {
   const { data: session, status } = useSession();
 
-  // Define goal options with corresponding icons or images
-  const goalOptions = {
-    FRONTEND: "FrontEnd Engineer",
-    BACKEND: "BackEnd Engineer",
-    FULLSTACK: "FullStack Engineer",
-    // Add other options as needed
-  };
+  // Fetch user data from backend
+  const { data: userData, isLoading, error } = useQuery(
+    getUserSideCardQuery(session?.user.login || '')
+  );
+
+  // Primary career path from user data with fallback
+  const primaryPath: CareerPathKey = (userData?.primary_specialization as CareerPathKey) || "FULLSTACK";
+  const path = CAREER_PATHS[primaryPath];
+
+  // Loading skeleton component
+  if (isLoading) {
+    return (
+      <div className="pr-2">
+        <Card className="@container/card p-6 rounded-2xl shadow-md">
+          <div className="flex flex-col space-y-4 items-center text-center">
+            <Skeleton className="w-36 h-36 rounded-full" />
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-9 w-32" />
+            
+            <div className="flex justify-center gap-8 mt-4">
+              <div className="text-center">
+                <Skeleton className="h-6 w-12 mb-1" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="text-center">
+                <Skeleton className="h-6 w-12 mb-1" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="text-center">
+                <Skeleton className="h-6 w-12 mb-1" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Three-column skeleton */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+              <Skeleton className="w-20 h-20 mb-2 rounded-full" />
+              <Skeleton className="h-4 w-16 mb-1" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+            <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+              <Skeleton className="w-20 h-20 mb-2 rounded-full" />
+              <Skeleton className="h-4 w-16 mb-1" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+            <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+              <Skeleton className="w-20 h-20 mb-2 rounded-full" />
+              <Skeleton className="h-4 w-16 mb-1" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    console.error("Error fetching user data:", error);
+    // Continue with fallback data
+  }
 
   return (
     <div className="pr-2">
@@ -64,7 +178,7 @@ export function ProfileData() {
             </a>
           </p>
           <p className="text-sm mt-2 text-muted-foreground">
-            {session?.user.bio || "Bio unavailable"}
+            {userData?.bio || session?.user.bio}
           </p>
           <Button variant="outline" size="sm" className="mt-3">
             <Pencil className="h-4 w-4 mr-2" />
@@ -87,50 +201,74 @@ export function ProfileData() {
           </div>
         </div>
         {/* Three-column section for Rank, Streak, and Goal */}
-        <div className="grid grid-cols-3">
+        <div className="grid grid-cols-3 gap-3">
           {/* Rank Column */}
-          <div className="flex flex-col items-center justify-center bg-muted/30 rounded-lg">
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
             <Image
-              src="/gold.png" // Replace with your actual rank image path
+              src={userData?.rank ? getRankImagePath(userData.rank) : "/Ranks/UNRANKED.png"}
               alt="Rank Badge"
-              width={120}
-              height={120}
-              className=""
+              width={80}
+              height={80}
+              className="mb-2"
+              onError={(e) => {
+                // Fallback to UNRANKED image if rank image doesn't exist
+                e.currentTarget.src = "/Ranks/UNRANKED.png";
+              }}
             />
-            <h2 className="text-center text-lg font-bold mb-6 text-yellow-500">
-              GOLD 1
-            </h2>
+            <span className={`text-sm font-bold text-center ${userData?.rank ? getRankColor(userData.rank) : "text-gray-500"}`}>
+              {userData?.rank ? formatRankDisplay(userData.rank) : "UNRANKED"}
+            </span>
+            <span className="text-xs text-muted-foreground mt-1">Rank</span>
           </div>
 
           {/* Streak Column */}
-          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg">
-            <div className="flex items-center mb-1">
-              {/* <Image
-                src="/fire.png" // Replace with your actual fire emoji image
-                alt="Streak"
-                width={50}
-                height={50}
-                className="mr-1"
-              /> */}
-              <IconFlame className="h-12 w-12 mb-1 mr-1 text-orange-500" />
-              <span className="text-lg font-bold">12</span>
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+            <div className="relative mb-2">
+              <img
+                src={userData?.streak == 0 ? "/fire_0.png" : "/fire.png"}
+                alt="Fire streak"
+                className="w-25 h-25 object-contain"
+              />
+              <div className="absolute inset-0 flex items-center justify-center pt-2">
+                <span className="text-xl font-bold text-white drop-shadow-lg">{userData?.streak ?? 0}</span>
+              </div>
             </div>
-            <span className="text-xs font-medium">Day Streak</span>
+            <span className="text-xs text-muted-foreground mt-1">Day Streak</span>
           </div>
 
-          {/* Goal Column */}
-          <div
-            className="flex flex-col items-center justify-center p-[2px] rounded-lg border-2 border-transparent 
-                          bg-gradient-to-r from-pink-500 via-blue-500 to-purple-500 bg-origin-border"
-          >
-            <div className="flex flex-col items-center justify-center w-full h-full bg-background rounded-md py-2">
-              <IconFileTypeJs className="h-12 w-12 mb-1 text-pink-500" />
-              <span
-                className="text-xs font-bold text-transparent bg-clip-text 
-                              bg-gradient-to-r from-pink-500 to-purple-500 text-center"
-              >
-                Frontend <br /> Engineer <br /> (F.E)
-              </span>
+          {/* Goal Column - Primary Specialization */}
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
+            <div className={`w-28 h-36 p-3 rounded-xl border-2 bg-gradient-to-br ${path.gradient} border-white/20 shadow-xl backdrop-blur-sm`}>
+              <div className="text-center h-full flex flex-col justify-between">
+                <div>
+                  <div className={`w-10 h-10 mx-auto mb-2 rounded-xl bg-white/30 backdrop-blur-sm border border-white/30 flex items-center justify-center p-1.5 shadow-lg`}>
+                    <img 
+                      src={`/${path.icon}`} 
+                      alt={path.label}
+                      className="w-full h-full object-contain filter drop-shadow-sm"
+                      onError={(e) => {
+                        // Fallback to shortLabel if image doesn't exist
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const span = document.createElement('span');
+                          span.className = 'text-white text-[10px] font-bold';
+                          span.textContent = path.shortLabel;
+                          parent.appendChild(span);
+                        }
+                      }}
+                    />
+                  </div>
+                  <h4 className="text-[10px] font-medium text-white drop-shadow-sm leading-tight px-1 break-words">{path.label}</h4>
+                </div>
+                
+                {/* Primary Badge */}
+                <div className="flex justify-center mt-auto">
+                  <Badge variant="default" className="text-[9px] font-semibold px-1.5 py-0.5 bg-white/50 text-white border-white/70 shadow-lg backdrop-blur-sm">
+                    ⭐ Primary
+                  </Badge>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -147,7 +285,7 @@ export function ProfileData() {
           <div className="flex flex-row items-center justify-center gap-2 pt-3">
             <Button variant="default" className="w-1/3">
               <a
-                href="https://www.linkedin.com/in/jrs2002/"
+                href={userData?.linkedin_link || "https://www.linkedin.com/"}
                 target="_blank"
                 className="w-full flex justify-center"
               >
@@ -156,7 +294,7 @@ export function ProfileData() {
             </Button>
             <Button variant="default" className="w-1/3">
               <a
-                href="https://leetcode.com/u/JRS296/"
+                href={userData?.leetcode_link || "https://leetcode.com/"}
                 target="_blank"
                 className="w-full flex justify-center"
               >
@@ -165,7 +303,7 @@ export function ProfileData() {
             </Button>
             <Button variant="default" className="w-1/3">
               <a
-                href="https://jrs-studios.web.cern.ch/"
+                href={userData?.portfolio_link || "https://github.com/" + session?.user.login}
                 target="_blank"
                 className="w-full flex justify-center"
               >
@@ -176,7 +314,7 @@ export function ProfileData() {
         </div>
         <Separator className="my-1" />
 
-        {/* Current Project & Team Card f0f5f0 */}
+        {/* Current Project & Team Card f0f5f0 - TODO: Needs to be updated */}
         <Card className="bg-[#f0f5f0] dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-0 shadow-md">
           <CardContent className="py-2 space-y-4">
             <div className="text-center">

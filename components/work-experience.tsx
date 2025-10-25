@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Edit, Plus, Trash2, Save, X } from "lucide-react"
 import { MonthPicker } from "@/components/ui/date-picker"
-import { CompanyAutoComplete } from "./company-autocomplete"
+import { CompanyAutoComplete } from "./autocompletes/company-autocomplete"
 
 interface Company {
   name: string

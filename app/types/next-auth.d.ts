@@ -20,6 +20,13 @@ declare module "next-auth" {
       updated_at?: string;
       organization?: string;
       hireable?: boolean;
+      linkedinId?: string;
+      linkedinName?: string;
+      linkedinImage?: string;
+      github_user_name?: string;
+      user_id?: string;
+      profile_id?: string;
+      requires_onboarding?: boolean;
     };
   }
 
@@ -59,5 +66,9 @@ declare module "next-auth/jwt" {
     updated_at?: string;
     organization?: string;
     hireable?: boolean;
+    github_user_name?: string;
+    user_id?: string;
+    profile_id?: string;
+    requires_onboarding?: boolean;
   }
 }

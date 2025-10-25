@@ -1,3 +1,11 @@
+// Settings Store Types
+export type {
+  ConnectedAccount,
+  PresetPin,
+  CustomPin,
+  SettingsStore,
+} from './lib/Zustand/settings-store-types'
+
 // Base interface for all detail pages
 export interface BaseDetailItem {
   id: string
