@@ -65,7 +65,7 @@ export const StackedProjectsTable = ({ projects, onProjectClick, onDelete, onBul
   return (
     <div className="bg-card text-card-foreground rounded-2xl shadow-sm p-6 mb-10 border border-border/60 backdrop-blur-sm">
       <div className="flex items-center justify-between pb-4 border-b border-border/60">
-        <h3 className="text-2xl font-semibold tracking-tight">All Documents</h3>
+        <h3 className="text-2xl font-semibold tracking-tight">Document Type</h3>
         <div className="flex items-center gap-3">
           {selectedItems.length > 0 && (
             <Button 
