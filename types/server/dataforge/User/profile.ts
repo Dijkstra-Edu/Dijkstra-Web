@@ -1,5 +1,5 @@
 import { UUID } from "crypto"
-import { Domain, EmploymentType, Rank, Tools, WorkLocationType } from "../enums"
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType } from "../enums"
 
 export interface GetLocationResponse {
     id: UUID
@@ -92,5 +92,28 @@ export interface GetWorkExperienceResponse {
     company_score?: number
     time_spent_multiplier?: number
     work_done_multiplier?: number
+    tools_used?: Tools[]
+}
+
+export interface GetEducationResponse {
+    id: UUID
+    profile_id: UUID
+    school_name: string
+    school_logo_url?: string
+    school_type: SchoolType
+    degree: Degree
+    course_field_name: string
+    currently_studying: boolean
+    location?: GetLocationResponse
+    location_type: WorkLocationType
+    start_date_month: number
+    start_date_year: number
+    end_date_month?: number
+    end_date_year?: number
+    description_general: string
+    description_detailed?: string
+    description_less?: string
+    work_done?: string
+    cgpa?: number
     tools_used?: Tools[]
 }

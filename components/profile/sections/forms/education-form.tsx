@@ -62,8 +62,9 @@ const DEGREES: { value: Degree; label: string }[] = [
 ];
 
 interface EducationFormProps {
+  profileId: string;
   educations: EducationData[];
-  onAdd: (data: Omit<EducationData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
+  onAdd: (data: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>) => void;
   onUpdate: (data: { id: string; data: Partial<EducationData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
@@ -73,6 +74,7 @@ interface EducationFormProps {
 }
 
 export function EducationForm({
+  profileId,
   educations,
   onAdd,
   onUpdate,
@@ -129,6 +131,7 @@ export function EducationForm({
         locationType: data.locationType as WorkLocationType,
         toolsUsed: data.toolsUsed as Tools[],
         location: data.location as Location,
+        profileId: profileId,
       });
       toast.success("Education added successfully!");
       form.reset();
@@ -151,6 +154,7 @@ export function EducationForm({
           locationType: data.locationType as WorkLocationType,
           toolsUsed: data.toolsUsed as Tools[],
           location: data.location as Location,
+          profileId: profileId,
         }
       });
       toast.success("Education updated successfully!");
@@ -170,7 +174,7 @@ export function EducationForm({
       degree: education.degree,
       courseFieldName: education.courseFieldName,
       currentlyStudying: education.currentlyStudying,
-      location: education.location,
+      location: education.location as Location,
       locationType: education.locationType,
       startDateMonth: education.startDateMonth,
       startDateYear: education.startDateYear,

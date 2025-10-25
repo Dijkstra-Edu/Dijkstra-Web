@@ -1,7 +1,11 @@
 // Custom hook for work experience
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { addWorkExperienceMutation, deleteWorkExperienceMutation, updateWorkExperienceMutation } from '@/server/dataforge/User/QueryOptions/user.queryOptions';
+import { addWorkExperienceMutation, deleteWorkExperienceMutation, getWorkExperienceQuery, updateWorkExperienceMutation } from '@/server/dataforge/User/QueryOptions/user.queryOptions';
+
+export function useWorkExperience(username: string) {
+    return useQuery(getWorkExperienceQuery(username));
+  }
 
 export const useAddWorkExperienceMutation = (username: string) => {
   const queryClient = useQueryClient();

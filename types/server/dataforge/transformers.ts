@@ -1,6 +1,6 @@
-import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest } from "./User/profile";
-import { Domain, EmploymentType, Rank, Tools, WorkLocationType } from "./enums";
+import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest } from "./User/profile";
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType } from "./enums";
 import { UUID } from "crypto";
 
 export function transformPersonalDetails(personalDetails: GetPersonalDetailsResponse): PersonalDetailsData {
@@ -165,5 +165,104 @@ export function transformWorkExperienceUpdateRequest(workExperience: Partial<Wor
         description_less: workExperience.descriptionLess,
         work_done: workExperience.workDone,
         tools_used: workExperience.toolsUsed as Tools[],
+    }
+}
+
+
+export function transformEducationArray(educationArray: GetEducationResponse[]): EducationData[] {
+    return educationArray.map((education) => transformEducation(education));
+}
+
+export function transformEducation(education: GetEducationResponse): EducationData {
+    return {
+        id: education.id,
+        profileId: education.profile_id,
+        schoolName: education.school_name,
+        schoolLogoUrl: education.school_logo_url,
+        schoolType: education.school_type as SchoolType,
+        degree: education.degree as Degree,
+        courseFieldName: education.course_field_name,
+        currentlyStudying: education.currently_studying,
+        location: education.location ? {
+            id: education.location.id as UUID,
+            country: education.location.country as string,
+            state: education.location.state as string,
+            city: education.location.city as string,
+            latitude: education.location.latitude as number,
+            longitude: education.location.longitude as number,
+        } : undefined,
+        locationType: education.location_type as WorkLocationType,
+        startDateMonth: education.start_date_month,
+        startDateYear: education.start_date_year,
+        endDateMonth: education.end_date_month || undefined,
+        endDateYear: education.end_date_year || undefined,
+        descriptionGeneral: education.description_general,
+        descriptionDetailed: education.description_detailed || undefined,
+        descriptionLess: education.description_less || undefined,
+        workDone: education.work_done || undefined,
+        cgpa: education.cgpa,
+        toolsUsed: education.tools_used || [],
+    }
+}
+
+export function transformEducationToRequest(education: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetEducationResponse, 'id'> {
+    return {
+        profile_id: education.profileId as UUID,
+        school_name: education.schoolName,
+        school_logo_url: education.schoolLogoUrl,
+        school_type: education.schoolType as SchoolType,
+        degree: education.degree as Degree,
+        course_field_name: education.courseFieldName,
+        currently_studying: education.currentlyStudying,
+        location: education.location ? {
+            id: education.location.id as UUID,
+            country: education.location.country,
+            state: education.location.state || "",
+            city: education.location.city,
+            latitude: education.location.latitude || 0,
+            longitude: education.location.longitude || 0,
+        } : undefined,
+        location_type: education.locationType as WorkLocationType,
+        start_date_month: education.startDateMonth,
+        start_date_year: education.startDateYear,
+        end_date_month: education.endDateMonth,
+        end_date_year: education.endDateYear,
+        description_general: education.descriptionGeneral,
+        description_detailed: education.descriptionDetailed,
+        description_less: education.descriptionLess,
+        work_done: education.workDone,
+        cgpa: education.cgpa,
+        tools_used: education.toolsUsed as Tools[],
+    }
+}
+
+export function transformEducationUpdateRequest(education: Partial<EducationData>): Partial<GetEducationResponse> {
+    return {
+        profile_id: education.profileId as UUID,
+        school_name: education.schoolName,
+        school_logo_url: education.schoolLogoUrl,
+        school_type: education.schoolType as SchoolType,
+        degree: education.degree as Degree,
+        course_field_name: education.courseFieldName,
+        currently_studying: education.currentlyStudying,
+        location: education.location ? {
+            id: education.location.id as UUID,
+            country: education.location.country,
+            state: education.location.state || "",
+            city: education.location.city,
+            latitude: education.location.latitude || 0,
+            longitude: education.location.longitude || 0,
+        } : undefined,
+        location_type: education.locationType as WorkLocationType,
+        start_date_month: education.startDateMonth,
+        start_date_year: education.startDateYear,
+        end_date_month: education.endDateMonth,
+        end_date_year: education.endDateYear,
+        description_general: education.descriptionGeneral,
+        description_detailed: education.descriptionDetailed,
+        description_less: education.descriptionLess,
+        work_done: education.workDone,
+        cgpa: education.cgpa,
+        tools_used: education.toolsUsed as Tools[],
     }
 }

@@ -10,15 +10,10 @@ import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 import { useQuery } from "@tanstack/react-query";
 import { getWorkExperienceQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
-import { useAddWorkExperienceMutation, useUpdateWorkExperienceMutation, useDeleteWorkExperienceMutation } from "@/hooks/profile/use-work-experience";
+import { useAddWorkExperienceMutation, useUpdateWorkExperienceMutation, useDeleteWorkExperienceMutation, useWorkExperience } from "@/hooks/profile/use-work-experience";
 
 export function WorkExperienceSection({ profileId, githubUserName, isEditing, onToggleEdit }: ProfileSectionProps) {
-  /*const { data: experiences, isLoading, error, refetch } = useWorkExperience(profileId);*/
-  const { data: experiences, isLoading, error, refetch } = useQuery(getWorkExperienceQuery(githubUserName));
-  
-  /*const addMutation = useAddWorkExperience();
-  const updateMutation = useUpdateWorkExperience();
-  const deleteMutation = useDeleteWorkExperience();*/
+  const { data: experiences, isLoading, error, refetch } = useWorkExperience(githubUserName);
   const addMutation = useAddWorkExperienceMutation(githubUserName);
   const updateMutation = useUpdateWorkExperienceMutation(githubUserName);
   const deleteMutation = useDeleteWorkExperienceMutation(githubUserName);

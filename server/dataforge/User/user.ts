@@ -1,9 +1,9 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
-import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest } from "@/types/server/dataforge/transformers";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
+import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import { transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest } from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -197,6 +197,55 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
   export async function deleteWorkExperienceByWorkExperienceId(workExperienceId: string): Promise<void> {
     await fetchDataForge<void>(
       `/Dijkstra/v1/wp/${encodeURIComponent(workExperienceId)}`, {
+        method: 'DELETE',
+      }
+    );
+  }
+
+  /**
+   * Get Education by GitHub username
+   */
+  export async function getEducationByGithubUsername(username: string): Promise<EducationData[]> {
+    const response = await fetchDataForge<GetEducationResponse[]>(
+      `/Dijkstra/v1/education/${encodeURIComponent(username)}`
+    );
+    return transformEducationArray(response);
+  }
+
+  /**
+   * Add Education by GitHub username
+   */
+  export async function addEducationByGithubUsername( data: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>): Promise<EducationData> {
+    const request = transformEducationToRequest(data);
+    const response = await fetchDataForge<GetEducationResponse>(
+      `/Dijkstra/v1/education/`, {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformEducation(response);
+  }
+
+  /**
+   * Update Education by Education ID
+   */
+  export async function updateEducationByEducationId(educationId: string, data: Partial<EducationData>): Promise<EducationData> {
+    const request = transformEducationUpdateRequest(data);
+    const response = await fetchDataForge<GetEducationResponse>(
+      `/Dijkstra/v1/education/${encodeURIComponent(educationId)}`, {
+        method: 'PUT',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformEducation(response);
+  }
+
+  /**
+   * Delete Education by Education ID
+   */
+  export async function deleteEducationByEducationId(educationId: string): Promise<void> {
+    await fetchDataForge<void>(
+      `/Dijkstra/v1/education/${encodeURIComponent(educationId)}`, {
         method: 'DELETE',
       }
     );
