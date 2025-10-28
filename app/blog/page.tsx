@@ -2,17 +2,19 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileData } from "@/components/profile-data";
-import Readme from "@/components/readme";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { DataTable } from "@/components/blogs/data-table";
+import { columns } from "@/components/blogs/columns";
+import { personalBlogs, lcBlogs } from "@/lib/mock-data";
+import { LCBlogCard } from "@/components/blogs/lc-blog-card";
+import { LCInstructionsCard } from "@/components/blogs/lc-instructions-card";
+import { UserProfileCard } from "@/components/user-profile-card";
+import { QuickActions } from "@/components/quick-actions";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
 
 export default function Page() {
-
-export default function BlogDashboardPage() {
   return (
     <SidebarProvider
       style={
@@ -22,17 +24,19 @@ export default function BlogDashboardPage() {
         } as React.CSSProperties
       }
     >
+      {/* Keep QA sidebar */}
       <AppSidebar variant="inset" />
 
+      {/* Keep QA SidebarInset wrapper */}
       <SidebarInset className="h-[calc(100vh-20px)] flex flex-col overflow-hidden">
+        {/* QA Sticky Header */}
         <div className="sticky top-0 z-10 bg-background">
-          <SiteHeader title="Blog Dashboard" />
+          <SiteHeader title="Blogs and Articles" />
         </div>
 
-        {/* ✅ Reduced vertical padding to bring everything up */}
+        {/* Scrollable content (PR widgets go here) */}
         <div className="flex-1 overflow-y-auto px-6 py-2 space-y-6 landing-page">
-
-          {/* ✅ Brought button up & aligned right neatly */}
+          {/* Dashboard Header & New Blog Button */}
           <div className="flex justify-end">
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -40,7 +44,9 @@ export default function BlogDashboardPage() {
             </Button>
           </div>
 
+          {/* Main Grid */}
           <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+            {/* Left Column */}
             <div className="space-y-6">
               <div>
                 <div className="mb-4">
@@ -49,19 +55,19 @@ export default function BlogDashboardPage() {
                     Manage and organize your blog posts
                   </p>
                 </div>
-
                 <DataTable data={personalBlogs} columns={columns} />
               </div>
-
               <Separator />
             </div>
 
+            {/* Right Column */}
             <div className="space-y-6">
               <UserProfileCard />
               <QuickActions />
             </div>
           </div>
 
+          {/* LeetCode Blogs */}
           <div>
             <div className="mb-4">
               <h2 className="text-2xl font-bold tracking-tight">LeetCode Blogs</h2>
@@ -69,7 +75,6 @@ export default function BlogDashboardPage() {
                 Automatically generated from your LeetCode solutions
               </p>
             </div>
-
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               <LCInstructionsCard />
               {lcBlogs.map((blog) => (
