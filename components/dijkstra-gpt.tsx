@@ -71,6 +71,7 @@ export default function DijkstraGPT() {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [apiStatus, setApiStatus] = useState<'checking' | 'active' | 'inactive'>('checking');
 
   // ============================================
   // REFS FOR DOM ELEMENTS
@@ -79,6 +80,7 @@ export default function DijkstraGPT() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
 
   // ============================================
   // COMPUTED VALUES
@@ -116,7 +118,7 @@ export default function DijkstraGPT() {
 
     setChatSessions([initialSession]);
     setCurrentSessionId(initialSession.id);
-  }, []);
+  }, []);  
 
   // ============================================
   // SESSION MANAGEMENT FUNCTIONS
@@ -152,6 +154,24 @@ export default function DijkstraGPT() {
       })
     );
   };
+
+  useEffect(() => {
+  const initialSession: ChatSession = {
+    id: Date.now().toString(),
+    title: "New Chat",
+    messages: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  setChatSessions([initialSession]);
+  setCurrentSessionId(initialSession.id);
+}, []);
+
+// Check API status on mount
+useEffect(() => {
+  checkApiStatus();
+}, []);
 
   const deleteSession = (sessionId: string): void => {
     setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
@@ -192,6 +212,25 @@ export default function DijkstraGPT() {
       })
     );
   };
+  // ============================================
+// API STATUS CHECK
+// ============================================
+
+const checkApiStatus = async (): Promise<void> => {
+  try {
+    const response = await callGemini("test");
+    if (response) {
+      setApiStatus('active');
+      console.log('✅ API key is active');
+    } else {
+      setApiStatus('inactive');
+      console.log('❌ API key is not configured or invalid');
+    }
+  } catch (error) {
+    setApiStatus('inactive');
+    console.error('❌ API check failed:', error);
+  }
+};
 
   // ============================================
   // FILE HANDLING FUNCTIONS
@@ -771,11 +810,11 @@ export default function DijkstraGPT() {
       </div>
 
       {/* ==================== SIDEBAR - CHAT HISTORY ==================== */}
-      <div
-        className={`${
-          isSidebarOpen ? "w-80" : "w-0"
-        } transition-all duration-300 bg-background border-l border-border/50 flex flex-col overflow-hidden relative`}
-      >
+<div
+  className={`${
+    isSidebarOpen ? "w-80" : "w-0"
+  } transition-all duration-300 bg-background border-l border-border/50 flex flex-col ${isSidebarOpen ? 'overflow-y-auto' : 'overflow-hidden'} relative`}
+>
         {/* Sidebar header */}
         <div className="p-4 border-b border-border/50">
           {/* Title and close button */}
@@ -903,11 +942,7 @@ export default function DijkstraGPT() {
           )}
         </div>
 
-        {/* Sidebar footer */}
-        <div className="p-4 border-t border-border/50 text-xs text-muted-foreground">
-          <p className="text-center">Chat history stored in memory</p>
-          <p className="text-center mt-1">{chatSessions.length} total conversation{chatSessions.length !== 1 ? "s" : ""}</p>
-        </div>
+       {/* Sidebar footer */}
       </div>
 
       {/* ==================== FLOATING SIDEBAR TOGGLE ==================== */}
@@ -933,6 +968,40 @@ export default function DijkstraGPT() {
         accept=".txt,.pdf,.doc,.docx,.md,.json,.csv,.xlsx,.jpg,.jpeg,.png,image/*,application/pdf"
         aria-label="File upload input"
       />
+
+      {/* ==================== FLOATING API STATUS INDICATOR (Bottom Right) ==================== */}
+      <div className={`fixed bottom-6 z-50 transition-all duration-300 ${
+        isSidebarOpen ? 'right-[336px]' : 'right-6'
+      }`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 shadow-lg backdrop-blur-sm transition-all ${
+          apiStatus === 'active' 
+            ? 'bg-green-500/10 border-green-500 text-green-600' 
+            : apiStatus === 'inactive'
+            ? 'bg-red-500/10 border-red-500 text-red-600'
+            : 'bg-yellow-500/10 border-yellow-500 text-yellow-600'
+        }`}>
+          <div className={`w-3 h-3 rounded-full ${
+            apiStatus === 'active' 
+              ? 'bg-green-500 animate-pulse' 
+              : apiStatus === 'inactive'
+              ? 'bg-red-500'
+              : 'bg-yellow-500 animate-pulse'
+          }`} />
+          <span className="text-sm font-medium">
+            {apiStatus === 'active' ? 'Active' : apiStatus === 'inactive' ? 'Inactive' : 'Checking...'}
+          </span>
+          {apiStatus === 'inactive' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={checkApiStatus}
+              className="h-6 px-2 text-xs ml-1"
+            >
+              Retry
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
