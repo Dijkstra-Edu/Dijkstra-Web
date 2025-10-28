@@ -36,14 +36,6 @@ export default function Page() {
 
         {/* Scrollable content (PR widgets go here) */}
         <div className="flex-1 overflow-y-auto px-6 py-2 space-y-6 landing-page">
-          {/* Dashboard Header & New Blog Button */}
-          <div className="flex justify-end">
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              New Blog
-            </Button>
-          </div>
-
           {/* Main Grid */}
           <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
             {/* Left Column */}
@@ -55,7 +47,16 @@ export default function Page() {
                     Manage and organize your blog posts
                   </p>
                 </div>
-                <DataTable data={personalBlogs} columns={columns} />
+                <DataTable 
+                  data={personalBlogs} 
+                  columns={columns}
+                  actions={
+                    <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      New Blog
+                    </Button>
+                  }
+                />
               </div>
               <Separator />
             </div>

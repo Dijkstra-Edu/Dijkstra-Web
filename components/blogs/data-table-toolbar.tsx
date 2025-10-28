@@ -2,6 +2,7 @@
 
 import { Cross2Icon } from "@radix-ui/react-icons"
 import type { Table } from "@tanstack/react-table"
+import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "./data-table-view-options"
@@ -9,16 +10,17 @@ import { DataTableFacetedFilter } from "./data-table-faceted-filter"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
+  actions?: ReactNode
 }
 
-export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({ table, actions }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center gap-2">
+    <div className="flex items-center justify-between gap-2 flex-wrap">
+      <div className="flex flex-1 items-center gap-2 min-w-[250px]">
         <Input
-          placeholder="Filter blogs..."
+          placeholder="Search Blogs"
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
@@ -52,7 +54,10 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className="flex items-center gap-2">
+        <DataTableViewOptions table={table} />
+        {actions}
+      </div>
     </div>
   )
 }
