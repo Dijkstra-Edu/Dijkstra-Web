@@ -282,6 +282,20 @@
   animation: animate-in 0.5s ease-out;
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  to { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+}
+
 @keyframes animate-in {
   from {
     opacity: 0;

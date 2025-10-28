@@ -1,7 +1,8 @@
 export function CompanyTaglineSlide() {
     return (
       <>
-        <div className="flex flex-1 flex-col items-center justify-center px-10 pt-16">
+        <div className="flex h-full flex-col">
+          <div className="flex flex-1 flex-col items-center justify-center px-10">
           {/* Decorative graphics */}
           <div className="relative mb-12 h-48 w-full">
             {/* Central animated element */}
@@ -84,22 +85,23 @@ export function CompanyTaglineSlide() {
   
             <p className="text-lg font-medium text-[#00ff88]">For Students, By Students</p>
           </div>
-        </div>
-  
-        <div className="border-t border-[#2a2a2a] px-10 py-5">
-          <p className="mb-2.5 text-[11px] text-[#666666]">Empowering the next generation of developers</p>
-          <div className="flex items-center justify-center gap-6">
-            <div className="flex items-center gap-2 text-[#999999]">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-              </svg>
-              <span className="text-[13px] font-medium">Student Built</span>
-            </div>
-            <div className="flex items-center gap-2 text-[#999999]">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" />
-              </svg>
-              <span className="text-[13px] font-medium">Student Driven</span>
+          </div>
+
+          <div className="border-t border-[#2a2a2a] px-10 py-5">
+            <p className="mb-2.5 text-[11px] text-[#666666]">Empowering the next generation of developers</p>
+            <div className="flex items-center justify-center gap-6">
+              <div className="flex items-center gap-2 text-[#999999]">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
+                </svg>
+                <span className="text-[13px] font-medium">Student Built</span>
+              </div>
+              <div className="flex items-center gap-2 text-[#999999]">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+                <span className="text-[13px] font-medium">Student Driven</span>
+              </div>
             </div>
           </div>
         </div>

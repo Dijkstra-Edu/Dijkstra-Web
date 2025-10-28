@@ -1,14 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CompanyTaglineSlide } from "@/components/login/slides/company-tagline-slide"
+import { HeroCanvasSlide } from "@/components/login/slides/hero-canvas-slide"
+import { SpecializationsSlide } from "@/components/login/slides/specializations-slide"
 import { RankingSystemSlide } from "@/components/login/slides/ranking-system-slide"
 import { DijkstraGPTSlide } from "@/components/login/slides/dijkstra-gpt-slide"
 
 const slides = [
-  { id: 1, component: CompanyTaglineSlide },
-  { id: 2, component: RankingSystemSlide },
-  { id: 3, component: DijkstraGPTSlide },
+  { id: 1, component: HeroCanvasSlide },
+  { id: 2, component: SpecializationsSlide },
+  { id: 3, component: RankingSystemSlide },
+  { id: 4, component: DijkstraGPTSlide },
 ]
 
 export function FeatureCarousel() {
@@ -17,7 +19,7 @@ export function FeatureCarousel() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 5000)
+    }, 10000)
 
     return () => clearInterval(interval)
   }, [])
