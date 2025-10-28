@@ -1,9 +1,11 @@
 // components/LatexPreview.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { UserProfileData } from '@/types/resume';
 import { generateRowBasedLatex, generateDeedyLatex } from '@/lib/latex-generator';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface LatexPreviewProps {
   data: Partial<UserProfileData>;
@@ -16,7 +18,8 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showLatex, setShowLatex] = useState(false);
-  const [copied, setCopied] = useState(false); // Add copied state
+  const [copied, setCopied] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const latexCode = template === 'row-based' ? generateRowBasedLatex(data) : generateDeedyLatex(data);
 
@@ -378,34 +381,216 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
     );
   };
 
-  const compileToPDF = async () => {
+  const downloadPDF = async () => {
+    if (!previewRef.current) {
+      setError('Preview content not found');
+      return;
+    }
+
     setIsCompiling(true);
     setError(null);
+    setPdfUrl(null);
     
     try {
-      // Call the LaTeX compilation API
-      const response = await fetch('/api/compile-latex', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ latex: latexCode }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Compilation failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      const element = previewRef.current;
       
-      if (result.success) {
-        setPdfUrl(result.pdfUrl);
-      } else {
-        setError(result.error || 'Compilation failed');
+      // Find the actual content div (the one with transform scale)
+      const contentDiv = element.querySelector('div > div') as HTMLElement;
+      
+      if (!contentDiv) {
+        throw new Error('Content not found');
       }
+      
+      // Create a completely isolated container outside the main DOM
+      const isolatedContainer = document.createElement('div');
+      isolatedContainer.style.cssText = `
+        position: fixed;
+        top: -20000px;
+        left: -20000px;
+        background: white;
+        width: auto;
+        min-width: 900px;
+        max-width: 900px;
+        min-height: 1200px;
+        overflow: visible;
+        box-sizing: border-box;
+        padding: 20px;
+      `;
+      
+      // Clone the content
+      const clone = contentDiv.cloneNode(true) as HTMLElement;
+      clone.style.transform = 'none';
+      clone.style.width = '100%';
+      clone.style.maxWidth = '860px';
+      clone.style.height = 'auto';
+      clone.style.overflow = 'visible';
+      clone.style.boxSizing = 'border-box';
+      clone.style.fontSize = '10pt';
+      
+      // Add inline styles to override all colors and ensure proper layout
+      const styleTag = document.createElement('style');
+      styleTag.textContent = `
+        * {
+          color: inherit !important;
+          background-color: transparent !important;
+          border-color: currentColor !important;
+          box-sizing: border-box !important;
+        }
+        body, html, div {
+          background-color: white !important;
+          overflow: visible !important;
+        }
+        .text-gray-900, h1, h2 { color: #111827 !important; }
+        .text-gray-700 { color: #374151 !important; }
+        .text-gray-600 { color: #4b5563 !important; }
+        .text-gray-500 { color: #6b7280 !important; }
+        .text-blue-600 { color: #2563eb !important; }
+        .bg-white { background-color: #ffffff !important; }
+        .border-gray-400 { border-color: #9ca3af !important; }
+        .border-blue-600 { border-color: #2563eb !important; }
+        .border-b { border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+        .grid { 
+          display: grid !important; 
+          width: 100% !important;
+        }
+        .grid-cols-3 { 
+          grid-template-columns: 2fr 1fr !important; 
+          gap: 1.5rem !important;
+        }
+        .col-span-2 { 
+          grid-column: 1 / 2 !important;
+          min-width: 0 !important;
+          overflow: visible !important;
+        }
+        .col-span-1 { 
+          grid-column: 2 / 3 !important;
+          min-width: 0 !important;
+          overflow: visible !important;
+          word-wrap: break-word !important;
+        }
+        .gap-6 { gap: 1.5rem !important; }
+        .flex { display: flex !important; }
+        .flex-wrap { flex-wrap: wrap !important; }
+        .justify-between { justify-content: space-between !important; }
+        .justify-center { justify-content: center !important; }
+        .items-start { align-items: flex-start !important; }
+        .items-center { align-items: center !important; }
+        .text-center { text-align: center !important; }
+        .text-right { text-align: right !important; }
+        .mb-1 { margin-bottom: 0.25rem !important; }
+        .mb-2 { margin-bottom: 0.5rem !important; }
+        .mb-3 { margin-bottom: 0.75rem !important; }
+        .mb-4 { margin-bottom: 1rem !important; }
+        .mb-6 { margin-bottom: 1.5rem !important; }
+        .mb-8 { margin-bottom: 2rem !important; }
+        .pb-1 { padding-bottom: 0.25rem !important; }
+        .pb-4 { padding-bottom: 1rem !important; }
+        .p-6 { padding: 1.5rem !important; }
+        .mx-2 { margin-left: 0.5rem !important; margin-right: 0.5rem !important; }
+        .gap-2 { gap: 0.5rem !important; }
+        .tracking-wider { letter-spacing: 0.05em !important; }
+        .tracking-widest { letter-spacing: 0.1em !important; }
+        .uppercase { text-transform: uppercase !important; }
+        .italic { font-style: italic !important; }
+        .font-bold { font-weight: 700 !important; }
+        .font-thin { font-weight: 100 !important; }
+        .underline { text-decoration: underline !important; }
+        .text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
+        .text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+        .text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        .text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
+        .leading-relaxed { line-height: 1.625 !important; }
+        span, p, div, li {
+          white-space: normal !important;
+          overflow: visible !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+        ul, ol {
+          padding-left: 1rem !important;
+          margin: 0 !important;
+          list-style-position: inside !important;
+        }
+        li {
+          margin-bottom: 0.25rem !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+      `;
+      
+      isolatedContainer.appendChild(styleTag);
+      isolatedContainer.appendChild(clone);
+      document.body.appendChild(isolatedContainer);
+      
+      // Wait for rendering and layout to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Create canvas from the isolated container with better settings
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        foreignObjectRendering: false,
+        allowTaint: true,
+        width: clone.scrollWidth,
+        height: clone.scrollHeight,
+        windowWidth: clone.scrollWidth,
+        windowHeight: clone.scrollHeight
+      });
+      
+      // Remove isolated container
+      document.body.removeChild(isolatedContainer);
+      
+      // PDF dimensions - A4 size
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 297; // A4 height in mm
+      
+      // Calculate image dimensions to fit in PDF
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      
+      // If content fits on one page
+      if (imgHeight <= pdfHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      } else {
+        // Multiple pages needed
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+        
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+      }
+      
+      // Generate filename
+      const fullName = `${data.user?.first_name || ''} ${data.user?.last_name || ''}`.trim() || 'resume';
+      const filename = `${fullName.toLowerCase().replace(/\s+/g, '_')}_resume.pdf`;
+      
+      // Download
+      pdf.save(filename);
+      
+      setPdfUrl('success');
+      setTimeout(() => setPdfUrl(null), 3000);
       
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      setError(err instanceof Error ? err.message : 'Failed to generate PDF');
+      console.error('PDF Error:', err);
     } finally {
       setIsCompiling(false);
     }
@@ -423,11 +608,11 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
             {showLatex ? 'Show Preview' : 'Show Code'}
           </button>
           <button
-            onClick={compileToPDF}
+            onClick={downloadPDF}
             disabled={isCompiling}
-            className="px-3 py-1 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50"
+            className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
           >
-            {isCompiling ? 'Compiling...' : 'Generate PDF'}
+            {isCompiling ? 'Generating...' : 'Download PDF'}
           </button>
         </div>
       </div>
@@ -441,10 +626,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
       {pdfUrl && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
           <p className="text-green-700 text-sm">
-            PDF compiled successfully!{' '}
-            <a href={pdfUrl} download="resume.pdf" className="underline font-medium">
-              Download PDF
-            </a>
+            PDF downloaded successfully!
           </p>
         </div>
       )}
@@ -458,8 +640,8 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(latexCode);
-                    setCopied(true); // Set the copied state to true
-                    setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
                   } catch (err) {
                     console.error("Failed to copy text: ", err);
                   }
@@ -481,7 +663,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
           <div className="h-full flex flex-col">
             <h3 className="text-sm font-semibold text-gray-700 mb-2 flex-shrink-0">Resume Preview</h3>
             <div className="flex-1 overflow-auto bg-white border rounded-lg">
-              <div className="origin-top-left" style={{ transformOrigin: 'top left' }}>
+              <div className="origin-top-left" style={{ transformOrigin: 'top left' }} ref={previewRef}>
                 {renderHTMLPreview()}
               </div>
             </div>
