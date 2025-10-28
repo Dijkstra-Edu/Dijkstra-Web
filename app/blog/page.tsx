@@ -2,17 +2,15 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
-import { DataTable } from "@/components/blogs/data-table";
-import { columns } from "@/components/blogs/columns";
-import { personalBlogs, lcBlogs } from "@/lib/mock-data";
-import { UserProfileCard } from "@/components/user-profile-card";
-import { QuickActions } from "@/components/quick-actions";
-import { LCBlogCard } from "@/components/blogs/lc-blog-card";
-import { LCInstructionsCard } from "@/components/blogs/lc-instructions-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileData } from "@/components/profile-data";
+import Readme from "@/components/readme";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+
+export default function Page() {
 
 export default function BlogDashboardPage() {
   return (
