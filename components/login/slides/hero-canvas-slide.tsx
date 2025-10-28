@@ -1,6 +1,6 @@
 "use client"
 
-import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect"
+import { CanvasRevealEffect } from "@/components/canvas-reveal-effect"
 import Link from "next/link"
 
 export function HeroCanvasSlide() {

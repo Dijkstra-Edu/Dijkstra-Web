@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation Issues
+    url: https://github.com/Dijkstra-Edu/docs
+    about: Please open docs-related issues in the docs repository.
+  - name: Discussions
+    url: https://github.com/Dijkstra-Edu/dijkstra-web/discussions
+    about: Use GitHub Discussions for General Questions and Feedback.
