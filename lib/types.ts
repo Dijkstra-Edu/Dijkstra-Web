@@ -27,3 +27,25 @@ export interface LCBlog {
   errorMessage?: string
   slug: string
 }
+
+export interface PostAuthor {
+  name: string
+  title: string
+  avatar: string
+  verified: boolean
+}
+
+export interface Post {
+  id: string
+  author: PostAuthor
+  timeAgo: string
+  content: string
+  images: string[]
+  likes: number
+  comments: number
+  reposts: number
+  reactions: string[]
+  createdAt: Date
+  isLiked?: boolean
+  isSaved?: boolean
+}

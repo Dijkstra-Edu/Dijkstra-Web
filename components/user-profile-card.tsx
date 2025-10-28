@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Github, BookOpen } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useMemo } from "react"
-import { personalBlogs } from "@/lib/mock-data"
+import { personalBlogs } from "@/data/mock-data"
 
 interface UserProfileCardProps {
   blogStats?: {

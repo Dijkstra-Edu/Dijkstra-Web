@@ -4,17 +4,28 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/blogs/data-table";
 import { columns } from "@/components/blogs/columns";
-import { personalBlogs, lcBlogs } from "@/lib/mock-data";
+import { personalBlogs, lcBlogs, posts } from "@/data/mock-data";
 import { LCBlogCard } from "@/components/blogs/lc-blog-card";
 import { LCInstructionsCard } from "@/components/blogs/lc-instructions-card";
+import { PostsCarousel } from "@/components/blogs/posts-carousel";
 import { UserProfileCard } from "@/components/user-profile-card";
 import { QuickActions } from "@/components/quick-actions";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import Link from "next/link";
 
 export default function Page() {
+  const handleEditPost = (postId: string) => {
+    // TODO: Implement edit functionality
+    console.log("Edit post:", postId)
+  }
+
+  const handleDeletePost = (postId: string) => {
+    // TODO: Implement delete functionality
+    console.log("Delete post:", postId)
+  }
   return (
     <SidebarProvider
       style={
@@ -35,9 +46,9 @@ export default function Page() {
         </div>
 
         {/* Scrollable content (PR widgets go here) */}
-        <div className="flex-1 overflow-y-auto px-6 py-2 space-y-6 landing-page">
+        <div className="flex-1 overflow-y-auto px-8 py-4 space-y-6 landing-page">
           {/* Main Grid */}
-          <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+          <div className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-start">
             {/* Left Column */}
             <div className="space-y-6">
               <div>
@@ -51,22 +62,52 @@ export default function Page() {
                   data={personalBlogs} 
                   columns={columns}
                   actions={
-                    <Button>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      New Blog
-                    </Button>
+                    <Link href="/blog/create">
+                      <Button>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        New Blog
+                      </Button>
+                    </Link>
                   }
                 />
               </div>
-              <Separator />
             </div>
 
             {/* Right Column */}
-            <div className="space-y-6">
+            <div className="space-y-6 lg:flex lg:flex-col lg:h-full">
               <UserProfileCard />
-              <QuickActions />
+              <div className="lg:flex-1">
+                <QuickActions />
+              </div>
             </div>
           </div>
+
+          <Separator />
+
+          {/* Posts */}
+          <div>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">Posts</h2>
+                <p className="text-sm text-muted-foreground">
+                  Your posts shared with the Dijkstra community
+                </p>
+              </div>
+              <Link href="/post/create">
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create Post
+                </Button>
+              </Link>
+            </div>
+            <PostsCarousel 
+              posts={posts} 
+              onEdit={handleEditPost}
+              onDelete={handleDeletePost}
+            />
+          </div>
+
+          <Separator />
 
           {/* LeetCode Blogs */}
           <div>
