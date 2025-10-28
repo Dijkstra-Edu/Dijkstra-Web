@@ -15,7 +15,7 @@ export function HeroCanvasSlide() {
               containerClassName="bg-black"
               colors={[
                 [0, 180, 0], // Brighter green
-                [0, 180, 0], // Even brighter green
+                [0, 220, 0], // Even brighter green
                 [100, 255, 100], // Light green
               ]}
               dotSize={3}
