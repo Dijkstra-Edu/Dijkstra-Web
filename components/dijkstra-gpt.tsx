@@ -7,6 +7,9 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 // Icon library (removed voice & enhance icons)
 import {
@@ -72,6 +75,7 @@ export default function DijkstraGPT() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'active' | 'inactive'>('checking');
+  const [hasMessages, setHasMessages] = useState<boolean>(false);
 
   // ============================================
   // REFS FOR DOM ELEMENTS
@@ -101,10 +105,48 @@ export default function DijkstraGPT() {
     }
   }, [prompt]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive (scrolling parent container)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+    if (messagesEndRef.current && hasMessages) {
+      // Find the scrollable parent container from page.tsx
+      let scrollContainer = messagesEndRef.current.closest('.overflow-y-auto');
+      if (!scrollContainer) {
+        // Try to find the parent scroll container by traversing up
+        let parent = messagesEndRef.current.parentElement;
+        while (parent && parent !== document.body) {
+          const style = window.getComputedStyle(parent);
+          if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+            scrollContainer = parent;
+            break;
+          }
+          parent = parent.parentElement;
+        }
+      }
+      
+      if (scrollContainer) {
+        // Use setTimeout to ensure DOM is updated
+        setTimeout(() => {
+          scrollContainer?.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: "smooth"
+          });
+        }, 100);
+      } else {
+        // Fallback to direct scrollIntoView
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [messages, isLoading, hasMessages]);
+
+  // Track if there are messages to determine layout state
+  // Note: hasMessages is set immediately on submit, so we only update if it's false and messages exist
+  useEffect(() => {
+    if (!hasMessages && messages.length > 0) {
+      setHasMessages(true);
+    }
+  }, [messages, hasMessages]);
 
   // Initialize with a default session on mount
   useEffect(() => {
@@ -155,23 +197,10 @@ export default function DijkstraGPT() {
     );
   };
 
+  // Check API status on mount
   useEffect(() => {
-  const initialSession: ChatSession = {
-    id: Date.now().toString(),
-    title: "New Chat",
-    messages: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  setChatSessions([initialSession]);
-  setCurrentSessionId(initialSession.id);
-}, []);
-
-// Check API status on mount
-useEffect(() => {
-  checkApiStatus();
-}, []);
+    checkApiStatus();
+  }, []);
 
   const deleteSession = (sessionId: string): void => {
     setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
@@ -213,24 +242,24 @@ useEffect(() => {
     );
   };
   // ============================================
-// API STATUS CHECK
-// ============================================
+  // API STATUS CHECK
+  // ============================================
 
-const checkApiStatus = async (): Promise<void> => {
-  try {
-    const response = await callGemini("test");
-    if (response) {
-      setApiStatus('active');
-      console.log('✅ API key is active');
-    } else {
+  const checkApiStatus = async (): Promise<void> => {
+    try {
+      const response = await callGemini("test");
+      if (response) {
+        setApiStatus('active');
+        console.log('✅ API key is active');
+      } else {
+        setApiStatus('inactive');
+        console.log('❌ API key is not configured or invalid');
+      }
+    } catch (error) {
       setApiStatus('inactive');
-      console.log('❌ API key is not configured or invalid');
+      console.error('❌ API check failed:', error);
     }
-  } catch (error) {
-    setApiStatus('inactive');
-    console.error('❌ API check failed:', error);
-  }
-};
+  };
 
   // ============================================
   // FILE HANDLING FUNCTIONS
@@ -417,6 +446,9 @@ const checkApiStatus = async (): Promise<void> => {
 
   const handleSubmit = async (): Promise<void> => {
     if (!prompt.trim() && uploadedFiles.length === 0) return;
+
+    // Trigger layout transition immediately
+    setHasMessages(true);
 
     if (!currentSessionId) {
       createNewChat();
@@ -631,58 +663,180 @@ const checkApiStatus = async (): Promise<void> => {
   ];
 
   // ============================================
+  // RENDER INPUT AREA
+  // ============================================
+
+  const renderInputArea = (isCentered: boolean = false) => (
+    <div 
+      className={`relative max-w-4xl mx-auto transition-all duration-500 ease-in-out ${
+        isCentered ? 'w-full' : 'w-full'
+      }`}
+    >
+      {/* Uploaded files preview */}
+      {uploadedFiles.length > 0 && (
+        <div className="mb-4 p-4 bg-muted/50 rounded-2xl border border-border/50">
+          <div className="flex flex-wrap gap-2">
+            {uploadedFiles.map((file, index) => (
+              <Badge key={index} variant="secondary" className="flex items-center gap-2 px-3 py-2 bg-background border border-border/50 hover:bg-muted/80 transition-colors">
+                <FileText className="h-3 w-3" />
+                <span className="text-sm font-medium">{file.name}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 hover:text-destructive rounded-full"
+                  onClick={() => removeFile(index)}
+                  aria-label={`Remove ${file.name}`}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Input container */}
+      <div className="relative bg-background border border-border/50 rounded-3xl shadow-lg shadow-black/5 overflow-hidden">
+        <div className="relative">
+          <Textarea
+            ref={textareaRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={isCentered ? "Describe what you want to build..." : "Ask me anything about CS, algorithms, or coding interviews..."}
+            className="min-h-[80px] max-h-[300px] resize-none border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0"
+            style={{ height: "auto" }}
+            disabled={isLoading}
+            aria-label="Message input"
+          />
+
+          {/* Action buttons bar */}
+          <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-t border-border/30">
+            {/* Left side - Input tools */}
+            <div className="flex items-center gap-1">
+              {/* File attachment button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-9 w-9 p-0 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
+                aria-label="Attach file"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+
+              {/* Image upload button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/*";
+                  input.multiple = true;
+                  input.onchange = (e) => handleFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
+                  input.click();
+                }}
+                className="h-9 w-9 p-0 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
+                aria-label="Upload image"
+              >
+                <Image className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Right side - Send button */}
+            <Button
+              onClick={handleSubmit}
+              disabled={(!prompt.trim() && uploadedFiles.length === 0) || isLoading}
+              className="h-9 px-4 rounded-xl bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
+              aria-label="Send message"
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2" />
+              ) : (
+                <ArrowUp className="h-4 w-4 mr-1" />
+              )}
+              Send
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Keyboard shortcut hint */}
+      {isCentered && (
+        <div className="text-center mt-3">
+          <p className="text-xs text-muted-foreground/80">
+            Press{" "}
+            <kbd className="px-1.5 py-0.5 bg-muted/80 border border-border/50 rounded text-xs font-mono">
+              ⌘ Enter
+            </kbd>{" "}
+            to send
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  // ============================================
   // MAIN COMPONENT RENDER
   // ============================================
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="bg-gradient-to-br from-background via-background to-muted/20 flex flex-col w-full h-full">
       {/* ==================== MAIN CHAT AREA ==================== */}
-      <div className="flex-1 flex flex-col">
-        {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-4xl mx-auto">
-            {/* Empty state with example prompts */}
-            {messages.length === 0 && !isLoading ? (
-              <div className="space-y-8 pt-20">
-                {/* Header with logo */}
-                <div className="text-center mb-12">
-                  <div className="flex justify-center mb-6">
-                    <img src="/icon.png" alt="Dijkstra GPT" className="h-24 w-24" />
-                  </div>
-                  <h1 className="text-3xl font-bold mb-3">Your Personal CS Prep Assistant</h1>
-                  <p className="text-muted-foreground text-base max-w-2xl mx-auto">
-                    Trained on computer science topics, interview prep, and coding resources to help you
-                    excel in your journey to becoming a Computer Science Engineer.
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        <div className="flex-1 flex flex-col relative min-h-0">
+          {/* Messages Container - No internal scroll, uses parent scroll */}
+          {!hasMessages && !isLoading ? (
+            <>
+              {/* Header - matches original layout */}
+              <div className="flex-shrink-0 text-center pt-4 pb-8">
+                <div className="flex flex-col items-center space-y-2 my-8">
+                  <img src="/icon.png" alt="Dijkstra GPT logo" className="h-30 w-30" />
+                  <h2 className="text-2xl font-semibold">Your Personal CS Prep Assistant</h2>
+                  <p className="text-gray-500 text-center max-w-3xl">
+                    This model has been trained on a wide range of computer science topics, tips and tricks, resources, and more to help you on your journey towards becoming a Computer Science Engineer. It is also context aware of what you do within GitHub and Leetcode. Happy coding :)
                   </p>
                 </div>
+              </div>
 
-                {/* Instructions */}
-                <div className="text-center mb-6">
-                  <h3 className="text-lg font-semibold mb-2">Get started with these examples</h3>
-                  <p className="text-sm text-muted-foreground">Click any prompt to try it out</p>
-                </div>
+              {/* Main Content - matches original layout */}
+              <div className={`flex-1 flex flex-col items-center px-4 pb-8 ${hasMessages ? 'hidden' : ''}`}>
+                <div className="w-full max-w-4xl mx-auto space-y-8">
+                  {/* Example Prompts - Below Input (shown in original layout) */}
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h2 className="text-lg font-semibold text-foreground/90 mb-2">Get started with these examples</h2>
+                      <p className="text-sm text-muted-foreground">Click any prompt to try it out</p>
+                    </div>
 
-                {/* Example prompt cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {examplePrompts.map((example, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setPrompt(example)}
-                      className="group p-4 text-left bg-background border border-border/50 rounded-2xl hover:border-border hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
-                      aria-label={`Use example prompt: ${example}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                          <MessageSquare className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-medium leading-relaxed">{example}</span>
-                      </div>
-                    </button>
-                  ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {examplePrompts.map((example, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setPrompt(example)}
+                          className="group p-4 text-left bg-background border border-border/50 rounded-2xl hover:border-border hover:shadow-md hover:shadow-black/5 transition-all duration-200 hover:-translate-y-0.5"
+                          aria-label={`Use example prompt: ${example}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-gradient-to-br from-black/10 to-green-800/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-black/20 group-hover:to-green-800/20 transition-colors">
+                              <MessageSquare className="h-4 w-4 text-green-800" />
+                            </div>
+                            <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors leading-relaxed">
+                              {example}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <>
+            </>
+          ) : (
+            <div className={`flex-1 ${hasMessages ? 'p-6' : ''} min-h-0`}>
+              {/* ==================== MESSAGES VIEW ==================== */}
+              <div className="max-w-4xl mx-auto">
                 {/* Render all messages */}
                 {messages.map((m, i) => renderMessage(m, i))}
 
@@ -703,246 +857,189 @@ const checkApiStatus = async (): Promise<void> => {
                 )}
 
                 <div ref={messagesEndRef} />
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* ==================== INPUT AREA ==================== */}
-        <div className="flex-shrink-0 p-6 border-t border-border/50">
-          <div className="max-w-4xl mx-auto">
-            {/* Uploaded files preview */}
-            {uploadedFiles.length > 0 && (
-              <div className="mb-4 p-4 bg-muted/50 rounded-2xl border border-border/50">
-                <div className="flex flex-wrap gap-2">
-                  {uploadedFiles.map((file, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-2 px-3 py-2">
-                      <FileText className="h-3 w-3" />
-                      <span className="text-sm font-medium">{file.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-4 w-4 p-0 hover:bg-destructive/20 hover:text-destructive rounded-full"
-                        onClick={() => removeFile(index)}
-                        aria-label={`Remove ${file.name}`}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Input container */}
-            <div className="relative bg-background border border-border/50 rounded-3xl shadow-lg overflow-hidden">
-              {/* Textarea */}
-              <Textarea
-                ref={textareaRef}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask me anything about CS, algorithms, or coding interviews..."
-                className="min-h-[80px] max-h-[300px] resize-none border-0 bg-transparent px-6 py-5 text-base focus-visible:ring-0"
-                disabled={isLoading}
-                aria-label="Message input"
-              />
-
-              {/* Action buttons bar */}
-              <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-t border-border/30">
-                {/* Left side - Input tools (removed voice & enhance) */}
-                <div className="flex items-center gap-1">
-                  {/* File attachment button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-9 w-9 p-0 rounded-xl"
-                    aria-label="Attach file"
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-
-                  {/* Image upload button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const input = document.createElement("input");
-                      input.type = "file";
-                      input.accept = "image/*";
-                      input.multiple = true;
-                      input.onchange = (e) => handleFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-                      input.click();
-                    }}
-                    className="h-9 w-9 p-0 rounded-xl"
-                    aria-label="Upload image"
-                  >
-                    <Image className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Right side - Send button */}
-                <Button
-                  onClick={handleSubmit}
-                  disabled={(!prompt.trim() && uploadedFiles.length === 0) || isLoading}
-                  className="h-9 px-4 rounded-xl bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50"
-                  aria-label="Send message"
-                >
-                  {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2" />
-                  ) : (
-                    <ArrowUp className="h-4 w-4 mr-1" />
-                  )}
-                  Send
-                </Button>
               </div>
             </div>
+          )}
 
-            {/* Keyboard shortcut hint */}
-            <div className="text-center mt-3">
-              <p className="text-xs text-muted-foreground">
-                Press <kbd className="px-1.5 py-0.5 bg-muted border border-border/50 rounded text-xs">⌘ Enter</kbd> to send
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ==================== SIDEBAR - CHAT HISTORY ==================== */}
-<div
-  className={`${
-    isSidebarOpen ? "w-80" : "w-0"
-  } transition-all duration-300 bg-background border-l border-border/50 flex flex-col ${isSidebarOpen ? 'overflow-y-auto' : 'overflow-hidden'} relative`}
->
-        {/* Sidebar header */}
-        <div className="p-4 border-b border-border/50">
-          {/* Title and close button */}
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Chat History
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsSidebarOpen(false)}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Close sidebar"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* New chat button */}
-          <Button onClick={createNewChat} className="w-full mb-3" aria-label="Create new chat">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            New Chat
-          </Button>
-
-          {/* Search input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <input
-              type="text"
-              placeholder="Search chats..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-border/50 rounded-lg bg-background text-sm focus:ring-2 focus:ring-ring focus:border-transparent"
-              aria-label="Search chat history"
-            />
-          </div>
-        </div>
-
-        {/* Chat sessions list */}
-        <div className="flex-1 overflow-y-auto p-2">
-          {/* Grouped by date */}
-          {Object.entries(groupedSessions).map(([date, sessions]) => (
-            <div key={date} className="mb-4">
-              {/* Date header */}
-              <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground font-medium">
-                <Calendar className="h-3 w-3" />
-                {date === new Date().toDateString()
-                  ? "Today"
-                  : date === new Date(Date.now() - 86400000).toDateString()
-                  ? "Yesterday"
-                  : new Date(date).toLocaleDateString()}
+          {/* ==================== INPUT AREA - SINGLE INSTANCE THAT MOVES ==================== */}
+          {hasMessages ? (
+            <div className="flex-shrink-0 sticky bottom-0 p-6 border-t border-border/50 bg-gradient-to-br from-background via-background to-muted/20 backdrop-blur-sm z-10 transition-all duration-500 ease-in-out">
+              <div className="w-full max-w-4xl mx-auto">
+                {renderInputArea(false)}
               </div>
-
-              {/* Session items */}
-              {sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
-                    currentSessionId === session.id ? "bg-muted border border-border" : "hover:bg-muted/50"
-                  }`}
-                  onClick={() => setCurrentSessionId(session.id)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Select chat: ${session.title}`}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      setCurrentSessionId(session.id);
-                    }
-                  }}
-                >
-                  {/* Session info */}
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{session.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {session.messages.length} messages • {session.updatedAt.toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Action buttons - Download and Delete */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {/* Download button - Icon only */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-foreground h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        downloadSession(session);
-                      }}
-                      aria-label={`Download chat: ${session.title}`}
-                    >
-                      <Download className="h-3 w-3" />
-                    </Button>
-
-                    {/* Delete button - Icon only */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteSession(session.id);
-                      }}
-                      aria-label={`Delete chat: ${session.title}`}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
             </div>
-          ))}
-
-          {/* Empty state */}
-          {filteredSessions.length === 0 && (
-            <div className="text-center text-muted-foreground mt-8 px-4">
-              <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p className="text-sm">No chat history yet</p>
-              <p className="text-xs">Start a conversation to see your chats here</p>
+          ) : (
+            <div className="flex-1 flex flex-col items-center px-4 pb-8">
+              <div className="w-full max-w-4xl mx-auto">
+                <div className="relative">
+                  {renderInputArea(true)}
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-       {/* Sidebar footer */}
+        {/* ==================== SIDEBAR - CHAT HISTORY ==================== */}
+        <div
+          className={`${
+            isSidebarOpen ? "w-80" : "w-0"
+          } transition-all duration-300 bg-background/95 backdrop-blur-md border-l border-border/30 flex flex-col ${isSidebarOpen ? '' : 'overflow-hidden'} relative shadow-lg`}
+        >
+          {/* Sidebar header */}
+          <div className="flex-shrink-0 p-4 border-b border-border/30 bg-gradient-to-b from-transparent to-muted/20">
+            {/* Title and close button */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold flex items-center gap-2 text-foreground/90">
+                <MessageSquare className="h-4 w-4" />
+                Chat History
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSidebarOpen(false)}
+                className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-200"
+                aria-label="Close sidebar"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+            {/* New chat button */}
+            <Button 
+              onClick={createNewChat} 
+              className="w-full mb-3 h-9 text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-lg shadow-sm" 
+              aria-label="Create new chat"
+            >
+              <MessageSquare className="h-3.5 w-3.5 mr-2" />
+              New Chat
+            </Button>
+
+            {/* Search input */}
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5" />
+              <input
+                type="text"
+                placeholder="Search chats..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border border-border/40 rounded-lg bg-background/50 text-sm focus:ring-2 focus:ring-ring/50 focus:border-ring/50 transition-all duration-200 text-foreground placeholder:text-muted-foreground/60"
+                aria-label="Search chat history"
+              />
+            </div>
+          </div>
+
+          {/* Chat sessions list with ScrollArea */}
+          {isSidebarOpen && (
+            <ScrollArea className="flex-1">
+              <div className="p-3 space-y-1">
+                {/* Grouped by date */}
+                {Object.entries(groupedSessions).map(([date, sessions]) => (
+                  <div key={date} className="mb-3">
+                    {/* Date header */}
+                    <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground/70 font-medium uppercase tracking-wider">
+                      <Calendar className="h-3 w-3" />
+                      {date === new Date().toDateString()
+                        ? "Today"
+                        : date === new Date(Date.now() - 86400000).toDateString()
+                        ? "Yesterday"
+                        : new Date(date).toLocaleDateString()}
+                    </div>
+
+                    {/* Session items */}
+                    <div className="space-y-2">
+                      {sessions.map((session) => (
+                        <Card
+                          key={session.id}
+                          className={`group relative cursor-pointer transition-all duration-200 hover:shadow-md py-0 ${
+                            currentSessionId === session.id 
+                              ? "border-primary/50 bg-muted/50 shadow-sm" 
+                              : "hover:border-border/80"
+                          }`}
+                          onClick={() => setCurrentSessionId(session.id)}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Select chat: ${session.title}`}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              setCurrentSessionId(session.id);
+                            }
+                          }}
+                        >
+                          <div className="p-2.5">
+                            <div className="flex items-center gap-2">
+                              {/* Session info */}
+                              <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                <div className={`flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-colors duration-200 ${
+                                  currentSessionId === session.id 
+                                    ? "bg-primary/10 text-primary" 
+                                    : "bg-muted text-muted-foreground group-hover:bg-muted/80 group-hover:text-foreground"
+                                }`}>
+                                  <MessageSquare className="h-3.5 w-3.5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className={`text-sm font-medium truncate transition-colors duration-200 ${
+                                    currentSessionId === session.id ? "text-foreground" : "text-foreground/90"
+                                  }`} title={session.title}>
+                                    {session.title}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
+                                    {session.messages.length} messages • {session.updatedAt.toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Action buttons - Download and Delete */}
+                              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0">
+                                {/* Download button */}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-all duration-200"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    downloadSession(session);
+                                  }}
+                                  aria-label={`Download chat: ${session.title}`}
+                                >
+                                  <Download className="h-3 w-3" />
+                                </Button>
+
+                                {/* Delete button */}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all duration-200"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteSession(session.id);
+                                  }}
+                                  aria-label={`Delete chat: ${session.title}`}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Empty state */}
+                {filteredSessions.length === 0 && (
+                  <div className="text-center text-muted-foreground mt-12 px-4">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
+                      <MessageSquare className="h-8 w-8 opacity-40" />
+                    </div>
+                    <p className="text-sm font-medium mb-1">No chat history yet</p>
+                    <p className="text-xs text-muted-foreground/70">Start a conversation to see your chats here</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
       </div>
 
       {/* ==================== FLOATING SIDEBAR TOGGLE ==================== */}
