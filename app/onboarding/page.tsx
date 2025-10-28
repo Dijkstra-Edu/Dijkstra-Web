@@ -52,6 +52,7 @@ import { onboardUserMutation, checkOnboardingStatusQuery } from "@/server/datafo
 import { Domain, Tools, Rank } from "@/types/server/dataforge/enums";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { Confetti } from "@/components/ui/confetti";
 
 const steps = [
   {
