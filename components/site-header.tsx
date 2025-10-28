@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -19,6 +20,7 @@ import {
   IconNotebook,
   IconSun,
   IconMoon,
+  IconExternalLink,
 } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { Bell, Notebook, Sheet } from "lucide-react";
@@ -32,15 +34,53 @@ import {
 } from "./ui/sheet";
 
 import { handleLogout } from "@/lib/logout";
+import { useSettingsStore } from "@/lib/Zustand/settings-store";
+import type { PresetPin, CustomPin } from "@/types/lib/Zustand/settings-store-types";
+
+// Icon mapping helper
+const getIconComponent = (iconName: string) => {
+  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    reddit: IconBrandReddit,
+    scholar: IconSchool,
+    stackoverflow: IconBrandStackoverflow,
+    discord: IconBrandDiscord,
+    linkedin: IconBrandLinkedin,
+    leetcode: IconBrandLeetcode,
+    github: IconBrandGithub,
+    world: IconWorldWww,
+    dashboard: IconLayoutDashboard,
+    notebook: IconNotebook,
+  };
+  return iconMap[iconName] || IconExternalLink;
+};
 
 export function SiteHeader({ title }: { title: string }) {
-  /*
-  Things to change:
-  - Change it all to icons
-  - LinksL GithUb, Leetcode, Specialization, LinkedIn, Dijkstra Page, Personal Page
-  - option to pin other pages and sites
-  */
   const { theme, setTheme } = useTheme();
+  const presetPins = useSettingsStore((state) => state.presetPins);
+  const customPins = useSettingsStore((state) => state.customPins);
+
+  // Debug logging (can be removed later)
+  React.useEffect(() => {
+    console.log('Preset Pins:', presetPins);
+    console.log('Enabled Preset Pins:', presetPins?.filter((pin) => pin.enabled));
+  }, [presetPins]);
+
+  // Filter enabled pins and group them
+  const enabledPresetPins = presetPins?.filter((pin) => pin.enabled) || [];
+  const enabledCustomPins = customPins?.filter((pin) => pin.enabled) || [];
+
+  // Group preset pins by their group number
+  const groupedPins = enabledPresetPins.reduce((acc, pin) => {
+    if (!acc[pin.group]) {
+      acc[pin.group] = [];
+    }
+    acc[pin.group].push(pin);
+    return acc;
+  }, {} as Record<number, typeof enabledPresetPins>);
+
+  // Get sorted group numbers
+  const groupNumbers = Object.keys(groupedPins).map(Number).sort((a, b) => a - b);
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -52,145 +92,78 @@ export function SiteHeader({ title }: { title: string }) {
         <h1 className="text-base font-medium">{title}</h1>
         {/* <ActionSearchBar /> */}
         <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex bg-[#FF4500]"
-          >
-            <a
-              href="https://www.reddit.com/"
-              target="_blank"
-              className="dark:text-foreground"
+          {/* Render preset pins grouped with separators */}
+          {groupNumbers.map((groupNum, groupIndex) => (
+            <React.Fragment key={`group-${groupNum}`}>
+              {(groupedPins[groupNum] || []).map((pin) => {
+                const IconComponent = getIconComponent(pin.icon);
+                const hasBackgroundColor = pin.color && pin.color !== "";
+                
+                return (
+                  <Button
+                    key={pin.id}
+                    variant="secondary"
+                    asChild
+                    size="sm"
+                    className="hidden sm:flex"
+                    style={hasBackgroundColor ? { backgroundColor: pin.color } : undefined}
+                    title={pin.tooltip}
+                  >
+                    <a
+                      href={pin.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="dark:text-foreground"
+                    >
+                      <IconComponent className={hasBackgroundColor ? "h-4 w-4 text-white" : "h-4 w-4"} />
+                    </a>
+                  </Button>
+                );
+              })}
+              
+              {/* Add separator after each group except the last one */}
+              {groupIndex < groupNumbers.length - 1 && (
+                <Separator
+                  orientation="vertical"
+                  className="mx-2 data-[orientation=vertical]:h-4"
+                />
+              )}
+            </React.Fragment>
+          ))}
+
+          {/* Render custom pins */}
+          {enabledCustomPins.map((pin) => (
+            <Button
+              key={pin.id}
+              variant="secondary"
+              asChild
+              size="sm"
+              className="hidden sm:flex"
+              title={pin.tooltip}
             >
-              <IconBrandReddit className="h-4 w-4 text-white" />
-            </a>
-          </Button>
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex bg-[#4285F4]"
-          >
-            <a
-              href="https://scholar.google.com/"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              <IconSchool className="h-4 w-4 text-white" />
-            </a>
-          </Button>
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex bg-[#F48024]"
-          >
-            <a
-              href="https://stackoverflow.com/questions"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              <IconBrandStackoverflow className="h-4 w-4 text-white" />
-            </a>
-          </Button>
-          <Separator
-            orientation="vertical"
-            className="mx-2 data-[orientation=vertical]:h-4"
-          />
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex bg-[#5865F2]"
-          >
-            <a
-              href="https://discord.gg/jE9kfzCv"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              <IconBrandDiscord className="h-4 w-4 text-white" />
-            </a>
-          </Button>
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex bg-[#0A66C2]"
-          >
-            <a
-              href="https://www.linkedin.com/in/jrs2002/"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              <IconBrandLinkedin className="h-4 w-4 text-white" />
-            </a>
-          </Button>
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex bg-amber-300"
-          >
-            <a
-              href="https://leetcode.com/u/JRS296/"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              <IconBrandLeetcode className="h-4 w-4 text-white" />
-            </a>
-          </Button>
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex bg-black"
-          >
-            <a
-              href="https://github.com/JRS296"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              <IconBrandGithub className="h-4 w-4 text-white" />
-            </a>
-          </Button>
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex"
-          >
-            <a
-              href="https://jrs-studios.web.cern.ch/"
-              target="_blank"
-              className="dark:text-foreground"
-            >
-              <IconWorldWww className="h-4 w-4" />
-            </a>
-          </Button>
-          <Button
-            variant="secondary"
-            asChild
-            size="sm"
-            className="hidden sm:flex"
-            disabled
-          >
-            <a href="" target="_blank" className="dark:text-foreground">
-              <IconLayoutDashboard className="h-4 w-4" />
-            </a>
-          </Button>
-          <Separator
-            orientation="vertical"
-            className="mx-2 data-[orientation=vertical]:h-4"
-          />
-          {/* <Button
-            variant="secondary"
-            size="sm"
-            className="hidden sm:flex"
-            onClick={onNotebookClick}
-          >
-            <IconNotebook className="h-4 w-4" />
-          </Button> */}
+              <a
+                href={pin.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dark:text-foreground"
+              >
+                {pin.image ? (
+                  <img src={pin.image} alt={pin.title} className="h-4 w-4" />
+                ) : (
+                  <IconExternalLink className="h-4 w-4" />
+                )}
+              </a>
+            </Button>
+          ))}
+
+          {/* Final separator before theme/notifications */}
+          {(enabledPresetPins.length > 0 || enabledCustomPins.length > 0) && (
+            <Separator
+              orientation="vertical"
+              className="mx-2 data-[orientation=vertical]:h-4"
+            />
+          )}
+
           <Button
             variant="secondary"
             asChild

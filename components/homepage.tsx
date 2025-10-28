@@ -235,9 +235,9 @@ export default function Homepage() {
                 <div className="">
                   <div className="flex justify-center">
                     <img
-                      src="/gold.png"
+                      src="./Ranks/GOLD_1.png"
                       alt="Dijkstra GPT logo"
-                      className="h-30 w-30"
+                      className="h-25 w-25"
                     />
                   </div>
 

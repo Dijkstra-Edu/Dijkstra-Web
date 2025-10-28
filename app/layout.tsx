@@ -29,7 +29,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProviderWrapper>
-          <SessionProviderWrapper>{children}</SessionProviderWrapper>
+          <SessionProviderWrapper>
+            <TanstackProviderWrapper>
+              {children}
+            </TanstackProviderWrapper>
+          </SessionProviderWrapper>
         </ThemeProviderWrapper>
       </body>
     </html>
