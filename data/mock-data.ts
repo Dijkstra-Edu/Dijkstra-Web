@@ -1,4 +1,4 @@
-import type { PersonalBlog, LCBlog, Post } from "@/lib/types"
+import type { PersonalBlog, LCBlog, Post } from "@/types/client/blog/blog-types"
 
 export const personalBlogs: PersonalBlog[] = [
   {

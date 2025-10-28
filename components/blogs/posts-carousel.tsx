@@ -10,7 +10,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel"
 import { UserPostCard } from "./user-post-card"
-import type { Post } from "@/lib/types"
+import type { Post } from "@/types/client/blog/blog-types"
 import { cn } from "@/lib/utils"
 
 interface PostsCarouselProps {

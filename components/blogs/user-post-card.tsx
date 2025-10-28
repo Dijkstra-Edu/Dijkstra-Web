@@ -8,8 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Post } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import type { Post } from "@/types/client/blog/blog-types"
 
 interface UserPostCardProps {
   post: Post
