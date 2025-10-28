@@ -66,7 +66,6 @@ export const authOptions: NextAuthOptions = {
     session.user.organization = token.organization;
     session.user.hireable = token.hireable;
   }
-  console.log("Session callback:", session);
   return session;
 },
 async jwt({ token, profile }) {
