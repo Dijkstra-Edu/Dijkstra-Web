@@ -881,56 +881,57 @@ export default function DijkstraGPT() {
 
         {/* ==================== SIDEBAR - CHAT HISTORY ==================== */}
         <div
-          className={`${
-            isSidebarOpen ? "w-80" : "w-0"
-          } transition-all duration-300 bg-background/95 backdrop-blur-md border-l border-border/30 flex flex-col ${isSidebarOpen ? '' : 'overflow-hidden'} sticky top-2 self-start shadow-lg`}
-          style={{ height: 'calc(100vh - var(--header-height, 64px) - 40px)' }}
+          className={`transition-all duration-300 ease-in-out bg-background/95 backdrop-blur-md border-l border-border/30 flex flex-col sticky top-2 self-start shadow-lg`}
+          style={{ 
+            height: 'calc(100vh - var(--header-height, 64px) - 40px)',
+            width: isSidebarOpen ? '20rem' : '0',
+            minWidth: isSidebarOpen ? '20rem' : '0',
+            overflow: 'hidden'
+          }}
         >
-          {/* Sidebar header */}
-          <div className="flex-shrink-0 p-4 border-b border-border/30 bg-gradient-to-b from-transparent to-muted/20">
-            {/* Title and close button */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold flex items-center gap-2 text-foreground/90">
-                <MessageSquare className="h-4 w-4" />
-                Chat History
-              </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSidebarOpen(false)}
-                className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-200"
-                aria-label="Close sidebar"
+          {/* Sidebar content wrapper - controls visibility */}
+          <div 
+            className={`flex flex-col h-full transition-opacity duration-200 ${isSidebarOpen ? 'opacity-100 delay-100' : 'opacity-0 delay-0'}`}
+            style={{ 
+              visibility: isSidebarOpen ? 'visible' : 'hidden',
+              width: '20rem'
+            }}
+          >
+            {/* Sidebar header */}
+            <div className="flex-shrink-0 p-4 border-b border-border/30 bg-gradient-to-b from-transparent to-muted/20">
+              {/* Title */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-semibold flex items-center gap-2 text-foreground/90">
+                  <MessageSquare className="h-4 w-4" />
+                  Chat History
+                </h2>
+              </div>
+
+              {/* New chat button */}
+              <Button 
+                onClick={createNewChat} 
+                className="w-full mb-3 h-9 text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-lg shadow-sm" 
+                aria-label="Create new chat"
               >
-                <ChevronRight className="h-3.5 w-3.5" />
+                <MessageSquare className="h-3.5 w-3.5 mr-2" />
+                New Chat
               </Button>
+
+              {/* Search input */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5" />
+                <input
+                  type="text"
+                  placeholder="Search chats..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-border/40 rounded-lg bg-background/50 text-sm focus:ring-2 focus:ring-ring/50 focus:border-ring/50 transition-all duration-200 text-foreground placeholder:text-muted-foreground/60"
+                  aria-label="Search chat history"
+                />
+              </div>
             </div>
 
-            {/* New chat button */}
-            <Button 
-              onClick={createNewChat} 
-              className="w-full mb-3 h-9 text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-lg shadow-sm" 
-              aria-label="Create new chat"
-            >
-              <MessageSquare className="h-3.5 w-3.5 mr-2" />
-              New Chat
-            </Button>
-
-            {/* Search input */}
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5" />
-              <input
-                type="text"
-                placeholder="Search chats..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-border/40 rounded-lg bg-background/50 text-sm focus:ring-2 focus:ring-ring/50 focus:border-ring/50 transition-all duration-200 text-foreground placeholder:text-muted-foreground/60"
-                aria-label="Search chat history"
-              />
-            </div>
-          </div>
-
-          {/* Chat sessions list with ScrollArea */}
-          {isSidebarOpen && (
+            {/* Chat sessions list with ScrollArea */}
             <ScrollArea className="flex-1 min-h-0">
               <div className="p-3 space-y-1">
                 {/* Grouped by date */}
@@ -1038,23 +1039,23 @@ export default function DijkstraGPT() {
                   </div>
                 )}
               </div>
-            </ScrollArea>
-          )}
+              </ScrollArea>
+          </div>
         </div>
       </div>
 
       {/* ==================== FLOATING SIDEBAR TOGGLE ==================== */}
-      {!isSidebarOpen && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsSidebarOpen(true)}
-          className="fixed top-20 right-4 z-10 bg-background shadow-lg hover:shadow-xl border border-border/50"
-          aria-label="Open chat history"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className={`fixed top-20 z-50 bg-background shadow-lg hover:shadow-xl border border-border/50 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? 'right-[340px]' : 'right-4'
+        }`}
+        aria-label={isSidebarOpen ? "Close chat history" : "Open chat history"}
+      >
+        <ChevronLeft className={`h-4 w-4 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'rotate-180' : ''}`} />
+      </Button>
 
       {/* ==================== HIDDEN FILE INPUT ==================== */}
       <input
@@ -1068,8 +1069,8 @@ export default function DijkstraGPT() {
       />
 
       {/* ==================== FLOATING API STATUS INDICATOR (Bottom Right) ==================== */}
-      <div className={`fixed bottom-6 z-50 transition-all duration-300 ${
-        isSidebarOpen ? 'right-[336px]' : 'right-6'
+      <div className={`fixed bottom-6 z-40 transition-all duration-300 ease-in-out ${
+        isSidebarOpen ? 'right-[356px]' : 'right-6'
       }`}>
         <div className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 shadow-lg backdrop-blur-sm transition-all ${
           apiStatus === 'active' 
