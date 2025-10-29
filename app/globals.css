@@ -321,17 +321,25 @@
 }
 
 *::-webkit-scrollbar-track {
+  background: white;
+}
+
+.dark *::-webkit-scrollbar-track {
   background: black;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #048304;
+  background-color: #048304; 
+  /* background: rgb(159, 159, 159); */
   border-radius: 14px;
   border: 2px solid #048304;
+  /* border: 2px solid rgb(159, 159, 159);  */
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: #005500;
+  /* background: rgb(107, 107, 107);
+  border: 2px solid rgb(107, 107, 107); */
 }
 
 .default-scroll {
