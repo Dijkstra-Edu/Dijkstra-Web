@@ -55,6 +55,7 @@
     "@tiptap/starter-kit": "^2.24.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/three": "^0.177.0",
+    "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^4.0.8",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
