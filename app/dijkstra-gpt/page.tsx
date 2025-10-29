@@ -19,7 +19,7 @@ export default function Page() {
       <SidebarInset className="h-[calc(100vh-20px)] flex flex-col overflow-hidden">
         {/* Sticky header */}
         <div className="sticky top-0 z-10 bg-background">
-          <SiteHeader title="Dijkstra GPT" />
+          <SiteHeader title="Dijkstra GPT" services={['DIJKSTRA_GPT']} />
         </div>
 
         {/* Scrollable content */}

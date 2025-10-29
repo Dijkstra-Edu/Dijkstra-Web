@@ -36,6 +36,16 @@ import {
 import { handleLogout } from "@/lib/logout";
 import { useSettingsStore } from "@/lib/Zustand/settings-store";
 import type { PresetPin, CustomPin } from "@/types/lib/Zustand/settings-store-types";
+import { callGemini } from "@/lib/geminiClient";
+import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
+
+// Service types for API status checks
+export type ServiceType = 'DIJKSTRA_GPT' | 'ARCHIVIST' | 'GITRIPPER' | 'DATAFORGE' | 'HELIOS';
+
+interface ServiceStatus {
+  service: ServiceType;
+  status: 'checking' | 'active' | 'inactive';
+}
 
 // Icon mapping helper
 const getIconComponent = (iconName: string) => {
@@ -54,10 +64,87 @@ const getIconComponent = (iconName: string) => {
   return iconMap[iconName] || IconExternalLink;
 };
 
-export function SiteHeader({ title }: { title: string }) {
+export function SiteHeader({ title, services }: { title: string; services?: ServiceType[] }) {
   const { theme, setTheme } = useTheme();
   const presetPins = useSettingsStore((state) => state.presetPins);
   const customPins = useSettingsStore((state) => state.customPins);
+  const [serviceStatuses, setServiceStatuses] = React.useState<ServiceStatus[]>([]);
+
+  // Health check endpoints mapping
+  const healthEndpoints: Record<ServiceType, () => Promise<boolean>> = {
+    DIJKSTRA_GPT: async () => {
+      try {
+        const response = await callGemini("test");
+        return !!response;
+      } catch {
+        return false;
+      }
+    },
+    DATAFORGE: async () => {
+      try {
+        const response = await fetch('http://api.dataforge-qa.dijkstra.org.in/Dijkstra/v1/health');
+        return response.ok;
+      } catch {
+        return false;
+      }
+    },
+    HELIOS: async () => {
+      try {
+        const response = await fetch('http://api.helios-qa.dijkstra.org.in/Helios/v1/health');
+        return response.ok;
+      } catch {
+        return false;
+      }
+    },
+    GITRIPPER: async () => {
+      try {
+        const response = await fetch('http://api.gitripper-qa.dijkstra.org.in/Gitripper/v1/health');
+        return response.ok;
+      } catch {
+        return false;
+      }
+    },
+    ARCHIVIST: async () => {
+      try {
+        const response = await fetch('http://api.archivist-qa.dijkstra.org.in/Archivist/v1/health');
+        return response.ok;
+      } catch {
+        return false;
+      }
+    },
+  };
+
+  // Check API status for all specified services
+  React.useEffect(() => {
+    if (services && services.length > 0) {
+      // Initialize all services as checking
+      const initialStatuses: ServiceStatus[] = services.map(service => ({
+        service,
+        status: 'checking'
+      }));
+      setServiceStatuses(initialStatuses);
+
+      // Check each service
+      services.forEach(async (service) => {
+        try {
+          const isActive = await healthEndpoints[service]();
+          setServiceStatuses(prev => 
+            prev.map(s => s.service === service 
+              ? { ...s, status: isActive ? 'active' : 'inactive' }
+              : s
+            )
+          );
+        } catch {
+          setServiceStatuses(prev => 
+            prev.map(s => s.service === service 
+              ? { ...s, status: 'inactive' }
+              : s
+            )
+          );
+        }
+      });
+    }
+  }, [services]);
 
   // Debug logging (can be removed later)
   React.useEffect(() => {
@@ -89,7 +176,57 @@ export function SiteHeader({ title }: { title: string }) {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium">{title}</h1>
+        <h1 className="text-base font-medium mr-2">{title}</h1>
+        {services && services.length > 0 && serviceStatuses.length > 0 && (() => {
+          // Calculate overall status: checking if any is checking, active if all are active, otherwise inactive
+          const overallStatus = serviceStatuses.some(s => s.status === 'checking')
+            ? 'checking'
+            : serviceStatuses.every(s => s.status === 'active')
+            ? 'active'
+            : 'inactive';
+          
+          // Format service names for display
+          const formatServiceName = (service: ServiceType): string => {
+            return service.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          };
+
+          // Build tooltip content
+          const tooltipContent = serviceStatuses
+            .map(s => {
+              const statusIcon = s.status === 'active' ? '✓' : s.status === 'inactive' ? '✗' : '⟳';
+              return `${statusIcon} ${formatServiceName(s.service)}: ${s.status === 'active' ? 'Active' : s.status === 'inactive' ? 'Inactive' : 'Checking...'}`;
+            })
+            .join('\n');
+
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className={`flex items-center gap-2 px-2 py-1 rounded-full border text-xs font-medium transition-all cursor-help ${
+                  overallStatus === 'active' 
+                    ? 'bg-green-500/10 border-green-500 text-green-600' 
+                    : overallStatus === 'inactive'
+                    ? 'bg-red-500/10 border-red-500 text-red-600'
+                    : 'bg-yellow-500/10 border-yellow-500 text-yellow-600'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    overallStatus === 'active' 
+                      ? 'bg-green-500 animate-pulse' 
+                      : overallStatus === 'inactive'
+                      ? 'bg-red-500'
+                      : 'bg-yellow-500 animate-pulse'
+                  }`} />
+                  <span>
+                    {overallStatus === 'active' ? 'Active' : overallStatus === 'inactive' ? 'Inactive' : 'Checking...'}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs whitespace-pre-line text-left">
+                <div className="font-semibold mb-1">Service Status:</div>
+                {tooltipContent}
+              </TooltipContent>
+            </Tooltip>
+          );
+        })()}
         {/* <ActionSearchBar /> */}
         <div className="ml-auto flex items-center gap-2">
           {/* Render preset pins grouped with separators */}

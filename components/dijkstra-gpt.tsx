@@ -863,7 +863,7 @@ export default function DijkstraGPT() {
 
           {/* ==================== INPUT AREA - SINGLE INSTANCE THAT MOVES ==================== */}
           {hasMessages ? (
-            <div className="flex-shrink-0 sticky bottom-0 p-6 border-t border-border/50 bg-gradient-to-br from-background via-background to-muted/20 backdrop-blur-sm z-10 transition-all duration-500 ease-in-out">
+            <div className="flex-shrink-0 sticky bottom-0 p-6 border-t border-border/50 bg-gradient-to-br from-black/2 via-black/2 to-black/2 backdrop-blur-sm z-10 transition-all duration-500 ease-in-out">
               <div className="w-full max-w-4xl mx-auto">
                 {renderInputArea(false)}
               </div>
@@ -1068,39 +1068,6 @@ export default function DijkstraGPT() {
         aria-label="File upload input"
       />
 
-      {/* ==================== FLOATING API STATUS INDICATOR (Bottom Right) ==================== */}
-      <div className={`fixed bottom-6 z-40 transition-all duration-300 ease-in-out ${
-        isSidebarOpen ? 'right-[356px]' : 'right-6'
-      }`}>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 shadow-lg backdrop-blur-sm transition-all ${
-          apiStatus === 'active' 
-            ? 'bg-green-500/10 border-green-500 text-green-600' 
-            : apiStatus === 'inactive'
-            ? 'bg-red-500/10 border-red-500 text-red-600'
-            : 'bg-yellow-500/10 border-yellow-500 text-yellow-600'
-        }`}>
-          <div className={`w-3 h-3 rounded-full ${
-            apiStatus === 'active' 
-              ? 'bg-green-500 animate-pulse' 
-              : apiStatus === 'inactive'
-              ? 'bg-red-500'
-              : 'bg-yellow-500 animate-pulse'
-          }`} />
-          <span className="text-sm font-medium">
-            {apiStatus === 'active' ? 'Active' : apiStatus === 'inactive' ? 'Inactive' : 'Checking...'}
-          </span>
-          {apiStatus === 'inactive' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={checkApiStatus}
-              className="h-6 px-2 text-xs ml-1"
-            >
-              Retry
-            </Button>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
