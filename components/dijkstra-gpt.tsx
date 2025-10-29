@@ -784,7 +784,7 @@ export default function DijkstraGPT() {
   return (
     <div className="bg-gradient-to-br from-background via-background to-muted/20 flex flex-col w-full h-full">
       {/* ==================== MAIN CHAT AREA ==================== */}
-      <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div className="flex-1 flex min-h-0">
         <div className="flex-1 flex flex-col relative min-h-0">
           {/* Messages Container - No internal scroll, uses parent scroll */}
           {!hasMessages && !isLoading ? (
@@ -883,7 +883,8 @@ export default function DijkstraGPT() {
         <div
           className={`${
             isSidebarOpen ? "w-80" : "w-0"
-          } transition-all duration-300 bg-background/95 backdrop-blur-md border-l border-border/30 flex flex-col ${isSidebarOpen ? '' : 'overflow-hidden'} relative shadow-lg`}
+          } transition-all duration-300 bg-background/95 backdrop-blur-md border-l border-border/30 flex flex-col ${isSidebarOpen ? '' : 'overflow-hidden'} sticky top-2 self-start shadow-lg`}
+          style={{ height: 'calc(100vh - var(--header-height, 64px) - 40px)' }}
         >
           {/* Sidebar header */}
           <div className="flex-shrink-0 p-4 border-b border-border/30 bg-gradient-to-b from-transparent to-muted/20">
@@ -930,7 +931,7 @@ export default function DijkstraGPT() {
 
           {/* Chat sessions list with ScrollArea */}
           {isSidebarOpen && (
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="p-3 space-y-1">
                 {/* Grouped by date */}
                 {Object.entries(groupedSessions).map(([date, sessions]) => (
