@@ -38,6 +38,10 @@ import { useSettingsStore } from "@/lib/Zustand/settings-store";
 import type { PresetPin, CustomPin } from "@/types/lib/Zustand/settings-store-types";
 import { callGemini } from "@/lib/geminiClient";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
+import { getDataForgeBaseUrl } from "@/server/dataforge/client";
+import { getArchivistBaseUrl } from "@/server/archivist/client";
+import { getGitripperBaseUrl } from "@/server/gitripper/client";
+import { getHeliosBaseUrl } from "@/server/helios/client";
 
 // Service types for API status checks
 export type ServiceType = 'DIJKSTRA_GPT' | 'ARCHIVIST' | 'GITRIPPER' | 'DATAFORGE' | 'HELIOS';
@@ -69,7 +73,10 @@ export function SiteHeader({ title, services }: { title: string; services?: Serv
   const presetPins = useSettingsStore((state) => state.presetPins);
   const customPins = useSettingsStore((state) => state.customPins);
   const [serviceStatuses, setServiceStatuses] = React.useState<ServiceStatus[]>([]);
-
+  const dataforgeBaseUrl = getDataForgeBaseUrl();
+  const archivistBaseUrl = getArchivistBaseUrl();
+  const gitripperBaseUrl = getGitripperBaseUrl();
+  const heliosBaseUrl = getHeliosBaseUrl();
   // Health check endpoints mapping
   const healthEndpoints: Record<ServiceType, () => Promise<boolean>> = {
     DIJKSTRA_GPT: async () => {
@@ -82,7 +89,7 @@ export function SiteHeader({ title, services }: { title: string; services?: Serv
     },
     DATAFORGE: async () => {
       try {
-        const response = await fetch('http://api.dataforge-qa.dijkstra.org.in/Dijkstra/v1/health');
+        const response = await fetch(`${dataforgeBaseUrl}/Dijkstra/v1/health`);
         return response.ok;
       } catch {
         return false;
@@ -90,7 +97,7 @@ export function SiteHeader({ title, services }: { title: string; services?: Serv
     },
     HELIOS: async () => {
       try {
-        const response = await fetch('http://api.helios-qa.dijkstra.org.in/Helios/v1/health');
+        const response = await fetch(`${heliosBaseUrl}/Helios/v1/health`);
         return response.ok;
       } catch {
         return false;
@@ -98,7 +105,7 @@ export function SiteHeader({ title, services }: { title: string; services?: Serv
     },
     GITRIPPER: async () => {
       try {
-        const response = await fetch('http://api.gitripper-qa.dijkstra.org.in/Gitripper/v1/health');
+        const response = await fetch(`${gitripperBaseUrl}/Gitripper/v1/health`);
         return response.ok;
       } catch {
         return false;
@@ -106,7 +113,7 @@ export function SiteHeader({ title, services }: { title: string; services?: Serv
     },
     ARCHIVIST: async () => {
       try {
-        const response = await fetch('http://api.archivist-qa.dijkstra.org.in/Archivist/v1/health');
+        const response = await fetch(`${archivistBaseUrl}/Archivist/v1/health`);
         return response.ok;
       } catch {
         return false;
