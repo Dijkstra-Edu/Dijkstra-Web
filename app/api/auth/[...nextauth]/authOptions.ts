@@ -206,6 +206,31 @@ export const authOptions: NextAuthOptions = {
         
         return newToken as any;
       }
+
+      // Check onboarding status for existing tokens to refresh the flag
+      // This runs on every JWT callback invocation (session refresh)
+      if (token.github_user_name) {
+        try {
+          const onboardingStatus = await checkOnboardingStatus(token.github_user_name);
+          
+          if (onboardingStatus.onboarded) {
+            // User is now onboarded - fetch auth credentials
+            const authData = await getAuthDataByGithubUsername(token.github_user_name);
+            
+            token.user_id = authData.user_id;
+            token.profile_id = authData.profile_id;
+            token.requires_onboarding = false;
+          } else {
+            // User still not onboarded
+            token.requires_onboarding = true;
+            // Clear auth data if they exist
+            delete token.user_id;
+            delete token.profile_id;
+          }
+        } catch (error) {
+          console.error('Failed to refresh onboarding status:', error);
+        }
+      }
       
       return token;
     },
