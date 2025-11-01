@@ -2,51 +2,50 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  educationQuery, 
+  getEducationQuery, 
   addEducationMutation, 
   updateEducationMutation, 
   deleteEducationMutation 
-} from '@/lib/profile/query-options';
-import { profileQueryKeys } from '@/lib/profile/query-keys';
+} from '@/server/dataforge/User/QueryOptions/user.queryOptions';
 
-export function useEducation(userId: string) {
-  return useQuery(educationQuery(userId));
+export function useEducation(username: string) {
+  return useQuery(getEducationQuery(username));
 }
 
-export function useAddEducation() {
+export function useAddEducation(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...addEducationMutation,
-    onSuccess: (_, { profileId }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.education.list(profileId) 
+        queryKey: ['education', username] 
       });
     },
   });
 }
 
-export function useUpdateEducation() {
+export function useUpdateEducation(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...updateEducationMutation,
-    onSuccess: (_, { profileId }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.education.list(profileId) 
+        queryKey: ['education', username] 
       });
     },
   });
 }
 
-export function useDeleteEducation() {
+export function useDeleteEducation(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...deleteEducationMutation,
-    onSuccess: (_, { profileId }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.education.list(profileId) 
+        queryKey: ['education', username] 
       });
     },
   });

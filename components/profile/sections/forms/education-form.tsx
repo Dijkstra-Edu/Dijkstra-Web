@@ -25,45 +25,20 @@ import {
 } from "@/components/ui/form";
 import { MonthYearPicker } from "../../shared/month-year-picker";
 import { InstitutionAutoComplete } from "@/components/institution-autocomplete";
+import { LocationAutoComplete } from "@/components/autocompletes/location-autocomplete";
+import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { educationSchema, type EducationFormData } from "@/lib/profile/schemas";
-import { parseSkillsString } from "@/lib/profile/profile-utils";
+import { SCHOOL_TYPE_OPTIONS, DEGREE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/constants/enum-constants";
 import type { EducationData, SchoolType, Degree, WorkLocationType, Location, Tools } from "@/types/client/profile-section/profile-sections";
 
-const SCHOOL_TYPES: { value: SchoolType; label: string }[] = [
-  { value: "UNIVERSITY", label: "University" },
-  { value: "COLLEGE", label: "College" },
-  { value: "SCHOOL", label: "School" },
-  { value: "COURSE", label: "Course" },
-  { value: "BOOTCAMP", label: "Bootcamp" },
-  { value: "OTHER", label: "Other" },
-];
-
-const DEGREES: { value: Degree; label: string }[] = [
-  { value: "BTECH", label: "B.Tech" },
-  { value: "BSC", label: "B.Sc" },
-  { value: "BE", label: "B.E" },
-  { value: "BCA", label: "BCA" },
-  { value: "BSCHONS", label: "B.Sc (Hons)" },
-  { value: "BDES", label: "B.Des" },
-  { value: "BPHIL", label: "B.Phil" },
-  { value: "MTECH", label: "M.Tech" },
-  { value: "MSC", label: "M.Sc" },
-  { value: "ME", label: "M.E" },
-  { value: "MCA", label: "MCA" },
-  { value: "MSR", label: "M.S.R" },
-  { value: "MBA", label: "MBA" },
-  { value: "MDES", label: "M.Des" },
-  { value: "MPHIL", label: "M.Phil" },
-  { value: "PGDM", label: "PGDM" },
-  { value: "PHD", label: "PhD" },
-  { value: "DENG", label: "D.Eng" },
-];
 
 interface EducationFormProps {
+  profileId: string;
   educations: EducationData[];
-  onAdd: (data: Omit<EducationData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
+  onAdd: (data: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>) => void;
   onUpdate: (data: { id: string; data: Partial<EducationData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
@@ -73,6 +48,7 @@ interface EducationFormProps {
 }
 
 export function EducationForm({
+  profileId,
   educations,
   onAdd,
   onUpdate,
@@ -85,6 +61,13 @@ export function EducationForm({
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedInstitutionData, setSelectedInstitutionData] = useState<{name: string, logo_url?: string} | null>(null);
+
+  const stripLogoDevToken = (url: string): string => {
+    if (url.includes('logo.dev') && url.includes('?token=')) {
+      return url.split('?token=')[0];
+    }
+    return url;
+  };
 
   const form = useForm<EducationFormData>({
     resolver: zodResolver(educationSchema),
@@ -129,6 +112,8 @@ export function EducationForm({
         locationType: data.locationType as WorkLocationType,
         toolsUsed: data.toolsUsed as Tools[],
         location: data.location as Location,
+        schoolLogoUrl: stripLogoDevToken(data.schoolLogoUrl || ""),
+        profileId: profileId,
       });
       toast.success("Education added successfully!");
       form.reset();
@@ -151,6 +136,8 @@ export function EducationForm({
           locationType: data.locationType as WorkLocationType,
           toolsUsed: data.toolsUsed as Tools[],
           location: data.location as Location,
+          schoolLogoUrl: stripLogoDevToken(data.schoolLogoUrl || ""),
+          profileId: profileId,
         }
       });
       toast.success("Education updated successfully!");
@@ -170,7 +157,7 @@ export function EducationForm({
       degree: education.degree,
       courseFieldName: education.courseFieldName,
       currentlyStudying: education.currentlyStudying,
-      location: education.location,
+      location: education.location as Location,
       locationType: education.locationType,
       startDateMonth: education.startDateMonth,
       startDateYear: education.startDateYear,
@@ -194,16 +181,6 @@ export function EducationForm({
       onDelete(id);
       toast.success("Education deleted successfully!");
     }
-  };
-
-  const handleToolsChange = (toolsString: string) => {
-    const tools = parseSkillsString(toolsString);
-    form.setValue("toolsUsed", tools);
-  };
-
-  const handleEditToolsChange = (toolsString: string) => {
-    const tools = parseSkillsString(toolsString);
-    editForm.setValue("toolsUsed", tools);
   };
 
   return (
@@ -266,7 +243,7 @@ export function EducationForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {SCHOOL_TYPES.map((type) => (
+                          {SCHOOL_TYPE_OPTIONS.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
                             </SelectItem>
@@ -291,7 +268,7 @@ export function EducationForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {DEGREES.map((degree) => (
+                          {DEGREE_OPTIONS.map((degree) => (
                             <SelectItem key={degree.value} value={degree.value}>
                               {degree.label}
                             </SelectItem>
@@ -303,6 +280,51 @@ export function EducationForm({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <LocationAutoComplete
+                        value={field.value ? `${field.value.city}, ${field.value.country}` : ""}
+                        onChange={(location) => {
+                          field.onChange(location);
+                        }}
+                        selectedLocation={field.value}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="locationType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Work Location Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select work location type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {WORK_LOCATION_TYPE_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -398,8 +420,61 @@ export function EducationForm({
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
+                      <Tabs defaultValue="general" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="general">General</TabsTrigger>
+                          <TabsTrigger value="short">Short</TabsTrigger>
+                          <TabsTrigger value="detailed">Detailed</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="general" className="mt-4">
+                          <Textarea
+                            placeholder="Describe your academic achievements and coursework..."
+                            rows={3}
+                            {...field}
+                          />
+                        </TabsContent>
+                        <TabsContent value="short" className="mt-4">
+                          <FormField
+                            control={form.control}
+                            name="descriptionLess"
+                            render={({ field: shortField }) => (
+                              <Textarea
+                                placeholder="Brief description..."
+                                rows={3}
+                                {...shortField}
+                              />
+                            )}
+                          />
+                        </TabsContent>
+                        <TabsContent value="detailed" className="mt-4">
+                          <FormField
+                            control={form.control}
+                            name="descriptionDetailed"
+                            render={({ field: detailedField }) => (
+                              <Textarea
+                                placeholder="Detailed description..."
+                                rows={5}
+                                {...detailedField}
+                              />
+                            )}
+                          />
+                        </TabsContent>
+                      </Tabs>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="workDone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Work Done</FormLabel>
+                    <FormControl>
                       <Textarea
-                        placeholder="Describe your academic achievements and coursework..."
+                        placeholder="Describe the specific academic work you accomplished..."
                         rows={3}
                         {...field}
                       />
@@ -414,12 +489,12 @@ export function EducationForm({
                 name="toolsUsed"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Technologies & Tools (comma-separated)</FormLabel>
+                    <FormLabel>Tools & Technologies</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Python, Java, C++, Git"
-                        value={field.value.join(", ")}
-                        onChange={(e) => handleToolsChange(e.target.value)}
+                      <ToolsMultiSelect
+                        value={field.value as Tools[] || []}
+                        onChange={field.onChange}
+                        placeholder="Select tools and technologies"
                       />
                     </FormControl>
                     <FormMessage />
@@ -503,7 +578,7 @@ export function EducationForm({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {SCHOOL_TYPES.map((type) => (
+                            {SCHOOL_TYPE_OPTIONS.map((type) => (
                               <SelectItem key={type.value} value={type.value}>
                                 {type.label}
                               </SelectItem>
@@ -528,7 +603,7 @@ export function EducationForm({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {DEGREES.map((degree) => (
+                            {DEGREE_OPTIONS.map((degree) => (
                               <SelectItem key={degree.value} value={degree.value}>
                                 {degree.label}
                               </SelectItem>
@@ -540,6 +615,51 @@ export function EducationForm({
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={editForm.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <LocationAutoComplete
+                          value={field.value ? `${field.value.city}, ${field.value.country}` : ""}
+                          onChange={(location) => {
+                            field.onChange(location);
+                          }}
+                          selectedLocation={field.value}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="locationType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Work Location Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select work location type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {WORK_LOCATION_TYPE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -635,8 +755,61 @@ export function EducationForm({
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
+                        <Tabs defaultValue="general" className="w-full">
+                          <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="general">General</TabsTrigger>
+                            <TabsTrigger value="short">Short</TabsTrigger>
+                            <TabsTrigger value="detailed">Detailed</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="general" className="mt-4">
+                            <Textarea
+                              placeholder="Describe your academic achievements and coursework..."
+                              rows={3}
+                              {...field}
+                            />
+                          </TabsContent>
+                          <TabsContent value="short" className="mt-4">
+                            <FormField
+                              control={editForm.control}
+                              name="descriptionLess"
+                              render={({ field: shortField }) => (
+                                <Textarea
+                                  placeholder="Brief description..."
+                                  rows={3}
+                                  {...shortField}
+                                />
+                              )}
+                            />
+                          </TabsContent>
+                          <TabsContent value="detailed" className="mt-4">
+                            <FormField
+                              control={editForm.control}
+                              name="descriptionDetailed"
+                              render={({ field: detailedField }) => (
+                                <Textarea
+                                  placeholder="Detailed description..."
+                                  rows={5}
+                                  {...detailedField}
+                                />
+                              )}
+                            />
+                          </TabsContent>
+                        </Tabs>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="workDone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Work Done</FormLabel>
+                      <FormControl>
                         <Textarea
-                          placeholder="Describe your academic achievements and coursework..."
+                          placeholder="Describe the specific academic work you accomplished..."
                           rows={3}
                           {...field}
                         />
@@ -651,12 +824,12 @@ export function EducationForm({
                   name="toolsUsed"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Technologies & Tools (comma-separated)</FormLabel>
+                      <FormLabel>Tools & Technologies</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Python, Java, C++, Git"
-                          value={field.value.join(", ")}
-                          onChange={(e) => handleEditToolsChange(e.target.value)}
+                        <ToolsMultiSelect
+                          value={field.value as Tools[] || []}
+                          onChange={field.onChange}
+                          placeholder="Select tools and technologies"
                         />
                       </FormControl>
                       <FormMessage />
@@ -683,12 +856,27 @@ export function EducationForm({
           ) : (
             // Display Mode
             <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h5 className="font-medium">{education.schoolName}</h5>
-                  <p className="text-sm text-muted-foreground">{education.degree} in {education.courseFieldName}</p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                  {education.schoolLogoUrl ? (
+                    <img
+                      src={education.schoolLogoUrl.includes('logo.dev') ? `${education.schoolLogoUrl}?token=${process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY}` : education.schoolLogoUrl}
+                      alt={`${education.schoolName} logo`}
+                      className="w-16 h-16 rounded-lg object-contain border bg-white flex-shrink-0"
+                    />
+                  ) : (
+                    <img
+                      src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48`}
+                      alt={`${education.schoolName || 'institution'} logo`}
+                      className="w-16 h-16 rounded-lg object-cover border flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h5 className="font-medium">{education.schoolName}</h5>
+                    <p className="text-sm text-muted-foreground">{education.degree} in {education.courseFieldName}</p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button
                     size="sm"
                     variant="outline"
@@ -706,17 +894,23 @@ export function EducationForm({
                   </Button>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">{education.descriptionGeneral}</p>
-              <div className="flex flex-wrap gap-1">
-                {education.toolsUsed.map((tool) => (
-                  <span
-                    key={tool}
-                    className="px-2 py-1 bg-muted rounded-md text-xs"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
+              {education.descriptionGeneral && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {education.descriptionGeneral}
+                </p>
+              )}
+              {education.toolsUsed && education.toolsUsed.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {education.toolsUsed.map((tool) => (
+                    <span
+                      key={tool}
+                      className="px-2 py-1 bg-muted rounded-md text-xs"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

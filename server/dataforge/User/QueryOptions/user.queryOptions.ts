@@ -1,7 +1,7 @@
 import { mutationOptions, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { OnboardUserRequest } from "../user";
-import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getWorkExperienceByGithubUsername, addWorkExperienceByGithubUsername, updateWorkExperienceByWorkExperienceId, deleteWorkExperienceByWorkExperienceId } from "../user";
-import { PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getWorkExperienceByGithubUsername, addWorkExperienceByGithubUsername, updateWorkExperienceByWorkExperienceId, deleteWorkExperienceByWorkExperienceId, addEducationByGithubUsername, deleteEducationByEducationId, getEducationByGithubUsername, updateEducationByEducationId } from "../user";
+import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
 
 
 export const onboardUserMutation = mutationOptions({
@@ -67,4 +67,30 @@ export const updateWorkExperienceMutation = mutationOptions({
 export const deleteWorkExperienceMutation = mutationOptions({
     mutationFn: ({ workExperienceId }: { workExperienceId: string }) => 
         deleteWorkExperienceByWorkExperienceId(workExperienceId),
+});
+
+// Education Query Options
+
+export const getEducationQuery = (username: string) => queryOptions({
+    queryKey: ['education', username],
+    queryFn: () => getEducationByGithubUsername(username),
+    enabled: !!username,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
+});
+
+export const addEducationMutation = mutationOptions({
+    mutationFn: ({ data }: { data: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'> }) => {
+        return addEducationByGithubUsername(data);
+    },
+});
+
+export const updateEducationMutation = mutationOptions({
+    mutationFn: ({ educationId, data }: { educationId: string; data: Partial<EducationData> }) => 
+        updateEducationByEducationId(educationId, data),
+});
+
+export const deleteEducationMutation = mutationOptions({
+    mutationFn: ({ educationId }: { educationId: string }) => 
+        deleteEducationByEducationId(educationId),
 });

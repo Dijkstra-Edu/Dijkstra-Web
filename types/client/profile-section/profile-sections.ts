@@ -162,7 +162,7 @@ export interface EducationData {
   degree: Degree;
   courseFieldName: string;
   currentlyStudying: boolean;
-  location: Location;
+  location?: Location;
   locationType: WorkLocationType;
   startDateMonth: number;
   startDateYear: number;
