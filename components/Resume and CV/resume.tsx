@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedDocumentsTable } from "@/components/Resume and CV/stacked-documents-table";
 import AddResumeModal from "./AddResumeModal";
@@ -30,6 +31,9 @@ const ResumeBuilderWrapper = ({
   template?: "deedy" | "row-based";
   documentType?: "resume" | "cv";
 }) => {
+  const { data: session } = useSession();
+  const githubUsername = session?.user?.github_user_name || "test_user_123"; // Fallback to test user
+  
   const isCV = documentType === "cv";
   const docTypeLabel = isCV ? "CV" : "Resume";
   const templateTitle =
@@ -57,7 +61,7 @@ const ResumeBuilderWrapper = ({
                 Editing: {resumeData.title}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {templateSubtitle}
+                {templateSubtitle} {session?.user?.github_user_name && `• ${session.user.github_user_name}`}
               </p>
             </div>
           </div>
@@ -76,6 +80,8 @@ const ResumeBuilderWrapper = ({
         documentId={resumeData.documentId}
         userEmail={resumeData.userEmail}
         userName={resumeData.userName}
+        githubUsername={githubUsername}
+        useApiData={true}
       />
     </div>
   );

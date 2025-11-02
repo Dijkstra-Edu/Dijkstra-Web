@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { userProfileData } from "@/data/mockResumeData";
 import { UserProfileData, Education, Project } from "@/types/resume";
 
@@ -13,18 +13,102 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   onDataChange,
   initialData = {},
 }) => {
-  const [data, setData] = useState<Partial<UserProfileData>>({
-    user: initialData.user || userProfileData.user,
-    experience: initialData.experience || userProfileData.experience,
-    education: initialData.education || userProfileData.education,
-    projects: initialData.projects || userProfileData.projects,
-    links: initialData.links || userProfileData.links,
-    organizations: initialData.organizations || userProfileData.organizations,
-  });
+  // Helper function to initialize data with proper fallback
+  const getInitialFormData = (initial: Partial<UserProfileData>): Partial<UserProfileData> => {
+    // If we have API data (check for user id or github_user_name), use it
+    const hasApiData = initial.user?.id || initial.user?.github_user_name;
+    
+    if (hasApiData) {
+      console.log('🎯 Initializing form with API data:', initial.user?.github_user_name);
+      return {
+        user: initial.user,
+        experience: initial.experience,
+        education: initial.education,
+        projects: initial.projects,
+        links: initial.links,
+        organizations: initial.organizations,
+      };
+    }
+    
+    // Otherwise use mock data
+    console.log('🎯 Initializing form with mock data');
+    return {
+      user: userProfileData.user,
+      experience: userProfileData.experience,
+      education: userProfileData.education,
+      projects: userProfileData.projects,
+      links: userProfileData.links,
+      organizations: userProfileData.organizations,
+    };
+  };
 
+  const [data, setData] = useState<Partial<UserProfileData>>(() => getInitialFormData(initialData));
+
+  const isInitialMount = useRef(true);
+  const hasLoadedApiData = useRef(false);
+  const onDataChangeRef = useRef(onDataChange);
+  const previousUserIdRef = useRef<string | undefined>(undefined);
+
+  // Keep ref updated
   useEffect(() => {
-    onDataChange(data);
-  }, [data, onDataChange]);
+    onDataChangeRef.current = onDataChange;
+  }, [onDataChange]);
+
+  // Update data when initialData changes (e.g., when API data loads)
+  useEffect(() => {
+    console.log('🔍 ResumeForm: initialData changed:', {
+      hasInitialData: !!initialData,
+      hasUser: !!initialData?.user,
+      userId: initialData?.user?.id,
+      githubUsername: initialData?.user?.github_user_name,
+      firstName: initialData?.user?.first_name,
+      educationCount: Array.isArray(initialData?.education) ? initialData.education.length : 0,
+      experienceExists: !!initialData?.experience,
+      hasLoadedApiDataFlag: hasLoadedApiData.current,
+      previousUserId: previousUserIdRef.current,
+    });
+    
+    // Check if initialData actually has data (not just an empty object)
+    const hasData = initialData.user?.id || initialData.user?.github_user_name;
+    const currentUserId = initialData.user?.id;
+    
+    // Reset hasLoadedApiData if we're loading a different user
+    if (currentUserId && currentUserId !== previousUserIdRef.current) {
+      console.log('🔄 Different user detected, resetting hasLoadedApiData');
+      hasLoadedApiData.current = false;
+      previousUserIdRef.current = currentUserId;
+    }
+    
+    // Only update if we haven't loaded API data yet and initialData has actual data
+    if (hasData && !hasLoadedApiData.current) {
+      hasLoadedApiData.current = true;
+      console.log('✅ Loading API data into form:', {
+        user: initialData.user?.github_user_name,
+        hasEducation: Array.isArray(initialData.education) ? initialData.education.length : 0,
+        hasExperience: !!initialData.experience,
+        hasProjects: Array.isArray(initialData.projects) ? initialData.projects.length : 0,
+      });
+      console.log('📦 Full initialData being loaded:', initialData);
+      
+      setData({
+        user: initialData.user || userProfileData.user,
+        experience: initialData.experience || userProfileData.experience,
+        education: initialData.education || userProfileData.education,
+        projects: initialData.projects || userProfileData.projects,
+        links: initialData.links || userProfileData.links,
+        organizations: initialData.organizations || userProfileData.organizations,
+      });
+    }
+  }, [initialData]);
+
+  // Only notify parent of changes when user edits (not on initial mount)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    onDataChangeRef.current(data);
+  }, [data]);
 
   const updateUser = (field: string, value: string) => {
     setData((prev) => ({

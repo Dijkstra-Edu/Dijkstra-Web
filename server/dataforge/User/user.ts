@@ -1,9 +1,21 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
-import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest } from "@/types/server/dataforge/transformers";
+import { GetPersonalDetailsResponse, GetWorkExperienceResponse, GetEducationResponse } from "@/types/server/dataforge/User/profile";
+import { GetFullUserProfileResponse } from "@/types/server/dataforge/User/full-profile";
+import { PersonalDetailsData, WorkExperienceData, EducationData } from "@/types/client/profile-section/profile-sections";
+import { 
+  transformPersonalDetails, 
+  transformPersonalDetailsUpdateRequest, 
+  transformWorkExperience, 
+  transformWorkExperienceArray, 
+  transformWorkExperienceToRequest, 
+  transformWorkExperienceUpdateRequest,
+  transformEducation,
+  transformEducationArray,
+  transformEducationToRequest,
+  transformEducationUpdateRequest
+} from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -105,6 +117,16 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
   export async function getUserByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
     return fetchDataForge<GetUserBasicResponse>(
       `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+    );
+  }
+
+  /**
+   * Get full user profile by GitHub username (with all nested data)
+   * This includes: links, education, work_experience, certifications, publications, volunteering, projects
+   */
+  export async function getFullUserProfileByGithubUsername(username: string): Promise<GetFullUserProfileResponse> {
+    return fetchDataForge<GetFullUserProfileResponse>(
+      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=true`
     );
   }
 

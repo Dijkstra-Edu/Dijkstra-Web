@@ -6,6 +6,8 @@ import { UserProfileData } from '@/types/resume';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
 import { ResumeStorageService } from '@/services/ResumeStorageService';
+import { useFullUserProfile } from '@/hooks/user/use-user-profile';
+import { transformFullUserProfileToResumeData } from '@/lib/user/resume-transformers';
 
 interface ResumeBuilderProps {
   initialData?: Partial<UserProfileData>;
@@ -22,6 +24,8 @@ interface ResumeBuilderProps {
   documentId?: string;
   userEmail?: string;
   userName?: string;
+  githubUsername?: string; // NEW: GitHub username to fetch profile data
+  useApiData?: boolean; // NEW: Flag to enable API data fetching (default: false for backward compatibility)
 }
 
 export default function ResumeBuilder({
@@ -38,9 +42,19 @@ export default function ResumeBuilder({
   resumeTitle,
   documentId,
   userEmail,
-  userName
+  userName,
+  githubUsername,
+  useApiData = false,
 }: ResumeBuilderProps) {
-  const [resumeData, setResumeData] = useState<Partial<UserProfileData>>(initialData);
+  // If using API data, start with empty state; otherwise use initialData
+  const [resumeData, setResumeData] = useState<Partial<UserProfileData>>(() => {
+    if (useApiData && githubUsername) {
+      console.log('🎬 ResumeBuilder: Starting with empty data, will load from API');
+      return {};
+    }
+    console.log('🎬 ResumeBuilder: Starting with initialData:', initialData);
+    return initialData;
+  });
   const [leftPanelWidth, setLeftPanelWidth] = useState(50); // Percentage
   const [isDragging, setIsDragging] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -49,6 +63,39 @@ export default function ResumeBuilder({
   const [previewScale, setPreviewScale] = useState(1); // Scale factor for preview
   const containerRef = React.useRef<HTMLDivElement>(null);
   const previewContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Fetch user profile data from API if enabled and username provided
+  const shouldFetchApiData = useApiData && !!githubUsername;
+  
+  // Only call the hook when we should fetch API data
+  const queryResult = useFullUserProfile(githubUsername || '');
+  
+  // Extract data only if we should be using API data
+  const apiProfileData = shouldFetchApiData ? queryResult.data : undefined;
+  const isLoadingApiData = shouldFetchApiData ? queryResult.isLoading : false;
+  const apiError = shouldFetchApiData ? queryResult.error : undefined;
+
+  // Transform and load API data when available
+  useEffect(() => {
+    if (shouldFetchApiData && apiProfileData && !isLoadingApiData) {
+      console.log('🔄 Starting API data transformation...');
+      console.log('API Profile Data:', apiProfileData);
+      
+      const transformedData = transformFullUserProfileToResumeData(apiProfileData);
+      console.log('✅ Transformed Resume Data:', transformedData);
+      console.log('📊 Transformation Summary:', {
+        hasUser: !!transformedData.user,
+        userName: transformedData.user?.first_name,
+        educationCount: Array.isArray(transformedData.education) ? transformedData.education.length : 0,
+        experienceCount: Array.isArray(transformedData.experience) ? transformedData.experience.length : 0,
+        projectsCount: Array.isArray(transformedData.projects) ? transformedData.projects.length : 0,
+        hasLinks: !!transformedData.links
+      });
+      
+      setResumeData(transformedData);
+      console.log('✅ Resume data state updated from API for user:', githubUsername);
+    }
+  }, [apiProfileData, isLoadingApiData, shouldFetchApiData, githubUsername]);
 
   // Dynamic titles based on document type
   const defaultHeaderTitle = documentType === 'cv' 
@@ -167,10 +214,10 @@ export default function ResumeBuilder({
     }
   };
 
-  const handleDataChange = (data: Partial<UserProfileData>) => {
+  const handleDataChange = useCallback((data: Partial<UserProfileData>) => {
     setResumeData(data);
     onDataChange?.(data);
-  };
+  }, [onDataChange]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -217,32 +264,51 @@ export default function ResumeBuilder({
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{displayHeaderTitle}</h1>
               <p className="text-sm text-gray-600">{displayHeaderSubtitle}</p>
+              {useApiData && githubUsername && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Loading data for: <span className="font-medium">{githubUsername}</span>
+                </p>
+              )}
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-500">
                 {isLoading ? 'Loading resume...' :
+                 isLoadingApiData ? 'Fetching profile data...' :
                  isSaving ? 'Saving...' :
                  lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 
                  'Auto-save enabled'}
               </div>
               <button
                 onClick={handleManualSave}
-                disabled={isLoading || isSaving}
+                disabled={isLoading || isSaving || isLoadingApiData}
                 className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSaving ? 'Saving...' : 'Save Now'}
               </button>
             </div>
           </div>
+          {/* API Error Display */}
+          {apiError && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-800">
+                <strong>Error loading profile data:</strong> {apiError.message}
+              </p>
+              <p className="text-xs text-red-600 mt-1">
+                Using {initialData && Object.keys(initialData).length > 0 ? 'provided initial data' : 'empty data'} instead.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Show loading state while loading saved data */}
-      {isLoading ? (
+      {/* Show loading state while loading saved data or API data */}
+      {(isLoading || (shouldFetchApiData && (isLoadingApiData || !resumeData.user))) ? (
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your resume...</p>
+            <p className="text-gray-600">
+              {isLoadingApiData ? `Loading profile data for ${githubUsername}...` : 'Loading your resume...'}
+            </p>
           </div>
         </div>
       ) : (
@@ -258,7 +324,7 @@ export default function ResumeBuilder({
             <div className="p-6">
               <div className="bg-white rounded-lg shadow-sm">
                 <ResumeForm
-                  key={resumeId || 'new-resume'} // Force re-mount when loading different resume
+                  key={`${resumeId || 'new-resume'}-${resumeData.user?.id || resumeData.user?.github_user_name || 'no-api'}`} // Force re-mount when resume data changes
                   onDataChange={handleDataChange}
                   initialData={resumeData}
                 />
