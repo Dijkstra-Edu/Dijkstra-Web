@@ -1,146 +1,85 @@
-import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import type { OAuthAccountData } from "@/types/onboarding";
+import { useEffect, useState } from "react";
 
 /**
  * Hook to manage OAuth account connections (GitHub, LinkedIn)
- * Abstracts localStorage for OAuth data and provides helper methods
+ * Reads from NextAuth session (JWT) first, with cookie fallback for LinkedIn
  */
 export function useOAuthAccounts() {
   const { data: session } = useSession();
-  const [oauthData, setOAuthData] = useState<OAuthAccountData>({});
+  const [linkedinFromCookie, setLinkedinFromCookie] = useState<any>(null);
 
-  // Load account data from localStorage and session on mount
+  const user = session?.user as any;
+
+  const githubUsername = user?.login || "";
+
+  const githubConnected = Boolean(user?.login);
+
+  // Check LinkedIn in session first, then fallback to cookie
   useEffect(() => {
-    const loadAccountData = async () => {
-      try {
-        // Try to load from server first
-        const response = await fetch("/api/auth/link-accounts");
-        if (response.ok) {
-          const data = await response.json();
-          const loaded: OAuthAccountData = {};
-          
-          if (data.github) {
-            localStorage.setItem("githubData", JSON.stringify(data.github));
-            loaded.github = data.github;
-          } else {
-            // Fallback to localStorage
-            const stored = localStorage.getItem("githubData");
-            if (stored) {
-              loaded.github = JSON.parse(stored);
-            }
-          }
-          
-          if (data.linkedin) {
-            localStorage.setItem("linkedinData", JSON.stringify(data.linkedin));
-            loaded.linkedin = data.linkedin;
-          } else {
-            // Fallback to localStorage
-            const stored = localStorage.getItem("linkedinData");
-            if (stored) {
-              loaded.linkedin = JSON.parse(stored);
-            }
-          }
-          
-          setOAuthData(loaded);
+    if (!user?.linkedinId && typeof document !== 'undefined') {
+      // Read from cookie as fallback
+      const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        acc[key] = decodeURIComponent(value);
+        return acc;
+      }, {} as Record<string, string>);
+      
+      const linkedinDataStr = cookies['linkedinData'];
+      if (linkedinDataStr) {
+        try {
+          setLinkedinFromCookie(JSON.parse(linkedinDataStr));
+        } catch (e) {
+          // Silently fail - invalid cookie data
         }
-      } catch (error) {
-        console.error("Failed to load account data:", error);
-        // Fallback to localStorage only
-        const githubData = localStorage.getItem("githubData");
-        const linkedinData = localStorage.getItem("linkedinData");
-        setOAuthData({
-          github: githubData ? JSON.parse(githubData) : undefined,
-          linkedin: linkedinData ? JSON.parse(linkedinData) : undefined,
-        });
       }
-    };
-
-    loadAccountData();
-  }, []);
-
-  // Sync session data with localStorage
-  useEffect(() => {
-    if (session?.user) {
-      const user = session.user as any;
-      
-      // Store GitHub data
-      if (user.id && user.login) {
-        const githubData = {
-          id: user.id,
-          login: user.login,
-          avatar_url: user.avatar_url,
-          bio: user.bio,
-          followers: user.followers,
-          following: user.following,
-          public_repos: user.public_repos,
-          company: user.company,
-          location: user.location,
-          blog: user.blog,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-          organization: user.organization,
-          hireable: user.hireable,
-        };
-        
-        localStorage.setItem("githubData", JSON.stringify(githubData));
-        setOAuthData((prev) => ({ ...prev, github: githubData }));
-        
-        // Also store in server-side cookies for persistence
-        fetch("/api/auth/link-accounts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ provider: "github", data: githubData }),
-        }).catch(console.error);
-      }
-      
-      // Store LinkedIn data
-      if (user.linkedinId) {
-        const linkedinData = {
-          linkedinId: user.linkedinId,
-          linkedinName: user.linkedinName,
-          linkedinImage: user.linkedinImage,
-        };
-        
-        localStorage.setItem("linkedinData", JSON.stringify(linkedinData));
-        setOAuthData((prev) => ({ ...prev, linkedin: linkedinData }));
-        
-        // Also store in server-side cookies for persistence
-        fetch("/api/auth/link-accounts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ provider: "linkedin", data: linkedinData }),
-        }).catch(console.error);
-      }
+    } else {
+      setLinkedinFromCookie(null);
     }
-  }, [session]);
+  }, [user?.linkedinId]);
 
-  const githubUsername = 
-    session?.user?.login || 
-    oauthData.github?.login || 
-    (() => {
-      const stored = localStorage.getItem("githubData");
-      return stored ? JSON.parse(stored).login : "";
-    })();
+  const linkedinConnected = Boolean(user?.linkedinId || linkedinFromCookie);
 
-  const githubConnected = Boolean(
-    githubUsername || 
-    oauthData.github || 
-    localStorage.getItem("githubData")
-  );
+  // Extract account data from session for convenience
+  const githubData = user?.login
+    ? {
+        id: user.id,
+        login: user.login,
+        avatar_url: user.avatar_url,
+        bio: user.bio,
+        followers: user.followers,
+        following: user.following,
+        public_repos: user.public_repos,
+        company: user.company,
+        location: user.location,
+        blog: user.blog,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        organization: user.organization,
+        hireable: user.hireable,
+      }
+    : undefined;
 
-  const linkedinConnected = Boolean(
-    (session?.user as any)?.linkedinId ||
-    oauthData.linkedin ||
-    localStorage.getItem("linkedinData")
-  );
+  const linkedinData = user?.linkedinId
+    ? {
+        linkedinId: user.linkedinId,
+        linkedinName: user.linkedinName,
+        linkedinImage: user.linkedinImage,
+      }
+    : linkedinFromCookie
+    ? {
+        linkedinId: linkedinFromCookie.linkedinId,
+        linkedinName: linkedinFromCookie.linkedinName,
+        linkedinImage: linkedinFromCookie.linkedinImage,
+      }
+    : undefined;
 
   return {
     githubConnected,
     linkedinConnected,
     githubUsername,
-    githubData: oauthData.github,
-    linkedinData: oauthData.linkedin,
+    githubData,
+    linkedinData,
   };
 }
 

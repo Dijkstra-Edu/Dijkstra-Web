@@ -20,11 +20,23 @@ export function SignInForm() {
   useEffect(() => {
     if (justLoggedIn && session?.user) {
       console.log('Login verification:', { 
-        githubUsername: session.user.github_user_name,
+        githubUsername: session.user.github_user_name || session.user.login,
         requiresOnboarding: session.user.requires_onboarding 
       });
       
-      if (session.user.requires_onboarding) {
+      // Ensure we have GitHub username (either from github_user_name or login field)
+      const githubUsername = session.user.github_user_name || (session.user as any).login;
+      
+      if (!githubUsername) {
+        console.error('GitHub username missing from session');
+        alert('Authentication error: GitHub username not found. Please try logging in again.');
+        return;
+      }
+      
+      // Check onboarding status
+      const requiresOnboarding = session.user.requires_onboarding !== false;
+      
+      if (requiresOnboarding) {
         console.log('User not onboarded, redirecting to onboarding');
         window.location.href = '/onboarding';
       } else {
@@ -71,7 +83,7 @@ export function SignInForm() {
   };
 
   // Show loading state during callback verification
-  if (justLoggedIn && session?.user?.github_user_name) {
+  if (justLoggedIn && session?.user && (session.user.github_user_name || (session.user as any).login)) {
     return (
       <div className="flex w-full flex-col bg-[#ffffff] lg:w-[60%]">
         <div className="p-6">

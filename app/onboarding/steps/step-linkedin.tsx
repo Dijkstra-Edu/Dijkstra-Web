@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { CheckCircle, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { StepIndicator } from "@/components/onboarding/step-indicator";
 import type { StepProps } from "@/types/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
@@ -29,40 +29,81 @@ export function LinkedInStep({
   onStepClick,
   onMarkComplete,
 }: LinkedInStepProps) {
+  const searchParams = useSearchParams();
   const [localLinkedInHandle, setLocalLinkedInHandle] = useState(
     formData.linkedinHandle
   );
   const [authRedirecting, setAuthRedirecting] = useState(false);
+  const hasProcessedCallbackRef = useRef(false);
 
   useEffect(() => {
     setLocalLinkedInHandle(formData.linkedinHandle);
   }, [formData.linkedinHandle]);
 
+  // Handle LinkedIn OAuth callback success/error
+  useEffect(() => {
+    if (hasProcessedCallbackRef.current) {
+      return;
+    }
+    
+    const success = searchParams.get("linkedin_success");
+    const error = searchParams.get("linkedin_error");
+    
+    if (success === "true") {
+      const timer = setTimeout(() => {
+        if (hasProcessedCallbackRef.current) {
+          return;
+        }
+        hasProcessedCallbackRef.current = true;
+        
+        const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+          const [key, value] = cookie.trim().split('=');
+          acc[key] = decodeURIComponent(value);
+          return acc;
+        }, {} as Record<string, string>);
+        
+        const linkedinDataStr = cookies['linkedinData'];
+        
+        if (linkedinDataStr) {
+          try {
+            JSON.parse(linkedinDataStr);
+            
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete("linkedin_success");
+            window.history.replaceState({}, "", newUrl.toString());
+            
+            setAuthRedirecting(false);
+            window.location.reload();
+          } catch (err) {
+            alert("Failed to verify LinkedIn connection. Please try again.");
+            setAuthRedirecting(false);
+            hasProcessedCallbackRef.current = false;
+          }
+        } else {
+          alert("LinkedIn connection may not have been saved. Please refresh the page to check.");
+          setAuthRedirecting(false);
+          hasProcessedCallbackRef.current = false;
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    } else if (error) {
+      hasProcessedCallbackRef.current = true;
+      setAuthRedirecting(false);
+      alert(`LinkedIn connection failed: ${error}`);
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("linkedin_error");
+      window.history.replaceState({}, "", newUrl.toString());
+    }
+  }, [searchParams]);
+
   const handleLinkedInLogin = async () => {
     try {
-      const currentGitHubData = localStorage.getItem("githubData");
-
-      const result = await signIn("linkedin", {
-        callbackUrl: "/onboarding?step=5",
-        redirect: false,
-      });
-
-      if (result?.error) {
-        console.error("LinkedIn login failed:", result.error);
-        alert("LinkedIn login failed. Please try again.");
-        return;
-      }
-
-      if (result?.ok && result.url) {
-        if (currentGitHubData) {
-          localStorage.setItem("githubData", currentGitHubData);
-        }
-
-        window.location.href = result.url;
-      }
+      setAuthRedirecting(true);
+      window.location.href = "/api/auth/linkedin-link";
     } catch (error) {
-      console.error("LinkedIn login error:", error);
       alert("An unexpected error occurred. Please try again later.");
+      setAuthRedirecting(false);
     }
   };
 

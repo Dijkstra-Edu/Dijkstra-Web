@@ -1,6 +1,5 @@
 // app/api/auth/[...nextauth]/authOptions.ts
 import GitHub from "next-auth/providers/github";
-import LinkedIn from "next-auth/providers/linkedin";
 import type { NextAuthOptions } from "next-auth";
 import { fetchDataForge } from "@/server/dataforge/client";
 import { checkOnboardingStatus, getAuthDataByGithubUsername } from "@/server/dataforge/User/user";
@@ -44,28 +43,8 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
-    LinkedIn({
-      clientId: process.env.LINKEDIN_CLIENT_ID as string,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET as string,
-      wellKnown: "https://www.linkedin.com/oauth/.well-known/openid-configuration",
-      authorization: {
-        params: {
-          scope: "profile email openid",
-        },
-      },
-      issuer: 'https://www.linkedin.com',
-      jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
-      async profile(profile) {
-        const p: any = profile as any;
-        const name = p.name || [p.given_name, p.family_name].filter(Boolean).join(" ") || undefined;
-        return {
-          id: String(p.sub),
-          name,
-          email: p.email || undefined,
-          image: p.picture || undefined,
-        } as any;
-      },
-    }),
+    // LinkedIn removed - only used for account linking via custom OAuth flow (/api/auth/linkedin-link)
+    // LinkedIn is not used as a primary authentication provider
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
@@ -74,14 +53,14 @@ export const authOptions: NextAuthOptions = {
       return baseUrl;
     },
     async signIn({ user, account, profile }) {
-      // Allow sign in for both providers
+      // Allow sign in (GitHub is the only provider now)
       return true;
     },
-    async session({ session, token }) {
+    async session({ session, token, trigger }) {
       if (session.user) {
         const u: any = session.user as any;
         
-        // Always add GitHub fields if they exist in token
+        // Always add GitHub fields if they exist in token (GitHub is primary auth)
         if ((token as any).id) {
           u.id = (token as any).id;
           u.login = (token as any).login;
@@ -99,7 +78,10 @@ export const authOptions: NextAuthOptions = {
           u.hireable = (token as any).hireable;
         }
         
-        // Always add LinkedIn fields if they exist in token
+        // Add LinkedIn fields if they exist in token (LinkedIn data is stored in persistent cookie)
+        // Note: LinkedIn data is primarily stored in 'linkedinData' cookie (30 days)
+        // For server-side access, use getLinkedInData() helper function in API routes
+        // This token check is for backward compatibility if LinkedIn was ever merged into JWT
         if ((token as any).linkedinId) {
           u.linkedinId = (token as any).linkedinId as string | undefined;
           u.linkedinName = (token as any).linkedinName as string | undefined;
@@ -115,7 +97,11 @@ export const authOptions: NextAuthOptions = {
       
       return session;
     },
-    async jwt({ token, profile, account, user }) {
+    async jwt({ token, profile, account, user, trigger }) {
+      // LinkedIn data is stored in persistent cookie, not in JWT
+      // LinkedIn OAuth flow stores data in 'linkedinData' cookie (30 days)
+      // This keeps LinkedIn separate from GitHub auth (primary auth provider)
+      
       // Handle GitHub login
       if (profile && account?.provider === "github") {
         const githubUsername = (profile as any).login;
@@ -173,39 +159,9 @@ export const authOptions: NextAuthOptions = {
         
         return newToken as any;
       }
-      
-      // Handle LinkedIn login
-      if (profile && account?.provider === "linkedin") {
-        const p = profile as any;
-        
-        // Create a new token with LinkedIn data
-        const newToken = {
-          ...token,
-          linkedinId: String(p.sub || p.id),
-          linkedinName: p.name || undefined,
-          linkedinImage: p.picture || p.image || undefined,
-        };
-        
-        // Preserve GitHub data if it exists
-        if (token.id) {
-          (newToken as any).id = token.id;
-          (newToken as any).login = token.login;
-          (newToken as any).avatar_url = token.avatar_url;
-          (newToken as any).bio = token.bio;
-          (newToken as any).followers = token.followers;
-          (newToken as any).following = token.following;
-          (newToken as any).public_repos = token.public_repos;
-          (newToken as any).company = token.company;
-          (newToken as any).location = token.location;
-          (newToken as any).blog = token.blog;
-          (newToken as any).created_at = token.created_at;
-          (newToken as any).updated_at = token.updated_at;
-          (newToken as any).organization = token.organization;
-          (newToken as any).hireable = token.hireable;
-        }
-        
-        return newToken as any;
-      }
+
+      // LinkedIn authentication removed - LinkedIn is only used for account linking
+      // via custom OAuth flow (/api/auth/linkedin-link), not as a NextAuth provider
 
       // Check onboarding status for existing tokens to refresh the flag
       // This runs on every JWT callback invocation (session refresh)

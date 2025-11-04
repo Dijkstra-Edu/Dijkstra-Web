@@ -54,11 +54,28 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
+    // Ensure GitHub session exists (required for onboarding)
     if (!session?.user?.login) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ 
+        error: 'GitHub authentication required', 
+        message: 'You must be signed in with GitHub to complete onboarding.'
+      }, { status: 401 });
     }
 
     const body = await request.json();
+
+    // Validate that GitHub username matches session
+    if (body.github_user_name && body.github_user_name !== session.user.login) {
+      return NextResponse.json({ 
+        error: 'Invalid GitHub username',
+        message: 'GitHub username in request does not match authenticated session.'
+      }, { status: 400 });
+    }
+
+    // Ensure github_user_name is set from session if not in body
+    if (!body.github_user_name) {
+      body.github_user_name = session.user.login;
+    }
 
     console.log('Calling backend for onboarding submission');
     console.log('Request data:', { 
