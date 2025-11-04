@@ -52,6 +52,15 @@ export default function Page() {
   // Validation
   const { canProceed } = useOnboardingValidation(formData, currentStep);
 
+  // Guard: Ensure GitHub is connected before allowing onboarding progress
+  // Exclude step 5 (LinkedIn) to prevent race condition during session update
+  useEffect(() => {
+    if (showOnboarding && !githubConnected && currentStep > 1 && currentStep !== 5) {
+      // If user tries to progress without GitHub, redirect to GitHub step
+      goToStep(1);
+    }
+  }, [showOnboarding, githubConnected, currentStep, goToStep]);
+
   // Auto-complete steps when OAuth connects
   useEffect(() => {
     if (githubConnected && !isStepCompleted("github")) {

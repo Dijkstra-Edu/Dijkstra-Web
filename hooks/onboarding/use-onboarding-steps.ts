@@ -49,8 +49,18 @@ export function useOnboardingSteps(formData: Parameters<typeof useOnboardingVali
       if (stepNumber >= 1 && stepNumber <= TOTAL_STEPS) {
         setShowOnboarding(true);
         setCurrentStep(stepNumber);
-        // Clear the URL parameter after setting the state
-        window.history.replaceState({}, "", "/onboarding");
+        // Don't clear URL parameters - preserve linkedin_success and other OAuth callback params
+        // Only clear the 'step' param while keeping others
+        const url = new URL(window.location.href);
+        url.searchParams.delete("step");
+        // Only update URL if there are no other important params (like linkedin_success)
+        // Otherwise let the components handle their own URL cleanup
+        if (url.searchParams.toString() === "") {
+          window.history.replaceState({}, "", "/onboarding");
+        } else {
+          // Keep other params like linkedin_success=true
+          window.history.replaceState({}, "", url.toString());
+        }
       }
     }
   }, [searchParams, setShowOnboarding, setCurrentStep]);

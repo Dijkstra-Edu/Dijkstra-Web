@@ -29,8 +29,6 @@ export function GitHubStep({
 
   const handleLogin = async () => {
     try {
-      const currentLinkedInData = localStorage.getItem("linkedinData");
-
       const result = await signIn("github", {
         callbackUrl: "/onboarding?step=2",
         redirect: false,
@@ -43,6 +41,8 @@ export function GitHubStep({
       }
 
       if (result?.ok && result.url) {
+        // LinkedIn data is stored in cookies, so it will be preserved automatically
+        // GitHub actions trigger (optional)
         if (!localStorage.getItem("githubActionsDone")) {
           try {
             await fetch("/api/github-actions");
@@ -50,10 +50,6 @@ export function GitHubStep({
           } catch (err) {
             console.warn("GitHub actions failed", err);
           }
-        }
-
-        if (currentLinkedInData) {
-          localStorage.setItem("linkedinData", currentLinkedInData);
         }
 
         window.location.href = result.url;
