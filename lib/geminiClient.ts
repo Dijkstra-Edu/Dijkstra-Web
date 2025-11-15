@@ -101,17 +101,3 @@ export async function callGeminiStreaming(
     await new Promise(resolve => setTimeout(resolve, 30));
   }
 }
-
-/**
- * Example usage:
- * 
- * // Standard call
- * const response = await callGemini("What is recursion?");
- * console.log(response);
- * 
- * // Streaming call
- * await callGeminiStreaming(
- *   "Explain binary search",
- *   (chunk) => console.log(chunk)
- * );
- */

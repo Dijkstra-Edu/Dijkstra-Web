@@ -9,9 +9,7 @@ import { TEAMNAMES } from "@/lib/constants";
 import { ORG } from "@/lib/constants";
 // import { DOMAIN } from "@/lib/constants";
 
-export async function POST(req: Request) {
-  console.log("QA Gate API called, ENV:", ENV);
-  
+export async function POST(req: Request) {  
   if (ENV !== "QA") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -43,11 +41,8 @@ export async function POST(req: Request) {
       crypto.timingSafeEqual(Buffer.from(password), Buffer.from(expectedPassword));
 
     if (!isValid) {
-      console.log("Invalid password for user:", username);
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
-
-    console.log("Checking GitHub org membership for:", username);
 
     // Check if user is in org
     const orgRes = await fetch(`https://api.github.com/orgs/${ORG}/members/${username}`, {
@@ -58,7 +53,6 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("Org check response:", orgRes.status);
 
     if (orgRes.status === 404) {
       return NextResponse.json({ 
@@ -70,7 +64,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Organization check failed" }, { status: 403 });
     }
 
-    console.log("Checking team membership for:", username, "in teams:", TEAMNAMES);
 
     // Split team names and check membership in any of them
     const allowedTeams = TEAMNAMES.split(',').map(team => team.trim());
@@ -78,7 +71,6 @@ export async function POST(req: Request) {
     let memberOfTeams: string[] = [];
 
     for (const teamName of allowedTeams) {
-      console.log("Checking membership in team:", teamName);
       
       const teamRes = await fetch(
         `https://api.github.com/orgs/${ORG}/teams/team-${teamName}/members/${username}`,
@@ -91,7 +83,6 @@ export async function POST(req: Request) {
         }
       );
 
-      console.log(`Team '${teamName}' check response:`, teamRes.status);
 
       if (teamRes.status === 200 || teamRes.status === 204) {
         userInTeam = true;

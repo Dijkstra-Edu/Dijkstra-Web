@@ -153,12 +153,6 @@ export function SiteHeader({ title, services }: { title: string; services?: Serv
     }
   }, [services]);
 
-  // Debug logging (can be removed later)
-  React.useEffect(() => {
-    console.log('Preset Pins:', presetPins);
-    console.log('Enabled Preset Pins:', presetPins?.filter((pin) => pin.enabled));
-  }, [presetPins]);
-
   // Filter enabled pins and group them
   const enabledPresetPins = presetPins?.filter((pin) => pin.enabled) || [];
   const enabledCustomPins = customPins?.filter((pin) => pin.enabled) || [];

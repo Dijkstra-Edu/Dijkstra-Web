@@ -19,10 +19,6 @@ export function SignInForm() {
   // Redirect based on onboarding status from session
   useEffect(() => {
     if (justLoggedIn && session?.user) {
-      console.log('Login verification:', { 
-        githubUsername: session.user.github_user_name || session.user.login,
-        requiresOnboarding: session.user.requires_onboarding 
-      });
       
       // Ensure we have GitHub username (either from github_user_name or login field)
       const githubUsername = session.user.github_user_name || (session.user as any).login;
@@ -37,10 +33,10 @@ export function SignInForm() {
       const requiresOnboarding = session.user.requires_onboarding !== false;
       
       if (requiresOnboarding) {
-        console.log('User not onboarded, redirecting to onboarding');
+        // User not onboarded, redirecting to onboarding  
         window.location.href = '/onboarding';
       } else {
-        console.log('User onboarded, redirecting to dashboard');
+        // User onboarded, redirecting to dashboard
         window.location.href = '/dashboard';
       }
     }

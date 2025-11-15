@@ -58,6 +58,7 @@ export interface OnboardUserRequest {
     user_id: string;
     profile_id: string;
     github_user_name: string;
+    roles: string[];
   }
   
   export interface GetUserBasicResponse {
@@ -122,7 +123,6 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    * Get Personal Details by GitHub username
    */
   export async function getPersonalDetailsByGithubUsername(username: string): Promise<PersonalDetailsData> {
-    console.log(`Getting personal details for ${username}`);
     const response = await fetchDataForge<GetPersonalDetailsResponse>(
       `/Dijkstra/v1/u/personal-details/${encodeURIComponent(username)}`
     );
@@ -166,7 +166,6 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    * Add Work Experience by GitHub username
    */
   export async function addWorkExperienceByGithubUsername( data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkExperienceData> {
-    console.log('Adding work experience data', data);
     const request = transformWorkExperienceToRequest(data);
     const response = await fetchDataForge<GetWorkExperienceResponse>(
       `/Dijkstra/v1/wp/`, {
@@ -216,9 +215,7 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    * Add Education by GitHub username
    */
   export async function addEducationByGithubUsername( data: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>): Promise<EducationData> {
-    console.log('Adding education data', data);
     const request = transformEducationToRequest(data);
-    console.log('Request', request);
     const response = await fetchDataForge<GetEducationResponse>(
       `/Dijkstra/v1/education/`, {
         method: 'POST',

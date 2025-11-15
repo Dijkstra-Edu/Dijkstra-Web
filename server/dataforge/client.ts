@@ -37,9 +37,7 @@ export async function fetchDataForge<T = any>(
 ): Promise<T> {
   const baseUrl = getDataForgeBaseUrl();
   const url = `${baseUrl}${path}`;
-  
-  console.log(`DataForge request: ${init?.method || 'GET'} ${url}`);
-  
+    
   try {
     const response = await fetch(url, {
       ...init,
@@ -72,7 +70,6 @@ export async function fetchDataForge<T = any>(
     }
 
     const data = await response.json();
-    console.log(`DataForge response: ${response.status} ${url}`);
     return data;
   } catch (error) {
     if (error instanceof Error) {

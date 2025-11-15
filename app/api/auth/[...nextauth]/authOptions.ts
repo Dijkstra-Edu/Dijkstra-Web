@@ -4,6 +4,8 @@ import type { NextAuthOptions } from "next-auth";
 import { fetchDataForge } from "@/server/dataforge/client";
 import { checkOnboardingStatus, getAuthDataByGithubUsername } from "@/server/dataforge/User/user";
 
+const isDev = process.env.ENVIRONMENT === 'DEV';
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GitHub({
@@ -93,6 +95,7 @@ export const authOptions: NextAuthOptions = {
         u.user_id = (token as any).user_id;
         u.profile_id = (token as any).profile_id;
         u.requires_onboarding = (token as any).requires_onboarding;
+        u.roles = (token as any).roles || [];
       }
       
       return session;
@@ -123,6 +126,8 @@ export const authOptions: NextAuthOptions = {
           updated_at: (profile as any).updated_at,
           organization: (profile as any).organization,
           hireable: (profile as any).hireable,
+          isDev: isDev,
+          roles: [] as string[],
         };
         
         try {
@@ -132,11 +137,12 @@ export const authOptions: NextAuthOptions = {
           if (onboardingStatus.onboarded) {
             // User is onboarded - fetch auth credentials
             const authData = await getAuthDataByGithubUsername(githubUsername);
-            
+            newToken.roles = authData.roles;
             newToken.user_id = authData.user_id;
             newToken.profile_id = authData.profile_id;
             newToken.github_user_name = githubUsername;
             newToken.requires_onboarding = false;
+            newToken.isDev = isDev;
           } else {
             // User not onboarded - set flag for redirect
             newToken.github_user_name = githubUsername;
@@ -172,10 +178,11 @@ export const authOptions: NextAuthOptions = {
           if (onboardingStatus.onboarded) {
             // User is now onboarded - fetch auth credentials
             const authData = await getAuthDataByGithubUsername(token.github_user_name);
-            
+            token.roles = authData.roles;
             token.user_id = authData.user_id;
             token.profile_id = authData.profile_id;
             token.requires_onboarding = false;
+            token.isDev = isDev;
           } else {
             // User still not onboarded
             token.requires_onboarding = true;
