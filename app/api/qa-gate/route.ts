@@ -139,14 +139,6 @@ function issueSuccessResponse(note: string, req: Request) {
     maxAge: 60 * 60 * 8, // 8 hours
   };
 
-  // Additional debug logging
-  console.log("Setting cookie with options:", {
-    ...cookieOptions,
-    url: url.origin,
-    protocol: url.protocol,
-    hostname,
-  });
-
   res.headers.set("Set-Cookie", serialize("qa_verified", "true", cookieOptions));
 
   return res;

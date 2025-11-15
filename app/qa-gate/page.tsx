@@ -19,7 +19,6 @@ export default function QAGatePage() {
     setLoading(true);
 
     try {
-      console.log("Submitting QA gate request...");
       const res = await fetch("/api/qa-gate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,12 +26,8 @@ export default function QAGatePage() {
         credentials: "include",
       });
 
-      console.log("Response status:", res.status);
-      console.log("Response ok:", res.ok);
-
       if (res.ok) {
         const data = await res.json();
-        console.log("QA gate passed:", data);
         // Redirect to login or home page
         window.location.href = "/";
       } else {
