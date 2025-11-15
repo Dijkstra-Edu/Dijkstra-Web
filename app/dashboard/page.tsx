@@ -30,8 +30,9 @@ export default function Page() {
 
   async function getCertificateData() {
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_HELIOS_SERVICE_URL || "http://localhost:8000";
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Dijkstra/test/certificate/data/`
+        `${apiUrl}/Dijkstra/test/certificate/data/`
       );
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
       return await res.json();

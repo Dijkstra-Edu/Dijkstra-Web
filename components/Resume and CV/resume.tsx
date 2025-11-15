@@ -7,17 +7,7 @@ import { StackedDocumentsTable } from "@/components/Resume and CV/stacked-docume
 import AddResumeModal from "./AddResumeModal";
 import ResumeBuilder from "@/components/Resume and CV/ResumeBuilder/ResumeBuilder";
 import { ResumeStorageService } from "@/services/ResumeStorageService";
-import { SavedResumeData } from "@/types/resume";
-
-interface ResumeData {
-  title: string;
-  resumeId: string;
-  userEmail: string;
-  userName: string;
-  documentId: string;
-  documentType?: "resume" | "cv";
-  template?: "deedy" | "row-based";
-}
+import { SavedResumeData, ResumeData } from "@/types/resume";
 
 // Wrapper for the new ResumeBuilder with header/back button
 const ResumeBuilderWrapper = ({
@@ -81,7 +71,8 @@ const ResumeBuilderWrapper = ({
         userEmail={resumeData.userEmail}
         userName={resumeData.userName}
         githubUsername={githubUsername}
-        useApiData={true}
+        useApiData={false}
+        initialData={resumeData.initialData}
       />
     </div>
   );

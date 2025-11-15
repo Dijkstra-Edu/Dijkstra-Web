@@ -126,18 +126,19 @@ export interface UserProfileData {
   organizations: Organization[];
 }
 
-// Saved resume data type
-export interface SavedUserProfileData {
-  resumeId: string;
+// Resume metadata and data
+export interface ResumeData {
   title: string;
-  template: 'deedy' | 'row-based';
-  content: Partial<UserProfileData>;
-  lastModified: string;
-  documentId: string;
+  resumeId: string;
   userEmail: string;
   userName: string;
+  documentId: string;
+  documentType?: "resume" | "cv";
+  template?: "deedy" | "row-based";
+  initialData?: Partial<UserProfileData>;
 }
 
+// Saved resume data (stored in localStorage)
 export interface SavedResumeData {
   resumeId: string;
   title: string;

@@ -13,17 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ResumeApiService } from "@/services/ResumeApiService";
-
-interface ResumeData {
-  title: string;
-  resumeId: string;
-  userEmail: string;
-  userName: string;
-  documentId: string;
-  documentType?: "resume" | "cv";
-  template?: "deedy" | "row-based";
-}
+import { useFetchUserData } from "@/hooks/user/use-fetch-user-data";
+import { transformFullUserProfileToResumeData } from "@/lib/user/resume-transformers";
+import { UserProfileData, ResumeData } from "@/types/resume";
 
 interface AddResumeModalProps {
   isOpen: boolean;
@@ -44,6 +36,13 @@ export default function AddResumeModal({
     documentType
   );
   const { data: session } = useSession();
+  const githubUsername = session?.user?.github_user_name || "";
+
+  const { 
+    data: userData, 
+    isLoading: isLoadingUserData,
+    error: userDataError 
+  } = useFetchUserData(githubUsername, isOpen);
 
   const defaultTitle = selectedDocType === "cv" ? "My New CV" : "My New Resume";
 
@@ -53,37 +52,31 @@ export default function AddResumeModal({
     setLoading(true);
     const uuid = uuidv4();
 
-    const data = {
-      data: {
-        title: resumeTitle,
-        resumeId: uuid,
-        userEmail: session?.user?.email || "",
-        userName: session?.user?.name || "",
-      },
-    };
-
     try {
-  const response = await ResumeApiService.createResume(data);
-      if (response) {
-        setLoading(false);
-
-        if (onResumeCreated) {
-          onResumeCreated({
-            title: resumeTitle,
-            resumeId: uuid,
-            userEmail: session?.user?.email || "",
-            userName: session?.user?.name || "",
-            documentId: response.data.data.documentId,
-            documentType: selectedDocType,
-            // template will be injected by parent if needed
-          });
-        }
-
-        onClose();
+      let transformedData: Partial<UserProfileData> | undefined;
+      
+      if (userData) {
+        transformedData = transformFullUserProfileToResumeData(userData);
       }
-    } catch (error) {
+      
       setLoading(false);
-      console.error("Error creating resume:", error);
+
+      if (onResumeCreated) {
+        onResumeCreated({
+          title: resumeTitle,
+          resumeId: uuid,
+          userEmail: session?.user?.email || "",
+          userName: session?.user?.name || "",
+          documentId: uuid,
+          documentType: selectedDocType,
+          initialData: transformedData,
+        });
+      }
+
+      onClose();
+      setResumeTitle("");
+    } catch {
+      setLoading(false);
     }
   };
 
@@ -99,7 +92,6 @@ export default function AddResumeModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Title input */}
         <Input
           className="my-4 rounded-xl border border-border/70 focus:ring-2 focus:ring-primary/40"
           placeholder={`Ex. ${defaultTitle}`}
@@ -107,7 +99,6 @@ export default function AddResumeModal({
           onChange={(e) => setResumeTitle(e.target.value)}
         />
 
-        {/* Document type dropdown */}
         <div className="mt-2">
           <label className="block text-sm font-medium text-muted-foreground mb-1">
             Document Type
@@ -124,18 +115,25 @@ export default function AddResumeModal({
           </select>
         </div>
 
-        {/* Footer buttons */}
+        {userDataError && (
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">
+              Failed to load user data. Resume will be created with empty data.
+            </p>
+          </div>
+        )}
+
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="ghost" className="rounded-lg" onClick={onClose}>
             Cancel
           </Button>
           <Button
-            disabled={!resumeTitle || loading}
+            disabled={!resumeTitle || loading || isLoadingUserData}
             onClick={handleCreate}
             className="rounded-lg shadow-sm px-5"
           >
-            {loading && <Loader2 className="animate-spin mr-2" />}
-            Create
+            {(loading || isLoadingUserData) && <Loader2 className="animate-spin mr-2" />}
+            {isLoadingUserData ? "Loading Data..." : "Create"}
           </Button>
         </div>
       </DialogContent>

@@ -1,14 +1,7 @@
 // ResumeApiService.ts
 // Handles API-like operations for resumes (simulated backend)
 import { v4 as uuidv4 } from 'uuid';
-
-interface ResumeData {
-  title: string;
-  resumeId: string;
-  userEmail: string;
-  userName: string;
-  [key: string]: string | number | boolean | object;
-}
+import { ResumeData } from '@/types/resume';
 
 interface CreateResumeRequest {
   data: ResumeData;

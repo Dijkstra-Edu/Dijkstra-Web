@@ -13,13 +13,24 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   onDataChange,
   initialData = {},
 }) => {
+  // Helper function to format location object to string
+  const formatLocation = (location: string | { city?: string; state?: string; country?: string } | unknown): string => {
+    if (!location) return '';
+    if (typeof location === 'string') return location;
+    if (typeof location === 'object' && location !== null) {
+      const loc = location as { city?: string; state?: string; country?: string };
+      const parts = [loc.city, loc.state, loc.country].filter(Boolean);
+      return parts.join(', ');
+    }
+    return '';
+  };
+  
   // Helper function to initialize data with proper fallback
   const getInitialFormData = (initial: Partial<UserProfileData>): Partial<UserProfileData> => {
     // If we have API data (check for user id or github_user_name), use it
     const hasApiData = initial.user?.id || initial.user?.github_user_name;
     
     if (hasApiData) {
-      console.log('🎯 Initializing form with API data:', initial.user?.github_user_name);
       return {
         user: initial.user,
         experience: initial.experience,
@@ -31,7 +42,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     }
     
     // Otherwise use mock data
-    console.log('🎯 Initializing form with mock data');
     return {
       user: userProfileData.user,
       experience: userProfileData.experience,
@@ -49,32 +59,18 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   const onDataChangeRef = useRef(onDataChange);
   const previousUserIdRef = useRef<string | undefined>(undefined);
 
-  // Keep ref updated
   useEffect(() => {
     onDataChangeRef.current = onDataChange;
   }, [onDataChange]);
 
   // Update data when initialData changes (e.g., when API data loads)
   useEffect(() => {
-    console.log('🔍 ResumeForm: initialData changed:', {
-      hasInitialData: !!initialData,
-      hasUser: !!initialData?.user,
-      userId: initialData?.user?.id,
-      githubUsername: initialData?.user?.github_user_name,
-      firstName: initialData?.user?.first_name,
-      educationCount: Array.isArray(initialData?.education) ? initialData.education.length : 0,
-      experienceExists: !!initialData?.experience,
-      hasLoadedApiDataFlag: hasLoadedApiData.current,
-      previousUserId: previousUserIdRef.current,
-    });
-    
     // Check if initialData actually has data (not just an empty object)
     const hasData = initialData.user?.id || initialData.user?.github_user_name;
     const currentUserId = initialData.user?.id;
     
     // Reset hasLoadedApiData if we're loading a different user
     if (currentUserId && currentUserId !== previousUserIdRef.current) {
-      console.log('🔄 Different user detected, resetting hasLoadedApiData');
       hasLoadedApiData.current = false;
       previousUserIdRef.current = currentUserId;
     }
@@ -82,13 +78,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     // Only update if we haven't loaded API data yet and initialData has actual data
     if (hasData && !hasLoadedApiData.current) {
       hasLoadedApiData.current = true;
-      console.log('✅ Loading API data into form:', {
-        user: initialData.user?.github_user_name,
-        hasEducation: Array.isArray(initialData.education) ? initialData.education.length : 0,
-        hasExperience: !!initialData.experience,
-        hasProjects: Array.isArray(initialData.projects) ? initialData.projects.length : 0,
-      });
-      console.log('📦 Full initialData being loaded:', initialData);
       
       setData({
         user: initialData.user || userProfileData.user,
@@ -379,7 +368,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                   </label>
                   <input
                     type="text"
-                    value={data.experience?.location || ""}
+                    value={formatLocation(data.experience?.location) || ""}
                     onChange={(e) =>
                       updateExperience("location", e.target.value)
                     }
@@ -407,7 +396,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                   </label>
                   <input
                     type="text"
-                    value={(data.experience?.work_done || []).join(", ")}
+                    value={(Array.isArray(data.experience?.work_done) ? data.experience.work_done : []).join(", ")}
                     onChange={(e) =>
                       updateExperience("work_done", handleStringArrayInput(e.target.value))
                     }
@@ -421,7 +410,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                   </label>
                   <input
                     type="text"
-                    value={(data.experience?.tools_used || []).join(", ")}
+                    value={(Array.isArray(data.experience?.tools_used) ? data.experience.tools_used : []).join(", ")}
                     onChange={(e) =>
                       updateExperience("tools_used", handleStringArrayInput(e.target.value))
                     }
@@ -545,7 +534,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={edu.location}
+                      value={formatLocation(edu.location) || ""}
                       onChange={(e) =>
                         updateEducation(index, "location", e.target.value)
                       }
@@ -668,7 +657,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={(project.topics || []).join(", ")}
+                      value={(Array.isArray(project.topics) ? project.topics : []).join(", ")}
                       onChange={(e) =>
                         updateProject(index, "topics", handleStringArrayInput(e.target.value))
                       }
@@ -682,7 +671,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={(project.tools || []).join(", ")}
+                      value={(Array.isArray(project.tools) ? project.tools : []).join(", ")}
                       onChange={(e) =>
                         updateProject(index, "tools", handleStringArrayInput(e.target.value))
                       }

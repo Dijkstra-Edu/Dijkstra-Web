@@ -1,13 +1,13 @@
 // ResumeStorageService.ts
 // Handles localStorage operations for resumes
-import { UserProfileData, SavedUserProfileData } from '@/types/resume';
+import { UserProfileData, SavedResumeData } from '@/types/resume';
 
 export class ResumeStorageService {
   private static STORAGE_KEY = 'dijkstra-resume-data';
 
   static saveResumeData(resumeId: string, data: Partial<UserProfileData>, template: 'deedy' | 'row-based', title: string, documentId: string, userEmail: string, userName: string): void {
     try {
-      const savedData: SavedUserProfileData = {
+      const savedData: SavedResumeData = {
         resumeId,
         title,
         template,
@@ -27,7 +27,7 @@ export class ResumeStorageService {
     }
   }
 
-  static loadResumeData(resumeId: string): SavedUserProfileData | null {
+  static loadResumeData(resumeId: string): SavedResumeData | null {
     try {
       const allData = this.getAllSavedResumes();
       const resumeData = allData.find(item => item.resumeId === resumeId);
@@ -38,7 +38,7 @@ export class ResumeStorageService {
     }
   }
 
-  static getAllSavedResumes(): SavedUserProfileData[] {
+  static getAllSavedResumes(): SavedResumeData[] {
     try {
       const data = localStorage.getItem(this.STORAGE_KEY);
       return data ? JSON.parse(data) : [];
