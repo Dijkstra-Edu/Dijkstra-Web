@@ -1,7 +1,7 @@
 import { mutationOptions, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { OnboardUserRequest } from "../user";
-import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getWorkExperienceByGithubUsername, addWorkExperienceByGithubUsername, updateWorkExperienceByWorkExperienceId, deleteWorkExperienceByWorkExperienceId, addEducationByGithubUsername, deleteEducationByEducationId, getEducationByGithubUsername, updateEducationByEducationId } from "../user";
-import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getWorkExperienceByGithubUsername, addWorkExperienceByGithubUsername, updateWorkExperienceByWorkExperienceId, deleteWorkExperienceByWorkExperienceId, addEducationByGithubUsername, deleteEducationByEducationId, getEducationByGithubUsername, updateEducationByEducationId, getCertificationsByGithubUsername, addCertificationsByGithubUsername, updateCertificationsByCertificationId, deleteCertificationsByCertificationId} from "../user";
+import { EducationData, PersonalDetailsData, WorkExperienceData, CertificationsData } from "@/types/client/profile-section/profile-sections";
 
 
 export const onboardUserMutation = mutationOptions({
@@ -93,4 +93,28 @@ export const updateEducationMutation = mutationOptions({
 export const deleteEducationMutation = mutationOptions({
     mutationFn: ({ educationId }: { educationId: string }) => 
         deleteEducationByEducationId(educationId),
+});
+
+export const getCertificationsQuery = (username: string) => queryOptions({
+    queryKey: ['certifications', username],
+    queryFn: () => getCertificationsByGithubUsername(username),
+    enabled: !!username,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
+});
+
+export const addCertificationMutation = mutationOptions({
+    mutationFn: ({ data }: { data: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'> }) => {
+        return addCertificationsByGithubUsername(data);
+    },
+});
+
+export const updateCertificationsMutation = mutationOptions({
+    mutationFn: ({ certificationId, data }: { certificationId: string; data: Partial<CertificationsData> }) => 
+        updateCertificationsByCertificationId(certificationId, data),
+});
+
+export const deleteCertificationsMutation = mutationOptions({
+    mutationFn: ({ certificationId }: { certificationId: string }) => 
+        deleteCertificationsByCertificationId(certificationId),
 });

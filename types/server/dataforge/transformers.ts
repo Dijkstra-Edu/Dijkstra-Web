@@ -1,6 +1,6 @@
-import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest } from "./User/profile";
-import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType } from "./enums";
+import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData} from "@/types/client/profile-section/profile-sections";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse } from "./User/profile";
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType } from "./enums";
 import { UUID } from "crypto";
 
 export function transformPersonalDetails(personalDetails: GetPersonalDetailsResponse): PersonalDetailsData {
@@ -167,6 +167,60 @@ export function transformWorkExperienceUpdateRequest(workExperience: Partial<Wor
         tools_used: workExperience.toolsUsed as Tools[],
     }
 }
+
+
+export function transformCertificationsArray(certificationsArray: GetCertificationsResponse[]): CertificationsData[] {
+    return certificationsArray.map((certification) => transformCertifications(certification));
+}
+
+
+export function transformCertifications(certification: GetCertificationsResponse): CertificationsData {
+    return  {
+          id: certification.id,
+          profileId: certification.profile_id,        
+          name: certification.name, 
+          type: certification.type as CertificationType,
+          issuingOrganization: certification.issuing_organization,
+          issueDate: certification.issue_date, // date field
+          expiryDate: certification.expiry_date || undefined, // date field
+          credentialId: certification.credential_id,
+          credentialUrl: certification.credential_url,
+          tools: certification.tools as Tools[] || undefined,
+          issuingOrganizationLogo: certification.issuing_organization_logo || undefined,
+    }
+}
+
+export function transformCertificationsToRequest(certification: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetCertificationsResponse, 'id'> {
+    return {
+          
+          profile_id: certification.profileId as UUID,        
+          name: certification.name, 
+          type: certification.type as CertificationType,
+          issuing_organization: certification.issuingOrganization,
+          issue_date: certification.issueDate, // date field
+          expiry_date: certification.expiryDate || undefined, // date field
+          credential_id: certification.credentialId,
+          credential_url: certification.credentialUrl,
+          tools: certification.tools as Tools[] || undefined,
+          issuing_organization_logo: certification.issuingOrganizationLogo || undefined,
+    }
+}
+
+export function transformCertificationsUpdateRequest(certification: Partial<CertificationsData>): Partial<GetCertificationsResponse> {
+    return {
+          profile_id: certification.profileId as UUID,        
+          name: certification.name, 
+          type: certification.type as CertificationType,
+          issuing_organization: certification.issuingOrganization,
+          issue_date: certification.issueDate, // date field
+          expiry_date: certification.expiryDate || undefined, // date field
+          credential_id: certification.credentialId,
+          credential_url: certification.credentialUrl,
+          tools: certification.tools as Tools[] || undefined,
+          issuing_organization_logo: certification.issuingOrganizationLogo || undefined,
+    }
+}
+
 
 
 export function transformEducationArray(educationArray: GetEducationResponse[]): EducationData[] {

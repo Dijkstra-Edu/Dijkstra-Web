@@ -1,9 +1,9 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
-import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest } from "@/types/server/dataforge/transformers";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, GetCertificationsResponse} from "@/types/server/dataforge/User/profile";
+import { EducationData, PersonalDetailsData, WorkExperienceData ,  CertificationsData} from "@/types/client/profile-section/profile-sections";
+import { transformCertificationsArray, transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest, transformCertificationsToRequest, transformCertifications, transformCertificationsUpdateRequest } from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -252,3 +252,44 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
       }
     );
   }
+
+  export async function getCertificationsByGithubUsername(username: string): Promise<CertificationsData[]> {
+    const response = await fetchDataForge<GetCertificationsResponse[]>(
+      `/Dijkstra/v1/certifications/${encodeURIComponent(username)}`
+    );
+    return transformCertificationsArray(response);
+  }
+
+    export async function addCertificationsByGithubUsername( data: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'>): Promise<CertificationsData> {
+    console.log('Adding certification data', data);
+    const request = transformCertificationsToRequest(data);
+    console.log('Request', request);
+    const response = await fetchDataForge<GetCertificationsResponse>(
+      `/Dijkstra/v1/certifications/`, {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformCertifications(response);
+  }
+
+
+
+  export async function updateCertificationsByCertificationId(certificationId: string, data: Partial<CertificationsData>): Promise<CertificationsData> {
+    const request = transformCertificationsUpdateRequest(data);
+    const response = await fetchDataForge<GetCertificationsResponse>(
+      `/Dijkstra/v1/certifications/${encodeURIComponent(certificationId)}`, {
+        method: 'PUT',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformCertifications(response);
+  } 
+
+  export async function deleteCertificationsByCertificationId(certificationId: string): Promise<void> {
+    await fetchDataForge<void>(
+      `/Dijkstra/v1/certifications/${encodeURIComponent(certificationId)}`, {
+        method: 'DELETE',
+      }
+    );
+  } 
