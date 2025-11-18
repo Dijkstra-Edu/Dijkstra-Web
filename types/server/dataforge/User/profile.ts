@@ -131,3 +131,18 @@ export interface GetCertificationsResponse {
     tools?: Tools[]
     issuing_organization_logo?: string
 }
+
+export interface GetPublicationsResponse {
+    id: UUID
+    profile_id: UUID
+    title: string
+    publisher: string
+    authors: string[]
+    publication_date: string
+    publication_url: string
+    description: string
+    tools?: Tools[]
+    publisher_logo?: string
+    created_at: string
+    updated_at: string
+}

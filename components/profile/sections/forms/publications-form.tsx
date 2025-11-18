@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -15,15 +14,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { publicationsSchema, type PublicationsFormData } from "@/lib/profile/schemas";
-import { parseSkillsString } from "@/lib/profile/profile-utils";
 import type { PublicationsData, Tools } from "@/types/client/profile-section/profile-sections";
 
 interface PublicationsFormProps {
+  profileId: string;
   publications: PublicationsData[];
-  onAdd: (data: Omit<PublicationsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
+  onAdd: (data: Omit<PublicationsData, 'id' | 'createdAt' | 'updatedAt'>) => void;
   onUpdate: (data: { id: string; data: Partial<PublicationsData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
@@ -33,6 +33,7 @@ interface PublicationsFormProps {
 }
 
 export function PublicationsForm({
+  profileId,
   publications,
   onAdd,
   onUpdate,
@@ -44,6 +45,8 @@ export function PublicationsForm({
 }: PublicationsFormProps) {
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [authorsInput, setAuthorsInput] = useState("");
+  const [editAuthorsInput, setEditAuthorsInput] = useState("");
 
   const form = useForm<PublicationsFormData>({
     resolver: zodResolver(publicationsSchema),
@@ -65,15 +68,21 @@ export function PublicationsForm({
 
   const onSubmit = (data: PublicationsFormData) => {
     try {
+      
+      const authorsArray = authorsInput.split(',').map(a => a.trim()).filter(a => a.length > 0);
+      
       onAdd({
+        profileId: profileId,
         ...data,
+        authors: authorsArray,
         tools: data.tools as Tools[],
-        publicationUrl: data.publicationUrl || "",
+        publicationUrl: data.publicationUrl || "" ,
         publisherLogo: data.publisherLogo || "",
         description: data.description || "",
       });
       toast.success("Publication added successfully!");
       form.reset();
+      setAuthorsInput("");
       setIsAddingNew(false);
     } catch (error) {
       toast.error("Failed to add publication");
@@ -83,15 +92,20 @@ export function PublicationsForm({
   const onEditSubmit = (data: PublicationsFormData) => {
     if (!editingId) return;
     try {
+      // Parse authors from the input string
+      const authorsArray = editAuthorsInput.split(',').map(a => a.trim()).filter(a => a.length > 0);
+      
       onUpdate({ 
         id: editingId, 
         data: {
           ...data,
+          authors: authorsArray,
           tools: data.tools as Tools[],
         }
       });
       toast.success("Publication updated successfully!");
       editForm.reset();
+      setEditAuthorsInput("");
       setEditingId(null);
     } catch (error) {
       toast.error("Failed to update publication");
@@ -100,12 +114,13 @@ export function PublicationsForm({
 
   const handleEdit = (publication: PublicationsData) => {
     setEditingId(publication.id);
+    setEditAuthorsInput(publication.authors?.join(", ") || "");
     editForm.reset({
       title: publication.title,
       publisher: publication.publisher,
       authors: publication.authors,
       publicationDate: publication.publicationDate,
-      publicationUrl: publication.publicationUrl || "",
+      publicationUrl: publication.publicationUrl || "" ,
       description: publication.description || "",
       tools: publication.tools,
       publisherLogo: publication.publisherLogo || "",
@@ -117,26 +132,6 @@ export function PublicationsForm({
       onDelete(id);
       toast.success("Publication deleted successfully!");
     }
-  };
-
-  const handleAuthorsChange = (authorsString: string) => {
-    const authors = authorsString.split(',').map(a => a.trim()).filter(a => a.length > 0);
-    form.setValue("authors", authors);
-  };
-
-  const handleEditAuthorsChange = (authorsString: string) => {
-    const authors = authorsString.split(',').map(a => a.trim()).filter(a => a.length > 0);
-    editForm.setValue("authors", authors);
-  };
-
-  const handleToolsChange = (toolsString: string) => {
-    const tools = parseSkillsString(toolsString);
-    form.setValue("tools", tools);
-  };
-
-  const handleEditToolsChange = (toolsString: string) => {
-    const tools = parseSkillsString(toolsString);
-    editForm.setValue("tools", tools);
   };
 
   return (
@@ -201,8 +196,8 @@ export function PublicationsForm({
                       <FormControl>
                         <Input
                           placeholder="Alex Johnson, Dr. Sarah Chen"
-                          value={field.value?.join(", ") || ""}
-                          onChange={(e) => handleAuthorsChange(e.target.value)}
+                          value={authorsInput}
+                          onChange={(e) => setAuthorsInput(e.target.value)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -230,7 +225,7 @@ export function PublicationsForm({
                 name="publicationUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Publication URL (Optional)</FormLabel>
+                    <FormLabel>Publication URL </FormLabel>
                     <FormControl>
                       <Input placeholder="https://medium.com/@alexjohnson/react-performance" {...field} />
                     </FormControl>
@@ -244,7 +239,7 @@ export function PublicationsForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
+                    <FormLabel>Description </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Brief description of the publication..."
@@ -262,12 +257,11 @@ export function PublicationsForm({
                 name="tools"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Technologies (comma-separated)</FormLabel>
+                    <FormLabel>Technologies (Optional)</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="REACTJS, JAVASCRIPT, PERFORMANCE"
-                        value={field.value?.join(", ") || ""}
-                        onChange={(e) => handleToolsChange(e.target.value)}
+                      <ToolsMultiSelect
+                        value={field.value as Tools[] || []}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -305,7 +299,7 @@ export function PublicationsForm({
                     <FormItem>
                       <FormLabel>Publication Title</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder="e.g., Optimizing React Performance with Memoization Techniques" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -320,7 +314,41 @@ export function PublicationsForm({
                       <FormItem>
                         <FormLabel>Publisher</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input placeholder="e.g., Medium, IEEE, ACM" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={editForm.control}
+                    name="publisherLogo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Publisher Logo URL (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com/logo.png" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={editForm.control}
+                    name="authors"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Authors (comma-separated)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Alex Johnson, Dr. Sarah Chen"
+                            value={editAuthorsInput}
+                            onChange={(e) => setEditAuthorsInput(e.target.value)}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -344,16 +372,12 @@ export function PublicationsForm({
 
                 <FormField
                   control={editForm.control}
-                  name="authors"
+                  name="publicationUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Authors (comma-separated)</FormLabel>
+                      <FormLabel>Publication URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Alex Johnson, Dr. Sarah Chen"
-                          value={field.value?.join(", ") || ""}
-                          onChange={(e) => handleEditAuthorsChange(e.target.value)}
-                        />
+                        <Input placeholder="https://medium.com/@alexjohnson/react-performance" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -367,7 +391,28 @@ export function PublicationsForm({
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea rows={3} {...field} />
+                        <Textarea
+                          placeholder="Brief description of the publication..."
+                          rows={3}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="tools"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Technologies (Optional)</FormLabel>
+                      <FormControl>
+                        <ToolsMultiSelect
+                          value={field.value as Tools[] || []}
+                          onChange={field.onChange}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -392,12 +437,35 @@ export function PublicationsForm({
           ) : (
             // Display Mode
             <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h5 className="font-medium">{publication.title}</h5>
-                  <p className="text-sm text-muted-foreground">{publication.publisher}</p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                  {publication.publisherLogo ? (
+                    <img
+                      src={publication.publisherLogo}
+                      alt={`${publication.publisher} logo`}
+                      className="w-16 h-16 rounded-lg object-contain border bg-white flex-shrink-0"
+                    />
+                  ) : (
+                    <img
+                      src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48`}
+                      alt={`${publication.publisher || 'publication'} logo`}
+                      className="w-16 h-16 rounded-lg object-cover border flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h5 className="font-medium">{publication.title}</h5>
+                    <p className="text-sm text-muted-foreground">{publication.publisher}</p>
+                    {publication.authors && publication.authors.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        By {publication.authors.join(", ")}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(publication.publicationDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button
                     size="sm"
                     variant="outline"
@@ -415,17 +483,23 @@ export function PublicationsForm({
                   </Button>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">{publication.description}</p>
-              <div className="flex flex-wrap gap-1">
-                {publication.tools?.map((tool) => (
-                  <span
-                    key={tool}
-                    className="px-2 py-1 bg-muted rounded-md text-xs"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
+              {publication.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {publication.description}
+                </p>
+              )}
+              {publication.tools && publication.tools.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {publication.tools.map((tool) => (
+                    <span
+                      key={tool}
+                      className="px-2 py-1 bg-muted rounded-md text-xs"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

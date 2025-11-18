@@ -2,51 +2,50 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  publicationsQuery, 
+  getPublicationsQuery, 
   addPublicationMutation, 
-  updatePublicationMutation, 
-  deletePublicationMutation 
-} from '@/lib/profile/query-options';
-import { profileQueryKeys } from '@/lib/profile/query-keys';
+  updatePublicationsMutation, 
+  deletePublicationsMutation 
+} from '@/server/dataforge/User/QueryOptions/user.queryOptions';
 
-export function usePublications(userId: string) {
-  return useQuery(publicationsQuery(userId));
+export function usePublications(username: string) {
+  return useQuery(getPublicationsQuery(username));
 }
 
-export function useAddPublication() {
+export function useAddPublication(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...addPublicationMutation,
-    onSuccess: (_, { profileId }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.publications.list(profileId) 
+        queryKey: ['publications', username] 
       });
     },
   });
 }
 
-export function useUpdatePublication() {
+export function useUpdatePublication(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...updatePublicationMutation,
-    onSuccess: (_, { profileId }) => {
+    ...updatePublicationsMutation,
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.publications.list(profileId) 
+        queryKey: ['publications', username] 
       });
     },
   });
 }
 
-export function useDeletePublication() {
+export function useDeletePublication(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...deletePublicationMutation,
-    onSuccess: (_, { profileId }) => {
+    ...deletePublicationsMutation,
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.publications.list(profileId) 
+        queryKey: ['publications', username] 
       });
     },
   });

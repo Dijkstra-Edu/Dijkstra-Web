@@ -1,9 +1,9 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, GetCertificationsResponse} from "@/types/server/dataforge/User/profile";
-import { EducationData, PersonalDetailsData, WorkExperienceData ,  CertificationsData} from "@/types/client/profile-section/profile-sections";
-import { transformCertificationsArray, transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest, transformCertificationsToRequest, transformCertifications, transformCertificationsUpdateRequest } from "@/types/server/dataforge/transformers";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, GetCertificationsResponse, GetPublicationsResponse} from "@/types/server/dataforge/User/profile";
+import { EducationData, PersonalDetailsData, WorkExperienceData ,  CertificationsData, PublicationsData} from "@/types/client/profile-section/profile-sections";
+import { transformCertificationsArray, transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest, transformCertificationsToRequest, transformCertifications, transformCertificationsUpdateRequest , transformPublications, transformPublicationsArray, transformPublicationsToRequest, transformPublicationsUpdateRequest} from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -293,3 +293,54 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
       }
     );
   } 
+
+
+
+export async function getPublicationsByGithubUsername(username: string): Promise<PublicationsData[]> {
+        const response = await fetchDataForge<GetPublicationsResponse[]>(
+      `/Dijkstra/v1/publications/${encodeURIComponent(username)}`
+    );
+    return transformPublicationsArray(response);
+    }
+
+  /**
+   * Add Publication by GitHub username
+   */
+  export async function addPublicationsByGithubUsername( data: Omit<PublicationsData, 'id' | 'createdAt' | 'updatedAt'>): Promise<PublicationsData> {
+    console.log('Adding publication data', data);
+    const request = transformPublicationsToRequest(data);
+    console.log('Request', request);
+    const response = await fetchDataForge<GetPublicationsResponse>(
+      `/Dijkstra/v1/publications/`, {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformPublications(response);
+  }
+
+  /**
+   * Update Publication by Publication ID
+   */
+  export async function updatePublicationsByPublicationId(publicationId: string, data: Partial<PublicationsData>): Promise<PublicationsData> {
+    const request = transformPublicationsUpdateRequest(data);
+    const response = await fetchDataForge<GetPublicationsResponse>(
+      `/Dijkstra/v1/publications/${encodeURIComponent(publicationId)}`, {
+        method: 'PUT',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformPublications(response);
+  } 
+
+  /**
+   * Delete Publication by Publication ID
+   */
+  export async function deletePublicationsByPublicationId(publicationId: string): Promise<void> {
+    await fetchDataForge<void>(
+      `/Dijkstra/v1/publications/${encodeURIComponent(publicationId)}`, {
+        method: 'DELETE',
+      }
+    );
+  }
+

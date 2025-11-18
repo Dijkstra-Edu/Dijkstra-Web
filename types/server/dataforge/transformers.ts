@@ -1,5 +1,5 @@
-import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData} from "@/types/client/profile-section/profile-sections";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse } from "./User/profile";
+import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData} from "@/types/client/profile-section/profile-sections";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse } from "./User/profile";
 import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType } from "./enums";
 import { UUID } from "crypto";
 
@@ -320,3 +320,51 @@ export function transformEducationUpdateRequest(education: Partial<EducationData
         tools_used: education.toolsUsed as Tools[],
     }
 }
+
+export function transformPublicationsArray(publicationsArray: GetPublicationsResponse[]): PublicationsData[] {
+    return publicationsArray.map((publication) => transformPublications(publication));
+}
+
+export function transformPublications(publication: GetPublicationsResponse): PublicationsData {
+    return {
+        id: publication.id,
+        profileId: publication.profile_id,
+        title: publication.title,
+        authors: publication.authors,
+        publicationDate: publication.publication_date,
+        publisher: publication.publisher,
+        publicationUrl: publication.publication_url,
+        description: publication.description,
+        publisherLogo: publication.publisher_logo || undefined,
+        tools: publication.tools as Tools[] || undefined,
+    }
+}
+
+export function transformPublicationsToRequest(publication: Omit<PublicationsData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetPublicationsResponse, 'id' | 'created_at' | 'updated_at'> {
+    return {
+        profile_id: publication.profileId as UUID,
+        title: publication.title,
+        authors: publication.authors,
+        publication_date: publication.publicationDate,
+        publisher: publication.publisher,
+        publication_url: publication.publicationUrl,
+        description: publication.description,
+        publisher_logo: publication.publisherLogo,
+        tools: publication.tools as Tools[] 
+    }
+}
+
+export function transformPublicationsUpdateRequest(publication: Partial<PublicationsData>): Partial<GetPublicationsResponse> {
+    return {
+        profile_id: publication.profileId as UUID,
+        title: publication.title,
+        authors: publication.authors,
+        publication_date: publication.publicationDate,
+        publisher: publication.publisher,
+        publication_url: publication.publicationUrl,
+        description: publication.description,
+        publisher_logo: publication.publisherLogo,
+        tools: publication.tools as Tools[] ,
+    }
+}
+
