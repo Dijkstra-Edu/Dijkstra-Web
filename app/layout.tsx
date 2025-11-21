@@ -4,6 +4,7 @@ import "./globals.css";
 import TanstackProviderWrapper from "@/components/providers/TanstackProviderWrapper";
 import SessionProviderWrapper from "@/components/providers/SessionProviderWrapper";
 import ThemeProviderWrapper from "@/components/providers/ThemeProviderWrapper";
+import { JoyrideProvider } from "./onboarding/JoyrideProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,9 @@ export default function RootLayout({
         <ThemeProviderWrapper>
           <SessionProviderWrapper>
             <TanstackProviderWrapper>
-              {children}
+              <JoyrideProvider>
+                {children}
+              </JoyrideProvider>
             </TanstackProviderWrapper>
           </SessionProviderWrapper>
         </ThemeProviderWrapper>
@@ -40,3 +43,4 @@ export default function RootLayout({
     </html>
   );
 }
+

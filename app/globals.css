@@ -361,6 +361,70 @@
   border: initial;
 }
 
+{/* Make the spotlight transparent but with a glowing outline 
+.react-joyride__spotlight {
+  background-color: transparent !important; 
+  border-radius: 12px !important;
+  box-shadow: 0 0 5px 4px rgba(255, 255, 255, 0.775) !important;
+  transition: box-shadow 0.3s ease-in-out;
+}*/}
+
+/* 💅 Custom Joyride Tooltip Styling */
+.react-joyride__tooltip {
+  background-color: #1a1a1a !important; /* dark theme */
+  color: #f0f0f0 !important; /* lignpht text */
+  border-radius: 12px !important;
+  border: 1px solid #333 !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+  font-family: 'Inter', sans-serif !important;
+  padding: 1rem 1.25rem !important;
+  max-width: 340px !important;
+}
+
+.react-joyride__tooltip h4 {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  color: #43755d !important; /* Dijkstra accent green */
+  margin-bottom: 0.5rem !important;
+}
+
+.react-joyride__tooltip button {
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 0.35rem 0.9rem !important;
+}
+
+.react-joyride__tooltip button[data-action="primary"] {
+  background: #e3f8ed !important;
+  color: #000 !important;
+  border: none !important;
+}
+
+.react-joyride__tooltip button[data-action="skip"] {
+  color: #ff5252 !important;
+  background: none !important;
+  font-weight: 600 !important;
+}
+
+.react-joyride__tooltip button[data-action="close"] {
+  color: #888 !important;
+}
+
+.react-joyride__tooltip-footer {
+  border-top: 1px solid #333 !important;
+  margin-top: 0.75rem !important;
+  padding-top: 0.75rem !important;
+}
+
+/* optional glowing spotlight */
+.react-joyride__spotlight {
+  box-shadow: 0 0 0 1px rgba(245, 247, 246, 0.6), 0 0 12px 4px rgba(23, 26, 25, 0.4) !important;
+  border-radius: 5px !important;
+  background: transparent !important;
+}
+
+
+
 /* .landing-scroll *::-webkit-scrollbar {
   width: 8px;
 }

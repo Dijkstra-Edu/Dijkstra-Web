@@ -18,6 +18,7 @@ export function NavMain({
     title: string
     url: string
     icon?: Icon
+    className?: string
   }[]
 }) {
   return (
@@ -45,8 +46,13 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} onClick={() => window.location.href = item.url}>
-                {item.icon && <item.icon />}
+              <SidebarMenuButton
+                tooltip={item.title}
+                onClick={() => (window.location.href = item.url)}
+                className={`joyride-target ${item.className || ''}`} // ✅ consistent Joyride target
+                data-tour-id={item.title} // optional for debugging
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

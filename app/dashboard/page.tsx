@@ -13,11 +13,17 @@ import { ProfileData } from "@/components/profile-data";
 import Readme from "@/components/readme";
 import Resume from "@/components/Resume and CV/resume";
 import { StudentDashboard } from "@/components/student-dashboard";
+import dynamic from "next/dynamic";
 
 export default function Page() {
   const [data, setData] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [isResumeBuildingMode, setIsResumeBuildingMode] = useState(false);
+  
+  const JoyrideTour = dynamic(
+    () => import("@/app/onboarding/product-tour/joyride"),
+    { ssr: false }
+  );
 
   useEffect(() => {
     getCertificateData().then((fetchedData) => {
@@ -58,19 +64,24 @@ export default function Page() {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-4 lg:px-6 landing-page">
+        <div className="flex-1 overflow-y-auto px-4 lg:px-6 landing-page" id="dashboard-content">
           <div className="@container/main flex flex-1 flex-row gap-6 py-4">
             <div className={`${isResumeBuildingMode ? 'flex-1' : 'flex-[3]'} flex flex-col gap-4`}>
               <Tabs defaultValue="stats">
-                <TabsList>
+                <TabsList id="tabs-section">
                   <TabsTrigger value="stats">Stats</TabsTrigger>
                   <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
                   <TabsTrigger value="readme">Readme</TabsTrigger>
                   <TabsTrigger value="resume">Resume & CV</TabsTrigger>
                   <TabsTrigger disabled value="achievements">Achievements</TabsTrigger>
+                  <TabsTrigger value="resume">Resume</TabsTrigger>
+                  <TabsTrigger value="cv">CV</TabsTrigger>
+                  <TabsTrigger disabled value="achievments">
+                    Achievements
+                  </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="stats" className="space-y-4">
+                <TabsContent value="stats" className="space-y-4" id="stats-graph">
                   <SectionCards />
                   <ChartAreaInteractive />
                   {loading ? (
@@ -84,6 +95,7 @@ export default function Page() {
                     <DataTable data={data as { header: string; type: string; id: number; status: string; target: string; limit: string; reviewer: string; }[]} />
                   )}
                 </TabsContent>
+
                 <TabsContent value="portfolio">
                   <StudentDashboard />
                 </TabsContent>
@@ -98,9 +110,31 @@ export default function Page() {
                 <ProfileData />
               </div>
             )}
+              <Tabs defaultValue="tabs-section">
+                <TabsContent value="readme">
+                  <Readme />
+                </TabsContent>
+
+                <TabsContent value="resume">
+                  Make changes to your account here.
+                </TabsContent>
+
+                <TabsContent value="cv">
+                  Change your password here.
+                </TabsContent>
+
+                <TabsContent value="achievments">
+                  Make changes to your account here.
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            <div className="flex-[1] flex flex-col" id="profile-section">
+              <ProfileData />
+            </div>
           </div>
-        </div>
       </SidebarInset>
+        {<JoyrideTour onFinish={() => console.log("✅ Joyride complete!")} />}
     </SidebarProvider>
   );
 }
