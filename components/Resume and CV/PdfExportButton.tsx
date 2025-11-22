@@ -36,8 +36,7 @@ export default function PdfExportButton({ contentRef, fileName = "resume" }: Pdf
       
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       pdf.save(`${fileName}.pdf`);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
+    } catch {
       alert("Failed to generate PDF. Please try again.");
     }
   };

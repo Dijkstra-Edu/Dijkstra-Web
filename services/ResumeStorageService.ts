@@ -5,7 +5,7 @@ import { UserProfileData, SavedResumeData } from '@/types/resume';
 export class ResumeStorageService {
   private static STORAGE_KEY = 'dijkstra-resume-data';
 
-  static saveResumeData(resumeId: string, data: Partial<UserProfileData>, template: 'deedy' | 'row-based', title: string, documentId: string, userEmail: string, userName: string): void {
+  static saveResumeData(resumeId: string, data: Partial<UserProfileData>, template: 'deedy' | 'row-based', title: string, documentId: string, userEmail: string, userName: string, documentType?: 'resume' | 'cv'): void {
     try {
       const savedData: SavedResumeData = {
         resumeId,
@@ -15,15 +15,15 @@ export class ResumeStorageService {
         lastModified: new Date().toISOString(),
         documentId,
         userEmail,
-        userName
+        userName,
+        documentType
       };
       const existingData = this.getAllSavedResumes();
       const updatedData = existingData.filter(item => item.resumeId !== resumeId);
       updatedData.push(savedData);
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedData));
-      console.log('Resume data saved successfully:', resumeId);
-    } catch (error) {
-      console.error('Error saving resume data:', error);
+    } catch {
+      // Error intentionally swallowed; localStorage operations may fail in restricted environments
     }
   }
 
@@ -32,8 +32,8 @@ export class ResumeStorageService {
       const allData = this.getAllSavedResumes();
       const resumeData = allData.find(item => item.resumeId === resumeId);
       return resumeData || null;
-    } catch (error) {
-      console.error('Error loading resume data:', error);
+    } catch {
+      // Return null if loading fails
       return null;
     }
   }
@@ -42,8 +42,8 @@ export class ResumeStorageService {
     try {
       const data = localStorage.getItem(this.STORAGE_KEY);
       return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error('Error loading saved resumes:', error);
+    } catch {
+      // If parsing fails or storage is unavailable, return empty list
       return [];
     }
   }
@@ -53,9 +53,8 @@ export class ResumeStorageService {
       const existingData = this.getAllSavedResumes();
       const updatedData = existingData.filter(item => item.resumeId !== resumeId);
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedData));
-      console.log('Resume deleted successfully:', resumeId);
-    } catch (error) {
-      console.error('Error deleting resume:', error);
+    } catch {
+      // Swallow delete errors from localStorage
     }
   }
 
@@ -90,10 +89,9 @@ export class ResumeStorageService {
         return false;
       }
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredData));
-      console.log('Resume deleted successfully:', resumeId);
       return true;
-    } catch (error) {
-      console.error('Error deleting resume data:', error);
+    } catch {
+      // Swallow delete errors and indicate failure
       return false;
     }
   }
@@ -104,10 +102,9 @@ export class ResumeStorageService {
       const filteredData = existingData.filter(item => !resumeIds.includes(item.resumeId));
       const deletedCount = existingData.length - filteredData.length;
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredData));
-      console.log(`${deletedCount} resumes deleted successfully`);
       return deletedCount;
-    } catch (error) {
-      console.error('Error deleting bulk resume data:', error);
+    } catch {
+      // On error, return 0 deleted
       return 0;
     }
   }

@@ -62,12 +62,14 @@ export default function AddResumeModal({
       setLoading(false);
 
       if (onResumeCreated) {
+        // documentId should be empty for a newly created local resume. The
+        // backend will return a server document id after the first create.
         onResumeCreated({
           title: resumeTitle,
           resumeId: uuid,
           userEmail: session?.user?.email || "",
           userName: session?.user?.name || "",
-          documentId: uuid,
+          documentId: "",
           documentType: selectedDocType,
           initialData: transformedData,
         });

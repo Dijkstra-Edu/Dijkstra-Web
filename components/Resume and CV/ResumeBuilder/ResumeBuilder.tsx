@@ -6,6 +6,10 @@ import { UserProfileData } from '@/types/resume';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
 import { ResumeStorageService } from '@/services/ResumeStorageService';
+import { DocumentApiService } from '@/services/DocumentApiService';
+import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import type { DocumentCreateResponse } from '@/services/DocumentApiService';
 import { userProfileData } from '@/data/mockResumeData';
 
 interface ResumeBuilderProps {
@@ -60,8 +64,29 @@ export default function ResumeBuilder({
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!resumeId);
   const [previewScale, setPreviewScale] = useState(1);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [documentApiId, setDocumentApiId] = useState<string | null>(null);
+  const [documentName, setDocumentName] = useState<string>(resumeTitle || '');
   const containerRef = React.useRef<HTMLDivElement>(null);
   const previewContainerRef = React.useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const lastSavedStringRef = React.useRef<string | null>(null);
+
+  // Keep documentName in sync with resumeTitle when no server document exists yet
+  useEffect(() => {
+    if (!documentApiId) {
+      setDocumentName(resumeTitle || '');
+    }
+  }, [resumeTitle, documentApiId]);
+
+  // Initialize documentApiId from incoming prop only when initialData is
+  // present. This avoids treating a new resume as an existing server
+  // document when the prop is present but no server data was loaded.
+  useEffect(() => {
+    if (documentId && initialData && Object.keys(initialData).length > 0) {
+      setDocumentApiId(documentId);
+    }
+  }, [documentId, initialData]);
 
   useEffect(() => {
     if (useApiData && Object.keys(resumeData).length === 0) {
@@ -79,6 +104,35 @@ export default function ResumeBuilder({
   const displayHeaderTitle = headerTitle || defaultHeaderTitle;
   const displayHeaderSubtitle = headerSubtitle || defaultHeaderSubtitle;
   
+  // Mutations for create / update using TanStack Query
+  const createMutation = useMutation({
+    mutationFn: (payload: { github: string; latex: string; base: Partial<UserProfileData>; name?: string; document_type?: string; document_kind?: string }) =>
+      DocumentApiService.createDocument(payload.github, payload.latex, payload.base, payload.name, payload.document_type, payload.document_kind),
+    onSuccess(data) {
+      setDocumentApiId(data.id);
+      if (data?.document_name) setDocumentName(data.document_name);
+      queryClient.setQueryData(['document', data.id], data);
+    },
+    onError(err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create document';
+      setSaveError(message);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (payload: { id: string; latex: string; base: Partial<UserProfileData>; name?: string; document_type?: string; document_kind?: string }) =>
+      DocumentApiService.updateDocument(payload.id, payload.latex, payload.base, payload.name, payload.document_type, payload.document_kind),
+    onSuccess(data) {
+      if (data?.document_name) setDocumentName(data.document_name);
+      queryClient.setQueryData(['document', data.id], data);
+    },
+    onError(err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update document';
+      setSaveError(message);
+    },
+  });
+
+  // Load saved localStorage data (if present) when opening an existing resume
   useEffect(() => {
     const loadSavedData = async () => {
       if (resumeId) {
@@ -88,36 +142,80 @@ export default function ResumeBuilder({
           if (savedData && savedData.content) {
             setResumeData(savedData.content);
             setLastSaved(new Date());
+            // restore documentType if present in local storage
+            // (the parent may override via props)
           }
-        } catch (error) {
-          console.error('Error loading resume data:', error);
+        } catch {
+          // ignore
         } finally {
           setIsLoading(false);
         }
       }
     };
-    
+
     loadSavedData();
   }, [resumeId]);
 
+  // Auto-save effect: only call server if data changed since last save
   useEffect(() => {
     if (!resumeId || !resumeData || Object.keys(resumeData).length === 0) return;
 
-    const saveTimer = setTimeout(() => {
-  ResumeStorageService.saveResumeData(
+    const saveTimer = setTimeout(async () => {
+      // Only proceed if data actually changed since last save
+      let currentString: string | null = null;
+      try {
+        currentString = JSON.stringify(resumeData || {});
+      } catch {
+        currentString = null;
+      }
+
+      if (currentString && lastSavedStringRef.current === currentString) {
+        // No changes since last save — skip server update
+        return;
+      }
+
+      // Save to localStorage
+      ResumeStorageService.saveResumeData(
         resumeId,
         resumeData,
         template,
         resumeTitle || 'Untitled Resume',
         documentId || '',
         userEmail || '',
-        userName || ''
+        userName || '',
+        documentType
       );
+
+      if (githubUsername) {
+        try {
+          const latex = template === 'deedy' ? generateDeedyLatex(resumeData) : generateRowBasedLatex(resumeData);
+          const apiDocumentType = template === 'row-based' ? 'row' : 'deedy';
+          const apiDocumentKind = documentType === 'cv' ? 'cv' : 'resume';
+          if (documentApiId) {
+            await updateMutation.mutateAsync({ id: documentApiId, latex, base: resumeData, name: documentName, document_type: apiDocumentType, document_kind: apiDocumentKind });
+          } else {
+            const validation = DocumentApiService.validateDocumentData(githubUsername, latex, resumeData);
+            if (!validation.isValid) {
+              setSaveError(validation.errors.join(', '));
+            } else {
+              const resp = await createMutation.mutateAsync({ github: githubUsername, latex, base: resumeData, name: documentName || resumeTitle || 'Untitled Resume', document_type: apiDocumentType, document_kind: apiDocumentKind });
+              setDocumentApiId((resp as DocumentCreateResponse).id);
+            }
+          }
+
+          // On success update lastSaved snapshot
+          lastSavedStringRef.current = currentString;
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Auto-save failed';
+          setSaveError(errorMessage);
+        }
+      }
+
       setLastSaved(new Date());
     }, 2000);
 
     return () => clearTimeout(saveTimer);
-  }, [resumeData, resumeId, template, resumeTitle, documentId, userEmail, userName]);
+  }, [resumeData, resumeId, template, resumeTitle, documentId, userEmail, userName, githubUsername, documentApiId, documentName, queryClient, createMutation, updateMutation, documentType]);
 
   const calculatePreviewScale = useCallback(() => {
     if (!previewContainerRef.current) return;
@@ -159,19 +257,50 @@ export default function ResumeBuilder({
   const handleManualSave = async () => {
     if (resumeId && resumeData && Object.keys(resumeData).length > 0) {
       setIsSaving(true);
+      setSaveError(null);
       try {
-  await ResumeStorageService.saveResumeData(
+        // Save to localStorage
+        await ResumeStorageService.saveResumeData(
           resumeId,
           resumeData,
           template,
           resumeTitle || 'Untitled Resume',
           documentId || '',
           userEmail || '',
-          userName || ''
+          userName || '',
+          documentType
         );
+        
+        // Save to API if GitHub username is available
+        if (githubUsername) {
+          try {
+            const latex = template === 'deedy' ? generateDeedyLatex(resumeData) : generateRowBasedLatex(resumeData);
+            const apiDocumentType = template === 'row-based' ? 'row' : 'deedy';
+            const apiDocumentKind = documentType === 'cv' ? 'cv' : 'resume';
+            if (documentApiId) {
+              await updateMutation.mutateAsync({ id: documentApiId, latex, base: resumeData, name: documentName, document_type: apiDocumentType, document_kind: apiDocumentKind });
+            } else {
+              const validation = DocumentApiService.validateDocumentData(githubUsername, latex, resumeData);
+              if (!validation.isValid) {
+                setSaveError(validation.errors.join(', '));
+              } else {
+                const resp = await createMutation.mutateAsync({ github: githubUsername, latex, base: resumeData, name: documentName || resumeTitle || 'Untitled Resume', document_type: apiDocumentType, document_kind: apiDocumentKind });
+                setDocumentApiId((resp as DocumentCreateResponse).id);
+              }
+            }
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+            setSaveError(errorMessage);
+          }
+        }
+        
         setLastSaved(new Date());
+        try {
+          lastSavedStringRef.current = JSON.stringify(resumeData || {});
+        } catch {}
       } catch (error) {
-        console.error('Error saving resume:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+        setSaveError(errorMessage);
       } finally {
         setIsSaving(false);
       }
@@ -229,16 +358,29 @@ export default function ResumeBuilder({
               <p className="text-sm text-gray-600">{displayHeaderSubtitle}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-500">
-                {isLoading ? 'Loading resume...' :
-                 isSaving ? 'Saving...' :
-                 lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 
-                 'Auto-save enabled'}
+              <div className="flex flex-col items-end">
+                <div className="text-sm text-gray-500">
+                  {isLoading ? 'Loading resume...' :
+                   isSaving ? 'Saving...' :
+                   lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 
+                   'Auto-save enabled'}
+                </div>
+                {saveError && (
+                  <div className="text-xs text-red-600 mt-1">
+                    Error: {saveError}
+                  </div>
+                )}
+                {documentApiId && (
+                  <div className="text-xs text-green-600 mt-1">
+                    Synced to server
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleManualSave}
-                disabled={isLoading || isSaving}
+                disabled={isLoading || isSaving || !githubUsername}
                 className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={!githubUsername ? 'GitHub username required to save' : ''}
               >
                 {isSaving ? 'Saving...' : 'Save Now'}
               </button>

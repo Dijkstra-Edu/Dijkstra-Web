@@ -148,4 +148,5 @@ export interface SavedResumeData {
   documentId: string;
   userEmail: string;
   userName: string;
+  documentType?: 'resume' | 'cv';
 }

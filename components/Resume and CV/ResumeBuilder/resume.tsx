@@ -8,10 +8,9 @@ import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedDocumentsTable } from "@/components/Resume and CV/stacked-documents-table";
 import AddResumeModal from "./AddResumeModal";
 import ResumeBuilder from "@/components/Resume and CV/ResumeBuilder/ResumeBuilder";
-import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
 import { ResumeStorageService } from "@/services/ResumeStorageService";
 import { DocumentApiService } from "@/services/DocumentApiService";
-import { SavedResumeData, ResumeData, UserProfileData } from "@/types/resume";
+import { SavedResumeData, ResumeData } from "@/types/resume";
 
 // Wrapper for the new ResumeBuilder with header/back button
 const ResumeBuilderWrapper = ({
@@ -197,43 +196,15 @@ const Resume = ({
 
   
 
-  
-
-  // Create server document immediately when user creates a new resume (if possible)
-  const handleResumeCreatedWithCreate = async (resumeData: ResumeData) => {
-    // First set up local state so the builder opens immediately
-    const templateToUse = resumeData.template || pendingTemplate || 'deedy';
-    const kindToUse = resumeData.documentType || 'resume';
+  const handleResumeCreated = (resumeData: ResumeData) => {
+    // Use the pendingTemplate if not set in resumeData
+    const templateToUse = resumeData.template || pendingTemplate || "deedy";
     setSelectedTemplate(templateToUse);
-    setCurrentDocumentType(kindToUse);
-    setCurrentResumeData({ ...resumeData, template: templateToUse, documentType: kindToUse });
+    setCurrentDocumentType(resumeData.documentType || "resume");
+    setCurrentResumeData({ ...resumeData, template: templateToUse });
 
-    if (onResumeBuildingModeChange) onResumeBuildingModeChange(true);
-
-    // If we have a GitHub username, try to create server document now
-    if (githubUsername) {
-      try {
-        const base = (resumeData.initialData || {}) as Partial<UserProfileData>;
-        const latex = templateToUse === 'deedy' ? generateDeedyLatex(base) : generateRowBasedLatex(base);
-        const apiDocumentType = templateToUse === 'row-based' ? 'row' : 'deedy';
-        const apiDocumentKind = kindToUse === 'cv' ? 'cv' : 'resume';
-
-        const resp = await DocumentApiService.createDocument(
-          githubUsername,
-          latex,
-          base,
-          resumeData.title,
-          apiDocumentType,
-          apiDocumentKind
-        );
-
-        // Update current resume data with server document id so builder will use server flows
-        setCurrentResumeData((prev) => ({ ...(prev || {}), documentId: resp.id } as ResumeData));
-        // Do not invalidate the documents list here — the list should only be
-        // refreshed when the user navigates back to the Resumes & CV dashboard.
-      } catch {
-        // If create fails, proceed with local-only resume and show builder
-      }
+    if (onResumeBuildingModeChange) {
+      onResumeBuildingModeChange(true);
     }
   };
 
@@ -385,7 +356,7 @@ const Resume = ({
         <AddResumeModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onResumeCreated={(resumeData) => handleResumeCreatedWithCreate({ ...resumeData, template: pendingTemplate })}
+          onResumeCreated={(resumeData) => handleResumeCreated({ ...resumeData, template: pendingTemplate })}
           documentType={currentDocumentType}
         />
       </div>

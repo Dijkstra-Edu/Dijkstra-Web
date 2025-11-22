@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { userProfileData } from "@/data/mockResumeData";
 import { UserProfileData, Education, Project } from "@/types/resume";
+import { formatLocation, handleStringArrayInput } from "@/lib/resume-utils";
 
 interface ResumeFormProps {
   onDataChange: (data: Partial<UserProfileData>) => void;
@@ -13,17 +14,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   onDataChange,
   initialData = {},
 }) => {
-  // Helper function to format location object to string
-  const formatLocation = (location: string | { city?: string; state?: string; country?: string } | unknown): string => {
-    if (!location) return '';
-    if (typeof location === 'string') return location;
-    if (typeof location === 'object' && location !== null) {
-      const loc = location as { city?: string; state?: string; country?: string };
-      const parts = [loc.city, loc.state, loc.country].filter(Boolean);
-      return parts.join(', ');
-    }
-    return '';
-  };
   
   // Helper function to initialize data with proper fallback
   const getInitialFormData = (initial: Partial<UserProfileData>): Partial<UserProfileData> => {
@@ -237,13 +227,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       ...prev,
       projects: prev.projects?.filter((_, i) => i !== index) || [],
     }));
-  };
-
-  const handleStringArrayInput = (value: string): string[] => {
-    return value
-      .split(",")
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
   };
 
   return (
@@ -753,5 +736,3 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
 };
 
 export default ResumeForm;
-
-// Made with Bob

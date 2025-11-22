@@ -4,6 +4,7 @@
 import React, { useState, useRef } from 'react';
 import { UserProfileData } from '@/types/resume';
 import { generateRowBasedLatex, generateDeedyLatex } from '@/lib/latex-generator';
+import { formatLocation } from '@/lib/resume-utils';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -12,18 +13,6 @@ interface LatexPreviewProps {
   template?: 'deedy' | 'row-based';
   scale?: number;
 }
-
-// Helper function to format location object to string
-const formatLocation = (location: string | { city?: string; state?: string; country?: string } | unknown): string => {
-  if (!location) return '';
-  if (typeof location === 'string') return location;
-  if (typeof location === 'object' && location !== null) {
-    const loc = location as { city?: string; state?: string; country?: string };
-    const parts = [loc.city, loc.state, loc.country].filter(Boolean);
-    return parts.join(', ');
-  }
-  return '';
-};
 
 export default function LatexPreview({ data, template = 'deedy', scale = 1 }: LatexPreviewProps) {
   const [isCompiling, setIsCompiling] = useState(false);
@@ -620,7 +609,6 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate PDF');
-      console.error('PDF Error:', err);
     } finally {
       setIsCompiling(false);
     }
@@ -672,8 +660,8 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                     await navigator.clipboard.writeText(latexCode);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
-                  } catch (err) {
-                    console.error("Failed to copy text: ", err);
+                  } catch {
+                    setError('Failed to copy LaTeX code to clipboard');
                   }
                 }}
                 className={`px-2 py-1 text-xs rounded ${
