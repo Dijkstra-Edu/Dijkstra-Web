@@ -1,6 +1,6 @@
-import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData} from "@/types/client/profile-section/profile-sections";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse } from "./User/profile";
-import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType } from "./enums";
+import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData, TestScoresData} from "@/types/client/profile-section/profile-sections";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse } from "./User/profile";
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType, TestScoreType } from "./enums";
 import { UUID } from "crypto";
 
 export function transformPersonalDetails(personalDetails: GetPersonalDetailsResponse): PersonalDetailsData {
@@ -368,3 +368,40 @@ export function transformPublicationsUpdateRequest(publication: Partial<Publicat
     }
 }
 
+export function transformTestScoresArray(testScoresArray: GetTestScoresResponse[]): TestScoresData[] {
+    return testScoresArray.map((testScore) => transformTestScores(testScore));
+}
+
+export function transformTestScores(testScore: GetTestScoresResponse): TestScoresData {
+    return {
+        id: testScore.id,
+        profileId: testScore.profile_id,
+        title: testScore.title,
+        type: testScore.type as TestScoreType,
+        score: testScore.score,
+        testDate: testScore.test_date,
+        description: testScore.description,
+    }
+}
+
+export function transformTestScoresToRequest(testScore: Omit<TestScoresData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetTestScoresResponse, 'id' | 'created_at' | 'updated_at'> {
+    return {
+        profile_id: testScore.profileId as UUID,
+        title: testScore.title,
+        type: testScore.type as TestScoreType,
+        score: testScore.score,
+        test_date: testScore.testDate,
+        description: testScore.description,
+    }
+}
+
+export function transformTestScoresUpdateRequest(testScore: Partial<TestScoresData>): Partial<GetTestScoresResponse> {
+    return {
+        profile_id: testScore.profileId as UUID,
+        title: testScore.title,
+        type: testScore.type as TestScoreType,
+        score: testScore.score,
+        test_date: testScore.testDate,
+        description: testScore.description,
+    }
+}

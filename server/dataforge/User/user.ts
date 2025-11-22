@@ -1,9 +1,9 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, GetCertificationsResponse, GetPublicationsResponse} from "@/types/server/dataforge/User/profile";
-import { EducationData, PersonalDetailsData, WorkExperienceData ,  CertificationsData, PublicationsData} from "@/types/client/profile-section/profile-sections";
-import { transformCertificationsArray, transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest, transformCertificationsToRequest, transformCertifications, transformCertificationsUpdateRequest , transformPublications, transformPublicationsArray, transformPublicationsToRequest, transformPublicationsUpdateRequest} from "@/types/server/dataforge/transformers";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse} from "@/types/server/dataforge/User/profile";
+import { EducationData, PersonalDetailsData, WorkExperienceData ,  CertificationsData, PublicationsData, TestScoresData} from "@/types/client/profile-section/profile-sections";
+import { transformCertificationsArray, transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest, transformCertificationsToRequest, transformCertifications, transformCertificationsUpdateRequest , transformPublications, transformPublicationsArray, transformPublicationsToRequest, transformPublicationsUpdateRequest, transformTestScores, transformTestScoresArray, transformTestScoresToRequest, transformTestScoresUpdateRequest} from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -344,3 +344,53 @@ export async function getPublicationsByGithubUsername(username: string): Promise
     );
   }
 
+  /**
+   * Get Test Scores by GitHub username
+   */
+  export async function getTestScoresByGithubUsername(username: string): Promise<TestScoresData[]> {
+    const response = await fetchDataForge<GetTestScoresResponse[]>(
+      `/Dijkstra/v1/test-scores/${encodeURIComponent(username)}`
+    );
+    return transformTestScoresArray(response);
+  }
+
+  /**
+   * Add Test Score by GitHub username
+   */
+  export async function addTestScoresByGithubUsername( data: Omit<TestScoresData, 'id' | 'createdAt' | 'updatedAt'>): Promise<TestScoresData> {
+    console.log('Adding test score data', data);
+    const request = transformTestScoresToRequest(data);
+    console.log('Request', request);
+    const response = await fetchDataForge<GetTestScoresResponse>(
+      `/Dijkstra/v1/test-scores/`, {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformTestScores(response);
+  }
+
+  /**
+   * Update Test Score by Test Score ID
+   */
+  export async function updateTestScoresByTestScoreId(testScoreId: string, data: Partial<TestScoresData>): Promise<TestScoresData> {
+    const request = transformTestScoresUpdateRequest(data);
+    const response = await fetchDataForge<GetTestScoresResponse>(
+      `/Dijkstra/v1/test-scores/${encodeURIComponent(testScoreId)}`, {
+        method: 'PUT',
+        body: JSON.stringify(request),
+      }
+    );
+    return transformTestScores(response);
+  } 
+
+  /**
+   * Delete Test Score by Test Score ID
+   */
+  export async function deleteTestScoresByTestScoreId(testScoreId: string): Promise<void> {
+    await fetchDataForge<void>(
+      `/Dijkstra/v1/test-scores/${encodeURIComponent(testScoreId)}`, {
+        method: 'DELETE',
+      }
+    );
+  }
