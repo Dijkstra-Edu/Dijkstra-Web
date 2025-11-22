@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Copy, Download, Trash2 } from "lucide-react";
-import { SavedResumeData } from "@/types/resume";
+import { SavedResumeData } from "@/types/document";
 
 interface ProjectItem {
   id: string;

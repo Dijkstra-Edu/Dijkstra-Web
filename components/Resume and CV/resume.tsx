@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { DocumentResponse } from '@/services/DocumentApiService';
+import { useQueryClient } from "@tanstack/react-query";
+import type { DocumentResponse } from '@/types/document';
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedDocumentsTable } from "@/components/Resume and CV/stacked-documents-table";
 import AddResumeModal from "./AddResumeModal";
@@ -11,7 +11,10 @@ import ResumeBuilder from "@/components/Resume and CV/ResumeBuilder/ResumeBuilde
 import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
 import { ResumeStorageService } from "@/services/ResumeStorageService";
 import { DocumentApiService } from "@/services/DocumentApiService";
-import { SavedResumeData, ResumeData, UserProfileData } from "@/types/resume";
+import { useDocuments } from '@/hooks/documents/useDocuments';
+import { useCreateDocument, useDeleteDocument } from '@/hooks/documents/useDocumentMutations';
+import { documentsQueryKeys } from '@/lib/documents/query-keys';
+import { SavedResumeData, ResumeData, UserProfileData } from "@/types/document";
 
 // Wrapper for the new ResumeBuilder with header/back button
 const ResumeBuilderWrapper = ({
@@ -101,13 +104,10 @@ const Resume = ({
 
   const githubUsername = session?.user?.github_user_name || "test_user_123";
 
-  // Use TanStack Query to fetch documents for the user
-  const { data: docs } = useQuery({
-    queryKey: ["documents", githubUsername],
-    queryFn: () => DocumentApiService.getDocumentsByUser(githubUsername),
-    enabled: !!githubUsername,
-    retry: false,
-  });
+  // Use centralized documents hook to fetch user documents
+  const { data: docs } = useDocuments(githubUsername);
+  const deleteMutation = useDeleteDocument();
+  const createMutation = useCreateDocument();
 
   useEffect(() => {
     if (docs === null) {
@@ -218,17 +218,12 @@ const Resume = ({
         const apiDocumentType = templateToUse === 'row-based' ? 'row' : 'deedy';
         const apiDocumentKind = kindToUse === 'cv' ? 'cv' : 'resume';
 
-        const resp = await DocumentApiService.createDocument(
-          githubUsername,
-          latex,
-          base,
-          resumeData.title,
-          apiDocumentType,
-          apiDocumentKind
-        );
+        const resp = await createMutation.mutateAsync({ github: githubUsername, latex, base, name: resumeData.title, document_type: apiDocumentType, document_kind: apiDocumentKind });
 
         // Update current resume data with server document id so builder will use server flows
         setCurrentResumeData((prev) => ({ ...(prev || {}), documentId: resp.id } as ResumeData));
+        // Prime the single-document cache and invalidate list for this user using centralized keys
+        queryClient.setQueryData(documentsQueryKeys.item(resp.id), resp);
         // Do not invalidate the documents list here — the list should only be
         // refreshed when the user navigates back to the Resumes & CV dashboard.
       } catch {
@@ -264,7 +259,7 @@ const Resume = ({
     // If we have a documentId, fetch full document details first
     if (project.resumeData && project.resumeData.documentId) {
       try {
-        const doc = await queryClient.fetchQuery({ queryKey: ['document', project.resumeData!.documentId], queryFn: () => DocumentApiService.getDocumentById(project.resumeData!.documentId) }) as DocumentResponse;
+        const doc = await queryClient.fetchQuery({ queryKey: documentsQueryKeys.item(project.resumeData!.documentId), queryFn: () => DocumentApiService.getDocumentById(project.resumeData!.documentId) }) as DocumentResponse;
         const templateToUse = doc.document_type === 'row' ? 'row-based' : (project.resumeData.template || 'deedy');
         const kindToUse = doc.document_kind === 'cv' ? 'cv' : (project.resumeData.documentType || 'resume');
         setSelectedTemplate(templateToUse);
@@ -315,12 +310,10 @@ const Resume = ({
     const project = stackedProjects.find((p) => p.id === projectId);
     if (project && !project.isTemplate) {
       try {
-        await DocumentApiService.deleteDocument(projectId);
-        // Refresh list from API
-        await queryClient.invalidateQueries({ queryKey: ["documents", githubUsername] });
+        await deleteMutation.mutateAsync({ id: projectId, github: githubUsername });
       } catch {
         // If API delete fails, refresh from backend to remain consistent
-        await queryClient.invalidateQueries({ queryKey: ["documents", githubUsername] });
+        await queryClient.invalidateQueries({ queryKey: documentsQueryKeys.list(githubUsername) });
       }
     }
   };
@@ -334,10 +327,10 @@ const Resume = ({
 
     if (resumeIdsToDelete.length > 0) {
       try {
-        await Promise.all(resumeIdsToDelete.map((id) => DocumentApiService.deleteDocument(id)));
-        await queryClient.invalidateQueries({ queryKey: ["documents", githubUsername] });
+        await Promise.all(resumeIdsToDelete.map((id) => deleteMutation.mutateAsync({ id, github: githubUsername })));
+        await queryClient.invalidateQueries({ queryKey: documentsQueryKeys.list(githubUsername) });
       } catch {
-        await queryClient.invalidateQueries({ queryKey: ["documents", githubUsername] });
+        await queryClient.invalidateQueries({ queryKey: documentsQueryKeys.list(githubUsername) });
       }
     }
   };

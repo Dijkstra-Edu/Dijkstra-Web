@@ -1,4 +1,4 @@
-import { UserProfileData } from '@/types/resume';
+import { UserProfileData } from '@/types/document';
 
 export const userProfileData: UserProfileData = {
   user: {

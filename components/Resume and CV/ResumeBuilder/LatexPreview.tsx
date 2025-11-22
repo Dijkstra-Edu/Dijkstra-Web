@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { UserProfileData } from '@/types/resume';
+import { UserProfileData } from '@/types/document';
 import { generateRowBasedLatex, generateDeedyLatex } from '@/lib/latex-generator';
 import { formatLocation } from '@/lib/resume-utils';
 import html2canvas from 'html2canvas';

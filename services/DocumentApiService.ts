@@ -4,66 +4,15 @@
  */
 
 import { API_ENDPOINTS } from "@/constants/api";
-import { UserProfileData } from "@/types/resume";
-
-export interface DocumentCreateRequest {
-  github_username: string;
-  latex: string;
-  base_structure: Partial<UserProfileData>;
-  document_type?: string;
-  document_kind?: string;
-}
-
-export interface DocumentCreateResponse {
-  id: string;
-  profile_id: string;
-  latex: string;
-  document_name?: string;
-  base_structure: Partial<UserProfileData>;
-  created_at: string;
-  updated_at: string;
-  document_type?: string;
-  document_kind?: string;
-}
-
-export interface DocumentUpdateRequest {
-  latex?: string;
-  document_name?: string;
-  base_structure?: Partial<UserProfileData>;
-  document_type?: string;
-  document_kind?: string;
-}
-
-export interface DocumentUpdateResponse {
-  id: string;
-  profile_id: string;
-  latex: string;
-  document_name?: string;
-  base_structure: Partial<UserProfileData>;
-  created_at: string;
-  updated_at: string;
-  document_type?: string;
-  document_kind?: string;
-}
-
-export interface DocumentApiError {
-  detail: {
-    error_code: string;
-    message: string;
-  };
-}
-
-export interface DocumentResponse {
-  id: string;
-  profile_id: string;
-  document_name?: string;
-  latex?: string;
-  base_structure?: Partial<UserProfileData>;
-  created_at: string;
-  updated_at: string;
-  document_type?: string;
-  document_kind?: string;
-}
+import type { UserProfileData } from '@/types/document';
+import type {
+  DocumentCreateRequest,
+  DocumentCreateResponse,
+  DocumentUpdateRequest,
+  DocumentUpdateResponse,
+  DocumentApiError,
+  DocumentResponse,
+} from '@/types/document';
 
 export class DocumentApiService {
   /**

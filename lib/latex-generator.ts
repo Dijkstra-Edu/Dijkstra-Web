@@ -1,5 +1,5 @@
 // lib/latex-generator.ts
-import { UserProfileData } from "@/types/resume";
+import { UserProfileData } from "@/types/document";
 
 function escapeLatex(text: string | unknown): string {
   if (!text) return "";

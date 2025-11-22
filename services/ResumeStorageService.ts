@@ -1,6 +1,6 @@
 // ResumeStorageService.ts
 // Handles localStorage operations for resumes
-import { UserProfileData, SavedResumeData } from '@/types/resume';
+import { UserProfileData, SavedResumeData } from '@/types/document';
 
 export class ResumeStorageService {
   private static STORAGE_KEY = 'dijkstra-resume-data';

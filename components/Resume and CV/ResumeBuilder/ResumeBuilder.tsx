@@ -2,14 +2,15 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { UserProfileData } from '@/types/resume';
+import { UserProfileData } from '@/types/document';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
 import { ResumeStorageService } from '@/services/ResumeStorageService';
 import { DocumentApiService } from '@/services/DocumentApiService';
 import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import type { DocumentCreateResponse } from '@/services/DocumentApiService';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCreateDocument, useUpdateDocument } from '@/hooks/documents/useDocumentMutations';
+import type { DocumentCreateResponse } from '@/types/document';
 import { userProfileData } from '@/data/mockResumeData';
 
 interface ResumeBuilderProps {
@@ -104,33 +105,9 @@ export default function ResumeBuilder({
   const displayHeaderTitle = headerTitle || defaultHeaderTitle;
   const displayHeaderSubtitle = headerSubtitle || defaultHeaderSubtitle;
   
-  // Mutations for create / update using TanStack Query
-  const createMutation = useMutation({
-    mutationFn: (payload: { github: string; latex: string; base: Partial<UserProfileData>; name?: string; document_type?: string; document_kind?: string }) =>
-      DocumentApiService.createDocument(payload.github, payload.latex, payload.base, payload.name, payload.document_type, payload.document_kind),
-    onSuccess(data) {
-      setDocumentApiId(data.id);
-      if (data?.document_name) setDocumentName(data.document_name);
-      queryClient.setQueryData(['document', data.id], data);
-    },
-    onError(err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to create document';
-      setSaveError(message);
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (payload: { id: string; latex: string; base: Partial<UserProfileData>; name?: string; document_type?: string; document_kind?: string }) =>
-      DocumentApiService.updateDocument(payload.id, payload.latex, payload.base, payload.name, payload.document_type, payload.document_kind),
-    onSuccess(data) {
-      if (data?.document_name) setDocumentName(data.document_name);
-      queryClient.setQueryData(['document', data.id], data);
-    },
-    onError(err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to update document';
-      setSaveError(message);
-    },
-  });
+  // Use centralized mutation hooks for create / update
+  const createMutation = useCreateDocument();
+  const updateMutation = useUpdateDocument();
 
   // Load saved localStorage data (if present) when opening an existing resume
   useEffect(() => {

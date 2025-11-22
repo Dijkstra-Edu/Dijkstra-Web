@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { userProfileData } from "@/data/mockResumeData";
-import { UserProfileData, Education, Project } from "@/types/resume";
+import { UserProfileData, Education, Project } from "@/types/document";
 import { formatLocation, handleStringArrayInput } from "@/lib/resume-utils";
 
 interface ResumeFormProps {
