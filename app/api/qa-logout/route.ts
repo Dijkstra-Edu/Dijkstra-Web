@@ -3,9 +3,7 @@ import { NextResponse } from "next/server";
 import { serialize } from "cookie";
 import { ENV } from "@/lib/constants";
 
-export async function POST(req: Request) {
-  console.log("QA logout API called");
-  
+export async function POST(req: Request) {  
   // Allow this in any environment for cleanup purposes
   try {
     const url = new URL(req.url);
@@ -21,7 +19,6 @@ export async function POST(req: Request) {
     };
     
     const cookieHeader = serialize("qa_verified", "", cookieOptions);
-    console.log("Setting cookie header:", cookieHeader);
     
     const res = NextResponse.json({ 
       success: true, 
@@ -34,7 +31,6 @@ export async function POST(req: Request) {
     // Set multiple cookie clearing headers to be sure
     res.headers.set("Set-Cookie", cookieHeader);
     
-    console.log("QA cookie cleared successfully");
     return res;
   } catch (err) {
     console.error("QA logout error:", err);

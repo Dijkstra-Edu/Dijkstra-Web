@@ -13,12 +13,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Username parameter is required' }, { status: 400 });
     }
 
-    console.log('Fetching user data for:', username);
     const data = await getUserByGithubUsername(username, allData);
-    console.log('User data fetched successfully for:', username);
     return NextResponse.json(data);
   } catch (error) {
-    console.error('User data fetch error:', error);
     
     if (error instanceof Error) {
       if (error.message.includes('Backend service unavailable')) {

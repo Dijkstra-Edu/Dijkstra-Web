@@ -250,14 +250,11 @@ export default function DijkstraGPT() {
       const response = await callGemini("test");
       if (response) {
         setApiStatus('active');
-        console.log('✅ API key is active');
       } else {
         setApiStatus('inactive');
-        console.log('❌ API key is not configured or invalid');
       }
     } catch (error) {
       setApiStatus('inactive');
-      console.error('❌ API check failed:', error);
     }
   };
 

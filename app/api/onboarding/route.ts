@@ -14,10 +14,8 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await checkOnboardingStatus(username);
-    console.log('Onboarding status check result:', data);
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Onboarding status check error:', error);
     
     if (error instanceof Error) {
       if (error.message.includes('Backend service unavailable')) {
@@ -76,16 +74,6 @@ export async function POST(request: NextRequest) {
     if (!body.github_user_name) {
       body.github_user_name = session.user.login;
     }
-
-    console.log('Calling backend for onboarding submission');
-    console.log('Request data:', { 
-      github_user_name: body.github_user_name,
-      primary_specialization: body.primary_specialization,
-      secondary_specializations: body.secondary_specializations,
-      selectedTools: `${body.selectedTools?.length || 0} tools`,
-      dreamCompany: body.dreamCompany,
-      dreamRole: body.dreamRole,
-    });
     
     const data = await submitOnboarding(body);
     console.log('User onboarded successfully:', data.id);

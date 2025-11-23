@@ -11,6 +11,7 @@ import {
   Globe,
   Home,
   Keyboard,
+  Key,
   Lock,
   Paintbrush,
   Plus,
@@ -58,6 +59,7 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import APIKeysPage from "@/components/settings/api-keys-page";
 import {
   IconBrandDiscord,
   IconBrandGithub,
@@ -69,8 +71,8 @@ import {
   IconLayoutDashboard,
 } from "@tabler/icons-react";
 
-const data = {
-  nav: [
+function getNavItems(developerMode: boolean) {
+  const baseNav = [
     { name: "Home", icon: Home },
     { name: "Accounts", icon: User },
     { name: "Notifications", icon: Bell },
@@ -79,9 +81,15 @@ const data = {
     { name: "Accessibility", icon: Keyboard },
     { name: "Privacy & visibility", icon: Lock },
     { name: "Developer Settings", icon: Code },
-    { name: "Advanced", icon: Settings },
-  ],
-};
+  ];
+
+  if (developerMode) {
+    baseNav.push({ name: "API Keys", icon: Key });
+  }
+
+  baseNav.push({ name: "Advanced", icon: Settings });
+  return baseNav;
+}
 
 function NotificationsPage() {
   
@@ -1485,9 +1493,15 @@ export function SettingsDialog({
 }: { open?: boolean; onOpenChange?: (open: boolean) => void } = {}) {
   const [internalOpen, setInternalOpen] = React.useState(false);
   const [activePage, setActivePage] = React.useState("Home");
+  const settings = useSettingsStore();
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = controlledOnOpenChange || setInternalOpen;
+
+  const navItems = React.useMemo(
+    () => getNavItems(settings.developerMode),
+    [settings.developerMode]
+  );
 
   const renderPageContent = () => {
     switch (activePage) {
@@ -1507,6 +1521,8 @@ export function SettingsDialog({
         return <PrivacyVisibilityPage />;
       case "Developer Settings":
         return <DeveloperSettingsPage />;
+      case "API Keys":
+        return <APIKeysPage />;
       case "Advanced":
         return <AdvancedPage />;
       default:
@@ -1538,7 +1554,7 @@ export function SettingsDialog({
               <SidebarGroup>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {data.nav.map((item) => (
+                    {navItems.map((item) => (
                       <SidebarMenuItem key={item.name}>
                         <SidebarMenuButton
                           asChild
