@@ -38,7 +38,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@react-three/fiber": "^9.1.2",
     "@tabler/icons-react": "^3.34.0",
-    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query": "^5.90.9",
     "@tanstack/react-table": "^8.21.3",
     "@tiptap/extension-highlight": "^2.24.2",
     "@tiptap/extension-image": "^2.24.2",

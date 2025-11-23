@@ -10,11 +10,11 @@ import { GenericSectionSkeleton } from "../shared/section-skeleton";
 import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
-export function TestScoresSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
-  const { data: testScores, isLoading, error, refetch } = useTestScores(profileId);
-  const addMutation = useAddTestScore();
-  const updateMutation = useUpdateTestScore();
-  const deleteMutation = useDeleteTestScore();
+export function TestScoresSection({ profileId, githubUserName, isEditing, onToggleEdit }: ProfileSectionProps) {
+  const { data: testScores, isLoading, error, refetch } = useTestScores(githubUserName);
+  const addMutation = useAddTestScore(githubUserName);
+  const updateMutation = useUpdateTestScore(githubUserName);
+  const deleteMutation = useDeleteTestScore(githubUserName);
 
   if (isLoading) return <GenericSectionSkeleton />;
   if (error) return <GenericSectionError error={error} onRetry={() => refetch()} title="Test Scores" />;
@@ -48,10 +48,11 @@ export function TestScoresSection({ profileId, isEditing, onToggleEdit }: Profil
       <CardContent>
         {isEditing ? (
           <TestScoresForm 
+            profileId={profileId}
             testScores={testScores || []}
-            onAdd={(data) => addMutation.mutate({ profileId, data })}
-            onUpdate={(data) => updateMutation.mutate({ profileId, id: data.id, data: data.data })}
-            onDelete={(id) => deleteMutation.mutate({ profileId, id })}
+            onAdd={(data) => addMutation.mutate({ data })}
+            onUpdate={(data) => updateMutation.mutate({ testScoreId: data.id, data: data.data })}
+            onDelete={(id) => deleteMutation.mutate({ testScoreId: id })}
             isAdding={addMutation.isPending}
             isUpdating={updateMutation.isPending}
             isDeleting={deleteMutation.isPending}

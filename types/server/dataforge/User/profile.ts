@@ -1,5 +1,5 @@
 import { UUID } from "crypto"
-import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType } from "../enums"
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType  , CertificationType, TestScoreType} from "../enums"
 
 export interface GetLocationResponse {
     id: UUID
@@ -116,4 +116,45 @@ export interface GetEducationResponse {
     work_done?: string
     cgpa?: number
     tools_used?: Tools[]
+}
+
+export interface GetCertificationsResponse {
+    id:string
+    profile_id: UUID 
+    name: string 
+    type: CertificationType 
+    issuing_organization: string 
+    issue_date: string
+    expiry_date?: string
+    credential_id: string
+    credential_url: string
+    tools?: Tools[]
+    issuing_organization_logo?: string
+}
+
+export interface GetPublicationsResponse {
+    id: UUID
+    profile_id: UUID
+    title: string
+    publisher: string
+    authors: string[]
+    publication_date: string
+    publication_url: string
+    description: string
+    tools?: Tools[]
+    publisher_logo?: string
+    created_at: string
+    updated_at: string
+}
+
+export interface GetTestScoresResponse {
+    id: UUID
+    profile_id: UUID
+    title: string
+    type: TestScoreType
+    score: string
+    test_date: string
+    description?: string
+    created_at: string
+    updated_at: string
 }
