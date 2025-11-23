@@ -6,7 +6,7 @@
 export const API_ENDPOINTS = {
   LOGO_DEV_SEARCH: "https://api.logo.dev/search",
   NOMINATIM_SEARCH: "https://nominatim.openstreetmap.org/search",
-  DIJKSTRA_API: "http://localhost:8000",
+  DATAFORGE_API: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
 } as const
 
 export const API_URLS = {
@@ -24,5 +24,5 @@ export const API_URLS = {
   nominatimSearch: (query: string) => `${API_ENDPOINTS.NOMINATIM_SEARCH}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`,
   
   getUserData: (githubUsername: string, allData: boolean = true) => 
-    `${API_ENDPOINTS.DIJKSTRA_API}/Dijkstra/v1/u/${encodeURIComponent(githubUsername)}${allData ? '?all_data=true' : ''}`,
+    `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/u/${encodeURIComponent(githubUsername)}${allData ? '?all_data=true' : ''}`,
 } as const

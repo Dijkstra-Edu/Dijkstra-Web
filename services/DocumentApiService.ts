@@ -30,7 +30,7 @@ export class DocumentApiService {
     documentType?: string,
     documentKind?: string
   ): Promise<DocumentCreateResponse> {
-    const url = `${API_ENDPOINTS.DIJKSTRA_API}/Dijkstra/v1/document/create`;
+    const url = `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/document/create`;
 
     const payload: DocumentCreateRequest & { document_name?: string } = {
       github_username: githubUsername,
@@ -102,7 +102,7 @@ export class DocumentApiService {
     documentType?: string,
     documentKind?: string
   ): Promise<DocumentUpdateResponse> {
-    const url = `${API_ENDPOINTS.DIJKSTRA_API}/Dijkstra/v1/document/${documentId}`;
+    const url = `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/document/${documentId}`;
 
     // Build payload with only provided fields
     const payload: DocumentUpdateRequest & { document_name?: string } = {};
@@ -202,7 +202,7 @@ export class DocumentApiService {
    * @returns Server response text on success
    */
   static async deleteDocument(documentId: string): Promise<string> {
-    const url = `${API_ENDPOINTS.DIJKSTRA_API}/Dijkstra/v1/document/${documentId}`;
+    const url = `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/document/${documentId}`;
 
     try {
       const response = await fetch(url, {
@@ -234,7 +234,7 @@ export class DocumentApiService {
    * @returns Array of documents (may be empty)
    */
   static async getDocumentsByUser(githubUsername: string): Promise<DocumentResponse[] | null> {
-    const url = `${API_ENDPOINTS.DIJKSTRA_API}/Dijkstra/v1/document/user/${githubUsername}`;
+    const url = `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/document/user/${githubUsername}`;
 
     try {
       const response = await fetch(url, {
@@ -271,7 +271,7 @@ export class DocumentApiService {
    * @returns DocumentResponse
    */
   static async getDocumentById(documentId: string): Promise<DocumentResponse> {
-    const url = `${API_ENDPOINTS.DIJKSTRA_API}/Dijkstra/v1/document/${documentId}`;
+    const url = `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/document/${documentId}`;
 
     try {
       const response = await fetch(url, {
