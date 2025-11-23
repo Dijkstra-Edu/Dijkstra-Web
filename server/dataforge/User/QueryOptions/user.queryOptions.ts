@@ -1,16 +1,15 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import type { OnboardUserRequest } from "../user";
-import { 
-    submitOnboarding, 
-    checkOnboardingStatus, 
-    getPersonalDetailsByGithubUsername, 
-    getUserByGithubUsername, 
-    getFullUserProfileByGithubUsername,
-    getSideCardDetailsByGithubUsername, 
-    updatePersonalDetailsByGithubUsername, 
-    getWorkExperienceByGithubUsername, 
-    addWorkExperienceByGithubUsername, 
-    updateWorkExperienceByWorkExperienceId, 
+import {
+    submitOnboarding,
+    checkOnboardingStatus,
+    getPersonalDetailsByGithubUsername,
+    getUserByGithubUsername,
+    getSideCardDetailsByGithubUsername,
+    updatePersonalDetailsByGithubUsername,
+    getWorkExperienceByGithubUsername,
+    addWorkExperienceByGithubUsername,
+    updateWorkExperienceByWorkExperienceId,
     deleteWorkExperienceByWorkExperienceId,
     getEducationByGithubUsername,
     addEducationByGithubUsername,
@@ -18,7 +17,6 @@ import {
     deleteEducationByEducationId
 } from "../user";
 import { PersonalDetailsData, WorkExperienceData, EducationData } from "@/types/client/profile-section/profile-sections";
-import { userQueryKeys } from "@/lib/user/query-keys";
 
 
 export const onboardUserMutation = mutationOptions({
@@ -37,16 +35,6 @@ export const getUserQuery = (username: string, allData: boolean = false) => quer
     enabled: !!username,
     staleTime: 1000 * 60 * 5, // avoid instant refetch
     gcTime: 1000 * 60 * 30, // keep data cached longer
-});
-
-export const getFullUserProfileQuery = (username: string) => queryOptions({
-    queryKey: userQueryKeys.byGithubFull(username),
-    queryFn: () => getFullUserProfileByGithubUsername(username),
-    enabled: !!username,
-    staleTime: 1000 * 60 * 5, // 5 minutes - avoid instant refetch
-    gcTime: 1000 * 60 * 30, // 30 minutes - keep data cached longer
-    retry: 3, // Retry failed requests 3 times
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
 });
 
 export const getUserSideCardQuery = (username: string) => queryOptions({

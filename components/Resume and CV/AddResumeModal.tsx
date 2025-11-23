@@ -38,10 +38,10 @@ export default function AddResumeModal({
   const { data: session } = useSession();
   const githubUsername = session?.user?.github_user_name || "";
 
-  const { 
-    data: userData, 
+  const {
+    data: userData,
     isLoading: isLoadingUserData,
-    error: userDataError 
+    error: userDataError
   } = useFetchUserData(githubUsername, isOpen);
 
   const defaultTitle = selectedDocType === "cv" ? "My New CV" : "My New Resume";

@@ -328,8 +328,9 @@ const Resume = ({
     if (resumeIdsToDelete.length > 0) {
       try {
         await Promise.all(resumeIdsToDelete.map((id) => deleteMutation.mutateAsync({ id, github: githubUsername })));
-        await queryClient.invalidateQueries({ queryKey: documentsQueryKeys.list(githubUsername) });
+        // No need to invalidate here - the mutation's onSuccess already handles it
       } catch {
+        // On error, invalidate to ensure UI is in sync with backend
         await queryClient.invalidateQueries({ queryKey: documentsQueryKeys.list(githubUsername) });
       }
     }
