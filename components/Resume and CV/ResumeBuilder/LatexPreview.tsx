@@ -2,8 +2,9 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { UserProfileData } from '@/types/resume';
+import { UserProfileData } from '@/types/document';
 import { generateRowBasedLatex, generateDeedyLatex } from '@/lib/latex-generator';
+import { formatLocation } from '@/lib/resume-utils';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -95,7 +96,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                     <div>
                       <span className="font-bold text-sm">{edu.school}</span>
                       <span>, {edu.degree}</span>
-                      {edu.location && <span> -- {edu.location}</span>}
+                      {edu.location && <span> -- {formatLocation(edu.location)}</span>}
                     </div>
                     <div className="text-sm text-gray-600 text-right">
                       {edu.start_date} - {edu.end_date || 'Present'}
@@ -136,7 +137,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                   <div>
                     <span className="font-bold text-sm">{data.experience.title}</span>
                     <span>, {data.experience.company_name}</span>
-                    {data.experience.location && <span> -- {data.experience.location}</span>}
+                    {data.experience.location && <span> -- {formatLocation(data.experience.location)}</span>}
                   </div>
                   <div className="text-sm text-gray-600 text-right">
                     {data.experience.start_date} – {data.experience.end_date || 'Present'}
@@ -220,9 +221,13 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
           <h2 className="text-lg font-bold text-gray-900 border-b border-gray-400 pb-1 mb-4">
             Technologies
           </h2>
-          <div className="space-y-3">
+                    <div className="space-y-3">
             <div className="text-sm">
-              <span className="font-bold">Tools:</span> {data.experience?.tools_used?.join(', ') || 'Python, JavaScript, Java, C++, SQL'}
+              <span className="font-bold">Tools:</span> {(() => {
+                const tools = data.experience?.tools_used;
+                if (!tools) return 'Python, JavaScript, Java, C++, SQL';
+                return typeof tools === 'string' ? tools : Array.isArray(tools) ? tools.join(', ') : String(tools);
+              })()}
             </div>
             
             {data.projects && data.projects.length > 0 && data.projects[0].tools && data.projects[0].tools.length > 0 ? (
@@ -294,13 +299,17 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                     <div className="text-xs text-gray-600">
                       <span>{data.experience.start_date} - {data.experience.end_date || 'Present'}</span>
                       <span className="mx-2">|</span>
-                      <span>{data.experience.location}</span>
+                      <span>{formatLocation(data.experience.location)}</span>
                     </div>
                   </div>
                   <ul className="text-xs leading-relaxed">
-                    {data.experience.work_done?.map((item, i) => (
-                      <li key={i}>• {item}</li>
-                    ))}
+                    {(() => {
+                      const workDone: string | string[] | unknown = data.experience.work_done;
+                      const items: string[] = typeof workDone === 'string' 
+                        ? workDone.split(/[,;]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0)
+                        : Array.isArray(workDone) ? workDone : [];
+                      return items.map((item: string, i: number) => <li key={i}>• {item}</li>);
+                    })()}
                   </ul>
                 </div>
               </div>
@@ -325,9 +334,13 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                       </div>
                     </div>
                     <ul className="text-xs leading-relaxed">
-                      {project.topics?.map((item, i) => (
-                        <li key={i}>• {item}</li>
-                      ))}
+                      {(() => {
+                        const topics: string | string[] | unknown = project.topics;
+                        const items: string[] = typeof topics === 'string'
+                          ? topics.split(/[,;]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0)
+                          : Array.isArray(topics) ? topics : [];
+                        return items.map((item: string, i: number) => <li key={i}>• {item}</li>);
+                      })()}
                     </ul>
                   </div>
                 ))}
@@ -347,7 +360,7 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                   <div key={index} className="mb-3">
                     <div className="font-bold text-sm">{edu.school}</div>
                     <div className="text-xs">{edu.degree} in {edu.field}</div>
-                    <div className="text-xs text-gray-600">{edu.start_date} - {edu.end_date || 'Present'} | {edu.location}</div>
+                    <div className="text-xs text-gray-600">{edu.start_date} - {edu.end_date || 'Present'} | {formatLocation(edu.location)}</div>
                   </div>
                 ))}
               </div>
@@ -360,10 +373,16 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
               </h2>
               
               <div className="mb-3">
+                              <div className="mb-3">
                 <div className="font-bold text-xs">Tools</div>
                 <div className="text-xs">
-                  {data.experience?.tools_used?.join(' • ') || 'Python • JavaScript • React'}
+                  {(() => {
+                    const tools: string | string[] | unknown = data.experience?.tools_used;
+                    if (!tools) return 'Python • JavaScript • React';
+                    return typeof tools === 'string' ? tools.replace(/,/g, ' •') : Array.isArray(tools) ? tools.join(' • ') : String(tools);
+                  })()}
                 </div>
+              </div>
               </div>
               
               {data.projects && data.projects.length > 0 && data.projects[0].tools && data.projects[0].tools.length > 0 && (
@@ -590,7 +609,6 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate PDF');
-      console.error('PDF Error:', err);
     } finally {
       setIsCompiling(false);
     }
@@ -642,8 +660,8 @@ export default function LatexPreview({ data, template = 'deedy', scale = 1 }: La
                     await navigator.clipboard.writeText(latexCode);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
-                  } catch (err) {
-                    console.error("Failed to copy text: ", err);
+                  } catch {
+                    setError('Failed to copy LaTeX code to clipboard');
                   }
                 }}
                 className={`px-2 py-1 text-xs rounded ${

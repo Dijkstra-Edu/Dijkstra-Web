@@ -1,9 +1,20 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse } from "@/types/server/dataforge/User/profile";
-import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
-import { transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest } from "@/types/server/dataforge/transformers";
+import { GetPersonalDetailsResponse, GetWorkExperienceResponse, GetEducationResponse } from "@/types/server/dataforge/User/profile";
+import { PersonalDetailsData, WorkExperienceData, EducationData } from "@/types/client/profile-section/profile-sections";
+import { 
+  transformPersonalDetails, 
+  transformPersonalDetailsUpdateRequest, 
+  transformWorkExperience, 
+  transformWorkExperienceArray, 
+  transformWorkExperienceToRequest, 
+  transformWorkExperienceUpdateRequest,
+  transformEducation,
+  transformEducationArray,
+  transformEducationToRequest,
+  transformEducationUpdateRequest
+} from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -103,13 +114,12 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    
   */
   export async function getUserByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
-    return fetchDataForge<GetUserBasicResponse>(
-      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
-    );
-  }
-
-
-  /**
+      return fetchDataForge<GetUserBasicResponse>(
+        `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+      );
+    }
+  
+    /**
    * Get Side Card Details by GitHub username
    */
   export async function getSideCardDetailsByGithubUsername(username: string): Promise<GetUserSideCardResponse> {

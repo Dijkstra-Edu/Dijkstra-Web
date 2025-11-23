@@ -1,15 +1,27 @@
 // lib/latex-generator.ts
-import { UserProfileData } from "@/types/resume";
+import { UserProfileData } from "@/types/document";
 
-function escapeLatex(text: string): string {
+function escapeLatex(text: string | unknown): string {
   if (!text) return "";
-  return text
+  const str = typeof text === 'string' ? text : String(text);
+  return str
     .replace(/\\/g, "\\textbackslash{}")
     .replace(/[{}]/g, "\\$&")
-    .replace(/\$/g, "\\$")
+    .replace(/\$/g, "\\\$")
     .replace(/[%#&_]/g, "\\$&")
     .replace(/\^/g, "\\textasciicircum{}")
     .replace(/~/g, "\\textasciitilde{}");
+}
+
+function formatLocation(location: string | { city?: string; state?: string; country?: string } | unknown): string {
+  if (!location) return '';
+  if (typeof location === 'string') return location;
+  if (typeof location === 'object' && location !== null) {
+    const loc = location as { city?: string; state?: string; country?: string };
+    const parts = [loc.city, loc.state, loc.country].filter(Boolean);
+    return parts.join(', ');
+  }
+  return '';
 }
 
 export function generateRowBasedLatex(data: Partial<UserProfileData>): string {
@@ -89,9 +101,8 @@ export function generateRowBasedLatex(data: Partial<UserProfileData>): string {
           }`;
           const company = escapeLatex(experience.company_name || "Apple");
           const position = escapeLatex(experience.title || "Software Engineer");
-          const location = experience.location
-            ? ` -- ${escapeLatex(experience.location)}`
-            : " -- Cupertino, CA";
+          const locationStr = formatLocation(experience.location) || "Cupertino, CA";
+          const location = ` -- ${escapeLatex(locationStr)}`;
 
           let expContent = `\\begin{twocolentry}{
             ${dateRange}
@@ -467,15 +478,26 @@ export function generateDeedyLatex(data: Partial<UserProfileData>): string {
   const experienceSection =
     experience
       ? (() => {
-          const responsibilities = experience.work_done || [
+          let responsibilities: string[] = [];
+          const workDone: string | string[] | unknown = experience.work_done || [
             "Developed a cloud-based solution to automate and enhance the engineering process for network installation using AWS and Python.",
           ];
+          
+          if (typeof workDone === 'string') {
+            responsibilities = workDone.split(/[,;]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+          } else if (Array.isArray(workDone)) {
+            responsibilities = workDone;
+          } else {
+            responsibilities = [String(workDone)];
+          }
 
+          const locationStr = formatLocation(experience.location) || "Somewhere, XX";
+          
           return `\\runsubsection{${escapeLatex(experience.company_name || "Company A")}}
 \\descript{| ${escapeLatex(experience.title || "Advanced Development Intern")} }
 \\location{${escapeLatex(experience.start_date || "May 2018")} – ${escapeLatex(
             experience.end_date || "Aug 2018"
-          )} | ${escapeLatex(experience.location || "Somewhere, XX")}}
+          )} | ${escapeLatex(locationStr)}}
 \\vspace{\\topsep} % Hacky fix for awkward extra vertical space
 \\begin{tightemize}
 ${responsibilities.map((resp) => `\\item ${escapeLatex(resp)}`).join("\n")}
@@ -534,7 +556,7 @@ ${descriptions.map((desc) => `\\item ${escapeLatex(desc)}`).join("\n")}
             )}}
 \\location{${escapeLatex(
               edu.end_date || "Expected Dec 2019"
-            )} | ${escapeLatex(edu.location || "Somewhere, XX")}}
+            )} | ${escapeLatex(formatLocation(edu.location) || "Somewhere, XX")}}
 % College of Engineering \\\\
 ${edu.description_general ? escapeLatex(edu.description_general) : "Dean's List (All Semesters)"} \\\\
 \\location{ Cum. GPA: 3.9 / 4.0}

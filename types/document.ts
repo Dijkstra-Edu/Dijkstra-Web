@@ -1,7 +1,7 @@
-// types/resume.ts
-// This file contains all types related to resumes
+// Combined document and resume types.
+// This file centralizes types used by the Resume & CV feature.
 
-// User profile data types
+// User profile data types (migrated from types/resume.ts)
 export interface User {
   id: string;
   created_at: string;
@@ -126,18 +126,19 @@ export interface UserProfileData {
   organizations: Organization[];
 }
 
-// Saved resume data type
-export interface SavedUserProfileData {
-  resumeId: string;
+// Resume metadata and data
+export interface ResumeData {
   title: string;
-  template: 'deedy' | 'row-based';
-  content: Partial<UserProfileData>;
-  lastModified: string;
-  documentId: string;
+  resumeId: string;
   userEmail: string;
   userName: string;
+  documentId: string;
+  documentType?: "resume" | "cv";
+  template?: "deedy" | "row-based";
+  initialData?: Partial<UserProfileData>;
 }
 
+// Saved resume data (stored in localStorage)
 export interface SavedResumeData {
   resumeId: string;
   title: string;
@@ -147,4 +148,66 @@ export interface SavedResumeData {
   documentId: string;
   userEmail: string;
   userName: string;
+  documentType?: 'resume' | 'cv';
 }
+
+// --- Document API types ---
+export interface DocumentCreateRequest {
+  github_username: string;
+  latex: string;
+  base_structure: Partial<UserProfileData>;
+  document_type?: string;
+  document_kind?: string;
+}
+
+export interface DocumentCreateResponse {
+  id: string;
+  profile_id: string;
+  latex: string;
+  document_name?: string;
+  base_structure: Partial<UserProfileData>;
+  created_at: string;
+  updated_at: string;
+  document_type?: string;
+  document_kind?: string;
+}
+
+export interface DocumentUpdateRequest {
+  latex?: string;
+  document_name?: string;
+  base_structure?: Partial<UserProfileData>;
+  document_type?: string;
+  document_kind?: string;
+}
+
+export interface DocumentUpdateResponse {
+  id: string;
+  profile_id: string;
+  latex: string;
+  document_name?: string;
+  base_structure: Partial<UserProfileData>;
+  created_at: string;
+  updated_at: string;
+  document_type?: string;
+  document_kind?: string;
+}
+
+export interface DocumentApiError {
+  detail: {
+    error_code: string;
+    message: string;
+  };
+}
+
+export interface DocumentResponse {
+  id: string;
+  profile_id: string;
+  document_name?: string;
+  latex?: string;
+  base_structure?: Partial<UserProfileData>;
+  created_at: string;
+  updated_at: string;
+  document_type?: string;
+  document_kind?: string;
+}
+

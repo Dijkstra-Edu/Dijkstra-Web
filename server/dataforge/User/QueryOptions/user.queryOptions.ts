@@ -1,7 +1,22 @@
-import { mutationOptions, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
+import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import type { OnboardUserRequest } from "../user";
-import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getWorkExperienceByGithubUsername, addWorkExperienceByGithubUsername, updateWorkExperienceByWorkExperienceId, deleteWorkExperienceByWorkExperienceId, addEducationByGithubUsername, deleteEducationByEducationId, getEducationByGithubUsername, updateEducationByEducationId } from "../user";
-import { EducationData, PersonalDetailsData, WorkExperienceData } from "@/types/client/profile-section/profile-sections";
+import {
+    submitOnboarding,
+    checkOnboardingStatus,
+    getPersonalDetailsByGithubUsername,
+    getUserByGithubUsername,
+    getSideCardDetailsByGithubUsername,
+    updatePersonalDetailsByGithubUsername,
+    getWorkExperienceByGithubUsername,
+    addWorkExperienceByGithubUsername,
+    updateWorkExperienceByWorkExperienceId,
+    deleteWorkExperienceByWorkExperienceId,
+    getEducationByGithubUsername,
+    addEducationByGithubUsername,
+    updateEducationByEducationId,
+    deleteEducationByEducationId
+} from "../user";
+import { PersonalDetailsData, WorkExperienceData, EducationData } from "@/types/client/profile-section/profile-sections";
 
 
 export const onboardUserMutation = mutationOptions({
