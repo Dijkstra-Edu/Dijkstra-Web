@@ -4,6 +4,20 @@ import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
 import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse} from "@/types/server/dataforge/User/profile";
 import { EducationData, PersonalDetailsData, WorkExperienceData ,  CertificationsData, PublicationsData, TestScoresData} from "@/types/client/profile-section/profile-sections";
 import { transformCertificationsArray, transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest, transformCertificationsToRequest, transformCertifications, transformCertificationsUpdateRequest , transformPublications, transformPublicationsArray, transformPublicationsToRequest, transformPublicationsUpdateRequest, transformTestScores, transformTestScoresArray, transformTestScoresToRequest, transformTestScoresUpdateRequest} from "@/types/server/dataforge/transformers";
+import { GetPersonalDetailsResponse, GetWorkExperienceResponse, GetEducationResponse } from "@/types/server/dataforge/User/profile";
+import { PersonalDetailsData, WorkExperienceData, EducationData } from "@/types/client/profile-section/profile-sections";
+import { 
+  transformPersonalDetails, 
+  transformPersonalDetailsUpdateRequest, 
+  transformWorkExperience, 
+  transformWorkExperienceArray, 
+  transformWorkExperienceToRequest, 
+  transformWorkExperienceUpdateRequest,
+  transformEducation,
+  transformEducationArray,
+  transformEducationToRequest,
+  transformEducationUpdateRequest
+} from "@/types/server/dataforge/transformers";
 
 export interface OnboardUserRequest {
     // Required fields
@@ -103,13 +117,12 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    
   */
   export async function getUserByGithubUsername(username: string, allData: boolean = false): Promise<GetUserBasicResponse> {
-    return fetchDataForge<GetUserBasicResponse>(
-      `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
-    );
-  }
-
-
-  /**
+      return fetchDataForge<GetUserBasicResponse>(
+        `/Dijkstra/v1/u/${encodeURIComponent(username)}?all_data=${allData}`
+      );
+    }
+  
+    /**
    * Get Side Card Details by GitHub username
    */
   export async function getSideCardDetailsByGithubUsername(username: string): Promise<GetUserSideCardResponse> {

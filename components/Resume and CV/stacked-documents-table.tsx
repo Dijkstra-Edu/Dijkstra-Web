@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Copy, Download, Trash2 } from "lucide-react";
-import { SavedResumeData } from "@/types/resume";
+import { SavedResumeData } from "@/types/document";
 
 interface ProjectItem {
   id: string;
@@ -107,6 +107,7 @@ export const StackedDocumentsTable = ({ projects, onProjectClick, onDelete, onBu
               />
             </TableHead>
             <TableHead className="text-base font-semibold text-muted-foreground align-middle">Title</TableHead>
+            <TableHead className="text-base font-semibold text-muted-foreground align-middle">Column Type</TableHead>
             <TableHead className="text-base font-semibold text-muted-foreground align-middle">Owner</TableHead>
             <TableHead className="text-base font-semibold text-muted-foreground align-middle">Last modified</TableHead>
             <TableHead className="text-base font-semibold text-muted-foreground align-middle text-right">Actions</TableHead>
@@ -131,6 +132,19 @@ export const StackedDocumentsTable = ({ projects, onProjectClick, onDelete, onBu
                 <TableCell className="text-base text-card-foreground font-inter">
                   {project.title} {!project.isTemplate && (
                     <span className="text-xs text-blue-600 ml-2">(Saved)</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-base text-muted-foreground font-inter">
+                  {project.resumeData?.template === 'deedy' ? (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-md text-sm font-medium">
+                      Double Column
+                    </span>
+                  ) : project.resumeData?.template === 'row-based' ? (
+                    <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-md text-sm font-medium">
+                      Single Column
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">—</span>
                   )}
                 </TableCell>
                 <TableCell className="text-base text-muted-foreground font-inter">
@@ -161,7 +175,7 @@ export const StackedDocumentsTable = ({ projects, onProjectClick, onDelete, onBu
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+              <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                 No documents found.
               </TableCell>
             </TableRow>

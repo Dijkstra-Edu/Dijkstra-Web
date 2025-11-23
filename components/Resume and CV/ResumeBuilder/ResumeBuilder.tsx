@@ -2,10 +2,16 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { UserProfileData } from '@/types/resume';
+import { UserProfileData } from '@/types/document';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
 import { ResumeStorageService } from '@/services/ResumeStorageService';
+import { DocumentApiService } from '@/services/DocumentApiService';
+import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCreateDocument, useUpdateDocument } from '@/hooks/documents/useDocumentMutations';
+import type { DocumentCreateResponse } from '@/types/document';
+import { userProfileData } from '@/data/mockResumeData';
 
 interface ResumeBuilderProps {
   initialData?: Partial<UserProfileData>;
@@ -22,6 +28,8 @@ interface ResumeBuilderProps {
   documentId?: string;
   userEmail?: string;
   userName?: string;
+  githubUsername?: string; // NEW: GitHub username to fetch profile data
+  useApiData?: boolean; // NEW: Flag to enable API data fetching (default: false for backward compatibility)
 }
 
 export default function ResumeBuilder({
@@ -38,19 +46,55 @@ export default function ResumeBuilder({
   resumeTitle,
   documentId,
   userEmail,
-  userName
+  userName,
+  githubUsername,
+  useApiData = false,
 }: ResumeBuilderProps) {
-  const [resumeData, setResumeData] = useState<Partial<UserProfileData>>(initialData);
-  const [leftPanelWidth, setLeftPanelWidth] = useState(50); // Percentage
+  const [resumeData, setResumeData] = useState<Partial<UserProfileData>>(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      return initialData;
+    }
+    if (useApiData && githubUsername) {
+      return {};
+    }
+    return initialData;
+  });
+  const [leftPanelWidth, setLeftPanelWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(!!resumeId); // Loading if resumeId is provided
-  const [previewScale, setPreviewScale] = useState(1); // Scale factor for preview
+  const [isLoading, setIsLoading] = useState(!!resumeId);
+  const [previewScale, setPreviewScale] = useState(1);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [documentApiId, setDocumentApiId] = useState<string | null>(null);
+  const [documentName, setDocumentName] = useState<string>(resumeTitle || '');
   const containerRef = React.useRef<HTMLDivElement>(null);
   const previewContainerRef = React.useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const lastSavedStringRef = React.useRef<string | null>(null);
 
-  // Dynamic titles based on document type
+  // Keep documentName in sync with resumeTitle when no server document exists yet
+  useEffect(() => {
+    if (!documentApiId) {
+      setDocumentName(resumeTitle || '');
+    }
+  }, [resumeTitle, documentApiId]);
+
+  // Initialize documentApiId from incoming prop only when initialData is
+  // present. This avoids treating a new resume as an existing server
+  // document when the prop is present but no server data was loaded.
+  useEffect(() => {
+    if (documentId && initialData && Object.keys(initialData).length > 0) {
+      setDocumentApiId(documentId);
+    }
+  }, [documentId, initialData]);
+
+  useEffect(() => {
+    if (useApiData && Object.keys(resumeData).length === 0) {
+      setResumeData(userProfileData);
+    }
+  }, [useApiData, resumeData]);
+
   const defaultHeaderTitle = documentType === 'cv' 
     ? "LaTeX CV Builder" 
     : "LaTeX Resume Builder";
@@ -61,7 +105,11 @@ export default function ResumeBuilder({
   const displayHeaderTitle = headerTitle || defaultHeaderTitle;
   const displayHeaderSubtitle = headerSubtitle || defaultHeaderSubtitle;
   
-  // Load saved data on mount if resumeId is provided
+  // Use centralized mutation hooks for create / update
+  const createMutation = useCreateDocument();
+  const updateMutation = useUpdateDocument();
+
+  // Load saved localStorage data (if present) when opening an existing resume
   useEffect(() => {
     const loadSavedData = async () => {
       if (resumeId) {
@@ -71,51 +119,91 @@ export default function ResumeBuilder({
           if (savedData && savedData.content) {
             setResumeData(savedData.content);
             setLastSaved(new Date());
+            // restore documentType if present in local storage
+            // (the parent may override via props)
           }
-        } catch (error) {
-          console.error('Error loading resume data:', error);
+        } catch {
+          // ignore
         } finally {
           setIsLoading(false);
         }
       }
     };
-    
+
     loadSavedData();
   }, [resumeId]);
 
-  // Auto-save functionality
+  // Auto-save effect: only call server if data changed since last save
   useEffect(() => {
     if (!resumeId || !resumeData || Object.keys(resumeData).length === 0) return;
 
-    const saveTimer = setTimeout(() => {
-  ResumeStorageService.saveResumeData(
+    const saveTimer = setTimeout(async () => {
+      // Only proceed if data actually changed since last save
+      let currentString: string | null = null;
+      try {
+        currentString = JSON.stringify(resumeData || {});
+      } catch {
+        currentString = null;
+      }
+
+      if (currentString && lastSavedStringRef.current === currentString) {
+        // No changes since last save — skip server update
+        return;
+      }
+
+      // Save to localStorage
+      ResumeStorageService.saveResumeData(
         resumeId,
         resumeData,
         template,
         resumeTitle || 'Untitled Resume',
         documentId || '',
         userEmail || '',
-        userName || ''
+        userName || '',
+        documentType
       );
+
+      if (githubUsername) {
+        try {
+          const latex = template === 'deedy' ? generateDeedyLatex(resumeData) : generateRowBasedLatex(resumeData);
+          const apiDocumentType = template === 'row-based' ? 'row' : 'deedy';
+          const apiDocumentKind = documentType === 'cv' ? 'cv' : 'resume';
+          if (documentApiId) {
+            await updateMutation.mutateAsync({ id: documentApiId, latex, base: resumeData, name: documentName, document_type: apiDocumentType, document_kind: apiDocumentKind });
+          } else {
+            const validation = DocumentApiService.validateDocumentData(githubUsername, latex, resumeData);
+            if (!validation.isValid) {
+              setSaveError(validation.errors.join(', '));
+            } else {
+              const resp = await createMutation.mutateAsync({ github: githubUsername, latex, base: resumeData, name: documentName || resumeTitle || 'Untitled Resume', document_type: apiDocumentType, document_kind: apiDocumentKind });
+              setDocumentApiId((resp as DocumentCreateResponse).id);
+            }
+          }
+
+          // On success update lastSaved snapshot
+          lastSavedStringRef.current = currentString;
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Auto-save failed';
+          setSaveError(errorMessage);
+        }
+      }
+
       setLastSaved(new Date());
-    }, 2000); // Save after 2 seconds of inactivity
+    }, 2000);
 
     return () => clearTimeout(saveTimer);
-  }, [resumeData, resumeId, template, resumeTitle, documentId, userEmail, userName]);
+  }, [resumeData, resumeId, template, resumeTitle, documentId, userEmail, userName, githubUsername, documentApiId, documentName, queryClient, createMutation, updateMutation, documentType]);
 
-  // Calculate preview scale based on container width
   const calculatePreviewScale = useCallback(() => {
     if (!previewContainerRef.current) return;
     
-    // Standard resume width (8.5 inches * 96 DPI = 816px)
     const standardResumeWidth = 816;
     const containerWidth = previewContainerRef.current.clientWidth;
-    const padding = 48; // 24px padding on each side (p-6 = 1.5rem = 24px)
+    const padding = 48;
     const availableWidth = containerWidth - padding;
     
-    // Calculate scale to fit the resume in the available width
     const newScale = Math.min(1, availableWidth / standardResumeWidth);
-    setPreviewScale(Math.max(0.3, newScale)); // Minimum scale of 30%
+    setPreviewScale(Math.max(0.3, newScale));
   }, []);
 
   // Update scale when container resizes
@@ -135,42 +223,71 @@ export default function ResumeBuilder({
     };
   }, [calculatePreviewScale]);
 
-  // Recalculate scale when left panel width changes
   useEffect(() => {
     const timer = setTimeout(() => {
       calculatePreviewScale();
-    }, 100); // Small delay to let the DOM update
+    }, 100);
     
     return () => clearTimeout(timer);
   }, [leftPanelWidth, calculatePreviewScale]);
 
-  // Manual save function
   const handleManualSave = async () => {
     if (resumeId && resumeData && Object.keys(resumeData).length > 0) {
       setIsSaving(true);
+      setSaveError(null);
       try {
-  await ResumeStorageService.saveResumeData(
+        // Save to localStorage
+        await ResumeStorageService.saveResumeData(
           resumeId,
           resumeData,
           template,
           resumeTitle || 'Untitled Resume',
           documentId || '',
           userEmail || '',
-          userName || ''
+          userName || '',
+          documentType
         );
+        
+        // Save to API if GitHub username is available
+        if (githubUsername) {
+          try {
+            const latex = template === 'deedy' ? generateDeedyLatex(resumeData) : generateRowBasedLatex(resumeData);
+            const apiDocumentType = template === 'row-based' ? 'row' : 'deedy';
+            const apiDocumentKind = documentType === 'cv' ? 'cv' : 'resume';
+            if (documentApiId) {
+              await updateMutation.mutateAsync({ id: documentApiId, latex, base: resumeData, name: documentName, document_type: apiDocumentType, document_kind: apiDocumentKind });
+            } else {
+              const validation = DocumentApiService.validateDocumentData(githubUsername, latex, resumeData);
+              if (!validation.isValid) {
+                setSaveError(validation.errors.join(', '));
+              } else {
+                const resp = await createMutation.mutateAsync({ github: githubUsername, latex, base: resumeData, name: documentName || resumeTitle || 'Untitled Resume', document_type: apiDocumentType, document_kind: apiDocumentKind });
+                setDocumentApiId((resp as DocumentCreateResponse).id);
+              }
+            }
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+            setSaveError(errorMessage);
+          }
+        }
+        
         setLastSaved(new Date());
+        try {
+          lastSavedStringRef.current = JSON.stringify(resumeData || {});
+        } catch {}
       } catch (error) {
-        console.error('Error saving resume:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+        setSaveError(errorMessage);
       } finally {
         setIsSaving(false);
       }
     }
   };
 
-  const handleDataChange = (data: Partial<UserProfileData>) => {
+  const handleDataChange = useCallback((data: Partial<UserProfileData>) => {
     setResumeData(data);
     onDataChange?.(data);
-  };
+  }, [onDataChange]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -184,7 +301,6 @@ export default function ResumeBuilder({
     const containerWidth = rect.width;
     const newLeftWidth = ((e.clientX - rect.left) / containerWidth) * 100;
     
-    // Constrain between 20% and 80%
     const constrainedWidth = Math.min(80, Math.max(20, newLeftWidth));
     setLeftPanelWidth(constrainedWidth);
   }, [isDragging]);
@@ -219,16 +335,29 @@ export default function ResumeBuilder({
               <p className="text-sm text-gray-600">{displayHeaderSubtitle}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-500">
-                {isLoading ? 'Loading resume...' :
-                 isSaving ? 'Saving...' :
-                 lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 
-                 'Auto-save enabled'}
+              <div className="flex flex-col items-end">
+                <div className="text-sm text-gray-500">
+                  {isLoading ? 'Loading resume...' :
+                   isSaving ? 'Saving...' :
+                   lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 
+                   'Auto-save enabled'}
+                </div>
+                {saveError && (
+                  <div className="text-xs text-red-600 mt-1">
+                    Error: {saveError}
+                  </div>
+                )}
+                {documentApiId && (
+                  <div className="text-xs text-green-600 mt-1">
+                    Synced to server
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleManualSave}
-                disabled={isLoading || isSaving}
+                disabled={isLoading || isSaving || !githubUsername}
                 className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={!githubUsername ? 'GitHub username required to save' : ''}
               >
                 {isSaving ? 'Saving...' : 'Save Now'}
               </button>
@@ -237,7 +366,6 @@ export default function ResumeBuilder({
         </div>
       )}
 
-      {/* Show loading state while loading saved data */}
       {isLoading ? (
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
@@ -247,9 +375,7 @@ export default function ResumeBuilder({
         </div>
       ) : (
         <>
-          {/* Two Panel Layout with Resizable Divider */}
       <div className="flex w-full max-w-full overflow-hidden" style={{ height: height }} ref={containerRef}>
-        {/* Left Panel - Form - Resizable width */}
         <div 
           className="border-r border-gray-200 bg-gray-50 flex-shrink-0 overflow-hidden"
           style={{ width: `${leftPanelWidth}%` }}
@@ -258,7 +384,7 @@ export default function ResumeBuilder({
             <div className="p-6">
               <div className="bg-white rounded-lg shadow-sm">
                 <ResumeForm
-                  key={resumeId || 'new-resume'} // Force re-mount when loading different resume
+                  key={`${resumeId || 'new-resume'}-${resumeData.user?.id || resumeData.user?.github_user_name || 'no-api'}`}
                   onDataChange={handleDataChange}
                   initialData={resumeData}
                 />
@@ -267,14 +393,12 @@ export default function ResumeBuilder({
           </div>
         </div>
 
-        {/* Resizable Divider */}
         <div
           className={`w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors relative group ${
             isDragging ? 'bg-blue-500' : ''
           }`}
           onMouseDown={handleMouseDown}
         >
-          {/* Drag handle indicator */}
           <div className="absolute inset-y-0 left-1/2 transform -translate-x-1/2 w-1 bg-gray-400 group-hover:bg-blue-600 transition-colors"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-12 bg-white border border-gray-300 rounded-md shadow-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <div className="flex flex-col space-y-0.5">
@@ -284,7 +408,6 @@ export default function ResumeBuilder({
           </div>
         </div>
 
-        {/* Right Panel - Preview - Resizable width */}
         <div 
           className="bg-white flex-shrink-0 overflow-hidden"
           style={{ width: `${100 - leftPanelWidth}%` }}
