@@ -36,9 +36,8 @@ const TEST_SCORE_TYPES: { value: TestScoreType; label: string }[] = [
 ];
 
 interface TestScoresFormProps {
-  profileId: string;
   testScores: TestScoresData[];
-  onAdd: (data: Omit<TestScoresData, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onAdd: (data: Omit<TestScoresData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
   onUpdate: (data: { id: string; data: Partial<TestScoresData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
@@ -48,7 +47,6 @@ interface TestScoresFormProps {
 }
 
 export function TestScoresForm({
-  profileId,
   testScores,
   onAdd,
   onUpdate,
@@ -79,7 +77,6 @@ export function TestScoresForm({
   const onSubmit = (data: TestScoresFormData) => {
     try {
       onAdd({
-        profileId: profileId,
         ...data,
         type: data.type as TestScoreType,
       });

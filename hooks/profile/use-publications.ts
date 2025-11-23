@@ -2,50 +2,51 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  getPublicationsQuery, 
+  publicationsQuery, 
   addPublicationMutation, 
-  updatePublicationsMutation, 
-  deletePublicationsMutation 
-} from '@/server/dataforge/User/QueryOptions/user.queryOptions';
+  updatePublicationMutation, 
+  deletePublicationMutation 
+} from '@/lib/profile/query-options';
+import { profileQueryKeys } from '@/lib/profile/query-keys';
 
-export function usePublications(username: string) {
-  return useQuery(getPublicationsQuery(username));
+export function usePublications(userId: string) {
+  return useQuery(publicationsQuery(userId));
 }
 
-export function useAddPublication(username: string) {
+export function useAddPublication() {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...addPublicationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['publications', username] 
+        queryKey: profileQueryKeys.publications.list(profileId) 
       });
     },
   });
 }
 
-export function useUpdatePublication(username: string) {
+export function useUpdatePublication() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...updatePublicationsMutation,
-    onSuccess: () => {
+    ...updatePublicationMutation,
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['publications', username] 
+        queryKey: profileQueryKeys.publications.list(profileId) 
       });
     },
   });
 }
 
-export function useDeletePublication(username: string) {
+export function useDeletePublication() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...deletePublicationsMutation,
-    onSuccess: () => {
+    ...deletePublicationMutation,
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['publications', username] 
+        queryKey: profileQueryKeys.publications.list(profileId) 
       });
     },
   });

@@ -1,48 +1,52 @@
 // Custom hook for certifications
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+  certificationsQuery, 
+  addCertificationMutation, 
+  updateCertificationMutation, 
+  deleteCertificationMutation 
+} from '@/lib/profile/query-options';
+import { profileQueryKeys } from '@/lib/profile/query-keys';
 
-
-import { getCertificationsQuery, addCertificationMutation, updateCertificationsMutation, deleteCertificationsMutation } from '@/server/dataforge/User/QueryOptions/user.queryOptions';
-
-export function useCertifications(username: string) {
-  return useQuery(getCertificationsQuery(username));
+export function useCertifications(userId: string) {
+  return useQuery(certificationsQuery(userId));
 }
 
-export function useAddCertification(username: string) {
+export function useAddCertification() {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...addCertificationMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['certifications', username]
+        queryKey: profileQueryKeys.certifications.list(profileId) 
       });
     },
   });
 }
 
-export function useUpdateCertification(username: string) {
+export function useUpdateCertification() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...updateCertificationsMutation,
-    onSuccess: () => {
+    ...updateCertificationMutation,
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['certifications', username]  
+        queryKey: profileQueryKeys.certifications.list(profileId) 
       });
     },
   });
 }
 
-export function useDeleteCertification(username: string) {
+export function useDeleteCertification() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...deleteCertificationsMutation,
-    onSuccess: () => {
+    ...deleteCertificationMutation,
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['certifications', username] 
+        queryKey: profileQueryKeys.certifications.list(profileId) 
       });
     },
   });

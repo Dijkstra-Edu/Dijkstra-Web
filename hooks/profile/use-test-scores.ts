@@ -2,50 +2,51 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  getTestScoresQuery, 
+  testScoresQuery, 
   addTestScoreMutation, 
-  updateTestScoresMutation, 
-  deleteTestScoresMutation 
-} from '@/server/dataforge/User/QueryOptions/user.queryOptions';
+  updateTestScoreMutation, 
+  deleteTestScoreMutation 
+} from '@/lib/profile/query-options';
+import { profileQueryKeys } from '@/lib/profile/query-keys';
 
-export function useTestScores(username: string) {
-  return useQuery(getTestScoresQuery(username));
+export function useTestScores(userId: string) {
+  return useQuery(testScoresQuery(userId));
 }
 
-export function useAddTestScore(username: string) {
+export function useAddTestScore() {
   const queryClient = useQueryClient();
   
   return useMutation({
     ...addTestScoreMutation,
-    onSuccess: () => {
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['test-scores', username] 
+        queryKey: profileQueryKeys.testScores.list(profileId) 
       });
     },
   });
 }
 
-export function useUpdateTestScore(username: string) {
+export function useUpdateTestScore() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...updateTestScoresMutation,
-    onSuccess: () => {
+    ...updateTestScoreMutation,
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['test-scores', username] 
+        queryKey: profileQueryKeys.testScores.list(profileId) 
       });
     },
   });
 }
 
-export function useDeleteTestScore(username: string) {
+export function useDeleteTestScore() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...deleteTestScoresMutation,
-    onSuccess: () => {
+    ...deleteTestScoreMutation,
+    onSuccess: (_, { profileId }) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['test-scores', username] 
+        queryKey: profileQueryKeys.testScores.list(profileId) 
       });
     },
   });

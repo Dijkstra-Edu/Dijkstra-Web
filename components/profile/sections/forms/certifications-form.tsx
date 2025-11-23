@@ -23,10 +23,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { certificationsSchema, type CertificationsFormData } from "@/lib/profile/schemas";
+import { parseSkillsString } from "@/lib/profile/profile-utils";
 import type { CertificationsData, CertificationType, Tools } from "@/types/client/profile-section/profile-sections";
 
 const CERTIFICATION_TYPES: { value: CertificationType; label: string }[] = [
@@ -36,9 +36,8 @@ const CERTIFICATION_TYPES: { value: CertificationType; label: string }[] = [
 ];
 
 interface CertificationsFormProps {
-  profileId: string;
   certifications: CertificationsData[];
-  onAdd: (data: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onAdd: (data: Omit<CertificationsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
   onUpdate: (data: { id: string; data: Partial<CertificationsData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
@@ -48,7 +47,6 @@ interface CertificationsFormProps {
 }
 
 export function CertificationsForm({
-  profileId,
   certifications,
   onAdd,
   onUpdate,
@@ -84,7 +82,6 @@ export function CertificationsForm({
     try {
       onAdd({
         ...data,
-        profileId: profileId,
         type: data.type as CertificationType,
         tools: data.tools as Tools[],
         credentialId: data.credentialId || "",
@@ -138,6 +135,16 @@ export function CertificationsForm({
       onDelete(id);
       toast.success("Certification deleted successfully!");
     }
+  };
+
+  const handleToolsChange = (toolsString: string) => {
+    const tools = parseSkillsString(toolsString);
+    form.setValue("tools", tools);
+  };
+
+  const handleEditToolsChange = (toolsString: string) => {
+    const tools = parseSkillsString(toolsString);
+    editForm.setValue("tools", tools);
   };
 
   return (
@@ -255,7 +262,7 @@ export function CertificationsForm({
                   name="credentialId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Credential ID </FormLabel>
+                      <FormLabel>Credential ID (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., AWS-DEV-123456" {...field} />
                       </FormControl>
@@ -269,7 +276,7 @@ export function CertificationsForm({
                   name="credentialUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Credential URL </FormLabel>
+                      <FormLabel>Credential URL (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="https://aws.amazon.com/verification" {...field} />
                       </FormControl>
@@ -284,12 +291,12 @@ export function CertificationsForm({
                 name="tools"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Technologies</FormLabel>
+                    <FormLabel>Technologies (comma-separated)</FormLabel>
                     <FormControl>
-                      <ToolsMultiSelect
-                        value={field.value as Tools[] || []}
-                        onChange={field.onChange}
-                        placeholder="Select tools and technologies"
+                      <Input
+                        placeholder="AWS, CLOUD, PYTHON"
+                        value={field.value?.join(", ") || ""}
+                        onChange={(e) => handleToolsChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -378,72 +385,12 @@ export function CertificationsForm({
                   
                   <FormField
                     control={editForm.control}
-                    name="issuingOrganizationLogo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Organization Logo URL (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://example.com/logo.png" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={editForm.control}
                     name="issueDate"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Issue Date</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={editForm.control}
-                    name="expiryDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Expiry Date (Optional)</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={editForm.control}
-                    name="credentialId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Credential ID (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., AWS-DEV-123456" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={editForm.control}
-                    name="credentialUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Credential URL (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://aws.amazon.com/verification" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -456,12 +403,12 @@ export function CertificationsForm({
                   name="tools"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Technologies</FormLabel>
+                      <FormLabel>Technologies (comma-separated)</FormLabel>
                       <FormControl>
-                        <ToolsMultiSelect
-                          value={field.value as Tools[] || []}
-                          onChange={field.onChange}
-                          placeholder="Select tools and technologies"
+                        <Input
+                          placeholder="AWS, CLOUD, PYTHON"
+                          value={field.value?.join(", ") || ""}
+                          onChange={(e) => handleEditToolsChange(e.target.value)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -487,36 +434,12 @@ export function CertificationsForm({
           ) : (
             // Display Mode
             <div className="space-y-3">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4 flex-1 min-w-0">
-                  {certification.issuingOrganizationLogo ? (
-                    <img
-                      src={certification.issuingOrganizationLogo}
-                      alt={`${certification.issuingOrganization} logo`}
-                      className="w-16 h-16 rounded-lg object-contain border bg-white flex-shrink-0"
-                    />
-                  ) : (
-                    <img
-                      src={`/abstract-geometric-shapes.png?key=kh3mj&height=48&width=48`}
-                      alt={`${certification.issuingOrganization || 'organization'} logo`}
-                      className="w-16 h-16 rounded-lg object-cover border flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h5 className="font-medium">{certification.name}</h5>
-                    <p className="text-sm text-muted-foreground">{certification.issuingOrganization}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Issued: {new Date(certification.issueDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                      {certification.expiryDate && ` • Expires: ${new Date(certification.expiryDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`}
-                    </p>
-                    {certification.credentialId && (
-                      <p className="text-xs text-muted-foreground">
-                        Credential ID: {certification.credentialId}
-                      </p>
-                    )}
-                  </div>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h5 className="font-medium">{certification.name}</h5>
+                  <p className="text-sm text-muted-foreground">{certification.issuingOrganization}</p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2">
                   <Button
                     size="sm"
                     variant="outline"
@@ -534,18 +457,16 @@ export function CertificationsForm({
                   </Button>
                 </div>
               </div>
-              {certification.tools && certification.tools.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {certification.tools.map((tool) => (
-                    <span
-                      key={tool}
-                      className="px-2 py-1 bg-muted rounded-md text-xs"
-                    >
-                      {tool}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className="flex flex-wrap gap-1">
+                {certification.tools?.map((tool) => (
+                  <span
+                    key={tool}
+                    className="px-2 py-1 bg-muted rounded-md text-xs"
+                  >
+                    {tool}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
