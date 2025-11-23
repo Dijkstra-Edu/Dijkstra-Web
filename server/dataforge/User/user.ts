@@ -1,11 +1,6 @@
 import { Rank, Tools, Domain } from "@/types/server/dataforge/enums";
 import { fetchDataForge } from "../client";
 import { GetUserSideCardResponse } from "@/types/server/dataforge/User/user";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse} from "@/types/server/dataforge/User/profile";
-import { EducationData, PersonalDetailsData, WorkExperienceData ,  CertificationsData, PublicationsData, TestScoresData} from "@/types/client/profile-section/profile-sections";
-import { transformCertificationsArray, transformEducation, transformEducationArray, transformEducationToRequest, transformEducationUpdateRequest, transformPersonalDetails, transformPersonalDetailsUpdateRequest, transformWorkExperience, transformWorkExperienceArray, transformWorkExperienceToRequest, transformWorkExperienceUpdateRequest, transformCertificationsToRequest, transformCertifications, transformCertificationsUpdateRequest , transformPublications, transformPublicationsArray, transformPublicationsToRequest, transformPublicationsUpdateRequest, transformTestScores, transformTestScoresArray, transformTestScoresToRequest, transformTestScoresUpdateRequest} from "@/types/server/dataforge/transformers";
-import { GetPersonalDetailsResponse, GetWorkExperienceResponse, GetEducationResponse } from "@/types/server/dataforge/User/profile";
-import { PersonalDetailsData, WorkExperienceData, EducationData } from "@/types/client/profile-section/profile-sections";
 import { 
   transformPersonalDetails, 
   transformPersonalDetailsUpdateRequest, 
@@ -16,8 +11,22 @@ import {
   transformEducation,
   transformEducationArray,
   transformEducationToRequest,
-  transformEducationUpdateRequest
+  transformEducationUpdateRequest,
+  transformCertifications,
+  transformCertificationsArray,
+  transformCertificationsToRequest,
+  transformCertificationsUpdateRequest,
+  transformPublications,
+  transformPublicationsArray,
+  transformPublicationsToRequest,
+  transformPublicationsUpdateRequest,
+  transformTestScores,
+  transformTestScoresArray,
+  transformTestScoresToRequest,
+  transformTestScoresUpdateRequest
 } from "@/types/server/dataforge/transformers";
+import { PersonalDetailsData, WorkExperienceData, EducationData, CertificationsData, PublicationsData, TestScoresData } from "@/types/client/profile-section/profile-sections";
+import { GetPersonalDetailsResponse, GetWorkExperienceResponse, GetEducationResponse, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse } from "@/types/server/dataforge/User/profile";
 
 export interface OnboardUserRequest {
     // Required fields
