@@ -6,7 +6,7 @@
 export const API_ENDPOINTS = {
   LOGO_DEV_SEARCH: "https://api.logo.dev/search",
   NOMINATIM_SEARCH: "https://nominatim.openstreetmap.org/search",
-  DATAFORGE_API: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
+  DATAFORGE_API: process.env.NEXT_PUBLIC_DATAFORGE_SERVICE_URL ?? "http://localhost:8000",
 } as const
 
 export const API_URLS = {

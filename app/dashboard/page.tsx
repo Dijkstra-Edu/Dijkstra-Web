@@ -31,7 +31,7 @@ export default function Page() {
   async function getCertificateData() {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Dijkstra/test/certificate/data/`
+        `${process.env.NEXT_PUBLIC_DATAFORGE_SERVICE_URL}/Dijkstra/test/certificate/data/`
       );
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
       return await res.json();
