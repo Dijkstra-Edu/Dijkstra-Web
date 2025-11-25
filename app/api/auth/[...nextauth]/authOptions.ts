@@ -144,6 +144,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           // Assume requires onboarding if we can't check
+          console.error('Failed to fetch DataForge auth data:', error);
           newToken.requires_onboarding = true;
           newToken.github_user_name = githubUsername;
         }
