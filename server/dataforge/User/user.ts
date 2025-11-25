@@ -116,7 +116,6 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
    * Submit onboarding data
    */
   export async function submitOnboarding(data: OnboardUserRequest): Promise<OnboardUserResponse> {
-    console.log("Access Token in submitOnboarding:", data.access_token);
     return fetchDataForge<OnboardUserResponse>('/Dijkstra/v1/u/onboard', {
       method: 'POST',
       body: JSON.stringify(data),
