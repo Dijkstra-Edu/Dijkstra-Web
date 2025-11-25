@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
     if (!body.github_user_name) {
       body.github_user_name = session.user.login;
     }
+    body.access_token = (session.user as any).access_token;
 
     console.log('Calling backend for onboarding submission');
     console.log('Request data:', { 
