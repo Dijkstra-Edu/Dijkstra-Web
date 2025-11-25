@@ -49,6 +49,7 @@ export interface OnboardUserRequest {
     rank?: Rank;
     streak?: number;
     dream_company_logo?: string;
+    access_token?: string;
   }
   
   export interface OnboardUserResponse {

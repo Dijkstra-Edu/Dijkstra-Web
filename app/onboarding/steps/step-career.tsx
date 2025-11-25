@@ -113,9 +113,9 @@ export function CareerStep({
       console.error("LinkedIn or LeetCode username not found");
       return;
     }
-
     mutation.mutate({
       first_name: session?.user?.name?.split(" ")[0] || session?.user?.name,
+      access_token: (session?.user as any)?.access_token,
       middle_name: session?.user?.name?.split(" ")[1] || undefined,
       last_name: session?.user?.name?.split(" ")[2] || undefined,
       github_user_name: githubUsername,
