@@ -9,3 +9,83 @@ export function getGitripperBaseUrl(): string {
     }
     return baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
   }
+  
+// Convert timeRange to date range
+function getDateRange(timeRange: string) {
+  const end = new Date()
+  const start = new Date()
+
+  const days =
+    timeRange === "7d" ? 7 :
+    timeRange === "30d" ? 30 : 90
+
+  start.setDate(end.getDate() - days)
+
+  return {
+    startTime: start.toISOString().slice(0, 10),
+    endTime: end.toISOString().slice(0, 10),
+  }
+}
+
+type ApiCommit = {
+  date: string
+  commitCount: number
+}
+
+type ApiResponse = {
+  commitsByDate: ApiCommit[]
+}
+
+export async function getGithubCommitInformation(
+  timeRange: string,
+  loginId: string
+): Promise<{ date: string; Github: number }[]> {
+
+  const { startTime, endTime } = getDateRange(timeRange)
+
+  const url = `http://localhost:7060/userCommitData/${loginId}/${startTime}/${endTime}`
+  console.log("Fetching commits:", url)
+
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error("Failed to fetch GitHub commits")
+  }
+
+  const raw: ApiResponse = await res.json()
+  console.log("Raw commit data:", raw)
+
+  const commits = raw?.commitsByDate ?? []
+
+  return normalizeMissingDates(commits, startTime, endTime)
+}
+
+function normalizeMissingDates(
+  data: { date: string; commitCount: number }[],
+  start: string,
+  end: string
+): { date: string; Github: number }[] {
+
+  const map = new Map<string, number>()
+
+  for (const item of data) {
+    map.set(item.date, item.commitCount)
+  }
+
+  const result: { date: string; Github: number }[] = []
+
+  const cur = new Date(start)
+  const endDate = new Date(end)
+
+  while (cur <= endDate) {
+    const date = cur.toISOString().slice(0, 10)
+
+    result.push({
+      date,
+      Github: map.get(date) ?? 0
+    })
+
+    cur.setDate(cur.getDate() + 1)
+  }
+
+  return result
+}
