@@ -1095,95 +1095,10 @@ function AccessibilityPage() {
   );
 }
 
-function PrivacyVisibilityPage() {
-  const settings = useSettingsStore();
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium">Privacy & visibility</h3>
-        <p className="text-sm text-muted-foreground">
-          Control your privacy and who can see your information
-        </p>
-      </div>
-      <Separator />
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Profile visibility</Label>
-          <RadioGroup
-            value={settings.profileVisibility}
-            onValueChange={settings.setProfileVisibility}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="public" id="public" />
-              <Label htmlFor="public">Public</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="friends" id="friends" />
-              <Label htmlFor="friends">Friends only</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="private" id="private" />
-              <Label htmlFor="private">Private</Label>
-            </div>
-          </RadioGroup>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Show online status</Label>
-            <p className="text-sm text-muted-foreground">
-              Let others see when you're online
-            </p>
-          </div>
-          <Switch
-            checked={settings.showOnlineStatus}
-            onCheckedChange={settings.setShowOnlineStatus}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Show activity</Label>
-            <p className="text-sm text-muted-foreground">
-              Display your recent activity
-            </p>
-          </div>
-          <Switch
-            checked={settings.showActivity}
-            onCheckedChange={settings.setShowActivity}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Allow search engines</Label>
-            <p className="text-sm text-muted-foreground">
-              Let search engines index your profile
-            </p>
-          </div>
-          <Switch
-            checked={settings.allowSearchEngines}
-            onCheckedChange={settings.setAllowSearchEngines}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Data collection</Label>
-            <p className="text-sm text-muted-foreground">
-              Allow analytics and usage data collection
-            </p>
-          </div>
-          <Switch
-            checked={settings.dataCollection}
-            onCheckedChange={settings.setDataCollection}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DeveloperSettingsPage() {
   const settings = useSettingsStore();
   const [showSupabaseKey, setShowSupabaseKey] = React.useState(false);
+  const [showSupabaseUrl, setShowSupabaseUrl] = React.useState(false);
   const [showGeminiKey, setShowGeminiKey] = React.useState(false);
 
   return (
@@ -1219,81 +1134,13 @@ function DeveloperSettingsPage() {
               API keys are stored securely in your browser's local storage and
               are only accessible on this device. Never share your API keys with
               others.
-
-              To Be Fixed, this is NOT THE RIGHT WAY TO DO THIS
             </p>
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="supabase-key">Supabase Key</Label>
-          <p className="text-sm text-muted-foreground">
-            API key for storing user chat data from Dijkstra GPT in Supabase
-          </p>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                id="supabase-key"
-                type={showSupabaseKey ? "text" : "password"}
-                placeholder="Enter your Supabase API key"
-                value={settings.supabaseKey}
-                onChange={(e) => settings.setSupabaseKey(e.target.value)}
-                className="pr-10"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                onClick={() => setShowSupabaseKey(!showSupabaseKey)}
-              >
-                {showSupabaseKey ? (
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                )}
-              </Button>
-            </div>
-          </div>
-          {settings.supabaseKey && (
-            <p className="text-xs text-green-600 dark:text-green-400">
-              ✓ Key saved and accessible throughout the app
-            </p>
-          )}
-        </div>
-
+        {/* Gemini API Key */}
         <div className="space-y-2">
           <Label htmlFor="gemini-key">Gemini API Key</Label>
           <p className="text-sm text-muted-foreground">
@@ -1355,6 +1202,144 @@ function DeveloperSettingsPage() {
             </div>
           </div>
           {settings.geminiKey && (
+            <p className="text-xs text-green-600 dark:text-green-400">
+              ✓ Key saved and accessible throughout the app
+            </p>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* Supabase URL */}
+        <div className="space-y-2">
+          <Label htmlFor="supabase-url">Supabase Project URL</Label>
+          <p className="text-sm text-muted-foreground">
+            Your Supabase project URL (e.g., https://xxxxx.supabase.co)
+          </p>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                id="supabase-url"
+                type={showSupabaseUrl ? "text" : "password"}
+                placeholder="https://xxxxx.supabase.co"
+                value={settings.supabaseUrl}
+                onChange={(e) => settings.setSupabaseUrl(e.target.value)}
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowSupabaseUrl(!showSupabaseUrl)}
+              >
+                {showSupabaseUrl ? (
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                )}
+              </Button>
+            </div>
+          </div>
+          {settings.supabaseUrl && (
+            <p className="text-xs text-green-600 dark:text-green-400">
+              ✓ URL saved and accessible throughout the app
+            </p>
+          )}
+        </div>
+
+        {/* Supabase Key */}
+        <div className="space-y-2">
+          <Label htmlFor="supabase-key">Supabase Anon Key</Label>
+          <p className="text-sm text-muted-foreground">
+            API key for storing user chat data in your Supabase bucket
+          </p>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                id="supabase-key"
+                type={showSupabaseKey ? "text" : "password"}
+                placeholder="Enter your Supabase anon key"
+                value={settings.supabaseKey}
+                onChange={(e) => settings.setSupabaseKey(e.target.value)}
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowSupabaseKey(!showSupabaseKey)}
+              >
+                {showSupabaseKey ? (
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                )}
+              </Button>
+            </div>
+          </div>
+          {settings.supabaseKey && (
             <p className="text-xs text-green-600 dark:text-green-400">
               ✓ Key saved and accessible throughout the app
             </p>
@@ -1508,7 +1493,7 @@ export function SettingsDialog({
       case "Developer Settings":
         return <DeveloperSettingsPage />;
       case "Advanced":
-        return <AdvancedPage />;
+        return <AdvancedPage />;  
       default:
         return <HomePage />;
     }
