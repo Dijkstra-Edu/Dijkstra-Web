@@ -159,6 +159,7 @@ export const useSettingsStore = create<SettingsStore>()(
       webhookUrl: '',
 
       // API keys for Dijkstra GPT
+      supabaseUrl: '',
       supabaseKey: '',
       geminiKey: '',
 
@@ -243,6 +244,7 @@ export const useSettingsStore = create<SettingsStore>()(
       setApiKey: (value) => set({ apiKey: value }),
       setWebhookUrl: (value) => set({ webhookUrl: value }),
 
+      setSupabaseUrl: (value) => set({ supabaseUrl: value }),
       setSupabaseKey: (value) => set({ supabaseKey: value }),
       setGeminiKey: (value) => set({ geminiKey: value }),
 
@@ -314,6 +316,7 @@ export const useSettingsStore = create<SettingsStore>()(
         betaFeatures: state.betaFeatures,
         apiKey: state.apiKey,
         webhookUrl: state.webhookUrl,
+        supabaseUrl: state.supabaseUrl,
         supabaseKey: state.supabaseKey,
         geminiKey: state.geminiKey,
         cacheSize: state.cacheSize,
