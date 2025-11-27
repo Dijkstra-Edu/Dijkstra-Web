@@ -1,3 +1,4 @@
+
 /**
  * Get the Gitripper base URL from environment variables
  * @throws Error if NEXT_PUBLIC_GITRIPPER_SERVICE_URL is not set
@@ -8,7 +9,7 @@ export function getGitripperBaseUrl(): string {
       throw new Error('NEXT_PUBLIC_GITRIPPER_SERVICE_URL environment variable is not set');
     }
     return baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
-  }
+}
 
 // Convert timeRange to date range
 function getDateRange(timeRange: string) {
@@ -42,7 +43,7 @@ export async function getGithubCommitInformationByDates(
   loginId: string
 ): Promise<{ date: string; Github: number }[]> {
 
-  const url = `http://localhost:7060/userCommitData/${loginId}/${startDate}/${endDate}`
+  const url = getGitripperBaseUrl() + `/userCommitData/${loginId}/${startDate}/${endDate}`
   console.log("Fetching commits by date:", url)
 
   const res = await fetch(url)
@@ -64,7 +65,7 @@ export async function getGithubCommitInformation(
 
   const { startTime, endTime } = getDateRange(timeRange)
 
-  const url = `http://localhost:7060/userCommitData/${loginId}/${startTime}/${endTime}`
+  const url = getGitripperBaseUrl() + `/userCommitData/${loginId}/${startTime}/${endTime}`
   console.log("Fetching commits:", url)
 
   const res = await fetch(url)
