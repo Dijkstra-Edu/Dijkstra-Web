@@ -9,7 +9,7 @@ export function getGitripperBaseUrl(): string {
     }
     return baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
   }
-  
+
 // Convert timeRange to date range
 function getDateRange(timeRange: string) {
   const end = new Date()
@@ -35,6 +35,27 @@ type ApiCommit = {
 type ApiResponse = {
   commitsByDate: ApiCommit[]
 }
+
+export async function getGithubCommitInformationByDates(
+  startDate: string,
+  endDate: string,
+  loginId: string
+): Promise<{ date: string; Github: number }[]> {
+
+  const url = `http://localhost:7060/userCommitData/${loginId}/${startDate}/${endDate}`
+  console.log("Fetching commits by date:", url)
+
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error("Failed to fetch GitHub commits")
+  }
+
+  const raw: ApiResponse = await res.json()
+  const commits = raw?.commitsByDate ?? []
+
+  return normalizeMissingDates(commits, startDate, endDate)
+}
+
 
 export async function getGithubCommitInformation(
   timeRange: string,
