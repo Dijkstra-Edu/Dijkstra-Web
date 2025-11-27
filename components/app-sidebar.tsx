@@ -20,6 +20,9 @@ import {
   IconTransformPoint,
   IconFidgetSpinner,
   IconArticle,
+  IconCalendarEvent,
+  IconCode,
+  IconQuestionMark,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -37,6 +40,9 @@ import {
 } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { SettingsDialog } from "./settings-dialog";
+import { useState } from "react";
+import { NavSettings } from "./nav-settings";
 
 const data = {
   user: {
@@ -136,11 +142,6 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "/administration/settings",
-      icon: IconSettings,
-    },
-    {
       title: "Get Help",
       url: "/administration/help",
       icon: IconHelp,
@@ -151,7 +152,24 @@ const data = {
       icon: IconSearch,
     },
   ],
-  documents: [
+  challenges: [
+    {
+      name: "Quizzes",
+      url: "/challenges/quizzes",
+      icon: IconQuestionMark,
+    },
+    {
+      name: "Weekly Challenges",
+      url: "/challenges/weekly-challenges",
+      icon: IconCalendarEvent,
+    },
+    {
+      name: "Hackathons",
+      url: "/challenges/hackathons",
+      icon: IconCode,
+    },
+  ],
+  opportunities: [
     {
       name: "Projects Hub",
       url: "/opportunities/projects",
@@ -172,6 +190,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession();
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   if (status === "authenticated") {
     data.user.name = session.user.name || "No name";
@@ -193,8 +212,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavDocuments items={data.challenges} title="Challenges" />
+        <NavDocuments items={data.opportunities} title="Opportunities" />
+        <NavSettings items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

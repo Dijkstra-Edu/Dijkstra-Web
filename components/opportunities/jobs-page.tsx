@@ -15,7 +15,7 @@ export default function JobsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Promo Banner */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container-max mx-auto px-4 py-8">
         <div className="overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 p-8 text-white">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-4">
@@ -41,7 +41,7 @@ export default function JobsPage() {
       </div>
 
       {/* Featured Jobs Section */}
-      <section className="container mx-auto px-4 py-8 space-y-4">
+      <section className="container-max mx-auto px-4 py-8 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold">Featured Opportunities</h2>
@@ -76,7 +76,7 @@ export default function JobsPage() {
 
       {/* Engineering Jobs Section */}
       <section className="bg-muted/30">
-        <div className="container mx-auto px-4 py-8 space-y-4">
+        <div className="container-max mx-auto px-4 py-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold">Engineering Roles</h2>
@@ -111,7 +111,7 @@ export default function JobsPage() {
       </section>
 
       {/* Remote Jobs Section */}
-      <section className="container mx-auto px-4 py-8 space-y-4">
+      <section className="container-max mx-auto px-4 py-8 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold">Remote Opportunities</h2>
