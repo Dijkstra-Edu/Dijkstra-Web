@@ -9,32 +9,14 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import type ReactCalendarHeatmapNS from "react-calendar-heatmap";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { useFetchGithubCommitDataByDateRange } from "@/hooks/gitripper/use-fetch-commit-data";
+import { getYearRange } from "@/lib/utils";
 
 export function ContributionHeatmap() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   type HeatmapValue = { date: Date; count?: number };
-
-  async function fetchContributions(startDate: string, endDate: string) {
-    const res = await fetch(`/api/gitripper?start=${startDate}&end=${endDate}`)
-    if (!res.ok) throw new Error("Failed to load contributions")
-    return res.json()
-  }
-
-  function getYearRange(year: number) {
-    const start = new Date(year, 0, 1)
-    const end = new Date(year, 11, 31)
-    return {
-      startDate: start.toISOString().slice(0, 10),
-      endDate: end.toISOString().slice(0, 10),
-    }
-  }
-
   const { startDate, endDate } = getYearRange(currentYear)
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["github-contributions", startDate, endDate],  
-    queryFn: () => fetchContributions(startDate, endDate),
-    staleTime: 1000 * 60 * 5,
-  })
+  const { data, isLoading, isError } = useFetchGithubCommitDataByDateRange(startDate, endDate)
 
   const yearData: HeatmapValue[] =
   data?.map((d: any) => ({

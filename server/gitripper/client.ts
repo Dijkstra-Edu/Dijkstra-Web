@@ -1,3 +1,5 @@
+import { getDateRange } from "@/lib/utils";
+import { AggregatedCommits } from "@/types/server/gitripper/commit_data";
 
 /**
  * Get the Gitripper base URL from environment variables
@@ -9,32 +11,6 @@ export function getGitripperBaseUrl(): string {
       throw new Error('NEXT_PUBLIC_GITRIPPER_SERVICE_URL environment variable is not set');
     }
     return baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
-}
-
-// Convert timeRange to date range
-function getDateRange(timeRange: string) {
-  const end = new Date()
-  const start = new Date()
-
-  const days =
-    timeRange === "7d" ? 7 :
-    timeRange === "30d" ? 30 : 90
-
-  start.setDate(end.getDate() - days)
-
-  return {
-    startTime: start.toISOString().slice(0, 10),
-    endTime: end.toISOString().slice(0, 10),
-  }
-}
-
-type ApiCommit = {
-  date: string
-  commitCount: number
-}
-
-type ApiResponse = {
-  commitsByDate: ApiCommit[]
 }
 
 export async function getGithubCommitInformationByDates(
@@ -51,7 +27,7 @@ export async function getGithubCommitInformationByDates(
     throw new Error("Failed to fetch GitHub commits")
   }
 
-  const raw: ApiResponse = await res.json()
+  const raw: AggregatedCommits = await res.json()
   const commits = raw?.commitsByDate ?? []
 
   return normalizeMissingDates(commits, startDate, endDate)
@@ -73,9 +49,8 @@ export async function getGithubCommitInformation(
     throw new Error("Failed to fetch GitHub commits")
   }
 
-  const raw: ApiResponse = await res.json()
+  const raw: AggregatedCommits = await res.json()
   console.log("Raw commit data:", raw)
-
   const commits = raw?.commitsByDate ?? []
 
   return normalizeMissingDates(commits, startTime, endTime)

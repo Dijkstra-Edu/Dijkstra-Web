@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import { useQuery } from "@tanstack/react-query"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Card,
@@ -29,6 +28,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
+import { useFetchGithubCommitDataByTimeRange } from "@/hooks/gitripper/use-fetch-commit-data"
 
 export const description = "An interactive area chart"
 const chartConfig = {
@@ -63,15 +63,7 @@ const chartConfig = {
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("90d")
-  const { data = [], isLoading } = useQuery({
-    queryKey: ["github-activity", timeRange],
-    queryFn: async () => {
-        const res = await fetch(`/api/gitripper?range=${timeRange}`)
-        if (!res.ok) throw new Error("Failed to load Gitripper data")
-        return res.json()
-    },
-    staleTime: 1000 * 60 * 5,
-  })
+  const { data = [], isLoading } = useFetchGithubCommitDataByTimeRange(timeRange)
   React.useEffect(() => {
     if (isMobile) {
       setTimeRange("7d")
