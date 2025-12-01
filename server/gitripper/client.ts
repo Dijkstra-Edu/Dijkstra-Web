@@ -1,3 +1,6 @@
+import { getDateRange } from "@/lib/utils";
+import { AggregatedCommits } from "@/types/server/gitripper/commit_data";
+
 /**
  * Get the Gitripper base URL from environment variables
  * @throws Error if NEXT_PUBLIC_GITRIPPER_SERVICE_URL is not set
@@ -8,4 +11,78 @@ export function getGitripperBaseUrl(): string {
       throw new Error('NEXT_PUBLIC_GITRIPPER_SERVICE_URL environment variable is not set');
     }
     return baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
+}
+
+export async function getGithubCommitInformationByDates(
+  startDate: string,
+  endDate: string,
+  loginId: string
+): Promise<{ date: string; Github: number }[]> {
+
+  const url = getGitripperBaseUrl() + `/userCommitData/${loginId}/${startDate}/${endDate}`
+  console.log("Fetching commits by date:", url)
+
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error("Failed to fetch GitHub commits")
   }
+
+  const raw: AggregatedCommits = await res.json()
+  const commits = raw?.commitsByDate ?? []
+
+  return normalizeMissingDates(commits, startDate, endDate)
+}
+
+
+export async function getGithubCommitInformation(
+  timeRange: string,
+  loginId: string
+): Promise<{ date: string; Github: number }[]> {
+
+  const { startTime, endTime } = getDateRange(timeRange)
+
+  const url = getGitripperBaseUrl() + `/userCommitData/${loginId}/${startTime}/${endTime}`
+  console.log("Fetching commits:", url)
+
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error("Failed to fetch GitHub commits")
+  }
+
+  const raw: AggregatedCommits = await res.json()
+  console.log("Raw commit data:", raw)
+  const commits = raw?.commitsByDate ?? []
+
+  return normalizeMissingDates(commits, startTime, endTime)
+}
+
+function normalizeMissingDates(
+  data: { date: string; commitCount: number }[],
+  start: string,
+  end: string
+): { date: string; Github: number }[] {
+
+  const map = new Map<string, number>()
+
+  for (const item of data) {
+    map.set(item.date, item.commitCount)
+  }
+
+  const result: { date: string; Github: number }[] = []
+
+  const cur = new Date(start)
+  const endDate = new Date(end)
+
+  while (cur <= endDate) {
+    const date = cur.toISOString().slice(0, 10)
+
+    result.push({
+      date,
+      Github: map.get(date) ?? 0
+    })
+
+    cur.setDate(cur.getDate() + 1)
+  }
+
+  return result
+}
