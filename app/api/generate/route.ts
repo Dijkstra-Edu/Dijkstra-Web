@@ -84,7 +84,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const prompt = typeof bRec["prompt"] === "string" ? bRec["prompt"] : null;
     const model = typeof bRec["model"] === "string" 
       ? bRec["model"] 
-      : "gemini-2.0-flash-exp";
+      : "gemini-2.0-flash-lite-preview";
 
     // Validate prompt
     if (!prompt) {
