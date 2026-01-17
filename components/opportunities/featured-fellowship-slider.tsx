@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-// import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,14 +32,13 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { fellowships } from "@/data/fellowship-data";
 import { ScrollArea } from "../ui/scroll-area";
 import ProjectDetails from "../project-details";
+import { Fellowship } from "@/types";
 
 interface FeaturedFellowshipSliderProps {
   category?: string;
@@ -55,13 +53,16 @@ const fellowshipConfig = {
     requirements: true,
     readme: true,
   },
-}
+};
 
 const FeaturedFellowshipSlider = React.forwardRef<
   CarouselApi,
   FeaturedFellowshipSliderProps
 >(({ category = "featured" }, ref) => {
   const [api, setApi] = React.useState<CarouselApi>();
+  const [fellowships, setFellowships] = React.useState<Fellowship[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (api && ref) {
@@ -73,13 +74,36 @@ const FeaturedFellowshipSlider = React.forwardRef<
     }
   }, [api, ref]);
 
+  // Fetch fellowships from Next.js API route
+  React.useEffect(() => {
+    const fetchFellowships = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch("/api/server/fellowships");
+
+        if (!res.ok) throw new Error("Failed to fetch fellowships");
+
+        const data: Fellowship[] = await res.json();
+        setFellowships(data);
+      } catch (err: any) {
+        console.error("Error fetching fellowships:", err);
+        setError(err.message || "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFellowships();
+  }, []);
+
   // Filter fellowships based on category
   const filteredFellowships = React.useMemo(() => {
     if (category === "featured") {
-      return fellowships.filter((fellowship) => fellowship.featured);
+      return fellowships.filter((f) => f.featured);
     }
     return fellowships.slice(0, 6);
-  }, [category]);
+  }, [category, fellowships]);
 
   // Calculate days until deadline
   const getDaysUntilDeadline = (deadlineString: string) => {
@@ -94,8 +118,8 @@ const FeaturedFellowshipSlider = React.forwardRef<
     return `${diffDays} days left`;
   };
 
-  // Get appropriate highlight icon and color
-  const getHighlightDetails = (highlight: string | undefined) => {
+  // Get highlight icon and color
+  const getHighlightDetails = (highlight?: string) => {
     switch (highlight) {
       case "new":
         return {
@@ -130,6 +154,10 @@ const FeaturedFellowshipSlider = React.forwardRef<
     }
   };
 
+  if (loading) return <p>Loading fellowships...</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
+  if (!filteredFellowships.length) return <p>No fellowships found.</p>;
+
   return (
     <div className="w-full">
       <Carousel
@@ -142,9 +170,7 @@ const FeaturedFellowshipSlider = React.forwardRef<
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {filteredFellowships.map((fellowship) => {
-            const highlightDetails = fellowship.highlight
-              ? getHighlightDetails(fellowship.highlight)
-              : null;
+            const highlightDetails = getHighlightDetails(fellowship.highlight);
 
             return (
               <CarouselItem
@@ -157,32 +183,17 @@ const FeaturedFellowshipSlider = React.forwardRef<
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between">
                           <div className="bg-card relative flex h-12 w-12 items-center justify-center rounded-md border">
-                            <div className="absolute flex h-full w-full items-center justify-center">
-                              {fellowship.organizationLogo ? (
-                                // <Image
-                                //   src={
-                                //     fellowship.organizationLogo ||
-                                //     "/placeholder.svg"
-                                //   }
-                                //   alt={fellowship.organization}
-                                //   width={48}
-                                //   height={48}
-                                //   className="h-12 w-12 object-contain"
-                                // />
-                                <img
-                                  src={
-                                    fellowship.organizationLogo ||
-                                    "/placeholder.svg"
-                                  }
-                                  alt={fellowship.organization}
-                                  width={48}
-                                  height={48}
-                                  className="h-12 w-12 object-contain"
-                                />
-                              ) : (
-                                <GraduationCapIcon className="text-muted-foreground h-6 w-6" />
-                              )}
-                            </div>
+                            {fellowship.organizationLogo ? (
+                              <img
+                                src={fellowship.organizationLogo}
+                                alt={fellowship.organization}
+                                width={48}
+                                height={48}
+                                className="h-12 w-12 object-contain"
+                              />
+                            ) : (
+                              <GraduationCapIcon className="text-muted-foreground h-6 w-6" />
+                            )}
                           </div>
                           {highlightDetails && (
                             <Badge
@@ -204,43 +215,30 @@ const FeaturedFellowshipSlider = React.forwardRef<
                           </div>
                         </div>
                       </CardHeader>
+
                       <CardContent className="flex flex-grow flex-col gap-3">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <ClockIcon className="text-muted-foreground h-4 w-4" />
-                            <span className="text-sm">
-                              {fellowship.duration}
-                            </span>
-                            <Badge
-                              variant="outline"
-                              className="ml-auto text-xs"
-                            >
-                              {fellowship.locationType.charAt(0).toUpperCase() +
-                                fellowship.locationType.slice(1)}
+                            <span className="text-sm">{fellowship.duration}</span>
+                            <Badge variant="outline" className="ml-auto text-xs">
+                              {fellowship.locationType?.charAt(0).toUpperCase() + fellowship.locationType?.slice(1) || "Unknown"}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-2">
                             <DollarSignIcon className="text-muted-foreground h-4 w-4" />
-                            <span className="text-sm">
-                              {fellowship.stipend}
-                            </span>
+                            <span className="text-sm">{fellowship.stipend}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <CalendarIcon className="text-muted-foreground h-4 w-4" />
                             <span className="text-sm">
-                              Deadline:{" "}
-                              {getDaysUntilDeadline(
-                                fellowship.applicationDeadline
-                              )}
+                              Deadline: {getDaysUntilDeadline(fellowship.applicationDeadline)}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <AwardIcon className="text-muted-foreground h-4 w-4" />
                             <span className="text-sm">
-                              Starts:{" "}
-                              {new Date(
-                                fellowship.startDate
-                              ).toLocaleDateString()}
+                              Starts: {new Date(fellowship.startDate).toLocaleDateString()}
                             </span>
                           </div>
                         </div>
@@ -254,17 +252,11 @@ const FeaturedFellowshipSlider = React.forwardRef<
                             Benefits:
                           </p>
                           <div className="flex flex-wrap gap-1.5">
-                            {fellowship.benefits
-                              .slice(0, 3)
-                              .map((benefit, index) => (
-                                <Badge
-                                  variant="secondary"
-                                  key={index}
-                                  className="text-xs"
-                                >
-                                  {benefit}
-                                </Badge>
-                              ))}
+                            {fellowship.benefits.slice(0, 3).map((b, i) => (
+                              <Badge key={i} variant="secondary" className="text-xs">
+                                {b}
+                              </Badge>
+                            ))}
                             {fellowship.benefits.length > 3 && (
                               <Badge variant="outline" className="text-xs">
                                 +{fellowship.benefits.length - 3} more
@@ -273,12 +265,9 @@ const FeaturedFellowshipSlider = React.forwardRef<
                           </div>
                         </div>
                       </CardContent>
+
                       <CardFooter className="flex gap-3 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-1/2 bg-transparent"
-                        >
+                        <Button variant="outline" size="sm" className="w-1/2 bg-transparent">
                           <BookmarkIcon className="mr-1 h-4 w-4" />
                           Save
                         </Button>
@@ -288,7 +277,7 @@ const FeaturedFellowshipSlider = React.forwardRef<
                       </CardFooter>
                     </Card>
                   </DialogTrigger>
-                  {/* <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] p-0 overflow-hidden"> */}
+
                   <DialogContent className="!max-w-7xl max-h-[85vh] p-0 overflow-hidden">
                     <DialogHeader className="sr-only">
                       <DialogTitle>{fellowship.title}</DialogTitle>
@@ -296,7 +285,6 @@ const FeaturedFellowshipSlider = React.forwardRef<
                     <ScrollArea className="max-h-[85vh]">
                       <ProjectDetails item={fellowship} config={fellowshipConfig} />
                     </ScrollArea>
-                    {/* <ProjectDetails item={job} config={jobConfig} /> */}
                   </DialogContent>
                 </Dialog>
               </CarouselItem>
