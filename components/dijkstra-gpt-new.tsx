@@ -1,0 +1,1066 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+
+// UI Components from shadcn/ui library
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Markdown rendering
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// Icon library
+import {
+  Paperclip,
+  Image,
+  FileText,
+  X,
+  ArrowUp,
+  Copy,
+  RefreshCw,
+  Share2,
+  Trash2,
+  ChevronLeft,
+  Search,
+  Check,
+  Download,
+  Edit3,
+  MoreVertical,
+} from "lucide-react";
+
+// API client for Gemini AI communication
+import { callGemini } from "@/lib/geminiClient";
+
+// Toast notification system
+import { toast } from "sonner";
+
+// ============================================
+// TYPE DEFINITIONS
+// ============================================
+type Message = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  files?: File[];
+};
+
+type ChatSession = {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
+export default function DijkstraGPT() {
+  // ============================================
+  // STATE MANAGEMENT
+  // ============================================
+  const [prompt, setPrompt] = useState<string>("");
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [apiStatus, setApiStatus] = useState<"checking" | "active" | "inactive">("checking");
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>("");
+
+  // refs
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // cancel flag for streaming
+  const cancelGenerationRef = useRef<boolean>(false);
+
+  // computed
+  const currentSession = chatSessions.find((session) => session.id === currentSessionId);
+  const messages = currentSession?.messages || [];
+  const hasMessages = messages.length > 0;
+
+  // ============================================
+  // EFFECTS
+  // ============================================
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [prompt]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current && hasMessages) {
+      let scrollContainer = messagesEndRef.current.closest(".overflow-y-auto");
+      if (!scrollContainer) {
+        let parent = messagesEndRef.current.parentElement;
+        while (parent && parent !== document.body) {
+          const style = window.getComputedStyle(parent);
+          if (style.overflowY === "auto" || style.overflowY === "scroll") {
+            scrollContainer = parent;
+            break;
+          }
+          parent = parent.parentElement;
+        }
+      }
+      if (scrollContainer) {
+        setTimeout(() => {
+          scrollContainer?.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: "smooth",
+          });
+        }, 100);
+      } else {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [messages, isLoading, hasMessages]);
+
+  // Initialize with a default session on mount
+  useEffect(() => {
+    const initialSession: ChatSession = {
+      id: Date.now().toString(),
+      title: "New Chat",
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setChatSessions([initialSession]);
+    setCurrentSessionId(initialSession.id);
+  }, []);
+
+  // Check API status on mount
+  useEffect(() => {
+    checkApiStatus();
+  }, []);
+
+  // ============================================
+  // SESSION MANAGEMENT
+  // ============================================
+  const createNewChat = (): void => {
+    const newSession: ChatSession = {
+      id: Date.now().toString(),
+      title: "New Chat",
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setChatSessions((prev) => [newSession, ...prev]);
+    setCurrentSessionId(newSession.id);
+    setPrompt("");
+    setUploadedFiles([]);
+    setIsLoading(false);
+    cancelGenerationRef.current = false;
+    toast.success("New chat created");
+  };
+
+  const updateSessionTitle = (sessionId: string, firstMessage: string): void => {
+    setChatSessions((prev) =>
+      prev.map((session) => {
+        if (session.id === sessionId && session.title === "New Chat") {
+          return {
+            ...session,
+            title: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : ""),
+            updatedAt: new Date(),
+          };
+        }
+        return session;
+      })
+    );
+  };
+
+  const deleteSession = (sessionId: string): void => {
+    if (!confirm("Are you sure you want to delete this chat?")) return;
+
+    setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    if (currentSessionId === sessionId) {
+      const remaining = chatSessions.filter((s) => s.id !== sessionId);
+      setCurrentSessionId(remaining.length > 0 ? remaining[0].id : null);
+    }
+    toast.success("Chat deleted");
+  };
+
+  const downloadSession = (session: ChatSession): void => {
+    const dataStr = JSON.stringify(session, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${session.title}_${Date.now()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Chat downloaded");
+  };
+
+  const renameSession = (sessionId: string): void => {
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (session) {
+      setEditingSessionId(sessionId);
+      setEditingTitle(session.title);
+    }
+  };
+
+  const saveRename = (): void => {
+    if (editingSessionId && editingTitle.trim()) {
+      setChatSessions((prev) =>
+        prev.map((session) =>
+          session.id === editingSessionId
+            ? { ...session, title: editingTitle.trim(), updatedAt: new Date() }
+            : session
+        )
+      );
+      toast.success("Chat renamed");
+    }
+    setEditingSessionId(null);
+    setEditingTitle("");
+  };
+
+  const shareSession = async (sessionId: string): Promise<void> => {
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (!session) return;
+
+    const shareText = `${session.title}\n\n${session.messages
+      .map((m) => `${m.role === "user" ? "You" : "Assistant"}: ${m.content}`)
+      .join("\n\n")}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: session.title,
+          text: shareText,
+        });
+        toast.success("Chat shared");
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Chat copied to clipboard");
+      }
+    } catch (error) {
+      console.log("Share cancelled or failed:", error);
+    }
+  };
+
+  const addMessage = (message: Message): void => {
+    setChatSessions((prev) =>
+      prev.map((session) => {
+        if (session.id === currentSessionId) {
+          return {
+            ...session,
+            messages: [...session.messages, message],
+            updatedAt: new Date(),
+          };
+        }
+        return session;
+      })
+    );
+  };
+
+  // ============================================
+  // API STATUS CHECK
+  // ============================================
+  const checkApiStatus = async (): Promise<void> => {
+    try {
+      const response = await callGemini("test");
+      if (response) {
+        setApiStatus("active");
+        console.log("✅ API key is active");
+      } else {
+        setApiStatus("inactive");
+        console.log("❌ API key is not configured or invalid");
+      }
+    } catch (error) {
+      setApiStatus("inactive");
+      console.error("❌ API check failed:", error);
+    }
+  };
+
+  // ============================================
+  // FILE HANDLING
+  // ============================================
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const files = Array.from(event.target.files || []);
+    const validTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    const validFiles = files.filter((file) => {
+      const isValid =
+        validTypes.includes(file.type) || file.name.match(/\.(jpg|jpeg|png|pdf|txt|doc|docx)$/i);
+      if (!isValid) {
+        toast.error(`File type not supported: ${file.name}`);
+      }
+      return isValid;
+    });
+
+    setUploadedFiles((prev) => [...prev, ...validFiles]);
+    if (validFiles.length > 0) {
+      toast.success(`${validFiles.length} file(s) uploaded`);
+    }
+  };
+
+  const removeFile = (index: number): void => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ============================================
+  // MESSAGE ACTIONS
+  // ============================================
+  const copyMessage = async (content: string, messageId: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedMessageId(messageId);
+      toast.success("Copied to clipboard");
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (error) {
+      toast.error("Failed to copy");
+    }
+  };
+
+  const updateAssistantContent = (
+    sessionId: string | null,
+    messageId: string,
+    newContent: string
+  ) => {
+    if (!sessionId) return;
+    setChatSessions((prev) =>
+      prev.map((session) => {
+        if (session.id !== sessionId) return session;
+        return {
+          ...session,
+          messages: session.messages.map((m) =>
+            m.id === messageId ? { ...m, content: newContent } : m
+          ),
+          updatedAt: new Date(),
+        };
+      })
+    );
+  };
+
+  // ============================================
+  // STREAMING + CANCEL
+  // ============================================
+  const streamGeminiResponse = async (
+    promptText: string,
+    sessionId: string,
+    assistantMessageId: string
+  ) => {
+    try {
+      const res: any = await callGemini(promptText);
+
+      // ReadableStream (true streaming)
+      if (res && res.body && typeof res.body.getReader === "function") {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+        let accumulated = "";
+
+        while (!done) {
+          if (cancelGenerationRef.current) {
+            updateAssistantContent(
+              sessionId,
+              assistantMessageId,
+              accumulated || "⚠ Generation stopped by user."
+            );
+            return accumulated;
+          }
+
+          const { value, done: d } = await reader.read();
+          if (value) {
+            accumulated += decoder.decode(value, { stream: true });
+            updateAssistantContent(sessionId, assistantMessageId, accumulated);
+          }
+          done = !!d;
+        }
+        updateAssistantContent(sessionId, assistantMessageId, accumulated);
+        return accumulated;
+      }
+
+      // Simple string
+      if (typeof res === "string") {
+        const full = res;
+        let i = 0;
+        while (i <= full.length) {
+          if (cancelGenerationRef.current) {
+            updateAssistantContent(
+              sessionId,
+              assistantMessageId,
+              full.slice(0, i) || "⚠ Generation stopped by user."
+            );
+            return full.slice(0, i);
+          }
+          await new Promise((r) => setTimeout(r, 12));
+          i += Math.ceil(Math.random() * 3);
+          const chunk = full.slice(0, i);
+          updateAssistantContent(sessionId, assistantMessageId, chunk);
+        }
+        updateAssistantContent(sessionId, assistantMessageId, full);
+        return full;
+      }
+
+      // Object with `.text`
+      if (res && typeof res === "object" && typeof res.text === "string") {
+        const text = res.text;
+        let i = 0;
+        while (i <= text.length) {
+          if (cancelGenerationRef.current) {
+            updateAssistantContent(
+              sessionId,
+              assistantMessageId,
+              text.slice(0, i) || "⚠ Generation stopped by user."
+            );
+            return text.slice(0, i);
+          }
+          await new Promise((r) => setTimeout(r, 12));
+          i += Math.ceil(Math.random() * 4);
+          updateAssistantContent(sessionId, assistantMessageId, text.slice(0, i));
+        }
+        updateAssistantContent(sessionId, assistantMessageId, text);
+        return text;
+      }
+
+      const fallback = String(res);
+      updateAssistantContent(sessionId, assistantMessageId, fallback);
+      return fallback;
+    } catch (error) {
+      if (cancelGenerationRef.current) {
+        updateAssistantContent(sessionId, assistantMessageId, "⚠ Generation stopped by user.");
+        return;
+      }
+      const errStr = "⚠ Error: " + String(error);
+      updateAssistantContent(sessionId, assistantMessageId, errStr);
+      throw error;
+    }
+  };
+
+  // ============================================
+  // REGENERATE (delete old assistant, new one)
+// ============================================
+  const handleRegenerate = async (assistantMessageId: string): Promise<void> => {
+    const session = chatSessions.find((s) => s.id === currentSessionId);
+    if (!session) return;
+
+    const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
+    if (idx <= 0) return;
+
+    const userMsg = session.messages[idx - 1];
+    if (!userMsg || userMsg.role !== "user") return;
+
+    // Remove old assistant message
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === currentSessionId
+          ? { ...s, messages: s.messages.filter((m) => m.id !== assistantMessageId) }
+          : s
+      )
+    );
+
+    cancelGenerationRef.current = false;
+    setIsLoading(true);
+
+    // New assistant bubble
+    const newAssistantMessage: Message = {
+      id: (Date.now() + 2).toString(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+    addMessage(newAssistantMessage);
+
+    try {
+      await streamGeminiResponse(userMsg.content, currentSessionId!, newAssistantMessage.id);
+      toast.success("Response regenerated");
+    } catch (error) {
+      if (!cancelGenerationRef.current) {
+        toast.error("Failed to regenerate: " + String(error));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const shareMessage = async (content: string): Promise<void> => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "DijkstraGPT Message",
+          text: content,
+        });
+        toast.success("Shared successfully");
+      } else {
+        await navigator.clipboard.writeText(content);
+        toast.success("Copied to clipboard (Share not available)");
+      }
+    } catch (error) {
+      console.log("Share cancelled or failed:", error);
+    }
+  };
+
+  // ============================================
+  // INPUT HANDLERS
+  // ============================================
+  const handleSubmit = async (): Promise<void> => {
+    if (!prompt.trim() && uploadedFiles.length === 0) return;
+
+    cancelGenerationRef.current = false;
+
+    if (!currentSessionId) {
+      createNewChat();
+    }
+
+    const currentPrompt = prompt;
+    const currentFiles = [...uploadedFiles];
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: currentPrompt,
+      timestamp: new Date(),
+      files: currentFiles.length > 0 ? currentFiles : undefined,
+    };
+
+    addMessage(userMessage);
+    setPrompt("");
+    setUploadedFiles([]);
+    setIsLoading(true);
+
+    if (currentSession && currentSession.messages.length === 0) {
+      updateSessionTitle(currentSessionId!, currentPrompt);
+    }
+
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+    addMessage(assistantMessage);
+
+    try {
+      await streamGeminiResponse(currentPrompt, currentSessionId!, assistantMessage.id);
+    } catch (error) {
+      if (!cancelGenerationRef.current) {
+        const errorMessage: Message = {
+          id: (Date.now() + 3).toString(),
+          role: "assistant",
+          content: "⚠ Error: " + String(error),
+          timestamp: new Date(),
+        };
+        updateAssistantContent(currentSessionId, assistantMessage.id, errorMessage.content);
+        toast.error("Failed to get response");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      void handleSubmit();
+    }
+  };
+
+  const handleStopGeneration = () => {
+    if (!isLoading) return;
+    cancelGenerationRef.current = true;
+    setIsLoading(false);
+    toast.info("Generation stopped");
+  };
+
+  // ============================================
+  // SEARCH & FILTER
+  // ============================================
+  const filteredSessions = chatSessions.filter(
+    (session) =>
+      session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      session.messages.some((msg) =>
+        msg.content.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+  );
+
+  // ============================================
+  // MESSAGE RENDER (markdown + thinking in bubble)
+// ============================================
+  const renderMessage = (msg: Message, i: number): React.JSX.Element => {
+    const isUser = msg.role === "user";
+    const isCopied = copiedMessageId === msg.id;
+
+    const isLastMessage = i === messages.length - 1;
+    const shouldShowThinkingPlaceholder =
+      !isUser && isLastMessage && isLoading && msg.content.trim() === "";
+
+    const displayContent = shouldShowThinkingPlaceholder
+      ? "DijkstraGPT is thinking ..."
+      : msg.content || "";
+
+    return (
+      <div
+        key={i}
+        className={`group flex ${isUser ? "justify-end" : "justify-start"} mb-6`}
+      >
+        <div
+          className={`max-w-[80%] rounded-2xl shadow-lg ${
+            isUser ? "bg-foreground text-background" : "bg-background border border-border/50"
+          }`}
+        >
+          <div className="p-4">
+            {isUser && msg.files && msg.files.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {msg.files.map((file, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs">
+                    <FileText className="h-3 w-3 mr-1" />
+                    {file.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div
+                className={`prose prose-sm dark:prose-invert max-w-none ${
+                  shouldShowThinkingPlaceholder ? "text-muted-foreground italic" : ""
+                }`}
+              >
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayContent}</ReactMarkdown>
+              </div>
+            </div>
+
+            <p className="text-xs opacity-70 mt-3">{msg.timestamp.toLocaleTimeString()}</p>
+          </div>
+
+          {/* Assistant toolbar: Copy, Regenerate, Share ONLY */}
+          {!isUser && (
+            <div className="flex items-center gap-1 px-4 pb-3 border-t border-border/30 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyMessage(msg.content, msg.id)}
+                className="h-8 w-8 p-0"
+                aria-label="Copy message"
+              >
+                {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleRegenerate(msg.id)}
+                className="h-8 w-8 p-0"
+                aria-label="Regenerate response"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => shareMessage(msg.content)}
+                className="h-8 w-8 p-0"
+                aria-label="Share message"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // EXAMPLE PROMPTS (no icons)
+ // ============================================
+  const examplePrompts = [
+    "I'm lost. How do I get started with coding to get a job in tech?",
+    "What are the steps I can take to become a Computer Science Engineer?",
+    "How do I approach a coding interview?",
+    "What are some good resources for learning algorithms?",
+    "How can I leverage AI in my coding projects?",
+    "How do I improve my resume for tech jobs?",
+  ];
+  // ============================================
+  // INPUT AREA (ChatGPT-like send/stop)
+ // ============================================
+  const renderInputArea = (isCentered: boolean = false) => (
+    <div
+      className={`relative max-w-4xl mx-auto transition-all duration-500 ease-in-out ${
+        isCentered ? "w-full" : "w-full"
+      }`}
+    >
+      {uploadedFiles.length > 0 && (
+        <div className="mb-4 p-4 bg-muted/50 rounded-2xl border border-border/50">
+          <div className="flex flex-wrap gap-2">
+            {uploadedFiles.map((file, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="flex items-center gap-2 px-3 py-2 bg-background border border-border/50 hover:bg-muted/80 transition-colors"
+              >
+                <FileText className="h-3 w-3" />
+                <span className="text-sm font-medium">{file.name}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 hover:text-destructive rounded-full"
+                  onClick={() => removeFile(index)}
+                  aria-label={`Remove ${file.name}`}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main input box */}
+      <div className="relative bg-background border border-border/50 rounded-3xl shadow-lg shadow-black/5 overflow-hidden">
+        <div className="relative">
+          <Textarea
+            ref={textareaRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              isCentered
+                ? "Describe what you want to build..."
+                : "Ask me anything about CS, algorithms, or coding interviews..."
+            }
+            className="min-h-[80px] max-h-[300px] resize-none border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0"
+            style={{ height: "auto" }}
+            disabled={isLoading}
+            aria-label="Message input"
+          />
+
+          {/* Bottom toolbar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-background/80 border-t border-border/30">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-8 w-8 p-0 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
+                aria-label="Attach file"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/*";
+                  input.multiple = true;
+                  input.onchange = (e) =>
+                    handleFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
+                  input.click();
+                }}
+                className="h-8 w-8 p-0 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
+                aria-label="Upload image"
+              >
+                <Image className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* ChatGPT-style circular send / stop button */}
+            {isLoading ? (
+              <Button
+                type="button"
+                onClick={handleStopGeneration}
+                className="h-9 w-9 rounded-full bg-red-600 text-white hover:bg-red-700 flex items-center justify-center transition-all duration-200 animate-pulse"
+                aria-label="Stop generation"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!prompt.trim() && uploadedFiles.length === 0}
+                className="h-9 w-9 rounded-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200"
+                aria-label="Send message"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {isCentered && (
+        <div className="text-center mt-3">
+          <p className="text-xs text-muted-foreground/80">
+            Press{" "}
+            <kbd className="px-1.5 py-0.5 bg-muted/80 border border-border/50 rounded text-xs font-mono">
+              ⌘ Enter
+            </kbd>{" "}
+            to send
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  // ============================================
+  // PART B – LAYOUT / RETURN
+  // ============================================
+  return (
+    <div className="bg-gradient-to-br from-background via-background to-muted/20 flex flex-col w-full h-full">
+      <div className="flex-1 flex min-h-0">
+        {/* MAIN CHAT AREA */}
+        <div
+          className={`flex-1 flex flex-col relative min-h-0 transition-all duration-300 ${
+            isSidebarOpen ? "mr-[280px]" : "mr-0"
+          }`}
+        >
+          {/* Hero / examples when this session has no messages yet */}
+          {!hasMessages && !isLoading ? (
+            <>
+              <div className="flex-shrink-0 text-center pt-4 pb-8">
+                <div className="flex flex-col items-center space-y-2 my-8">
+                  <img src="/icon.png" alt="Dijkstra GPT logo" className="h-30 w-30" />
+                  <h2 className="text-2xl font-semibold">Your Personal CS Prep Assistant</h2>
+                  <p className="text-gray-500 text-center max-w-3xl">
+                    This model has been trained on a wide range of computer science topics, tips
+                    and tricks, resources, and more to help you on your journey towards becoming a
+                    Computer Science Engineer. It is also context aware of what you do within
+                    GitHub and Leetcode. Happy coding :)
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center px-4 pb-8">
+                <div className="w-full max-w-4xl mx-auto space-y-8">
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h2 className="text-lg font-semibold text-foreground/90 mb-2">
+                        Get started with these examples
+                      </h2>
+                      <p className="text-sm text-muted-foreground">Click any prompt to try it out</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {examplePrompts.map((example, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setPrompt(example)}
+                          className="group p-4 text-left bg-background border border-border/50 rounded-2xl hover:border-border hover:shadow-md hover:shadow-black/5 transition-all duration-200 hover:-translate-y-0.5"
+                          aria-label={`Use example prompt: ${example}`}
+                        >
+                          <div className="flex items-start">
+                            <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors leading-relaxed">
+                              {example}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            // Messages view – scrollable
+            <div className="flex-1 min-h-0 p-6">
+              <div className="max-w-4xl mx-auto h-full overflow-y-auto pr-1">
+                {messages.map((m, i) => renderMessage(m, i))}
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+          )}
+
+          {/* Input area: sticky when messages, centered when empty */}
+          {hasMessages ? (
+            <div className="flex-shrink-0 sticky bottom-0 p-6 border-t border-border/50 bg-gradient-to-br from-black/2 via-black/2 to-black/2 backdrop-blur-sm z-10 transition-all duration-500 ease-in-out">
+              <div className="w-full max-w-4xl mx-auto">{renderInputArea(false)}</div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center px-4 pb-8">
+              <div className="w-full max-w-4xl mx-auto">
+                <div className="relative">{renderInputArea(true)}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ==================== FIXED SIDEBAR ==================== */}
+        {isSidebarOpen && (
+          <div className="fixed right-0 top-14 bottom-0 w-[310px] flex flex-col border-l border-border bg-background/95 backdrop-blur-md z-40">
+            {/* Sidebar header */}
+            <div className="p-3 border-b border-border">
+              <Button
+                onClick={createNewChat}
+                className="w-full justify-center rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-colors text-sm font-medium"
+              >
+                {/* No icon here – text only */}
+                New Chat
+              </Button>
+            </div>
+
+            {/* Search bar */}
+            <div className="px-3 py-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="w-full pl-10 pr-3 py-2 text-sm bg-secondary text-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+                />
+              </div>
+            </div>
+
+            {/* Chat list with 3-dot menu */}
+            <ScrollArea className="flex-1 px-2">
+              <div className="space-y-1 pb-8">
+                {filteredSessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className={`group flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors ${
+                      currentSessionId === session.id
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent/50 text-foreground"
+                    }`}
+                    onClick={() => setCurrentSessionId(session.id)}
+                  >
+                    {/* Chat title only (no icon) */}
+                    <div className="flex items-center gap-1 min-w-0">
+                      {editingSessionId === session.id ? (
+                        <input
+                          type="text"
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onBlur={saveRename}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") saveRename();
+                            if (e.key === "Escape") {
+                              setEditingSessionId(null);
+                              setEditingTitle("");
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          autoFocus
+                          className="flex-1 text-sm bg-background border border-border/50 rounded px-2 py-1"
+                        />
+                      ) : (
+                        <p className="text-sm truncate max-w-[150px]">{session.title}</p>
+                      )}
+                    </div>
+
+                    {/* 3-dot menu with actions */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent side="right" align="start">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            renameSession(session.id);
+                          }}
+                        >
+                          <Edit3 className="h-4 w-4 mr-2" /> Rename
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            shareSession(session.id);
+                          }}
+                        >
+                          <Share2 className="h-4 w-4 mr-2" /> Share
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadSession(session);
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-2" /> Download
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          className="text-red-600 focus:text-red-700 hover:bg-red-600/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteSession(session.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
+      </div>
+
+      {/* ==================== FLOATING SIDEBAR TOGGLE ==================== */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className={`fixed top-20 z-50 bg-background shadow-lg hover:shadow-xl border border-border/50 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "right-[320px]" : "right-4"
+        }`}
+        aria-label={isSidebarOpen ? "Close chat history" : "Open chat history"}
+      >
+        <ChevronLeft
+          className={`h-4 w-4 transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "rotate-180" : ""
+          }`}
+        />
+      </Button>
+
+      {/* ==================== HIDDEN FILE INPUT ==================== */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleFileUpload}
+        accept=".txt,.pdf,.doc,.docx,.md,.json,.csv,.xlsx,.jpg,.jpeg,.png,image/*,application/pdf"
+        aria-label="File upload input"
+      />
+    </div>
+  );
+}
