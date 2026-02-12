@@ -11,6 +11,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+// Markdown rendering
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 // Icon library (removed voice & enhance icons)
 import {
   Paperclip,
@@ -29,7 +33,17 @@ import {
   Calendar,
   Check,
   Download,
+  Edit3,
+  MoreVertical,
+  Pause,
 } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // API client for Gemini AI communication
 import { callGemini } from "@/lib/geminiClient";
@@ -76,6 +90,8 @@ export default function DijkstraGPT() {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'active' | 'inactive'>('checking');
   const [hasMessages, setHasMessages] = useState<boolean>(false);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>("");
 
   // ============================================
   // REFS FOR DOM ELEMENTS
@@ -84,6 +100,9 @@ export default function DijkstraGPT() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // cancel flag for streaming
+  const cancelGenerationRef = useRef<boolean>(false);
   
 
   // ============================================
@@ -105,13 +124,11 @@ export default function DijkstraGPT() {
     }
   }, [prompt]);
 
-  // Auto-scroll to bottom when new messages arrive (scrolling parent container)
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && hasMessages) {
-      // Find the scrollable parent container from page.tsx
       let scrollContainer = messagesEndRef.current.closest('.overflow-y-auto');
       if (!scrollContainer) {
-        // Try to find the parent scroll container by traversing up
         let parent = messagesEndRef.current.parentElement;
         while (parent && parent !== document.body) {
           const style = window.getComputedStyle(parent);
@@ -122,17 +139,14 @@ export default function DijkstraGPT() {
           parent = parent.parentElement;
         }
       }
-      
       if (scrollContainer) {
-        // Use setTimeout to ensure DOM is updated
         setTimeout(() => {
           scrollContainer?.scrollTo({
             top: scrollContainer.scrollHeight,
-            behavior: "smooth"
+            behavior: "smooth",
           });
         }, 100);
       } else {
-        // Fallback to direct scrollIntoView
         setTimeout(() => {
           messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         }, 100);
@@ -179,6 +193,8 @@ export default function DijkstraGPT() {
     setCurrentSessionId(newSession.id);
     setPrompt("");
     setUploadedFiles([]);
+    setIsLoading(false);
+    cancelGenerationRef.current = false;
     toast.success("New chat created");
   };
 
@@ -203,6 +219,8 @@ export default function DijkstraGPT() {
   }, []);
 
   const deleteSession = (sessionId: string): void => {
+    if (!confirm("Are you sure you want to delete this chat?")) return;
+
     setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
 
     if (currentSessionId === sessionId) {
@@ -211,6 +229,53 @@ export default function DijkstraGPT() {
     }
 
     toast.success("Chat deleted");
+  };
+
+  const renameSession = (sessionId: string): void => {
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (session) {
+      setEditingSessionId(sessionId);
+      setEditingTitle(session.title);
+    }
+  };
+
+  const saveRename = (): void => {
+    if (editingSessionId && editingTitle.trim()) {
+      setChatSessions((prev) =>
+        prev.map((session) =>
+          session.id === editingSessionId
+            ? { ...session, title: editingTitle.trim(), updatedAt: new Date() }
+            : session
+        )
+      );
+      toast.success("Chat renamed");
+    }
+    setEditingSessionId(null);
+    setEditingTitle("");
+  };
+
+  const shareSession = async (sessionId: string): Promise<void> => {
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (!session) return;
+
+    const shareText = `${session.title}\n\n${session.messages
+      .map((m) => `${m.role === "user" ? "You" : "Assistant"}: ${m.content}`)
+      .join("\n\n")}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: session.title,
+          text: shareText,
+        });
+        toast.success("Chat shared");
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Chat copied to clipboard");
+      }
+    } catch (error) {
+      console.log("Share cancelled or failed:", error);
+    }
   };
 
   const downloadSession = (session: ChatSession): void => {
@@ -335,7 +400,7 @@ export default function DijkstraGPT() {
     try {
       const res: any = await callGemini(promptText);
 
-      // If it's a fetch Response-like object with a ReadableStream body
+      // ReadableStream (true streaming)
       if (res && res.body && typeof res.body.getReader === "function") {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -343,6 +408,15 @@ export default function DijkstraGPT() {
         let accumulated = "";
 
         while (!done) {
+          if (cancelGenerationRef.current) {
+            updateAssistantContent(
+              sessionId,
+              assistantMessageId,
+              accumulated || "⚠ Generation stopped by user."
+            );
+            return accumulated;
+          }
+
           // eslint-disable-next-line no-await-in-loop
           const { value, done: d } = await reader.read();
           if (value) {
@@ -352,33 +426,46 @@ export default function DijkstraGPT() {
           done = !!d;
         }
 
-        // finalize (in case any leftovers)
         updateAssistantContent(sessionId, assistantMessageId, accumulated);
         return accumulated;
       }
 
-      // If callGemini returned a string, simulate typing
+      // Simple string
       if (typeof res === "string") {
         const full = res;
         let i = 0;
-        // A small delay between characters produces a smooth typing effect. Adjust as needed.
         while (i <= full.length) {
+          if (cancelGenerationRef.current) {
+            updateAssistantContent(
+              sessionId,
+              assistantMessageId,
+              full.slice(0, i) || "⚠ Generation stopped by user."
+            );
+            return full.slice(0, i);
+          }
           // eslint-disable-next-line no-await-in-loop
           await new Promise((r) => setTimeout(r, 12));
-          i += Math.ceil(Math.random() * 3); // append a few chars at a time to feel natural
+          i += Math.ceil(Math.random() * 3);
           const chunk = full.slice(0, i);
           updateAssistantContent(sessionId, assistantMessageId, chunk);
         }
-
         updateAssistantContent(sessionId, assistantMessageId, full);
         return full;
       }
 
-      // If the response shape is unknown but contains text field
+      // Object with `.text`
       if (res && typeof res === "object" && typeof res.text === "string") {
         const text = res.text;
         let i = 0;
         while (i <= text.length) {
+          if (cancelGenerationRef.current) {
+            updateAssistantContent(
+              sessionId,
+              assistantMessageId,
+              text.slice(0, i) || "⚠ Generation stopped by user."
+            );
+            return text.slice(0, i);
+          }
           // eslint-disable-next-line no-await-in-loop
           await new Promise((r) => setTimeout(r, 12));
           i += Math.ceil(Math.random() * 4);
@@ -388,39 +475,68 @@ export default function DijkstraGPT() {
         return text;
       }
 
-      // Unknown shape -> convert to string and show
       const fallback = String(res);
       updateAssistantContent(sessionId, assistantMessageId, fallback);
       return fallback;
     } catch (error) {
+      if (cancelGenerationRef.current) {
+        updateAssistantContent(sessionId, assistantMessageId, "⚠ Generation stopped by user.");
+        return;
+      }
       const errStr = "⚠ Error: " + String(error);
       updateAssistantContent(sessionId, assistantMessageId, errStr);
       throw error;
     }
   };
 
-  const regenerateMessage = async (userMessage: Message): Promise<void> => {
+  const handleRegenerate = async (assistantMessageId: string): Promise<void> => {
+    const session = chatSessions.find((s) => s.id === currentSessionId);
+    if (!session) return;
+
+    const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
+    if (idx <= 0) return;
+
+    const userMsg = session.messages[idx - 1];
+    if (!userMsg || userMsg.role !== "user") return;
+
+    // Remove old assistant message
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === currentSessionId
+          ? { ...s, messages: s.messages.filter((m) => m.id !== assistantMessageId) }
+          : s
+      )
+    );
+
+    cancelGenerationRef.current = false;
     setIsLoading(true);
 
+    // New assistant bubble
+    const newAssistantMessage: Message = {
+      id: (Date.now() + 2).toString(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+    addMessage(newAssistantMessage);
+
     try {
-      // create placeholder assistant message
-      const assistantMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-      };
-
-      addMessage(assistantMessage);
-
-      await streamGeminiResponse(userMessage.content, currentSessionId!, assistantMessage.id);
-
+      await streamGeminiResponse(userMsg.content, currentSessionId!, newAssistantMessage.id);
       toast.success("Response regenerated");
     } catch (error) {
-      toast.error("Failed to regenerate: " + String(error));
+      if (!cancelGenerationRef.current) {
+        toast.error("Failed to regenerate: " + String(error));
+      }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleStopGeneration = () => {
+    if (!isLoading) return;
+    cancelGenerationRef.current = true;
+    setIsLoading(false);
+    toast.info("Generation stopped");
   };
 
   const shareMessage = async (content: string): Promise<void> => {
@@ -446,6 +562,8 @@ export default function DijkstraGPT() {
 
   const handleSubmit = async (): Promise<void> => {
     if (!prompt.trim() && uploadedFiles.length === 0) return;
+
+    cancelGenerationRef.current = false;
 
     // Trigger layout transition immediately
     setHasMessages(true);
@@ -488,15 +606,17 @@ export default function DijkstraGPT() {
     try {
       await streamGeminiResponse(currentPrompt, currentSessionId!, assistantMessage.id);
     } catch (error) {
-      const errorMessage: Message = {
-        id: (Date.now() + 3).toString(),
-        role: "assistant",
-        content: "⚠ Error: " + String(error),
-        timestamp: new Date(),
-      };
-      // replace the placeholder content with the error
-      updateAssistantContent(currentSessionId, assistantMessage.id, errorMessage.content);
-      toast.error("Failed to get response");
+      if (!cancelGenerationRef.current) {
+        const errorMessage: Message = {
+          id: (Date.now() + 3).toString(),
+          role: "assistant",
+          content: "⚠ Error: " + String(error),
+          timestamp: new Date(),
+        };
+        // replace the placeholder content with the error
+        updateAssistantContent(currentSessionId, assistantMessage.id, errorMessage.content);
+        toast.error("Failed to get response");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -536,11 +656,16 @@ export default function DijkstraGPT() {
     const isUser = msg.role === "user";
     const isCopied = copiedMessageId === msg.id;
 
-    // Split content by code blocks (```) and preserve formatting
-    const parts = msg.content.split(/```/g);
+    const isLastMessage = i === messages.length - 1;
+    const shouldShowThinkingPlaceholder =
+      !isUser && isLastMessage && isLoading && msg.content.trim() === "";
+
+    const displayContent = shouldShowThinkingPlaceholder
+      ? "DijkstraGPT is thinking ..."
+      : msg.content || "";
 
     return (
-      <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"} mb-6`}>
+      <div key={i} className={`group flex ${isUser ? "justify-end" : "justify-start"} mb-6`}>
         <div
           className={`max-w-[80%] rounded-2xl shadow-lg ${
             isUser
@@ -561,51 +686,25 @@ export default function DijkstraGPT() {
               </div>
             )}
 
-            {/* Message content with code block formatting */}
+            {/* Message content with markdown rendering */}
             <div className="space-y-3">
-              {parts.map((part, idx) =>
-                idx % 2 === 1 ? (
-                  // Code block (odd indices)
-                  <div
-                    key={idx}
-                    className="relative bg-gray-900 text-green-400 rounded-lg p-3 font-mono text-sm overflow-x-auto"
-                  >
-                    <pre className="whitespace-pre-wrap">{part.trim()}</pre>
-                  </div>
-                ) : (
-                  // Regular text with list formatting (even indices)
-                  <div key={idx} className="prose prose-sm dark:prose-invert max-w-none">
-                    {part.split("\n").map((line, li) => {
-                      if (line.trim().match(/^[-*]\s+/)) {
-                        return (
-                          <li key={li} className="ml-4 list-disc">
-                            {line.replace(/^[-*]\s+/, "")}
-                          </li>
-                        );
-                      } else if (line.trim().match(/^\d+\.\s+/)) {
-                        return (
-                          <li key={li} className="ml-4 list-decimal">
-                            {line.replace(/^\d+\.\s+/, "")}
-                          </li>
-                        );
-                      } else if (line.trim()) {
-                        return <p key={li}>{line}</p>;
-                      }
-                      return <br key={li} />;
-                    })}
-                  </div>
-                )
-              )}
+              <div
+                className={`prose prose-sm dark:prose-invert max-w-none ${
+                  shouldShowThinkingPlaceholder ? "text-muted-foreground italic" : ""
+                }`}
+              >
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayContent}</ReactMarkdown>
+              </div>
             </div>
 
             {/* Timestamp */}
             <p className="text-xs opacity-70 mt-3">{msg.timestamp.toLocaleTimeString()}</p>
           </div>
 
-          {/* Action buttons for assistant messages - ICONS ONLY */}
+          {/* Action buttons for assistant messages - hover only */}
           {!isUser && (
-            <div className="flex items-center gap-1 px-4 pb-3 border-t border-border/30 pt-2">
-              {/* Copy button - Icon only */}
+            <div className="flex items-center gap-1 px-4 pb-3 border-t border-border/30 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Copy button */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -616,23 +715,18 @@ export default function DijkstraGPT() {
                 {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
 
-              {/* Regenerate button - Icon only */}
+              {/* Regenerate button */}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  const userMsg = messages[i - 1];
-                  if (userMsg && userMsg.role === "user") {
-                    void regenerateMessage(userMsg);
-                  }
-                }}
+                onClick={() => handleRegenerate(msg.id)}
                 className="h-8 w-8 p-0"
                 aria-label="Regenerate response"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
 
-              {/* Share button - Icon only */}
+              {/* Share button */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -721,6 +815,7 @@ export default function DijkstraGPT() {
                 onClick={() => fileInputRef.current?.click()}
                 className="h-9 w-9 p-0 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
                 aria-label="Attach file"
+                disabled={isLoading}
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
@@ -739,25 +834,33 @@ export default function DijkstraGPT() {
                 }}
                 className="h-9 w-9 p-0 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
                 aria-label="Upload image"
+                disabled={isLoading}
               >
                 <Image className="h-4 w-4" />
               </Button>
             </div>
 
-            {/* Right side - Send button */}
-            <Button
-              onClick={handleSubmit}
-              disabled={(!prompt.trim() && uploadedFiles.length === 0) || isLoading}
-              className="h-9 px-4 rounded-xl bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
-              aria-label="Send message"
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2" />
-              ) : (
+            {/* Right side - Send/Stop button */}
+            {isLoading ? (
+              <Button
+                variant="ghost"
+                onClick={handleStopGeneration}
+                className="h-9 w-9 p-0 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
+                aria-label="Stop generation"
+              >
+                <Pause className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                disabled={!prompt.trim() && uploadedFiles.length === 0}
+                className="h-9 px-4 rounded-xl bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
+                aria-label="Send message"
+              >
                 <ArrowUp className="h-4 w-4 mr-1" />
-              )}
-              Send
-            </Button>
+                Send
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -834,28 +937,10 @@ export default function DijkstraGPT() {
               </div>
             </>
           ) : (
-            <div className={`flex-1 ${hasMessages ? 'p-6' : ''} min-h-0`}>
-              {/* ==================== MESSAGES VIEW ==================== */}
-              <div className="max-w-4xl mx-auto">
-                {/* Render all messages */}
+            // Messages view – scrollable
+            <div className="flex-1 min-h-0 p-6">
+              <div className="max-w-4xl mx-auto h-full overflow-y-auto pr-1">
                 {messages.map((m, i) => renderMessage(m, i))}
-
-                {/* Loading indicator */}
-                {isLoading && (
-                  <div className="flex justify-start mb-6">
-                    <div className="bg-background border border-border/50 p-4 rounded-2xl shadow-lg">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">Thinking...</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <div ref={messagesEndRef} />
               </div>
             </div>
@@ -968,7 +1053,7 @@ export default function DijkstraGPT() {
                           }}
                         >
                           <div className="p-2.5">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between gap-2">
                               {/* Session info */}
                               <div className="flex items-center gap-2.5 flex-1 min-w-0">
                                 <div className={`flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-colors duration-200 ${
@@ -978,48 +1063,87 @@ export default function DijkstraGPT() {
                                 }`}>
                                   <MessageSquare className="h-3.5 w-3.5" />
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className={`text-sm font-medium truncate transition-colors duration-200 ${
-                                    currentSessionId === session.id ? "text-foreground" : "text-foreground/90"
-                                  }`} title={session.title}>
-                                    {session.title}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
-                                    {session.messages.length} messages • {session.updatedAt.toLocaleDateString()}
-                                  </p>
+                                <div className="min-w-0 flex-1 overflow-hidden">
+                                  {editingSessionId === session.id ? (
+                                    <input
+                                      type="text"
+                                      value={editingTitle}
+                                      onChange={(e) => setEditingTitle(e.target.value)}
+                                      onBlur={saveRename}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") saveRename();
+                                        if (e.key === "Escape") {
+                                          setEditingSessionId(null);
+                                          setEditingTitle("");
+                                        }
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                      autoFocus
+                                      className="w-full text-sm font-medium bg-background border border-border/50 rounded px-2 py-1"
+                                    />
+                                  ) : (
+                                    <>
+                                      <p className={`text-sm font-medium truncate max-w-[150px] transition-colors duration-200 ${
+                                        currentSessionId === session.id ? "text-foreground" : "text-foreground/90"
+                                      }`} title={session.title}>
+                                        {session.title}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground/70 mt-0.5 truncate max-w-[150px]">
+                                        {session.messages.length} messages • {session.updatedAt.toLocaleDateString()}
+                                      </p>
+                                    </>
+                                  )}
                                 </div>
                               </div>
 
-                              {/* Action buttons - Download and Delete */}
-                              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0">
-                                {/* Download button */}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-all duration-200"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    downloadSession(session);
-                                  }}
-                                  aria-label={`Download chat: ${session.title}`}
-                                >
-                                  <Download className="h-3 w-3" />
-                                </Button>
-
-                                {/* Delete button */}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all duration-200"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteSession(session.id);
-                                  }}
-                                  aria-label={`Delete chat: ${session.title}`}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
+                              {/* Action buttons - Dropdown menu */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                  <DropdownMenuContent side="right" align="start">
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        renameSession(session.id);
+                                      }}
+                                    >
+                                      <Edit3 className="h-4 w-4 mr-2" /> Rename
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        shareSession(session.id);
+                                      }}
+                                    >
+                                      <Share2 className="h-4 w-4 mr-2" /> Share
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        downloadSession(session);
+                                      }}
+                                    >
+                                      <Download className="h-4 w-4 mr-2" /> Download
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="text-red-600 focus:text-red-700 hover:bg-red-600/10"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteSession(session.id);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                           </div>
                         </Card>
