@@ -1,71 +1,133 @@
 "use client";
 
-import React from "react";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-// UI Components from shadcn/ui library
+// UI Components
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
-// Icon library (removed voice & enhance icons)
+// Markdown
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import {
-  Paperclip,
-  Image,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// Icons
+import {
   FileText,
   X,
   ArrowUp,
   Copy,
   RefreshCw,
   Share2,
-  MessageSquare,
   Trash2,
   ChevronLeft,
-  ChevronRight,
   Search,
-  Calendar,
   Check,
   Download,
+  Edit3,
+  MoreVertical,
+  Plus,
+  Square,
 } from "lucide-react";
 
-// API client for Gemini AI communication
+// API & helpers
 import { callGemini } from "@/lib/geminiClient";
-
-// Toast notification system
 import { toast } from "sonner";
+import { uploadFileToSupabase } from "@/lib/storageHelpers";
+import { loadChats, saveChat, updateChatMessages, deleteChat } from "@/lib/dbHelpers";
+import { useSettingsStore } from "@/lib/Zustand/settings-store";
 
 // ============================================
-// TYPE DEFINITIONS
+// TYPES
 // ============================================
+type MessageFileMeta = {
+  name: string;
+  url: string;
+  size?: number;
+  mime?: string;
+  base64?: string;
+};
 
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
-  files?: File[];
+  files?: File[] | MessageFileMeta[];
 };
 
 type ChatSession = {
   id: string;
+  session_id?: string;
   title: string;
   messages: Message[];
   createdAt: Date;
   updatedAt: Date;
 };
 
+type PreviewFile = {
+  src: string;
+  name: string;
+  mime?: string;
+};
+
+// ============================================
+// FILE HELPERS
+// ============================================
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      const base64Data = base64.split(",")[1];
+      resolve(base64Data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const getGeminiMimeType = (file: File): string => {
+  const mimeMap: Record<string, string> = {
+    "image/jpeg": "image/jpeg",
+    "image/jpg": "image/jpeg",
+    "image/png": "image/png",
+    "image/gif": "image/gif",
+    "image/webp": "image/webp",
+    "application/pdf": "application/pdf",
+    "text/plain": "text/plain",
+  };
+  return mimeMap[file.type] || file.type;
+};
+
+const isImageMeta = (file: any): boolean => {
+  const meta = file as MessageFileMeta;
+  const mime = meta.mime || "";
+  return (
+    mime.startsWith("image/") ||
+    (meta.name && meta.name.match(/\.(png|jpe?g|gif|webp)$/i) != null)
+  );
+};
+
+const buildPreviewSrcFromMeta = (meta: MessageFileMeta): string | null => {
+  if (meta.url && meta.url.length > 0) return meta.url;
+  if (meta.base64) {
+    return `data:${meta.mime || "application/octet-stream"};base64,${meta.base64}`;
+  }
+  return null;
+};
+
 // ============================================
 // MAIN COMPONENT
 // ============================================
-
 export default function DijkstraGPT() {
-  // ============================================
-  // STATE MANAGEMENT
-  // ============================================
-
+  // STATE
   const [prompt, setPrompt] = useState<string>("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -74,30 +136,38 @@ export default function DijkstraGPT() {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
-  const [apiStatus, setApiStatus] = useState<'checking' | 'active' | 'inactive'>('checking');
-  const [hasMessages, setHasMessages] = useState<boolean>(false);
+  const [, setApiStatus] = useState<"checking" | "active" | "inactive">("checking");
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>("");
+  const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null);
 
-  // ============================================
-  // REFS FOR DOM ELEMENTS
-  // ============================================
-
+  // REFS
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+  const cancelGenerationRef = useRef<boolean>(false);
 
-  // ============================================
-  // COMPUTED VALUES
-  // ============================================
-
-  const currentSession = chatSessions.find((session) => session.id === currentSessionId);
+  const currentSession = chatSessions.find((s) => s.id === currentSessionId);
   const messages = currentSession?.messages || [];
+  const hasMessages = messages.length > 0;
+
+  // ============================================
+  // UTIL / VALIDATION
+  // ============================================
+  const validateCredentials = (): boolean => {
+    const { geminiKey, supabaseUrl, supabaseKey } = useSettingsStore.getState();
+    if (!geminiKey || !supabaseUrl || !supabaseKey) {
+      toast.error("Please configure your API credentials in Settings > Developer Settings", {
+        duration: 5000,
+      });
+      return false;
+    }
+    return true;
+  };
 
   // ============================================
   // EFFECTS
   // ============================================
-
-  // Auto-resize textarea based on content
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -105,193 +175,320 @@ export default function DijkstraGPT() {
     }
   }, [prompt]);
 
-  // Auto-scroll to bottom when new messages arrive (scrolling parent container)
   useEffect(() => {
     if (messagesEndRef.current && hasMessages) {
-      // Find the scrollable parent container from page.tsx
-      let scrollContainer = messagesEndRef.current.closest('.overflow-y-auto');
+      let scrollContainer = messagesEndRef.current.closest(".overflow-y-auto");
       if (!scrollContainer) {
-        // Try to find the parent scroll container by traversing up
         let parent = messagesEndRef.current.parentElement;
         while (parent && parent !== document.body) {
           const style = window.getComputedStyle(parent);
-          if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          if (style.overflowY === "auto" || style.overflowY === "scroll") {
             scrollContainer = parent;
             break;
           }
           parent = parent.parentElement;
         }
       }
-      
-      if (scrollContainer) {
-        // Use setTimeout to ensure DOM is updated
-        setTimeout(() => {
-          scrollContainer?.scrollTo({
+      const doScroll = () => {
+        if (scrollContainer) {
+          scrollContainer.scrollTo({
             top: scrollContainer.scrollHeight,
-            behavior: "smooth"
+            behavior: "smooth",
           });
-        }, 100);
-      } else {
-        // Fallback to direct scrollIntoView
-        setTimeout(() => {
+        } else {
           messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
+        }
+      };
+      setTimeout(doScroll, 80);
     }
   }, [messages, isLoading, hasMessages]);
 
-  // Track if there are messages to determine layout state
-  // Note: hasMessages is set immediately on submit, so we only update if it's false and messages exist
   useEffect(() => {
-    if (!hasMessages && messages.length > 0) {
-      setHasMessages(true);
-    }
-  }, [messages, hasMessages]);
+    async function init() {
+      if (!validateCredentials()) {
+        const fallback: ChatSession = {
+          id: Date.now().toString(),
+          session_id: Date.now().toString(),
+          title: "New Chat",
+          messages: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        setChatSessions([fallback]);
+        setCurrentSessionId(fallback.id);
+        return;
+      }
 
-  // Initialize with a default session on mount
-  useEffect(() => {
-    const initialSession: ChatSession = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    setChatSessions([initialSession]);
-    setCurrentSessionId(initialSession.id);
-  }, []);  
-
-  // ============================================
-  // SESSION MANAGEMENT FUNCTIONS
-  // ============================================
-
-  const createNewChat = (): void => {
-    const newSession: ChatSession = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    setChatSessions((prev) => [newSession, ...prev]);
-    setCurrentSessionId(newSession.id);
-    setPrompt("");
-    setUploadedFiles([]);
-    toast.success("New chat created");
-  };
-
-  const updateSessionTitle = (sessionId: string, firstMessage: string): void => {
-    setChatSessions((prev) =>
-      prev.map((session) => {
-        if (session.id === sessionId && session.title === "New Chat") {
-          return {
-            ...session,
-            title: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : ""),
+      try {
+        const chats = await loadChats();
+        if (!chats || chats.length === 0) {
+          const initial: ChatSession = {
+            id: Date.now().toString(),
+            session_id: Date.now().toString(),
+            title: "New Chat",
+            messages: [],
+            createdAt: new Date(),
             updatedAt: new Date(),
           };
+          setChatSessions([initial]);
+          setCurrentSessionId(initial.id);
+          await saveChat({
+            id: initial.id,
+            session_id: initial.session_id!,
+            title: initial.title,
+            messages: [],
+          });
+          return;
         }
-        return session;
-      })
-    );
-  };
 
-  // Check API status on mount
-  useEffect(() => {
-    checkApiStatus();
-  }, []);
+        const mapped = chats.map((c: any) => {
+          const mappedMessages: Message[] = (c.messages ?? []).map((m: any) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content ?? "",
+            timestamp: m.timestamp ? new Date(m.timestamp) : new Date(),
+            files: m.files ?? undefined,
+          }));
+          return {
+            id: c.id,
+            session_id: c.session_id,
+            title: c.title,
+            messages: mappedMessages,
+            createdAt: new Date(c.created_at),
+            updatedAt: new Date(c.updated_at),
+          } as ChatSession;
+        });
 
-  const deleteSession = (sessionId: string): void => {
-    setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
+        setChatSessions(mapped);
+        setCurrentSessionId(mapped[0]?.id ?? null);
+      } catch (err) {
+        console.error("Failed to load chats:", err);
+        toast.error("Failed to load chats. Please check your Supabase credentials.");
 
-    if (currentSessionId === sessionId) {
-      const remaining = chatSessions.filter((s) => s.id !== sessionId);
-      setCurrentSessionId(remaining.length > 0 ? remaining[0].id : null);
+        const fallback: ChatSession = {
+          id: Date.now().toString(),
+          session_id: Date.now().toString(),
+          title: "New Chat",
+          messages: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        setChatSessions([fallback]);
+        setCurrentSessionId(fallback.id);
+      }
+
+      void checkApiStatus();
     }
 
-    toast.success("Chat deleted");
+    void init();
+  }, []);
+
+  // ============================================
+  // SESSION MANAGEMENT
+  // ============================================
+  const createNewChat = async (): Promise<void> => {
+    const s: ChatSession = {
+      id: Date.now().toString(),
+      session_id: Date.now().toString(),
+      title: "New Chat",
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    setChatSessions((prev) => [s, ...prev]);
+    setCurrentSessionId(s.id);
+    setPrompt("");
+    setUploadedFiles([]);
+    cancelGenerationRef.current = false;
+
+    if (!validateCredentials()) return;
+
+    try {
+      await saveChat({ id: s.id, session_id: s.session_id!, title: s.title, messages: [] });
+    } catch (err) {
+      console.error("saveChat failed:", err);
+      toast.error("Could not save new chat to DB");
+    }
+  };
+
+  const updateSessionTitle = async (sessionId: string, firstMessage: string): Promise<void> => {
+    const newTitle = firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : "");
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === sessionId && s.title === "New Chat"
+          ? { ...s, title: newTitle, updatedAt: new Date() }
+          : s
+      )
+    );
+
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (session && session.title === "New Chat") {
+      try {
+        await saveChat({
+          id: session.id,
+          session_id: session.session_id!,
+          title: newTitle,
+          messages: session.messages,
+        });
+      } catch (err) {
+        console.error("Failed to update title in DB:", err);
+      }
+    }
+  };
+
+  const deleteSession = async (sessionId: string): Promise<void> => {
+    if (!confirm("Are you sure you want to delete this chat?")) return;
+
+    try {
+      await deleteChat(sessionId);
+      setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      if (currentSessionId === sessionId) {
+        const rest = chatSessions.filter((s) => s.id !== sessionId);
+        setCurrentSessionId(rest[0]?.id ?? null);
+      }
+      toast.success("Chat deleted");
+    } catch (err) {
+      console.error("deleteChat failed:", err);
+      toast.error("Failed to delete chat from DB");
+    }
   };
 
   const downloadSession = (session: ChatSession): void => {
-    const dataStr = JSON.stringify(session, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const lines = session.messages.map((m) => {
+      const roleLabel = m.role === "user" ? "User" : "Assistant";
+      const time = m.timestamp.toLocaleString();
+      const files = (m.files as any[]) || [];
+      const fileText =
+        files.length > 0
+          ? `\nAttachments: ${files
+              .map((f: any) => f.name || "")
+              .filter(Boolean)
+              .join(", ")}`
+          : "";
+      return `### ${roleLabel} (${time})\n\n${m.content || ""}${fileText}`;
+    });
 
+    const md = `# ${session.title}\n\n${lines.join("\n\n---\n\n")}\n`;
+    const dataBlob = new Blob([md], { type: "text/markdown" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${session.title}_${Date.now()}.json`;
+    link.download = `${session.title.replace(/[^\w\-]+/g, "_") || "chat"}_${Date.now()}.md`;
     link.click();
-
     URL.revokeObjectURL(url);
     toast.success("Chat downloaded");
   };
 
-  const addMessage = (message: Message): void => {
-    setChatSessions((prev) =>
-      prev.map((session) => {
-        if (session.id === currentSessionId) {
-          return {
-            ...session,
-            messages: [...session.messages, message],
-            updatedAt: new Date(),
-          };
-        }
-        return session;
-      })
-    );
+  const renameSession = (sessionId: string): void => {
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (session) {
+      setEditingSessionId(sessionId);
+      setEditingTitle(session.title);
+    }
   };
-  // ============================================
-  // API STATUS CHECK
-  // ============================================
 
-  const checkApiStatus = async (): Promise<void> => {
+  const saveRename = async (): Promise<void> => {
+    if (!editingSessionId || !editingTitle.trim()) {
+      setEditingSessionId(null);
+      setEditingTitle("");
+      return;
+    }
+
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === editingSessionId
+          ? { ...s, title: editingTitle.trim(), updatedAt: new Date() }
+          : s
+      )
+    );
+
+    const chatToSave = chatSessions.find((c) => c.id === editingSessionId);
     try {
-      const response = await callGemini("test");
-      if (response) {
-        setApiStatus('active');
-        console.log('✅ API key is active');
+      if (chatToSave) {
+        await saveChat({
+          id: chatToSave.id,
+          session_id: chatToSave.session_id!,
+          title: editingTitle.trim(),
+          messages: chatToSave.messages,
+        });
+        toast.success("Chat renamed");
+      }
+    } catch (err) {
+      console.error("saveChat (rename) failed:", err);
+      toast.error("Failed to rename chat in DB");
+    } finally {
+      setEditingSessionId(null);
+      setEditingTitle("");
+    }
+  };
+
+  const shareSession = async (sessionId: string): Promise<void> => {
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (!session) return;
+
+    const shareText = `${session.title}\n\n${session.messages
+      .map((m) => `${m.role === "user" ? "You" : "Assistant"}: ${m.content}`)
+      .join("\n\n")}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: session.title, text: shareText });
+        toast.success("Chat shared");
       } else {
-        setApiStatus('inactive');
-        console.log('❌ API key is not configured or invalid');
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Chat copied to clipboard");
       }
     } catch (error) {
-      setApiStatus('inactive');
-      console.error('❌ API check failed:', error);
+      console.log("Share cancelled or failed:", error);
     }
   };
 
   // ============================================
-  // FILE HANDLING FUNCTIONS
+  // API STATUS
   // ============================================
+  const checkApiStatus = async (): Promise<void> => {
+    try {
+      const { geminiKey, supabaseUrl, supabaseKey } = useSettingsStore.getState();
+      if (!geminiKey || !supabaseUrl || !supabaseKey) {
+        setApiStatus("inactive");
+        return;
+      }
 
+      const response = await callGemini("test", []);
+      if (response) setApiStatus("active");
+      else setApiStatus("inactive");
+    } catch (error) {
+      setApiStatus("inactive");
+      console.error("API check failed:", error);
+    }
+  };
+
+  // ============================================
+  // FILE HANDLING
+  // ============================================
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const files = Array.from(event.target.files || []);
-
     const validTypes = [
       "application/pdf",
       "image/jpeg",
       "image/jpg",
       "image/png",
+      "image/gif",
+      "image/webp",
       "text/plain",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
     const validFiles = files.filter((file) => {
-      const isValid = validTypes.includes(file.type) || file.name.match(/\.(jpg|jpeg|png|pdf|txt|doc|docx)$/i);
-
-      if (!isValid) {
-        toast.error(`File type not supported: ${file.name}`);
-      }
+      const isValid =
+        validTypes.includes(file.type) ||
+        file.name.match(/\.(jpg|jpeg|png|gif|webp|pdf|txt)$/i);
+      if (!isValid) toast.error(`File type not supported: ${file.name}`);
       return isValid;
     });
 
     setUploadedFiles((prev) => [...prev, ...validFiles]);
-
-    if (validFiles.length > 0) {
-      toast.success(`${validFiles.length} file(s) uploaded`);
-    }
+    if (validFiles.length > 0) toast.success(`${validFiles.length} file(s) added`);
   };
 
   const removeFile = (index: number): void => {
@@ -299,125 +496,244 @@ export default function DijkstraGPT() {
   };
 
   // ============================================
-  // MESSAGE ACTION FUNCTIONS
+  // MESSAGE ACTIONS
   // ============================================
-
   const copyMessage = async (content: string, messageId: string): Promise<void> => {
     try {
       await navigator.clipboard.writeText(content);
       setCopiedMessageId(messageId);
-      toast.success("Copied to clipboard");
-
-      setTimeout(() => setCopiedMessageId(null), 2000);
-    } catch (error) {
+      toast.success("Copied");
+      setTimeout(() => setCopiedMessageId(null), 1500);
+    } catch {
       toast.error("Failed to copy");
     }
   };
 
-  // Helper to update assistant message content progressively (streaming)
-  const updateAssistantContent = (sessionId: string | null, messageId: string, newContent: string) => {
+  const updateAssistantContent = (
+    sessionId: string | null,
+    messageId: string,
+    newContent: string
+  ) => {
     if (!sessionId) return;
     setChatSessions((prev) =>
-      prev.map((session) => {
-        if (session.id !== sessionId) return session;
-        return {
-          ...session,
-          messages: session.messages.map((m) => (m.id === messageId ? { ...m, content: newContent } : m)),
-          updatedAt: new Date(),
-        };
-      })
+      prev.map((session) =>
+        session.id === sessionId
+          ? {
+              ...session,
+              messages: session.messages.map((m) =>
+                m.id === messageId ? { ...m, content: newContent } : m
+              ),
+              updatedAt: new Date(),
+            }
+          : session
+      )
     );
   };
 
-  // Try to handle streaming from callGemini. If callGemini returns a Response-like object with a body stream,
-  // we read it. Otherwise, if it returns a string, we simulate a typewriter streaming effect.
-  const streamGeminiResponse = async (promptText: string, sessionId: string, assistantMessageId: string) => {
-    try {
-      const res: any = await callGemini(promptText);
+  const addMessage = async (message: Message): Promise<MessageFileMeta[] | undefined> => {
+    let filesToSave: MessageFileMeta[] | undefined;
 
-      // If it's a fetch Response-like object with a ReadableStream body
-      if (res && res.body && typeof res.body.getReader === "function") {
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let done = false;
-        let accumulated = "";
+    if (message.files && message.files.length > 0 && (message.files as any)[0] instanceof File) {
+      filesToSave = [];
+      for (const f of message.files as File[]) {
+        let base64Data: string | undefined;
+        let publicUrl = "";
 
-        while (!done) {
-          // eslint-disable-next-line no-await-in-loop
-          const { value, done: d } = await reader.read();
-          if (value) {
-            accumulated += decoder.decode(value, { stream: true });
-            updateAssistantContent(sessionId, assistantMessageId, accumulated);
+        try {
+          base64Data = await fileToBase64(f);
+        } catch (err) {
+          console.error("Base64 conversion failed:", err);
+          toast.error(`Failed to read ${f.name}`);
+        }
+
+        try {
+          const uploaded = await uploadFileToSupabase(f);
+          if (uploaded && typeof uploaded.publicUrl === "string") {
+            publicUrl = uploaded.publicUrl;
           }
-          done = !!d;
+        } catch (err) {
+          console.error("Supabase upload failed:", err);
         }
 
-        // finalize (in case any leftovers)
-        updateAssistantContent(sessionId, assistantMessageId, accumulated);
-        return accumulated;
+        if (base64Data) {
+          filesToSave.push({
+            name: f.name,
+            url: publicUrl,
+            size: f.size,
+            mime: f.type || getGeminiMimeType(f),
+            base64: base64Data,
+          });
+        }
       }
+    } else if (message.files) {
+      filesToSave = message.files as MessageFileMeta[];
+    }
 
-      // If callGemini returned a string, simulate typing
-      if (typeof res === "string") {
-        const full = res;
+    const msgToSave: Message = {
+      ...message,
+      files: filesToSave,
+      timestamp: message.timestamp ?? new Date(),
+    };
+
+    let newMessagesForDb: Message[] | null = null;
+
+    setChatSessions((prev) =>
+      prev.map((s) => {
+        if (s.id === currentSessionId) {
+          const updatedMessages = [...s.messages, msgToSave];
+          newMessagesForDb = updatedMessages;
+          return { ...s, messages: updatedMessages, updatedAt: new Date() };
+        }
+        return s;
+      })
+    );
+
+    if (currentSessionId && newMessagesForDb) {
+      try {
+        await updateChatMessages(currentSessionId, newMessagesForDb);
+      } catch (err) {
+        console.error("updateChatMessages failed:", err);
+      }
+    }
+
+    return filesToSave;
+  };
+
+  // ============================================
+  // STREAMING
+  // ============================================
+  const streamGeminiResponse = async (
+    promptText: string,
+    sessionId: string,
+    assistantMessageId: string,
+    files?: MessageFileMeta[]
+  ) => {
+    try {
+      const fileParts =
+        files && files.length > 0
+          ? files.map((file) => ({
+              inlineData: {
+                mimeType: file.mime || "image/jpeg",
+                data: file.base64 || "",
+              },
+            }))
+          : [];
+
+      const res: any = await callGemini(promptText, fileParts);
+
+      const handleStreaming = async (full: string) => {
         let i = 0;
-        // A small delay between characters produces a smooth typing effect. Adjust as needed.
         while (i <= full.length) {
-          // eslint-disable-next-line no-await-in-loop
-          await new Promise((r) => setTimeout(r, 12));
-          i += Math.ceil(Math.random() * 3); // append a few chars at a time to feel natural
-          const chunk = full.slice(0, i);
-          updateAssistantContent(sessionId, assistantMessageId, chunk);
+          if (cancelGenerationRef.current) {
+            const partial = full.slice(0, i) || "⚠ Generation stopped by user.";
+            updateAssistantContent(sessionId, assistantMessageId, partial);
+            await saveStreamedMessage(sessionId, assistantMessageId, partial);
+            return partial;
+          }
+          await new Promise((r) => setTimeout(r, 14));
+          i += Math.ceil(Math.random() * 3);
+          updateAssistantContent(sessionId, assistantMessageId, full.slice(0, i));
         }
-
         updateAssistantContent(sessionId, assistantMessageId, full);
+        await saveStreamedMessage(sessionId, assistantMessageId, full);
         return full;
+      };
+
+      if (typeof res === "string") return await handleStreaming(res);
+      if (res && typeof res === "object" && typeof (res as any).text === "string") {
+        return await handleStreaming((res as any).text);
       }
 
-      // If the response shape is unknown but contains text field
-      if (res && typeof res === "object" && typeof res.text === "string") {
-        const text = res.text;
-        let i = 0;
-        while (i <= text.length) {
-          // eslint-disable-next-line no-await-in-loop
-          await new Promise((r) => setTimeout(r, 12));
-          i += Math.ceil(Math.random() * 4);
-          updateAssistantContent(sessionId, assistantMessageId, text.slice(0, i));
-        }
-        updateAssistantContent(sessionId, assistantMessageId, text);
-        return text;
-      }
-
-      // Unknown shape -> convert to string and show
       const fallback = String(res);
       updateAssistantContent(sessionId, assistantMessageId, fallback);
+      await saveStreamedMessage(sessionId, assistantMessageId, fallback);
       return fallback;
     } catch (error) {
+      if (cancelGenerationRef.current) {
+        updateAssistantContent(sessionId, assistantMessageId, "⚠ Generation stopped by user.");
+        return;
+      }
       const errStr = "⚠ Error: " + String(error);
       updateAssistantContent(sessionId, assistantMessageId, errStr);
       throw error;
     }
   };
 
-  const regenerateMessage = async (userMessage: Message): Promise<void> => {
+  const saveStreamedMessage = async (
+    sessionId: string,
+    messageId: string,
+    content: string
+  ): Promise<void> => {
+    const session = chatSessions.find((s) => s.id === sessionId);
+    if (!session) return;
+    const updatedMessages = session.messages.map((m) =>
+      m.id === messageId ? { ...m, content } : m
+    );
+    try {
+      await updateChatMessages(sessionId, updatedMessages);
+    } catch (err) {
+      console.error("Failed to save streamed message to DB:", err);
+    }
+  };
+
+  // ============================================
+  // REGENERATE
+  // ============================================
+  const handleRegenerate = async (assistantMessageId: string): Promise<void> => {
+    const session = chatSessions.find((s) => s.id === currentSessionId);
+    if (!session) return;
+    const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
+    if (idx <= 0) return;
+
+    const userMsg = session.messages[idx - 1];
+    if (!userMsg || userMsg.role !== "user") return;
+
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === currentSessionId
+          ? { ...s, messages: s.messages.filter((m) => m.id !== assistantMessageId) }
+          : s
+      )
+    );
+
+    const updatedMessages = session.messages.filter((m) => m.id !== assistantMessageId);
+    try {
+      await updateChatMessages(currentSessionId!, updatedMessages);
+    } catch (err) {
+      console.error("Failed to update DB after regenerate:", err);
+    }
+
+    cancelGenerationRef.current = false;
     setIsLoading(true);
 
+    const newAssistantMessage: Message = {
+      id: (Date.now() + 2).toString(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === currentSessionId
+          ? { ...s, messages: [...s.messages, newAssistantMessage], updatedAt: new Date() }
+          : s
+      )
+    );
+
     try {
-      // create placeholder assistant message
-      const assistantMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-      };
-
-      addMessage(assistantMessage);
-
-      await streamGeminiResponse(userMessage.content, currentSessionId!, assistantMessage.id);
-
+      const userFiles = userMsg.files as MessageFileMeta[] | undefined;
+      await streamGeminiResponse(
+        userMsg.content || "Please analyze the attached file.",
+        currentSessionId!,
+        newAssistantMessage.id,
+        userFiles
+      );
       toast.success("Response regenerated");
     } catch (error) {
-      toast.error("Failed to regenerate: " + String(error));
+      if (!cancelGenerationRef.current) {
+        toast.error("Failed to regenerate: " + String(error));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -426,14 +742,11 @@ export default function DijkstraGPT() {
   const shareMessage = async (content: string): Promise<void> => {
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: "DijkstraGPT Message",
-          text: content,
-        });
-        toast.success("Shared successfully");
+        await navigator.share({ title: "DijkstraGPT Message", text: content });
+        toast.success("Shared");
       } else {
         await navigator.clipboard.writeText(content);
-        toast.success("Copied to clipboard (Share not available)");
+        toast.success("Copied (share not available)");
       }
     } catch (error) {
       console.log("Share cancelled or failed:", error);
@@ -441,21 +754,23 @@ export default function DijkstraGPT() {
   };
 
   // ============================================
-  // INPUT HANDLING FUNCTIONS
+  // INPUT HANDLERS
   // ============================================
-
   const handleSubmit = async (): Promise<void> => {
     if (!prompt.trim() && uploadedFiles.length === 0) return;
+    if (!validateCredentials()) return;
 
-    // Trigger layout transition immediately
-    setHasMessages(true);
+    cancelGenerationRef.current = false;
 
-    if (!currentSessionId) {
-      createNewChat();
-    }
+    if (!currentSessionId) await createNewChat();
 
     const currentPrompt = prompt;
     const currentFiles = [...uploadedFiles];
+
+    const hasText = currentPrompt.trim().length > 0;
+    const effectivePrompt = hasText
+      ? currentPrompt
+      : "Please analyze the attached file(s) and give me a helpful response.";
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -465,17 +780,17 @@ export default function DijkstraGPT() {
       files: currentFiles.length > 0 ? currentFiles : undefined,
     };
 
-    addMessage(userMessage);
+    const processedFiles = await addMessage(userMessage);
 
     setPrompt("");
     setUploadedFiles([]);
     setIsLoading(true);
 
     if (currentSession && currentSession.messages.length === 0) {
-      updateSessionTitle(currentSessionId!, currentPrompt);
+      const titleSource = hasText ? currentPrompt : currentFiles[0]?.name || effectivePrompt;
+      await updateSessionTitle(currentSessionId!, titleSource);
     }
 
-    // Create an assistant placeholder message (will be updated progressively)
     const assistantMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: "assistant",
@@ -483,20 +798,33 @@ export default function DijkstraGPT() {
       timestamp: new Date(),
     };
 
-    addMessage(assistantMessage);
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === currentSessionId
+          ? { ...s, messages: [...s.messages, assistantMessage], updatedAt: new Date() }
+          : s
+      )
+    );
 
     try {
-      await streamGeminiResponse(currentPrompt, currentSessionId!, assistantMessage.id);
+      await streamGeminiResponse(
+        effectivePrompt,
+        currentSessionId!,
+        assistantMessage.id,
+        processedFiles
+      );
     } catch (error) {
-      const errorMessage: Message = {
-        id: (Date.now() + 3).toString(),
-        role: "assistant",
-        content: "⚠ Error: " + String(error),
-        timestamp: new Date(),
-      };
-      // replace the placeholder content with the error
-      updateAssistantContent(currentSessionId, assistantMessage.id, errorMessage.content);
-      toast.error("Failed to get response");
+      if (!cancelGenerationRef.current) {
+        const errorMessage: Message = {
+          id: (Date.now() + 3).toString(),
+          role: "assistant",
+          content: "⚠ Error: " + String(error),
+          timestamp: new Date(),
+        };
+        updateAssistantContent(currentSessionId, assistantMessage.id, errorMessage.content);
+        await saveStreamedMessage(currentSessionId!, assistantMessage.id, errorMessage.content);
+        toast.error("Failed to get response");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -509,139 +837,208 @@ export default function DijkstraGPT() {
     }
   };
 
-  // ============================================
-  // SEARCH & FILTER
-  // ============================================
+  const handleStopGeneration = () => {
+    if (!isLoading) return;
+    cancelGenerationRef.current = true;
+    setIsLoading(false);
+    toast.info("Generation stopped");
+  };
 
+  // ============================================
+  // SEARCH
+  // ============================================
   const filteredSessions = chatSessions.filter(
     (session) =>
       session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      session.messages.some((msg) => msg.content.toLowerCase().includes(searchQuery.toLowerCase()))
+      session.messages.some((msg) =>
+        msg.content.toLowerCase().includes(searchQuery.toLowerCase())
+      )
   );
 
-  const groupedSessions = filteredSessions.reduce((groups, session) => {
-    const date = session.updatedAt.toDateString();
-    if (!groups[date]) {
-      groups[date] = [];
+  // ============================================
+  // MESSAGE RENDER
+  // ============================================
+  const renderFilePreview = (file: any, idx: number) => {
+    const meta = file as MessageFileMeta;
+    const mime = meta.mime || "";
+    const isImage =
+      mime.startsWith("image/") ||
+      (meta.name && meta.name.match(/\.(png|jpe?g|gif|webp)$/i) != null);
+
+    const src = buildPreviewSrcFromMeta(meta);
+
+    const openPreview = () => {
+      if (!src) return;
+      setPreviewFile({
+        src,
+        name: meta.name || "File",
+        mime: mime || undefined,
+      });
+    };
+
+    if (isImage && src) {
+      return (
+        <button
+          type="button"
+          key={idx}
+          onClick={openPreview}
+          className="relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden bg-muted/40 hover:brightness-105 transition"
+        >
+          <img src={src} alt={meta.name || "Image"} className="w-full h-full object-cover" />
+        </button>
+      );
     }
-    groups[date].push(session);
-    return groups;
-  }, {} as Record<string, ChatSession[]>);
-
-  // ============================================
-  // RENDER MESSAGE FUNCTION
-  // ============================================
-
-  const renderMessage = (msg: Message, i: number): React.JSX.Element => {
-    const isUser = msg.role === "user";
-    const isCopied = copiedMessageId === msg.id;
-
-    // Split content by code blocks (```) and preserve formatting
-    const parts = msg.content.split(/```/g);
 
     return (
-      <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"} mb-6`}>
+      <button
+        type="button"
+        key={idx}
+        onClick={openPreview}
+        className="flex items-center gap-2 px-3 py-1.5 bg-muted/60 rounded-full text-xs hover:bg-muted/80 transition"
+      >
+        <FileText className="h-3 w-3" />
+        <span className="truncate max-w-[150px]">{meta.name}</span>
+      </button>
+    );
+  };
+
+  const renderMessage = (msg: Message, i: number): JSX.Element => {
+    const isUser = msg.role === "user";
+    const isCopied = copiedMessageId === msg.id;
+    const isLastMessage = i === messages.length - 1;
+    const isStreamingAssistant = !isUser && isLastMessage && isLoading;
+
+    const hasFiles = msg.files && (msg.files as any).length > 0;
+    const filesArray = (msg.files as any[]) || [];
+
+    const allImagesOnly =
+      hasFiles &&
+      filesArray.length > 0 &&
+      filesArray.every((f) => isImageMeta(f)) &&
+      (msg.content || "").trim().length === 0;
+
+    const contentToRender = msg.content || "";
+
+    const displayContent =
+      isStreamingAssistant && !contentToRender.trim().length
+        ? "_DijkstraGPT is thinking..._"
+        : contentToRender;
+
+    if (allImagesOnly) {
+      return (
         <div
-          className={`max-w-[80%] rounded-2xl shadow-lg ${
-            isUser
-              ? "bg-foreground text-background"
-              : "bg-background border border-border/50"
-          }`}
+          key={msg.id}
+          className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}
         >
-          <div className="p-4">
-            {/* File attachments display for user messages */}
-            {isUser && msg.files && msg.files.length > 0 && (
-              <div className="mb-3 flex flex-wrap gap-2">
-                {msg.files.map((file, idx) => (
-                  <Badge key={idx} variant="secondary" className="text-xs">
-                    <FileText className="h-3 w-3 mr-1" />
-                    {file.name}
-                  </Badge>
-                ))}
-              </div>
-            )}
-
-            {/* Message content with code block formatting */}
-            <div className="space-y-3">
-              {parts.map((part, idx) =>
-                idx % 2 === 1 ? (
-                  // Code block (odd indices)
-                  <div
-                    key={idx}
-                    className="relative bg-gray-900 text-green-400 rounded-lg p-3 font-mono text-sm overflow-x-auto"
-                  >
-                    <pre className="whitespace-pre-wrap">{part.trim()}</pre>
-                  </div>
-                ) : (
-                  // Regular text with list formatting (even indices)
-                  <div key={idx} className="prose prose-sm dark:prose-invert max-w-none">
-                    {part.split("\n").map((line, li) => {
-                      if (line.trim().match(/^[-*]\s+/)) {
-                        return (
-                          <li key={li} className="ml-4 list-disc">
-                            {line.replace(/^[-*]\s+/, "")}
-                          </li>
-                        );
-                      } else if (line.trim().match(/^\d+\.\s+/)) {
-                        return (
-                          <li key={li} className="ml-4 list-decimal">
-                            {line.replace(/^\d+\.\s+/, "")}
-                          </li>
-                        );
-                      } else if (line.trim()) {
-                        return <p key={li}>{line}</p>;
-                      }
-                      return <br key={li} />;
-                    })}
-                  </div>
-                )
-              )}
+          <div className="max-w-[80%] space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {filesArray.map((file, idx) => renderFilePreview(file, idx))}
             </div>
-
-            {/* Timestamp */}
-            <p className="text-xs opacity-70 mt-3">{msg.timestamp.toLocaleTimeString()}</p>
+            <p className="text-xs text-muted-foreground">
+              {msg.timestamp.toLocaleTimeString()}
+            </p>
           </div>
+        </div>
+      );
+    }
 
-          {/* Action buttons for assistant messages - ICONS ONLY */}
-          {!isUser && (
-            <div className="flex items-center gap-1 px-4 pb-3 border-t border-border/30 pt-2">
-              {/* Copy button - Icon only */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => copyMessage(msg.content, msg.id)}
-                className="h-8 w-8 p-0"
-                aria-label="Copy message"
-              >
-                {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
+    return (
+      <div
+        key={msg.id}
+        className={`flex ${isUser ? "justify-end" : "justify-start"} mb-6`}
+      >
+        <div className="max-w-[80%] space-y-2">
+          {hasFiles && (
+            <div className="flex flex-wrap gap-2">
+              {filesArray.map((file, idx) => renderFilePreview(file, idx))}
+            </div>
+          )}
 
-              {/* Regenerate button - Icon only */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const userMsg = messages[i - 1];
-                  if (userMsg && userMsg.role === "user") {
-                    void regenerateMessage(userMsg);
-                  }
+          {displayContent.trim().length > 0 && (
+            <div
+              className={`prose prose-sm dark:prose-invert max-w-none ${
+                isUser ? "text-right" : "text-left"
+              }`}
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code({ inline, className, children, ...props }) {
+  const match = /language-(\w+)/.exec(className || "");
+  if (!inline) {
+    return (
+      <pre
+        className="code-scroll mt-2 mb-4 rounded-xl bg-muted border border-border/40 px-4 py-3 overflow-x-auto overflow-y-hidden text-sm"
+      >
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </pre>
+    );
+  }
+  return (
+    <code
+      className="px-1.5 py-0.5 rounded bg-muted text-xs font-mono"
+      {...props}
+    >
+      {children}
+    </code>
+  );
+}
+,
                 }}
-                className="h-8 w-8 p-0"
-                aria-label="Regenerate response"
               >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
+                {displayContent}
+              </ReactMarkdown>
+            </div>
+          )}
 
-              {/* Share button - Icon only */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => shareMessage(msg.content)}
-                className="h-8 w-8 p-0"
-                aria-label="Share message"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
+          {!isStreamingAssistant && (
+            <div
+              className={`flex items-center gap-2 text-xs text-muted-foreground ${
+                isUser ? "justify-end" : "justify-start"
+              }`}
+            >
+              <span>{msg.timestamp.toLocaleTimeString()}</span>
+
+              {!isUser && (
+                <>
+                  <span className="mx-1 text-muted-foreground/40">•</span>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => copyMessage(msg.content, msg.id)}
+                      className="h-6 w-6 p-0"
+                      aria-label="Copy message"
+                    >
+                      {isCopied ? (
+                        <Check className="h-3 w-3" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRegenerate(msg.id)}
+                      className="h-6 w-6 p-0"
+                      aria-label="Regenerate response"
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => shareMessage(msg.content)}
+                      className="h-6 w-6 p-0"
+                      aria-label="Share message"
+                    >
+                      <Share2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -652,7 +1049,6 @@ export default function DijkstraGPT() {
   // ============================================
   // EXAMPLE PROMPTS
   // ============================================
-
   const examplePrompts = [
     "I'm lost. How do I get started with coding to get a job in tech?",
     "What are the steps I can take to become a Computer Science Engineer?",
@@ -663,106 +1059,141 @@ export default function DijkstraGPT() {
   ];
 
   // ============================================
-  // RENDER INPUT AREA
+  // INPUT AREA (ChatGPT-style)
   // ============================================
-
   const renderInputArea = (isCentered: boolean = false) => (
-    <div 
-      className={`relative max-w-4xl mx-auto transition-all duration-500 ease-in-out ${
-        isCentered ? 'w-full' : 'w-full'
-      }`}
-    >
-      {/* Uploaded files preview */}
-      {uploadedFiles.length > 0 && (
-        <div className="mb-4 p-4 bg-muted/50 rounded-2xl border border-border/50">
-          <div className="flex flex-wrap gap-2">
-            {uploadedFiles.map((file, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-2 px-3 py-2 bg-background border border-border/50 hover:bg-muted/80 transition-colors">
-                <FileText className="h-3 w-3" />
-                <span className="text-sm font-medium">{file.name}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive/20 hover:text-destructive rounded-full"
-                  onClick={() => removeFile(index)}
-                  aria-label={`Remove ${file.name}`}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="relative max-w-4xl mx-auto w-full transition-all duration-500 ease-in-out">
+      <div className="relative bg-background/95 rounded-3xl overflow-hidden">
+        <div className="px-4 pt-3 pb-2">
+          {uploadedFiles.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {uploadedFiles.map((file, index) => {
+                const isImageFile =
+                  (file.type && file.type.startsWith("image/")) ||
+                  file.name.match(/\.(png|jpe?g|gif|webp)$/i);
 
-      {/* Input container */}
-      <div className="relative bg-background border border-border/50 rounded-3xl shadow-lg shadow-black/5 overflow-hidden">
-        <div className="relative">
+                const objectUrl =
+                  typeof window !== "undefined" ? URL.createObjectURL(file) : "";
+
+                if (isImageFile) {
+                  return (
+                    <button
+                      type="button"
+                      key={`img-${index}`}
+                      onClick={() =>
+                        objectUrl &&
+                        setPreviewFile({
+                          src: objectUrl,
+                          name: file.name,
+                          mime: file.type || "image/*",
+                        })
+                      }
+                      className="relative h-16 w-20 rounded-2xl overflow-hidden bg-muted/40 hover:brightness-105 transition"
+                    >
+                      <img
+                        src={objectUrl}
+                        alt={file.name}
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFile(uploadedFiles.indexOf(file));
+                        }}
+                        className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center"
+                        aria-label={`Remove ${file.name}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </button>
+                  );
+                }
+
+                return (
+                  <div
+                    key={`file-${index}`}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-muted/60 rounded-2xl text-xs"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        objectUrl &&
+                        setPreviewFile({
+                          src: objectUrl,
+                          name: file.name,
+                          mime: file.type || "application/octet-stream",
+                        })
+                      }
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="h-3 w-3" />
+                      <div className="flex flex-col items-start">
+                        <span className="truncate max-w-[160px] font-medium">
+                          {file.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground uppercase">
+                          {file.type.split("/")[1] || "FILE"}
+                        </span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(uploadedFiles.indexOf(file))}
+                      className="h-4 w-4 rounded-full hover:bg-destructive/10 flex items-center justify-center"
+                      aria-label={`Remove ${file.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <Textarea
             ref={textareaRef}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isCentered ? "Describe what you want to build..." : "Ask me anything about CS, algorithms, or coding interviews..."}
-            className="min-h-[80px] max-h-[300px] resize-none border-0 bg-transparent px-6 py-5 text-base placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder={
+              isCentered
+                ? "Describe what you want to build..."
+                : "Ask me anything about CS, algorithms, or coding interviews..."
+            }
+            className="min-h-[64px] max-h-[260px] resize-none border-0 bg-transparent px-0 py-3 text-base placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0"
             style={{ height: "auto" }}
             disabled={isLoading}
             aria-label="Message input"
           />
+        </div>
 
-          {/* Action buttons bar */}
-          <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-t border-border/30">
-            {/* Left side - Input tools */}
-            <div className="flex items-center gap-1">
-              {/* File attachment button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="h-9 w-9 p-0 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
-                aria-label="Attach file"
-              >
-                <Paperclip className="h-4 w-4" />
-              </Button>
-
-              {/* Image upload button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const input = document.createElement("input");
-                  input.type = "file";
-                  input.accept = "image/*";
-                  input.multiple = true;
-                  input.onchange = (e) => handleFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-                  input.click();
-                }}
-                className="h-9 w-9 p-0 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
-                aria-label="Upload image"
-              >
-                <Image className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Right side - Send button */}
+        <div className="flex items-center justify-between px-3 py-2 bg-background/95">
+          <div className="flex items-center gap-2">
             <Button
-              onClick={handleSubmit}
-              disabled={(!prompt.trim() && uploadedFiles.length === 0) || isLoading}
-              className="h-9 px-4 rounded-xl bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
-              aria-label="Send message"
+              variant="ghost"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              className="h-8 w-8 p-0 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition"
+              aria-label="Attach files"
             >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2" />
-              ) : (
-                <ArrowUp className="h-4 w-4 mr-1" />
-              )}
-              Send
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* ChatGPT-style: same round button, icon changes; white circle with black icon */}
+          <Button
+            type="button"
+            onClick={isLoading ? handleStopGeneration : handleSubmit}
+            disabled={!isLoading && !prompt.trim() && uploadedFiles.length === 0}
+            className="h-9 w-9 rounded-full bg-white text-black hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition"
+            aria-label={isLoading ? "Stop generating" : "Send message"}
+          >
+            {isLoading ? <Square className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
 
-      {/* Keyboard shortcut hint */}
       {isCentered && (
         <div className="text-center mt-3">
           <p className="text-xs text-muted-foreground/80">
@@ -778,54 +1209,56 @@ export default function DijkstraGPT() {
   );
 
   // ============================================
-  // MAIN COMPONENT RENDER
+  // LAYOUT
   // ============================================
-
   return (
     <div className="bg-gradient-to-br from-background via-background to-muted/20 flex flex-col w-full h-full">
-      {/* ==================== MAIN CHAT AREA ==================== */}
       <div className="flex-1 flex min-h-0">
-        <div className="flex-1 flex flex-col relative min-h-0">
-          {/* Messages Container - No internal scroll, uses parent scroll */}
+        {/* MAIN CHAT AREA */}
+        <div
+          className={`flex-1 flex flex-col relative min-h-0 transition-[margin-right] duration-400 ease-in-out ${
+            isSidebarOpen ? "mr-[280px]" : "mr-0"
+          }`}
+        >
           {!hasMessages && !isLoading ? (
             <>
-              {/* Header - matches original layout */}
               <div className="flex-shrink-0 text-center pt-4 pb-8">
                 <div className="flex flex-col items-center space-y-2 my-8">
                   <img src="/icon.png" alt="Dijkstra GPT logo" className="h-30 w-30" />
-                  <h2 className="text-2xl font-semibold">Your Personal CS Prep Assistant</h2>
-                  <p className="text-gray-500 text-center max-w-3xl">
-                    This model has been trained on a wide range of computer science topics, tips and tricks, resources, and more to help you on your journey towards becoming a Computer Science Engineer. It is also context aware of what you do within GitHub and Leetcode. Happy coding :)
+                  <h2 className="text-2xl font-semibold text-foreground">
+                    Your Personal CS Prep Assistant
+                  </h2>
+                  <p className="text-muted-foreground text-center max-w-3xl">
+                    This model has been trained on a wide range of computer science topics, tips
+                    and tricks, resources, and more to help you on your journey towards becoming a
+                    Computer Science Engineer. It is also context aware of what you do within
+                    GitHub and Leetcode. Happy coding :)
                   </p>
                 </div>
               </div>
 
-              {/* Main Content - matches original layout */}
-              <div className={`flex-1 flex flex-col items-center px-4 pb-8 ${hasMessages ? 'hidden' : ''}`}>
+              <div className="flex-1 flex flex-col items-center px-4 pb-8">
                 <div className="w-full max-w-4xl mx-auto space-y-8">
-                  {/* Example Prompts - Below Input (shown in original layout) */}
                   <div className="space-y-6">
                     <div className="text-center">
-                      <h2 className="text-lg font-semibold text-foreground/90 mb-2">Get started with these examples</h2>
-                      <p className="text-sm text-muted-foreground">Click any prompt to try it out</p>
+                      <h2 className="text-lg font-semibold text-foreground/90 mb-2">
+                        Get started with these examples
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        Click any prompt to try it out
+                      </p>
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {examplePrompts.map((example, index) => (
                         <button
                           key={index}
                           onClick={() => setPrompt(example)}
-                          className="group p-4 text-left bg-background border border-border/50 rounded-2xl hover:border-border hover:shadow-md hover:shadow-black/5 transition-all duration-200 hover:-translate-y-0.5"
+                          className="group p-4 text-left bg-background border border-border/40 rounded-2xl hover:border-border hover:shadow-md hover:shadow-black/5 transition-all duration-200 hover:-translate-y-0.5"
                           aria-label={`Use example prompt: ${example}`}
                         >
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-br from-black/10 to-green-800/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-black/20 group-hover:to-green-800/20 transition-colors">
-                              <MessageSquare className="h-4 w-4 text-green-800" />
-                            </div>
-                            <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors leading-relaxed">
-                              {example}
-                            </span>
-                          </div>
+                          <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground leading-relaxed">
+                            {example}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -834,230 +1267,167 @@ export default function DijkstraGPT() {
               </div>
             </>
           ) : (
-            <div className={`flex-1 ${hasMessages ? 'p-6' : ''} min-h-0`}>
-              {/* ==================== MESSAGES VIEW ==================== */}
-              <div className="max-w-4xl mx-auto">
-                {/* Render all messages */}
+            <div className="flex-1 min-h-0 p-6">
+              <div className="max-w-4xl mx-auto h-full overflow-y-auto pr-1">
                 {messages.map((m, i) => renderMessage(m, i))}
-
-                {/* Loading indicator */}
-                {isLoading && (
-                  <div className="flex justify-start mb-6">
-                    <div className="bg-background border border-border/50 p-4 rounded-2xl shadow-lg">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                          <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">Thinking...</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <div ref={messagesEndRef} />
               </div>
             </div>
           )}
 
-          {/* ==================== INPUT AREA - SINGLE INSTANCE THAT MOVES ==================== */}
+          {/* Input area with blur at the bottom (no border line) */}
           {hasMessages ? (
-            <div className="flex-shrink-0 sticky bottom-0 p-6 border-t border-border/50 bg-gradient-to-br from-black/2 via-black/2 to-black/2 backdrop-blur-sm z-10 transition-all duration-500 ease-in-out">
-              <div className="w-full max-w-4xl mx-auto">
-                {renderInputArea(false)}
-              </div>
+            <div className="flex-shrink-0 sticky bottom-0 p-6 z-10 bg-gradient-to-t from-background/95 via-background/85 to-transparent backdrop-blur-xl transition-all duration-400 ease-in-out">
+              <div className="w-full max-w-4xl mx-auto">{renderInputArea(false)}</div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center px-4 pb-8">
               <div className="w-full max-w-4xl mx-auto">
-                <div className="relative">
-                  {renderInputArea(true)}
-                </div>
+                <div className="relative">{renderInputArea(true)}</div>
               </div>
             </div>
           )}
         </div>
 
-        {/* ==================== SIDEBAR - CHAT HISTORY ==================== */}
+        {/* SIDEBAR (slide in/out) */}
         <div
-          className={`transition-all duration-300 ease-in-out bg-background/95 backdrop-blur-md border-l border-border/30 flex flex-col sticky top-2 self-start shadow-lg`}
-          style={{ 
-            height: 'calc(100vh - var(--header-height, 64px) - 40px)',
-            width: isSidebarOpen ? '20rem' : '0',
-            minWidth: isSidebarOpen ? '20rem' : '0',
-            overflow: 'hidden'
-          }}
+          className={`fixed right-0 top-14 bottom-0 w-[310px] flex flex-col border-l border-border bg-background/95 backdrop-blur-md z-40 transform transition-transform duration-400 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         >
-          {/* Sidebar content wrapper - controls visibility */}
-          <div 
-            className={`flex flex-col h-full transition-opacity duration-200 ${isSidebarOpen ? 'opacity-100 delay-100' : 'opacity-0 delay-0'}`}
-            style={{ 
-              visibility: isSidebarOpen ? 'visible' : 'hidden',
-              width: '20rem'
-            }}
-          >
-            {/* Sidebar header */}
-            <div className="flex-shrink-0 p-4 border-b border-border/30 bg-gradient-to-b from-transparent to-muted/20">
-              {/* Title */}
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold flex items-center gap-2 text-foreground/90">
-                  <MessageSquare className="h-4 w-4" />
-                  Chat History
-                </h2>
-              </div>
-
-              {/* New chat button */}
-              <Button 
-                onClick={createNewChat} 
-                className="w-full mb-3 h-9 text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 rounded-lg shadow-sm" 
-                aria-label="Create new chat"
-              >
-                <MessageSquare className="h-3.5 w-3.5 mr-2" />
-                New Chat
-              </Button>
-
-              {/* Search input */}
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3.5 w-3.5" />
-                <input
-                  type="text"
-                  placeholder="Search chats..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-border/40 rounded-lg bg-background/50 text-sm focus:ring-2 focus:ring-ring/50 focus:border-ring/50 transition-all duration-200 text-foreground placeholder:text-muted-foreground/60"
-                  aria-label="Search chat history"
-                />
-              </div>
-            </div>
-
-            {/* Chat sessions list with ScrollArea */}
-            <ScrollArea className="flex-1 min-h-0">
-              <div className="p-3 space-y-1">
-                {/* Grouped by date */}
-                {Object.entries(groupedSessions).map(([date, sessions]) => (
-                  <div key={date} className="mb-3">
-                    {/* Date header */}
-                    <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground/70 font-medium uppercase tracking-wider">
-                      <Calendar className="h-3 w-3" />
-                      {date === new Date().toDateString()
-                        ? "Today"
-                        : date === new Date(Date.now() - 86400000).toDateString()
-                        ? "Yesterday"
-                        : new Date(date).toLocaleDateString()}
-                    </div>
-
-                    {/* Session items */}
-                    <div className="space-y-2">
-                      {sessions.map((session) => (
-                        <Card
-                          key={session.id}
-                          className={`group relative cursor-pointer transition-all duration-200 hover:shadow-md py-0 ${
-                            currentSessionId === session.id 
-                              ? "border-primary/50 bg-muted/50 shadow-sm" 
-                              : "hover:border-border/80"
-                          }`}
-                          onClick={() => setCurrentSessionId(session.id)}
-                          role="button"
-                          tabIndex={0}
-                          aria-label={`Select chat: ${session.title}`}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              setCurrentSessionId(session.id);
-                            }
-                          }}
-                        >
-                          <div className="p-2.5">
-                            <div className="flex items-center gap-2">
-                              {/* Session info */}
-                              <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                <div className={`flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-colors duration-200 ${
-                                  currentSessionId === session.id 
-                                    ? "bg-primary/10 text-primary" 
-                                    : "bg-muted text-muted-foreground group-hover:bg-muted/80 group-hover:text-foreground"
-                                }`}>
-                                  <MessageSquare className="h-3.5 w-3.5" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className={`text-sm font-medium truncate transition-colors duration-200 ${
-                                    currentSessionId === session.id ? "text-foreground" : "text-foreground/90"
-                                  }`} title={session.title}>
-                                    {session.title}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
-                                    {session.messages.length} messages • {session.updatedAt.toLocaleDateString()}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Action buttons - Download and Delete */}
-                              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0">
-                                {/* Download button */}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-all duration-200"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    downloadSession(session);
-                                  }}
-                                  aria-label={`Download chat: ${session.title}`}
-                                >
-                                  <Download className="h-3 w-3" />
-                                </Button>
-
-                                {/* Delete button */}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all duration-200"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteSession(session.id);
-                                  }}
-                                  aria-label={`Delete chat: ${session.title}`}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-
-                {/* Empty state */}
-                {filteredSessions.length === 0 && (
-                  <div className="text-center text-muted-foreground mt-12 px-4">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
-                      <MessageSquare className="h-8 w-8 opacity-40" />
-                    </div>
-                    <p className="text-sm font-medium mb-1">No chat history yet</p>
-                    <p className="text-xs text-muted-foreground/70">Start a conversation to see your chats here</p>
-                  </div>
-                )}
-              </div>
-              </ScrollArea>
+          <div className="p-3 border-b border-border">
+            <Button
+              onClick={createNewChat}
+              className="w-full justify-center rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-colors text-sm font-medium"
+            >
+              New Chat
+            </Button>
           </div>
+
+          <div className="px-3 py-2">
+            <div className="relative h-9">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                className="w-full h-full pl-10 pr-3 text-sm bg-secondary text-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+              />
+            </div>
+          </div>
+
+          <ScrollArea className="flex-1 px-2">
+            <div className="space-y-1 pb-8">
+              {filteredSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className={`group flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors ${
+                    currentSessionId === session.id
+                      ? "bg-accent text-accent-foreground"
+                      : "hover:bg-accent/50 text-foreground"
+                  }`}
+                  onClick={() => setCurrentSessionId(session.id)}
+                >
+                  <div className="flex items-center gap-1 min-w-0">
+                    {editingSessionId === session.id ? (
+                      <input
+                        type="text"
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onBlur={saveRename}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveRename();
+                          if (e.key === "Escape") {
+                            setEditingSessionId(null);
+                            setEditingTitle("");
+                          }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                        className="flex-1 text-sm bg-background border border-border/50 rounded px-2 py-1"
+                      />
+                    ) : (
+                      <p className="text-sm truncate max-w-[150px]">{session.title}</p>
+                    )}
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          renameSession(session.id);
+                        }}
+                      >
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Rename
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          shareSession(session.id);
+                        }}
+                      >
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadSession(session);
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-600 focus:text-red-700 hover:bg-red-600/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteSession(session.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       </div>
 
-      {/* ==================== FLOATING SIDEBAR TOGGLE ==================== */}
+      {/* SIDEBAR TOGGLE */}
       <Button
         variant="ghost"
         size="icon"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className={`fixed top-20 z-50 bg-background shadow-lg hover:shadow-xl border border-border/50 transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? 'right-[340px]' : 'right-4'
+        className={`fixed top-20 z-50 bg-background shadow-lg hover:shadow-xl border border-border/50 transition-all duration-400 ease-in-out ${
+          isSidebarOpen ? "right-[320px]" : "right-4"
         }`}
         aria-label={isSidebarOpen ? "Close chat history" : "Open chat history"}
       >
-        <ChevronLeft className={`h-4 w-4 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'rotate-180' : ''}`} />
+        <ChevronLeft
+          className={`h-4 w-4 transition-transform duration-400 ease-in-out ${
+            isSidebarOpen ? "rotate-180" : ""
+          }`}
+        />
       </Button>
 
-      {/* ==================== HIDDEN FILE INPUT ==================== */}
+      {/* HIDDEN FILE INPUT */}
       <input
         ref={fileInputRef}
         type="file"
@@ -1068,6 +1438,34 @@ export default function DijkstraGPT() {
         aria-label="File upload input"
       />
 
+      {/* INLINE PREVIEW OVERLAY (images + PDFs) */}
+      {previewFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <button
+            type="button"
+            onClick={() => setPreviewFile(null)}
+            className="absolute top-4 right-4 h-8 w-8 rounded-full bg-black/80 text-white flex items-center justify-center hover:bg-black/90 transition"
+            aria-label="Close preview"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
+          {previewFile.mime?.startsWith("image/") ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewFile.src}
+              alt={previewFile.name}
+              className="max-w-[90vw] max-h-[90vh] rounded-xl"
+            />
+          ) : (
+            <iframe
+              src={previewFile.src}
+              title={previewFile.name}
+              className="w-[85vw] h-[85vh] rounded-xl bg-background"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
