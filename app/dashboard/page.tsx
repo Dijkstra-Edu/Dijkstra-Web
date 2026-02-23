@@ -3,7 +3,7 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
-import { SectionCards } from "@/components/section-cards";
+import { SectionCards, TasksForTheDayCard } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -73,16 +73,23 @@ export default function Page() {
                 <TabsContent value="stats" className="space-y-4">
                   <SectionCards />
                   <ChartAreaInteractive />
-                  {loading ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-6 w-1/3" />
-                      <Skeleton className="h-8" />
-                      <Skeleton className="h-48" />
-                      <Skeleton className="h-10" />
+                  <div className="flex gap-4 min-h-0">
+                    <div className="w-1/4 min-w-0 shrink-0">
+                      <TasksForTheDayCard />
                     </div>
-                  ) : (
-                    <DataTable data={data as { header: string; type: string; id: number; status: string; target: string; limit: string; reviewer: string; }[]} />
-                  )}
+                    <div className="flex-[3] min-w-0">
+                      {loading ? (
+                        <div className="space-y-2">
+                          <Skeleton className="h-6 w-1/3" />
+                          <Skeleton className="h-8" />
+                          <Skeleton className="h-48" />
+                          <Skeleton className="h-10" />
+                        </div>
+                      ) : (
+                        <DataTable data={data as { header: string; type: string; id: number; status: string; target: string; limit: string; reviewer: string; }[]} />
+                      )}
+                    </div>
+                  </div>
                 </TabsContent>
                 <TabsContent value="portfolio">
                   <StudentDashboard />

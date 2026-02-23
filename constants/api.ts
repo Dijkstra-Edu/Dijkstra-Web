@@ -25,4 +25,6 @@ export const API_URLS = {
   
   getUserData: (githubUsername: string, allData: boolean = true) => 
     `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/u/${encodeURIComponent(githubUsername)}${allData ? '?all_data=true' : ''}`,
-} as const
+  getLeetcodeStatisticsUrl: (leetcodeUsername: string) =>
+    `${API_ENDPOINTS.DATAFORGE_API}/Dijkstra/v1/statistics/lc/${encodeURIComponent(leetcodeUsername)}`,
+} as const;
