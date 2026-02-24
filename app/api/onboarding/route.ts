@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/authOptions';
-import { checkOnboardingStatus, submitOnboarding } from '@/server/dataforge/User/user';
+import { checkOnboardingStatus, submitOnboarding } from '@/services/onboarding/OnboardingService';
 
 export async function GET(request: NextRequest) {
   try {

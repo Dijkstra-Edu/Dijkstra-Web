@@ -1,8 +1,8 @@
 // app/api/auth/[...nextauth]/authOptions.ts
 import GitHub from "next-auth/providers/github";
 import type { NextAuthOptions } from "next-auth";
-import { fetchDataForge } from "@/server/dataforge/client";
-import { checkOnboardingStatus, getAuthDataByGithubUsername } from "@/server/dataforge/User/user";
+import { checkOnboardingStatus } from "@/services/onboarding/OnboardingService";
+import { getAuthDataByGithubUsername } from "@/services/user/UserService";
 
 export const authOptions: NextAuthOptions = {
   providers: [

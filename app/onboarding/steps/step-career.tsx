@@ -34,6 +34,8 @@ import {
 } from "./shared-constants";
 import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
+import { submitOnboarding } from "@/services/onboarding/OnboardingService";
+import { OnboardUserRequest } from "@/types/server/dataforge/User/user";
 
 interface CareerStepProps extends StepProps {
   currentStep: number;
@@ -82,7 +84,7 @@ export function CareerStep({
   });
 
   const mutation = useMutation({
-    ...onboardUserMutation,
+    mutationFn: (data: OnboardUserRequest) => submitOnboarding(data),
     onSuccess: () => {
       updateFormData({
         primarySpecialization: localPrimarySpec,
