@@ -3,7 +3,7 @@
  * Server-only module for calling DataForge backend
  */
 
-import { getDataForgeBaseUrl } from "@/lib/base-urls";
+import { getDataForgeBaseUrl } from "@/lib/base-urls-keys";
 import { Rank, Domain, Tools } from "@/types/server/dataforge/enums";
 
 export interface DataForgeError {

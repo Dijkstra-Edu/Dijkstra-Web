@@ -59,13 +59,55 @@ export function getArchivistBaseUrl(): string {
 // 3rd Party API Base URLs
 
 /**
- * Get the Gemini base URL from environment variables
+ * Get the Logo Dev base URL from environment variables
+ */
+export function getLogoDevBaseUrl(): string {
+  const baseUrl = "https://api.logo.dev/search";  
+  return baseUrl;
+}
+
+/**
+ * Get the Nominatim base URL from environment variables
+ */
+export function getNominatimBaseUrl(): string {
+  const baseUrl = "https://nominatim.openstreetmap.org/search";
+  return baseUrl;
+}
+
+
+// KEYs
+
+/**
+ * Get the LOGODEV_API_PUBLIC_KEY from environment variables
+ * @throws Error if NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY is not set
+ */
+export function getLogoDevApiPublicKey(): string {
+  const apiKey = process.env.NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY;
+  if (!apiKey) {
+    throw new Error("NEXT_PUBLIC_LOGODEV_API_PUBLIC_KEY environment variable is not set");
+  }
+  return apiKey;
+}
+
+/**
+ * Get the LOGODEV_API_PRIVATE_KEY from environment variables
+ * @throws Error if LOGODEV_API_KEY is not set
+ */
+export function getLogoDevApiPrivateKey(): string {
+  const apiKey = process.env.LOGODEV_API_KEY;
+  if (!apiKey) {
+    throw new Error("LOGODEV_API_KEY environment variable is not set");
+  } 
+  return apiKey;
+}
+
+/** Get Gemini API Key from environment variables
  * @throws Error if GEMINI_API_KEY is not set
  */
-export function getGeminiBaseUrl(): string {
-  const baseUrl = process.env.GEMINI_API_KEY;
-  if (!baseUrl) {
+export function getGeminiApiKey(): string {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is not set");
   }
-  return baseUrl;
+  return apiKey;
 }

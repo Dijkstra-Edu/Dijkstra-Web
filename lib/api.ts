@@ -1,12 +1,13 @@
 /**
- * API Constants
- * Contains base URLs and endpoints for external APIs
+This Needs to GO
  */
 
+import { getDataForgeBaseUrl, getLogoDevBaseUrl, getNominatimBaseUrl } from "./base-urls-keys";
+
 export const API_ENDPOINTS = {
-  LOGO_DEV_SEARCH: "https://api.logo.dev/search",
-  NOMINATIM_SEARCH: "https://nominatim.openstreetmap.org/search",
-  DATAFORGE_API: process.env.NEXT_PUBLIC_DATAFORGE_SERVICE_URL ?? "http://localhost:8000",
+  LOGO_DEV_SEARCH: getLogoDevBaseUrl(),
+  NOMINATIM_SEARCH: getNominatimBaseUrl(),
+  DATAFORGE_API: getDataForgeBaseUrl(),
 } as const
 
 export const API_URLS = {

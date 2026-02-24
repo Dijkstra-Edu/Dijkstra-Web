@@ -1,4 +1,4 @@
-import { getGitripperBaseUrl } from "@/lib/base-urls";
+import { getGitripperBaseUrl } from "@/lib/base-urls-keys";
 import { getDateRange } from "@/lib/utils";
 import { AggregatedCommits } from "@/types/server/gitripper/commit_data";
 
