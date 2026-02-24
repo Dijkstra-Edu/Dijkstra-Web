@@ -4,7 +4,7 @@
  */
 
 import { GetFullUserProfileResponse, EducationResponse, WorkExperienceResponse, ProjectResponse } from "@/types/server/dataforge/User/full-profile";
-import { UserProfileData, User, Education, Experience, Project, Links } from "@/types/document";
+import { UserProfileData, User, Education, Experience, Project, Links } from "@/types/client/dashboard/document";
 
 /**
  * Transform full user profile API response to resume data format

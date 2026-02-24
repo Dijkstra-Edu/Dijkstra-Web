@@ -30,9 +30,9 @@ import {
 } from "@/components/ui/chart";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { API_URLS } from "@/constants/api";
+import { API_URLS } from "@/lib/api";
 import { getPersonalDetailsQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
-import type { LeetCodeStatisticsResponse } from "@/types/leetcode-statistics";
+import type { LeetCodeStatisticsResponse } from "@/types/client/dashboard/leetcode-statistics";
 
 const chartConfig2 = {
   easy: {

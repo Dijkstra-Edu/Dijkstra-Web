@@ -31,7 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { educationSchema, type EducationFormData } from "@/lib/profile/schemas";
-import { SCHOOL_TYPE_OPTIONS, DEGREE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/constants/enum-constants";
+import { SCHOOL_TYPE_OPTIONS, DEGREE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/types/enum-constants";
 import type { EducationData, SchoolType, Degree, WorkLocationType, Location, Tools } from "@/types/client/profile-section/profile-sections";
 
 

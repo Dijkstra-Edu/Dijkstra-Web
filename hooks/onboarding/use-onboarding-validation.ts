@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { OnboardingFormData } from "@/types/onboarding";
+import type { OnboardingFormData } from "@/types/client/onboarding/onboarding";
 import { useOAuthAccounts } from "./use-oauth-accounts";
 
 /**

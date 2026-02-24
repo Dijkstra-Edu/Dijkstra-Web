@@ -3,18 +3,18 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { DocumentResponse } from '@/types/document';
+import type { DocumentResponse } from '@/types/client/dashboard/document';
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
 import { StackedDocumentsTable } from "@/components/Resume and CV/stacked-documents-table";
 import AddResumeModal from "./AddResumeModal";
 import ResumeBuilder from "@/components/Resume and CV/ResumeBuilder/ResumeBuilder";
-import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
-import { ResumeStorageService } from "@/services/ResumeStorageService";
-import { DocumentApiService } from "@/services/DocumentApiService";
+import { generateDeedyLatex, generateRowBasedLatex } from '@/services/documents/latex-generator';
+import { ResumeStorageService } from "@/services/documents/ResumeStorageService";
+import { DocumentApiService } from "@/services/documents/DocumentApiService";
 import { useDocuments } from '@/hooks/documents/useDocuments';
 import { useCreateDocument, useDeleteDocument } from '@/hooks/documents/useDocumentMutations';
 import { documentsQueryKeys } from '@/lib/documents/query-keys';
-import { SavedResumeData, ResumeData, UserProfileData } from "@/types/document";
+import { SavedResumeData, ResumeData, UserProfileData } from "@/types/client/dashboard/document";
 
 // Wrapper for the new ResumeBuilder with header/back button
 const ResumeBuilderWrapper = ({

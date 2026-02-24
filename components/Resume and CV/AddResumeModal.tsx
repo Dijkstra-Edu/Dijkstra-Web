@@ -14,8 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFetchUserData } from "@/hooks/user/use-fetch-user-data";
-import { transformFullUserProfileToResumeData } from "@/lib/user/resume-transformers";
-import { UserProfileData, ResumeData } from "@/types/document";
+import { transformFullUserProfileToResumeData } from "@/services/documents/transformers/resume-transformers";
+import { UserProfileData, ResumeData } from "@/types/client/dashboard/document";
 
 interface AddResumeModalProps {
   isOpen: boolean;

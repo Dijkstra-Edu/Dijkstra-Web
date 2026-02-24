@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { UserApiService } from "@/services/UserApiService";
+import { UserApiService } from "@/services/documents/UserApiService";
 import { GetFullUserProfileResponse } from "@/types/server/dataforge/User/full-profile";
 
 export function useFetchUserData(githubUsername: string, enabled: boolean = true) {

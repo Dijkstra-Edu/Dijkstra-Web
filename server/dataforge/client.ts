@@ -3,25 +3,13 @@
  * Server-only module for calling DataForge backend
  */
 
+import { getDataForgeBaseUrl } from "@/lib/base-urls";
 import { Rank, Domain, Tools } from "@/types/server/dataforge/enums";
 
 export interface DataForgeError {
   error: string;
   message: string;
   details?: string;
-}
-
-
-/**
- * Get the DataForge base URL from environment variables
- * @throws Error if NEXT_PUBLIC_DATAFORGE_SERVICE_URL is not set
- */
-export function getDataForgeBaseUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_DATAFORGE_SERVICE_URL;
-  if (!baseUrl) {
-    throw new Error('NEXT_PUBLIC_DATAFORGE_SERVICE_URL environment variable is not set');
-  }
-  return baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
 }
 
 /**

@@ -1,7 +1,7 @@
 // Zod validation schemas for profile sections
 
 import { z } from 'zod';
-import { SKILL_CATEGORIES, EDUCATION_LEVELS, TEST_TYPES } from '@/constants/profile-constants';
+import { SKILL_CATEGORIES, EDUCATION_LEVELS, TEST_TYPES } from '@/constants/profile.constants';
 
 // Company schema
 export const companySchema = z.object({

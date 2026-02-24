@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-
 import { getCertificationsQuery, addCertificationMutation, updateCertificationsMutation, deleteCertificationsMutation } from '@/server/dataforge/User/QueryOptions/user.queryOptions';
 
 export function useCertifications(username: string) {

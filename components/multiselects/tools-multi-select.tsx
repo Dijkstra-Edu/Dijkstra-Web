@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Check, ChevronsUpDown, X, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { TOOLS_OPTIONS } from "@/constants/enum-constants"
+import { TOOLS_OPTIONS } from "@/types/enum-constants"
 import type { Tools } from "@/types/client/profile-section/profile-sections"
 
 interface ToolsMultiSelectProps {

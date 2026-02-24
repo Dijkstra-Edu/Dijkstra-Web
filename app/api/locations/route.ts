@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { API_URLS } from "@/constants/api"
+import { API_URLS } from "@/lib/api"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)

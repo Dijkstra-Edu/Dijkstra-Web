@@ -2,8 +2,8 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { UserProfileData } from '@/types/document';
-import { generateRowBasedLatex, generateDeedyLatex } from '@/lib/latex-generator';
+import { UserProfileData } from '@/types/client/dashboard/document';
+import { generateRowBasedLatex, generateDeedyLatex } from '@/services/documents/latex-generator';
 import { formatLocation } from '@/lib/resume-utils';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';

@@ -24,7 +24,7 @@ import {
   transformTestScoresArray,
   transformTestScoresToRequest,
   transformTestScoresUpdateRequest
-} from "@/types/server/dataforge/transformers";
+} from "@/services/profile/transformers/transformers";
 import { PersonalDetailsData, WorkExperienceData, EducationData, CertificationsData, PublicationsData, TestScoresData } from "@/types/client/profile-section/profile-sections";
 import { GetPersonalDetailsResponse, GetWorkExperienceResponse, GetEducationResponse, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse } from "@/types/server/dataforge/User/profile";
 

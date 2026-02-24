@@ -1,6 +1,6 @@
 import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData, TestScoresData} from "@/types/client/profile-section/profile-sections";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse } from "./User/profile";
-import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType, TestScoreType } from "./enums";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse } from "../../../types/server/dataforge/User/profile";
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType, TestScoreType } from "../../../types/server/dataforge/enums";
 import { UUID } from "crypto";
 
 export function transformPersonalDetails(personalDetails: GetPersonalDetailsResponse): PersonalDetailsData {

@@ -1,4 +1,4 @@
-import { API_URLS } from "@/constants/api";
+import { API_URLS } from "@/lib/api";
 import { GetFullUserProfileResponse } from "@/types/server/dataforge/User/full-profile";
 
 export class UserApiService {

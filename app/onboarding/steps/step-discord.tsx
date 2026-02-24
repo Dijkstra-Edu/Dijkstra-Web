@@ -11,7 +11,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { StepIndicator } from "@/components/onboarding/step-indicator";
-import type { StepProps } from "@/types/onboarding";
+import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
 
 interface DiscordStepProps extends StepProps {

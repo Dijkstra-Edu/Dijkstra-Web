@@ -3,8 +3,8 @@
  * Handles API calls for creating and updating resume/CV documents
  */
 
-import { API_ENDPOINTS } from "@/constants/api";
-import type { UserProfileData } from '@/types/document';
+import { API_ENDPOINTS } from "@/lib/api";
+import type { UserProfileData } from '@/types/client/dashboard/document';
 import type {
   DocumentCreateRequest,
   DocumentCreateResponse,
@@ -12,7 +12,7 @@ import type {
   DocumentUpdateResponse,
   DocumentApiError,
   DocumentResponse,
-} from '@/types/document';
+} from '@/types/client/dashboard/document';
 
 export class DocumentApiService {
   /**

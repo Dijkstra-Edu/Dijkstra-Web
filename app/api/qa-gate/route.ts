@@ -2,11 +2,11 @@
 import { NextResponse } from "next/server";
 import { serialize } from "cookie";
 import crypto from "crypto";
-import { ENV } from "@/lib/constants";
-import { SECRETKEY } from "@/lib/constants";
-import { GHTOKEN } from "@/lib/constants";
-import { TEAMNAMES } from "@/lib/constants";
-import { ORG } from "@/lib/constants";
+import { ENV } from "@/constants/constants";
+import { SECRETKEY } from "@/constants/constants";
+import { GHTOKEN } from "@/constants/constants";
+import { TEAMNAMES } from "@/constants/constants";
+import { ORG } from "@/constants/constants";
 // import { DOMAIN } from "@/lib/constants";
 
 export async function POST(req: Request) {

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { OnboardingFormData, OnboardingUIState } from '@/types/onboarding';
+import type { OnboardingFormData, OnboardingUIState } from '@/types/client/onboarding/onboarding';
 
 export type StepId =
   | "welcome"

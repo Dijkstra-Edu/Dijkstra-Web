@@ -4,7 +4,7 @@ export type {
   PresetPin,
   CustomPin,
   SettingsStore,
-} from './lib/Zustand/settings-store-types'
+} from '../../lib/Zustand/settings-store-types'
 
 // Base interface for all detail pages
 export interface BaseDetailItem {

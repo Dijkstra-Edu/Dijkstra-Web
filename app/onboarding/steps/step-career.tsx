@@ -32,7 +32,7 @@ import {
   SALARY_RANGES,
   formatTimeDisplay,
 } from "./shared-constants";
-import type { StepProps } from "@/types/onboarding";
+import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
 
 interface CareerStepProps extends StepProps {

@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MONTH_OPTIONS, YEAR_OPTIONS } from "@/constants/profile-constants";
+import { MONTH_OPTIONS, YEAR_OPTIONS } from "@/constants/profile.constants";
 
 interface MonthYearPickerProps {
   month: number;

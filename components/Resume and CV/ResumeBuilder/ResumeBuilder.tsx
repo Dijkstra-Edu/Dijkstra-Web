@@ -2,15 +2,15 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { UserProfileData } from '@/types/document';
+import { UserProfileData } from '@/types/client/dashboard/document';
 import ResumeForm from '@/components/Resume and CV/ResumeBuilder/ResumeForm';
 import LatexPreview from '@/components/Resume and CV/ResumeBuilder/LatexPreview';
-import { ResumeStorageService } from '@/services/ResumeStorageService';
-import { DocumentApiService } from '@/services/DocumentApiService';
-import { generateDeedyLatex, generateRowBasedLatex } from '@/lib/latex-generator';
+import { ResumeStorageService } from '@/services/documents/ResumeStorageService';
+import { DocumentApiService } from '@/services/documents/DocumentApiService';
+import { generateDeedyLatex, generateRowBasedLatex } from '@/services/documents/latex-generator';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCreateDocument, useUpdateDocument } from '@/hooks/documents/useDocumentMutations';
-import type { DocumentCreateResponse } from '@/types/document';
+import type { DocumentCreateResponse } from '@/types/client/dashboard/document';
 import { userProfileData } from '@/data/mockResumeData';
 
 interface ResumeBuilderProps {

@@ -5,7 +5,7 @@ import { ExternalLink, Play, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StepIndicator } from "@/components/onboarding/step-indicator";
 import { CustomIcon } from "./shared-components";
-import type { StepProps } from "@/types/onboarding";
+import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
 
 interface GitStepProps extends StepProps {

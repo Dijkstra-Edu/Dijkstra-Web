@@ -1,7 +1,7 @@
 // app/api/qa-logout/route.ts
 import { NextResponse } from "next/server";
 import { serialize } from "cookie";
-import { ENV } from "@/lib/constants";
+import { ENV } from "@/constants/constants";
 
 export async function POST(req: Request) {
   console.log("QA logout API called");

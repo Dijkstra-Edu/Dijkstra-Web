@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Award } from "lucide-react";
 import type { CertificationsData } from "@/types/client/profile-section/profile-sections";
-import { TOOLS_OPTIONS } from "@/constants/enum-constants";
+import { TOOLS_OPTIONS } from "@/types/enum-constants";
 interface CertificationsDisplayProps {
   data: CertificationsData[];
 }

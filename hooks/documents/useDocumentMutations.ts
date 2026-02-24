@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { DocumentApiService } from '@/services/DocumentApiService';
-import type { UserProfileData } from '@/types/document';
+import { DocumentApiService } from '@/services/documents/DocumentApiService';
+import type { UserProfileData } from '@/types/client/dashboard/document';
 import { documentsQueryKeys } from '@/lib/documents/query-keys';
 
 type CreateVars = {
