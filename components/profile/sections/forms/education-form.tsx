@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MonthYearPicker } from "../../shared/month-year-picker";
-import { InstitutionAutoComplete } from "@/components/institution-autocomplete";
+import { InstitutionAutoComplete } from "@/components/autocompletes/institution-autocomplete";
 import { LocationAutoComplete } from "@/components/autocompletes/location-autocomplete";
 import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
