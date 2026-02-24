@@ -378,3 +378,22 @@
 .landing-scroll *::-webkit-scrollbar-thumb:hover {
   background-color: var(--tertiary);
 } */
+
+/* Make code-block scrollbars thin & subtle */
+.code-scroll {
+  scrollbar-width: thin; /* Firefox */
+}
+
+/* WebKit (Chrome / Edge / Safari) */
+.code-scroll::-webkit-scrollbar {
+  height: 4px;             /* 👈 controls that fat green bar thickness */
+}
+
+.code-scroll::-webkit-scrollbar-track {
+  background: transparent;  /* no big black strip */
+}
+
+.code-scroll::-webkit-scrollbar-thumb {
+  background-color: #048304; /* or whatever color you like */
+  border-radius: 9999px;
+}
