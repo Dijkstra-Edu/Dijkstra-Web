@@ -175,55 +175,6 @@ export async function checkOnboardingStatus(username: string): Promise<CheckOnbo
     );
   }
 
-  /**
-   * Get Work Experience by GitHub username
-   */
-  export async function getWorkExperienceByGithubUsername(username: string): Promise<WorkExperienceData[]> {
-    const response = await fetchDataForge<GetWorkExperienceResponse[]>(
-      `/Dijkstra/v1/wp/${encodeURIComponent(username)}`
-    );
-    return transformWorkExperienceArray(response);
-  }
-
-  /**
-   * Add Work Experience by GitHub username
-   */
-  export async function addWorkExperienceByGithubUsername( data: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkExperienceData> {
-    console.log('Adding work experience data', data);
-    const request = transformWorkExperienceToRequest(data);
-    const response = await fetchDataForge<GetWorkExperienceResponse>(
-      `/Dijkstra/v1/wp/`, {
-        method: 'POST',
-        body: JSON.stringify(request),
-      }
-    );
-    return transformWorkExperience(response);
-  }
-
-  /**
-   * Update Work Experience by Work Experience ID
-   */
-  export async function updateWorkExperienceByWorkExperienceId(workExperienceId: string, data: Partial<WorkExperienceData>): Promise<WorkExperienceData> {
-    const request = transformWorkExperienceUpdateRequest(data);
-    const response = await fetchDataForge<GetWorkExperienceResponse>(
-      `/Dijkstra/v1/wp/${encodeURIComponent(workExperienceId)}`, {
-        method: 'PUT',
-        body: JSON.stringify(request),
-      }
-    );
-    return transformWorkExperience(response);
-  }
-  
-  /**
-   * Delete Work Experience by Work Experience ID
-   */
-  export async function deleteWorkExperienceByWorkExperienceId(workExperienceId: string): Promise<void> {
-    await fetchDataForge<void>(
-      `/Dijkstra/v1/wp/${encodeURIComponent(workExperienceId)}`, {
-        method: 'DELETE',
-      }
-    );
-  }
 
   /**
    * Get Education by GitHub username

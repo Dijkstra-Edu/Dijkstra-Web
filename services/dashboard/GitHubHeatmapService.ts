@@ -1,4 +1,4 @@
-import { getGitripperBaseUrl } from "@/lib/base-urls-keys";
+import { GITRIPPER_API_URLS } from "@/lib/api/url-builders";
 import { getDateRange } from "@/lib/utils";
 import { AggregatedCommits } from "@/types/server/gitripper/commit_data";
 
@@ -8,7 +8,7 @@ export async function getGithubCommitInformationByDates(
   loginId: string
 ): Promise<{ date: string; Github: number }[]> {
 
-  const url = getGitripperBaseUrl() + `/userCommitData/${loginId}/${startDate}/${endDate}`
+  const url = GITRIPPER_API_URLS.getGithubCommitInformationByDatesUrl(startDate, endDate, loginId)
   console.log("Fetching commits by date:", url)
 
   const res = await fetch(url)
@@ -30,7 +30,7 @@ export async function getGithubCommitInformation(
 
   const { startTime, endTime } = getDateRange(timeRange)
 
-  const url = getGitripperBaseUrl() + `/userCommitData/${loginId}/${startTime}/${endTime}`
+  const url = GITRIPPER_API_URLS.getGithubCommitInformationUrl(timeRange, loginId)
   console.log("Fetching commits:", url)
 
   const res = await fetch(url)

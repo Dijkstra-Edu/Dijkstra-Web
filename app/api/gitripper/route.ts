@@ -1,4 +1,4 @@
-import { getGithubCommitInformation, getGithubCommitInformationByDates } from "@/server/gitripper/client"
+import { getGithubCommitInformation, getGithubCommitInformationByDates } from "@/services/dashboard/GitHubHeatmapService"
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server"
 import { authOptions } from "../auth/[...nextauth]/authOptions";

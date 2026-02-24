@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { API_URLS } from "@/lib/api"
+import { OTHER_API_URLS } from "@/lib/api/url-builders"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(API_URLS.logoDevSearch(query), {
+    const response = await fetch(OTHER_API_URLS.getLogoDevSearchUrl(query), {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
