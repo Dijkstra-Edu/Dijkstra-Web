@@ -1,6 +1,6 @@
-import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData, TestScoresData} from "@/types/client/profile-section/profile-sections";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse } from "../../../types/server/dataforge/User/profile";
-import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType, TestScoreType } from "../../../types/server/dataforge/enums";
+import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData, TestScoresData, VolunteeringData, ProjectsData} from "@/types/client/profile-section/profile-sections";
+import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse, GetVolunteeringResponse, GetProjectResponse } from "../../../types/server/dataforge/User/profile";
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType, TestScoreType, Cause } from "../../../types/server/dataforge/enums";
 import { UUID } from "crypto";
 
 export function transformPersonalDetails(personalDetails: GetPersonalDetailsResponse): PersonalDetailsData {
@@ -404,4 +404,157 @@ export function transformTestScoresUpdateRequest(testScore: Partial<TestScoresDa
         test_date: testScore.testDate,
         description: testScore.description,
     }
+}
+
+// Volunteering transformers
+export function transformVolunteeringArray(volunteeringArray: GetVolunteeringResponse[]): VolunteeringData[] {
+    return volunteeringArray.map((v) => transformVolunteering(v));
+}
+
+export function transformVolunteering(volunteering: GetVolunteeringResponse): VolunteeringData {
+    return {
+        id: volunteering.id,
+        profileId: volunteering.profile_id,
+        organization: volunteering.organization,
+        role: volunteering.role,
+        cause: volunteering.cause as VolunteeringData["cause"],
+        startDate: volunteering.start_date,
+        endDate: volunteering.end_date,
+        currentlyVolunteering: volunteering.currently_volunteering,
+        description: volunteering.description,
+        tools: volunteering.tools,
+        organizationLogo: volunteering.organization_logo,
+    };
+}
+
+export function transformVolunteeringToRequest(volunteering: Omit<VolunteeringData, "id" | "createdAt" | "updatedAt">): Omit<GetVolunteeringResponse, "id"> {
+    return {
+        profile_id: volunteering.profileId as UUID,
+        organization: volunteering.organization,
+        role: volunteering.role,
+        cause: volunteering.cause as Cause,
+        start_date: volunteering.startDate,
+        end_date: volunteering.endDate,
+        currently_volunteering: volunteering.currentlyVolunteering,
+        description: volunteering.description,
+        tools: volunteering.tools as Tools[] | undefined,
+        organization_logo: volunteering.organizationLogo,
+    };
+}
+
+export function transformVolunteeringUpdateRequest(volunteering: Partial<VolunteeringData>): Partial<GetVolunteeringResponse> {
+    return {
+        profile_id: volunteering.profileId as UUID,
+        organization: volunteering.organization,
+        role: volunteering.role,
+        cause: volunteering.cause as Cause | undefined,
+        start_date: volunteering.startDate,
+        end_date: volunteering.endDate,
+        currently_volunteering: volunteering.currentlyVolunteering,
+        description: volunteering.description,
+        tools: volunteering.tools as Tools[] | undefined,
+        organization_logo: volunteering.organizationLogo,
+    };
+}
+
+// Project transformers
+export function transformProjectArray(projectArray: GetProjectResponse[]): ProjectsData[] {
+    return projectArray.map((p) => transformProject(p));
+}
+
+export function transformProject(project: GetProjectResponse): ProjectsData {
+    return {
+        id: project.id,
+        profileId: project.profile_id,
+        name: project.name,
+        organization: project.organization,
+        owner: project.owner,
+        private: project.private,
+        githubStars: project.github_stars,
+        githubAbout: project.github_about,
+        githubOpenIssues: project.github_open_issues,
+        githubForks: project.github_forks,
+        description: project.description,
+        domain: project.domain as ProjectsData["domain"],
+        topics: project.topics,
+        tools: project.tools as Tools[],
+        readme: project.readme,
+        license: project.license,
+        landingPage: project.landing_page,
+        landingPageLink: project.landing_page_link,
+        docsPage: project.docs_page,
+        docsPageLink: project.docs_page_link,
+        ownDomainName: project.own_domain_name,
+        domainName: project.domain_name,
+        totalLinesContributed: project.total_lines_contributed,
+        improperUploads: project.improper_uploads,
+        complexityRating: project.complexity_rating,
+        testingFrameworkPresent: project.testing_framework_present,
+        testingFramework: project.testing_framework,
+        projectOrganizationLogo: project.project_organization_logo,
+    };
+}
+
+export function transformProjectToRequest(project: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">): Omit<GetProjectResponse, "id"> {
+    return {
+        profile_id: project.profileId as UUID,
+        name: project.name,
+        organization: project.organization,
+        owner: project.owner,
+        private: project.private,
+        github_stars: project.githubStars,
+        github_about: project.githubAbout,
+        github_open_issues: project.githubOpenIssues,
+        github_forks: project.githubForks,
+        description: project.description,
+        domain: project.domain as GetProjectResponse["domain"],
+        topics: project.topics,
+        tools: project.tools as Tools[],
+        readme: project.readme,
+        license: project.license,
+        landing_page: project.landingPage,
+        landing_page_link: project.landingPageLink,
+        docs_page: project.docsPage,
+        docs_page_link: project.docsPageLink,
+        own_domain_name: project.ownDomainName,
+        domain_name: project.domainName,
+        total_lines_contributed: project.totalLinesContributed,
+        improper_uploads: project.improperUploads,
+        complexity_rating: project.complexityRating,
+        testing_framework_present: project.testingFrameworkPresent,
+        testing_framework: project.testingFramework,
+        project_organization_logo: project.projectOrganizationLogo,
+    };
+}
+
+export function transformProjectUpdateRequest(project: Partial<ProjectsData>): Partial<GetProjectResponse> {
+    return {
+        profile_id: project.profileId as UUID,
+        name: project.name,
+        organization: project.organization,
+        owner: project.owner,
+        private: project.private,
+        github_stars: project.githubStars,
+        github_about: project.githubAbout,
+        github_open_issues: project.githubOpenIssues,
+        github_forks: project.githubForks,
+        description: project.description,
+        domain: project.domain as GetProjectResponse["domain"],
+        topics: project.topics,
+        tools: project.tools as Tools[],
+        readme: project.readme,
+        license: project.license,
+        landing_page: project.landingPage,
+        landing_page_link: project.landingPageLink,
+        docs_page: project.docsPage,
+        docs_page_link: project.docsPageLink,
+        own_domain_name: project.ownDomainName,
+        domain_name: project.domainName,
+        total_lines_contributed: project.totalLinesContributed,
+        improper_uploads: project.improperUploads,
+        complexity_rating: project.complexityRating,
+        testing_framework_present: project.testingFrameworkPresent,
+        testing_framework: project.testingFramework,
+        project_organization_logo: project.projectOrganizationLogo,
+    };
 }

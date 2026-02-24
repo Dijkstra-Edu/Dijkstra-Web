@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Award } from "lucide-react";
-import { useTestScores, useAddTestScore, useUpdateTestScore, useDeleteTestScore } from "@/hooks/profile/use-test-scores";
+import { useGetTestScores, useAddTestScore, useUpdateTestScore, useDeleteTestScore } from "@/hooks/profile/use-test-scores";
 import { TestScoresForm } from "./forms/test-scores-form";
 import { TestScoresDisplay } from "./display/test-scores-display";
 import { EditControls } from "../shared/edit-controls";
@@ -11,7 +11,7 @@ import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
 export function TestScoresSection({ profileId, githubUserName, isEditing, onToggleEdit }: ProfileSectionProps) {
-  const { data: testScores, isLoading, error, refetch } = useTestScores(githubUserName);
+  const { data: testScores, isLoading, error, refetch } = useGetTestScores(githubUserName);
   const addMutation = useAddTestScore(githubUserName);
   const updateMutation = useUpdateTestScore(githubUserName);
   const deleteMutation = useDeleteTestScore(githubUserName);

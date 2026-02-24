@@ -1,5 +1,5 @@
 import { UUID } from "crypto"
-import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType  , CertificationType, TestScoreType} from "../enums"
+import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType  , CertificationType, TestScoreType, Cause} from "../enums"
 
 export interface GetLocationResponse {
     id: UUID
@@ -157,4 +157,49 @@ export interface GetTestScoresResponse {
     description?: string
     created_at: string
     updated_at: string
+}
+
+export interface GetVolunteeringResponse {
+    id: UUID
+    profile_id: UUID
+    organization: string
+    organization_logo?: string
+    role: string
+    cause: Cause
+    start_date: string
+    end_date?: string
+    currently_volunteering: boolean
+    description?: string
+    tools?: Tools[]
+}
+
+export interface GetProjectResponse {
+    id: UUID
+    profile_id: UUID
+    name: string
+    organization?: string
+    project_organization_logo?: string
+    owner: string
+    private: boolean
+    github_stars: number
+    github_about?: string
+    github_open_issues: number
+    github_forks: number
+    description: string
+    domain: Domain
+    topics: string[]
+    tools: Tools[]
+    readme: boolean
+    license: boolean
+    landing_page: boolean
+    landing_page_link?: string
+    docs_page: boolean
+    docs_page_link?: string
+    own_domain_name: boolean
+    domain_name?: string
+    total_lines_contributed?: number
+    improper_uploads?: boolean
+    complexity_rating?: number
+    testing_framework_present: boolean
+    testing_framework?: string
 }

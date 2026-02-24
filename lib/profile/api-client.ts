@@ -27,19 +27,7 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
 }
 
 // Personal Details API
-export async function fetchPersonalDetails(githubUserName: string): Promise<PersonalDetailsData> {
-  const response = await fetch(`${API_BASE}/api/profile/personal-details?githubUserName=${encodeURIComponent(githubUserName)}`);
-  return handleApiResponse<PersonalDetailsData>(response);
-}
 
-export async function updatePersonalDetails(userId: string, data: Partial<PersonalDetailsData>): Promise<PersonalDetailsData> {
-  const response = await fetch(`${API_BASE}/api/profile/personal-details?userId=${encodeURIComponent(userId)}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return handleApiResponse<PersonalDetailsData>(response);
-}
 
 // Work Experience API
 export async function fetchWorkExperience(profileId: string): Promise<WorkExperienceData[]> {
