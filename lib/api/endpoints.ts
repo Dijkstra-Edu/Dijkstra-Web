@@ -13,6 +13,6 @@ export const API_ENDPOINTS = {
   HELIOS_API: getHeliosBaseUrl(),
   ARCHIVIST_API: getArchivistBaseUrl(),
 
-  LOGO_DEV_SEARCH: getLogoDevBaseUrl(),
-  NOMINATIM_SEARCH: getNominatimBaseUrl(),
+  LOGO_DEV_SEARCH: getLogoDevBaseUrl() + "/search",
+  NOMINATIM_SEARCH: getNominatimBaseUrl() + "/search",
 } as const;

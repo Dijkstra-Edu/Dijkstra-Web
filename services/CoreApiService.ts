@@ -18,7 +18,7 @@ export interface ApiErrorBody {
  * Service keys that the API route uses to resolve the backend base URL.
  * Must match the keys in app/api/[...path]/route.ts (dataforge, gitripper, helios, archivist).
  */
-export type ApiServiceKey = "dataforge" | "gitripper" | "helios" | "archivist";
+export type ApiServiceKey = "dataforge" | "gitripper" | "helios" | "archivist" | "logo-dev" | "nominatim" | "gemini";
 
 /**
  * Generic client that calls the Next.js API route at /api/[...path], which proxies

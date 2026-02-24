@@ -59,19 +59,17 @@ export function getArchivistBaseUrl(): string {
 // 3rd Party API Base URLs
 
 /**
- * Get the Logo Dev base URL from environment variables
+ * Get the Logo Dev base URL (origin only; append /search for search endpoint).
  */
 export function getLogoDevBaseUrl(): string {
-  const baseUrl = "https://api.logo.dev/search";  
-  return baseUrl;
+  return "https://api.logo.dev";
 }
 
 /**
- * Get the Nominatim base URL from environment variables
+ * Get the Nominatim base URL (origin only; append /search for search endpoint).
  */
 export function getNominatimBaseUrl(): string {
-  const baseUrl = "https://nominatim.openstreetmap.org/search";
-  return baseUrl;
+  return "https://nominatim.openstreetmap.org";
 }
 
 

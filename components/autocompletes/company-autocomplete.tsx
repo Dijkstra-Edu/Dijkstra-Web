@@ -5,6 +5,7 @@ import { Command, CommandInput, CommandItem, CommandList, CommandEmpty, CommandG
 import { Button } from "../ui/button"
 import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { searchCompanies } from "@/services/dashboard/CompanyService"
 
 interface Company {
   name: string
@@ -40,20 +41,13 @@ export function CompanyAutoComplete({ value, onChange, selectedCompany }: Compan
     }
 
     const timeout = setTimeout(() => {
-      fetch(`/api/companies?q=${encodeURIComponent(query)}`)
-        .then((res) => res.json())
-        .then((data)=> {
-          if (Array.isArray(data)) {
-            setCompanies(data)
-          } else {
-            setCompanies([])
-          }
-        })
-        .catch((err)=> {
+      searchCompanies(query)
+        .then((data) => setCompanies(data))
+        .catch((err) => {
           console.error("Company search error:", err)
           setCompanies([])
         })
-    },300)
+    }, 300)
 
     return () => clearTimeout(timeout)
   }, [query])

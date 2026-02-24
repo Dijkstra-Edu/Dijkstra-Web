@@ -5,6 +5,7 @@ import { Command, CommandInput, CommandItem, CommandList, CommandEmpty, CommandG
 import { Button } from "./ui/button"
 import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { searchCompanies } from "@/services/dashboard/CompanyService"
 
 interface Institution {
   name: string
@@ -40,23 +41,21 @@ export function InstitutionAutoComplete({ value, onChange, selectedInstitution }
     }
 
     const timeout = setTimeout(() => {
-      fetch(`/api/companies?q=${encodeURIComponent(query)}`)
-      .then((res) => res.json()).then((data)=> {
-        // The API returns an array of institutions with logo URLs
-        if (Array.isArray(data)) {
-          setInstitutions(data.map((institution: any) => ({
-            name: institution.name,
-            domain: institution.domain,
-            logo_url: institution.logo_url
-          })))
-        } else {
-          setInstitutions([])
-        }
-      }).catch((err)=> {
-        console.error("Logo.dev error:", err)
-        setInstitutions([])
-      })
-    },300)
+      searchCompanies(query)
+        .then((data) => {
+          setInstitutions(
+            data.map((institution) => ({
+              name: institution.name,
+              domain: institution.domain,
+              logo_url: institution.logo_url,
+            }))
+          );
+        })
+        .catch((err) => {
+          console.error("Institution search error:", err);
+          setInstitutions([]);
+        });
+    }, 300);
 
     return () => clearTimeout(timeout)
   }, [query])
