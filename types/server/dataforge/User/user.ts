@@ -11,9 +11,10 @@ export interface OnboardUserRequest {
   secondary_specializations: Domain[];
   expected_salary_bucket: Rank;
   time_left: number;
-  selectedTools: Tools[];
-  dreamCompany: string;
-  dreamRole: string;
+  primary_email: string;
+  tools_to_learn: Tools[];
+  dream_company: string;
+  dream_position: string;
   
   // Optional fields
   first_name?: string;
@@ -21,6 +22,8 @@ export interface OnboardUserRequest {
   last_name?: string;
   rank?: Rank;
   streak?: number;
+  dream_company_logo?: string;
+  access_token?: string;
 }
 
 export interface OnboardUserResponse {
@@ -47,6 +50,12 @@ export interface OnboardUserResponse {
 export interface CheckOnboardingStatusResponse {
   onboarded: boolean;
   user_id: string | null;
+}
+
+export interface GetAuthDataResponse {
+  user_id: string;
+  profile_id: string;
+  github_user_name: string;
 }
 
 export interface GetUserBasicResponse {

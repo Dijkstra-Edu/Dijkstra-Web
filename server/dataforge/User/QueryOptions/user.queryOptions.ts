@@ -1,7 +1,8 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import type { OnboardUserRequest } from "../user";
-import { submitOnboarding, checkOnboardingStatus, getPersonalDetailsByGithubUsername, getUserByGithubUsername, getSideCardDetailsByGithubUsername, updatePersonalDetailsByGithubUsername, getPublicationsByGithubUsername, addPublicationsByGithubUsername, updatePublicationsByPublicationId, deletePublicationsByPublicationId} from "../user";
-import { EducationData, PersonalDetailsData, WorkExperienceData, CertificationsData, PublicationsData, TestScoresData } from "@/types/client/profile-section/profile-sections";
+import { checkOnboardingStatus, submitOnboarding } from "@/services/onboarding/OnboardingService";
+import { OnboardUserRequest } from "@/types/server/dataforge/User/user";
+import { getUserByGithubUsername, getSideCardDetailsByGithubUsername } from "@/services/user/UserService";
+import { getPersonalDetailsByGithubUsername } from "@/services/profile/PersonalDetailsService";
 
 export const onboardUserMutation = mutationOptions({
     mutationFn: (data: OnboardUserRequest) => submitOnboarding(data),
@@ -36,12 +37,3 @@ export const getPersonalDetailsQuery = (username: string) => queryOptions({
     staleTime: 1000 * 60 * 5, // avoid instant refetch
     gcTime: 1000 * 60 * 30, // keep data cached longer
 });
-
-export const updatePersonalDetailsMutation = mutationOptions({
-    mutationFn: ({ username, data }: { username: string; data: Partial<PersonalDetailsData> }) => 
-        updatePersonalDetailsByGithubUsername(username, data),
-});
-
-// Work Experience Query Options
-
-// Education Query Options
