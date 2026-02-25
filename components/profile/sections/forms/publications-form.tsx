@@ -17,7 +17,7 @@ import {
 import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { publicationsSchema, type PublicationsFormData } from "@/lib/profile/schemas";
+import { publicationsSchema, type PublicationsFormData } from "@/types/client/profile-section/schemas";
 import type { PublicationsData, Tools } from "@/types/client/profile-section/profile-sections";
 
 interface PublicationsFormProps {

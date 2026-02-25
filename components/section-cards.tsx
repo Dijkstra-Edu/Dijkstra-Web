@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import {
   Cell,
   Label,
@@ -31,8 +31,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { API_URLS } from "@/lib/api/url-builders";
-import { getPersonalDetailsQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
 import type { LeetCodeStatisticsResponse } from "@/types/client/dashboard/leetcode-statistics";
+import { getPersonalDetailsByGithubUsername } from "@/services/profile/PersonalDetailsService";
 
 const chartConfig2 = {
   easy: {
@@ -248,7 +248,13 @@ export function SectionCards() {
   const { data: session } = useSession();
   const githubUsername = session?.user?.login ?? "";
 
-  const { data: personalDetails } = useQuery(getPersonalDetailsQuery(githubUsername));
+  const { data: personalDetails } = useQuery(queryOptions({
+    queryKey: ['personal-details', githubUsername],
+    queryFn: () => getPersonalDetailsByGithubUsername(githubUsername),
+    enabled: !!githubUsername,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
+  }));
   const leetcodeUsername = personalDetails?.leetcodeUserName?.trim() ?? "";
 
   const { data: statsResponse, isLoading: statsLoading, error: statsError } = useQuery({

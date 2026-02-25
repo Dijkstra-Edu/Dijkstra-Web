@@ -1,7 +1,7 @@
 // Education Display Component
 
 import { Badge } from "@/components/ui/badge";
-import { formatMonthYearRange } from "@/lib/profile/profile-utils";
+import { formatMonthYearRange } from "@/lib/profile-utils";
 import type { EducationData } from "@/types/client/profile-section/profile-sections";
 
 interface EducationDisplayProps {

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { testScoresSchema, type TestScoresFormData } from "@/lib/profile/schemas";
+import { testScoresSchema, type TestScoresFormData } from "@/types/client/profile-section/schemas";
 import type { TestScoresData, TestScoreType } from "@/types/client/profile-section/profile-sections";
 
 const TEST_SCORE_TYPES: { value: TestScoreType; label: string }[] = [

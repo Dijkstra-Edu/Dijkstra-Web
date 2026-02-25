@@ -26,7 +26,7 @@ import {
 import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { certificationsSchema, type CertificationsFormData } from "@/lib/profile/schemas";
+import { certificationsSchema, type CertificationsFormData } from "@/types/client/profile-section/schemas";
 import type { CertificationsData, CertificationType, Tools } from "@/types/client/profile-section/profile-sections";
 
 const CERTIFICATION_TYPES: { value: CertificationType; label: string }[] = [

@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { calculateExperience, formatMonthYearRange, sortByEndDate } from "@/lib/profile/profile-utils";
+import { calculateExperience, formatMonthYearRange, sortByEndDate } from "@/lib/profile-utils";
 import { EMPLOYMENT_TYPE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS, DOMAIN_OPTIONS } from "@/types/enum-constants";
 import type { WorkExperienceData } from "@/types/client/profile-section/profile-sections";
 

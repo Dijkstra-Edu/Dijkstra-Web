@@ -13,7 +13,7 @@ import { ResumeStorageService } from "@/services/documents/ResumeStorageService"
 import { DocumentApiService } from "@/services/documents/DocumentApiService";
 import { useDocuments } from '@/hooks/documents/useDocuments';
 import { useCreateDocument, useDeleteDocument } from '@/hooks/documents/useDocumentMutations';
-import { documentsQueryKeys } from '@/lib/documents/query-keys';
+import { documentsQueryKeys } from '@/services/documents/query-keys';
 import { SavedResumeData, ResumeData, UserProfileData } from "@/types/client/dashboard/document";
 
 // Wrapper for the new ResumeBuilder with header/back button
