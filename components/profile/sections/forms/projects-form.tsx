@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/form";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { projectsSchema, type ProjectsFormData } from "@/lib/profile/schemas";
-import { parseSkillsString } from "@/lib/profile/profile-utils";
+import { projectsSchema, type ProjectsFormData } from "@/types/client/profile-section/schemas";
+import { parseSkillsString } from "@/lib/profile-utils";
 import type { ProjectsData, Domain, Tools } from "@/types/client/profile-section/profile-sections";
 
 const DOMAINS: { value: Domain; label: string }[] = [

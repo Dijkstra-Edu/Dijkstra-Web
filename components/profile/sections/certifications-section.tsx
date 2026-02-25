@@ -10,12 +10,11 @@ import { GenericSectionSkeleton } from "../shared/section-skeleton";
 import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
-export function CertificationsSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
-  const { data: certifications, isLoading, error, refetch } = useCertifications(profileId);
-  const addMutation = useAddCertification();
-  const updateMutation = useUpdateCertification();
-  const deleteMutation = useDeleteCertification();
-
+export function CertificationsSection({ profileId, githubUserName, isEditing, onToggleEdit }: ProfileSectionProps) {
+  const { data: certifications, isLoading, error, refetch } = useCertifications(githubUserName);
+  const addMutation = useAddCertification(githubUserName);
+  const updateMutation = useUpdateCertification(githubUserName);
+  const deleteMutation = useDeleteCertification(githubUserName);
   if (isLoading) return <GenericSectionSkeleton />;
   if (error) return <GenericSectionError error={error} onRetry={() => refetch()} title="Certifications" />;
 
@@ -48,10 +47,11 @@ export function CertificationsSection({ profileId, isEditing, onToggleEdit }: Pr
       <CardContent>
         {isEditing ? (
           <CertificationsForm 
+            profileId={profileId}
             certifications={certifications || []}
-            onAdd={(data) => addMutation.mutate({ profileId, data })}
-            onUpdate={(data) => updateMutation.mutate({ profileId, id: data.id, data: data.data })}
-            onDelete={(id) => deleteMutation.mutate({ profileId, id })}
+            onAdd={(data) => addMutation.mutate({ data })}
+            onUpdate={(data) => updateMutation.mutate({ certificationId:data.id, data: data.data })}
+            onDelete={(id) => deleteMutation.mutate({certificationId:id })}
             isAdding={addMutation.isPending}
             isUpdating={updateMutation.isPending}
             isDeleting={deleteMutation.isPending}

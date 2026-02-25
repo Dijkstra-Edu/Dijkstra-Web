@@ -6,7 +6,7 @@ import { Github, CheckCircle, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import { StepIndicator } from "@/components/onboarding/step-indicator";
-import type { StepProps } from "@/types/onboarding";
+import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
 
 interface GitHubStepProps extends StepProps {

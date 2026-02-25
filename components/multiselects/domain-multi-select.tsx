@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Check, ChevronsUpDown, X, Briefcase } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { DOMAIN_OPTIONS } from "@/constants/enum-constants"
+import { DOMAIN_OPTIONS } from "@/types/enum-constants"
 import type { Domain } from "@/types/client/profile-section/profile-sections"
 
 interface DomainMultiSelectProps {

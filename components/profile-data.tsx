@@ -24,7 +24,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import {
   IconBrandLeetcode,
   IconBrandLinkedin,
@@ -34,8 +34,8 @@ import {
 } from "@tabler/icons-react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { Badge } from "@/components/ui/badge";
-import { getUserSideCardQuery } from "@/server/dataforge/User/QueryOptions/user.queryOptions";
 import { Domain, Rank } from "@/types/server/dataforge/enums";
+import { getSideCardDetailsByGithubUsername } from "@/services/user/UserService";
 
 // Utility function to get rank image path
 const getRankImagePath = (rank: Rank): string => { 
@@ -92,7 +92,13 @@ export function ProfileData() {
 
   // Fetch user data from backend
   const { data: userData, isLoading, error } = useQuery(
-    getUserSideCardQuery(session?.user.login || '')
+    queryOptions({
+      queryKey: ['user-side-card', session?.user.login],
+      queryFn: () => getSideCardDetailsByGithubUsername(session?.user.login || ""),
+      enabled: !!session?.user.login,
+      staleTime: 1000 * 60 * 5, // avoid instant refetch
+      gcTime: 1000 * 60 * 30, // keep data cached longer
+    }),
   );
 
   // Primary career path from user data with fallback

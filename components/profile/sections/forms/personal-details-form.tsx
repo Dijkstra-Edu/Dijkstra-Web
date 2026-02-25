@@ -14,8 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { personalDetailsSchema, type PersonalDetailsFormData } from "@/lib/profile/schemas";
-import { SALARY_RANGES, TIME_OPTIONS } from "@/constants/profile-constants";
+import { personalDetailsSchema, type PersonalDetailsFormData } from "@/types/client/profile-section/schemas";
+import { SALARY_RANGES, TIME_OPTIONS } from "@/constants/profile.constants";
 import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
 import { LocationAutoComplete } from "@/components/autocompletes/location-autocomplete";
 import { CareerPathSelector } from "../../shared/career-path-selector";

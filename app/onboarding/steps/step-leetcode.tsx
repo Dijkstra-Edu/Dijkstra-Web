@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StepIndicator } from "@/components/onboarding/step-indicator";
 import { CustomIcon } from "./shared-components";
-import type { StepProps } from "@/types/onboarding";
+import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
 
 interface LeetCodeStepProps extends StepProps {

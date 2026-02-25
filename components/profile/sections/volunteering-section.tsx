@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart } from "lucide-react";
-import { useVolunteering, useAddVolunteering, useUpdateVolunteering, useDeleteVolunteering } from "@/hooks/profile/use-volunteering";
+import { useGetVolunteering, useAddVolunteering, useUpdateVolunteering, useDeleteVolunteering } from "@/hooks/profile/use-volunteering";
 import { VolunteeringForm } from "./forms/volunteering-form";
 import { VolunteeringDisplay } from "./display/volunteering-display";
 import { EditControls } from "../shared/edit-controls";
@@ -10,11 +10,11 @@ import { GenericSectionSkeleton } from "../shared/section-skeleton";
 import { GenericSectionError } from "../shared/section-error";
 import type { ProfileSectionProps } from "@/types/client/profile-section/profile-sections";
 
-export function VolunteeringSection({ profileId, isEditing, onToggleEdit }: ProfileSectionProps) {
-  const { data: volunteerings, isLoading, error, refetch } = useVolunteering(profileId);
-  const addMutation = useAddVolunteering();
-  const updateMutation = useUpdateVolunteering();
-  const deleteMutation = useDeleteVolunteering();
+export function VolunteeringSection({ profileId, githubUserName, isEditing, onToggleEdit }: ProfileSectionProps) {
+  const { data: volunteerings, isLoading, error, refetch } = useGetVolunteering(githubUserName);
+  const addMutation = useAddVolunteering(githubUserName);
+  const updateMutation = useUpdateVolunteering(githubUserName);
+  const deleteMutation = useDeleteVolunteering(githubUserName);
 
   if (isLoading) return <GenericSectionSkeleton />;
   if (error) return <GenericSectionError error={error} onRetry={() => refetch()} title="Volunteering" />;
@@ -49,9 +49,9 @@ export function VolunteeringSection({ profileId, isEditing, onToggleEdit }: Prof
         {isEditing ? (
           <VolunteeringForm 
             volunteerings={volunteerings || []}
-            onAdd={(data) => addMutation.mutate({ profileId, data })}
-            onUpdate={(data) => updateMutation.mutate({ profileId, id: data.id, data: data.data })}
-            onDelete={(id) => deleteMutation.mutate({ profileId, id })}
+            onAdd={(data) => addMutation.mutate({ data: { ...data, profileId } })}
+            onUpdate={(data) => updateMutation.mutate({ volunteeringId: data.id, data: data.data })}
+            onDelete={(id) => deleteMutation.mutate({ volunteeringId: id })}
             isAdding={addMutation.isPending}
             isUpdating={updateMutation.isPending}
             isDeleting={deleteMutation.isPending}

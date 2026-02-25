@@ -38,10 +38,10 @@ import { useSettingsStore } from "@/lib/Zustand/settings-store";
 import type { PresetPin, CustomPin } from "@/types/lib/Zustand/settings-store-types";
 import { callGemini } from "@/lib/geminiClient";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
-import { getDataForgeBaseUrl } from "@/server/dataforge/client";
-import { getArchivistBaseUrl } from "@/server/archivist/client";
-import { getGitripperBaseUrl } from "@/server/gitripper/client";
-import { getHeliosBaseUrl } from "@/server/helios/client";
+import { getDataForgeBaseUrl } from "@/lib/base-urls-keys";
+import { getArchivistBaseUrl } from "@/lib/base-urls-keys";
+import { getGitripperBaseUrl } from "@/lib/base-urls-keys";
+import { getHeliosBaseUrl } from "@/lib/base-urls-keys";
 
 // Service types for API status checks
 export type ServiceType = 'DIJKSTRA_GPT' | 'ARCHIVIST' | 'GITRIPPER' | 'DATAFORGE' | 'HELIOS';

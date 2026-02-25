@@ -24,14 +24,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { MonthYearPicker } from "../../shared/month-year-picker";
-import { InstitutionAutoComplete } from "@/components/institution-autocomplete";
+import { InstitutionAutoComplete } from "@/components/autocompletes/institution-autocomplete";
 import { LocationAutoComplete } from "@/components/autocompletes/location-autocomplete";
 import { ToolsMultiSelect } from "@/components/multiselects/tools-multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { educationSchema, type EducationFormData } from "@/lib/profile/schemas";
-import { SCHOOL_TYPE_OPTIONS, DEGREE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/constants/enum-constants";
+import { educationSchema, type EducationFormData } from "@/types/client/profile-section/schemas";
+import { SCHOOL_TYPE_OPTIONS, DEGREE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/types/enum-constants";
 import type { EducationData, SchoolType, Degree, WorkLocationType, Location, Tools } from "@/types/client/profile-section/profile-sections";
 
 

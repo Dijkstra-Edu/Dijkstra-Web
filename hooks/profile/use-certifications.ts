@@ -1,52 +1,59 @@
 // Custom hook for certifications
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  certificationsQuery, 
-  addCertificationMutation, 
-  updateCertificationMutation, 
-  deleteCertificationMutation 
-} from '@/lib/profile/query-options';
-import { profileQueryKeys } from '@/lib/profile/query-keys';
+import { useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
+import { getCertificationsByGithubUsername, addCertificationsByGithubUsername, updateCertificationsByCertificationId, deleteCertificationsByCertificationId } from '@/services/profile/CertificationService';
+import { CertificationsData } from '@/types/client/profile-section/profile-sections';
 
-export function useCertifications(userId: string) {
-  return useQuery(certificationsQuery(userId));
+export function useCertifications(username: string) {
+  return useQuery(
+    queryOptions({
+      queryKey: ['certifications', username],
+      queryFn: () => getCertificationsByGithubUsername(username),
+      enabled: !!username,
+      staleTime: 1000 * 60 * 5, // avoid instant refetch
+      gcTime: 1000 * 60 * 30, // keep data cached longer
+  })
+  );
 }
 
-export function useAddCertification() {
+export function useAddCertification(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...addCertificationMutation,
-    onSuccess: (_, { profileId }) => {
+    mutationFn: ({ data }: { data: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'> }) => {
+      return addCertificationsByGithubUsername(data);
+  },
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.certifications.list(profileId) 
+        queryKey: ['certifications', username]
       });
     },
   });
 }
 
-export function useUpdateCertification() {
+export function useUpdateCertification(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...updateCertificationMutation,
-    onSuccess: (_, { profileId }) => {
+    mutationFn: ({ certificationId, data }: { certificationId: string; data: Partial<CertificationsData> }) => 
+      updateCertificationsByCertificationId(certificationId, data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.certifications.list(profileId) 
+        queryKey: ['certifications', username]  
       });
     },
   });
 }
 
-export function useDeleteCertification() {
+export function useDeleteCertification(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...deleteCertificationMutation,
-    onSuccess: (_, { profileId }) => {
+    mutationFn: ({ certificationId }: { certificationId: string }) => 
+      deleteCertificationsByCertificationId(certificationId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.certifications.list(profileId) 
+        queryKey: ['certifications', username] 
       });
     },
   });

@@ -1,8 +1,8 @@
 // app/api/auth/[...nextauth]/authOptions.ts
 import GitHub from "next-auth/providers/github";
 import type { NextAuthOptions } from "next-auth";
-import { fetchDataForge } from "@/server/dataforge/client";
-import { checkOnboardingStatus, getAuthDataByGithubUsername } from "@/server/dataforge/User/user";
+import { checkOnboardingStatus } from "@/services/onboarding/OnboardingService";
+import { getAuthDataByGithubUsername } from "@/services/user/UserService";
 
 const isDev = process.env.ENVIRONMENT === 'DEV';
 
@@ -25,6 +25,7 @@ export const authOptions: NextAuthOptions = {
         });
         const extendedProfile = await res.json();
         return {
+          access_token: tokens.access_token,
           id: profile.id,
           login: profile.login,
           name: profile.name,
@@ -61,7 +62,6 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token, trigger }) {
       if (session.user) {
         const u: any = session.user as any;
-        
         // Always add GitHub fields if they exist in token (GitHub is primary auth)
         if ((token as any).id) {
           u.id = (token as any).id;
@@ -96,19 +96,17 @@ export const authOptions: NextAuthOptions = {
         u.profile_id = (token as any).profile_id;
         u.requires_onboarding = (token as any).requires_onboarding;
         u.roles = (token as any).roles || [];
+        u.access_token = (token as any).access_token;
       }
-      
       return session;
     },
     async jwt({ token, profile, account, user, trigger }) {
       // LinkedIn data is stored in persistent cookie, not in JWT
       // LinkedIn OAuth flow stores data in 'linkedinData' cookie (30 days)
       // This keeps LinkedIn separate from GitHub auth (primary auth provider)
-      
       // Handle GitHub login
       if (profile && account?.provider === "github") {
         const githubUsername = (profile as any).login;
-        
         // Create a new token with GitHub data
         const newToken = {
           ...token,
@@ -128,6 +126,7 @@ export const authOptions: NextAuthOptions = {
           hireable: (profile as any).hireable,
           isDev: isDev,
           roles: [] as string[],
+          access_token: account.access_token,
         };
         
         try {
@@ -150,8 +149,8 @@ export const authOptions: NextAuthOptions = {
             // Don't set user_id/profile_id for non-onboarded users
           }
         } catch (error) {
-          console.error('Failed to fetch DataForge auth data:', error);
           // Assume requires onboarding if we can't check
+          console.error('Failed to fetch DataForge auth data:', error);
           newToken.requires_onboarding = true;
           newToken.github_user_name = githubUsername;
         }
@@ -166,6 +165,7 @@ export const authOptions: NextAuthOptions = {
         return newToken as any;
       }
 
+
       // LinkedIn authentication removed - LinkedIn is only used for account linking
       // via custom OAuth flow (/api/auth/linkedin-link), not as a NextAuth provider
 
@@ -174,7 +174,7 @@ export const authOptions: NextAuthOptions = {
       if (token.github_user_name) {
         try {
           const onboardingStatus = await checkOnboardingStatus(token.github_user_name);
-          
+
           if (onboardingStatus.onboarded) {
             // User is now onboarded - fetch auth credentials
             const authData = await getAuthDataByGithubUsername(token.github_user_name);
@@ -194,7 +194,7 @@ export const authOptions: NextAuthOptions = {
           console.error('Failed to refresh onboarding status:', error);
         }
       }
-      
+    
       return token;
     },
   },

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getExperienceColor, getProficiencyLabel } from "@/lib/profile/profile-utils";
+import { getExperienceColor, getProficiencyLabel } from "@/lib/profile-utils";
 import type { SkillsData, Domain, SkillCategory } from "@/types/client/profile-section/profile-sections";
 
 interface SkillsDisplayProps {

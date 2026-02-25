@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/form";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { volunteeringSchema, type VolunteeringFormData } from "@/lib/profile/schemas";
-import { parseSkillsString } from "@/lib/profile/profile-utils";
+import { volunteeringSchema, type VolunteeringFormData } from "@/types/client/profile-section/schemas";
+import { parseSkillsString } from "@/lib/profile-utils";
 import type { VolunteeringData, Cause, Tools } from "@/types/client/profile-section/profile-sections";
 
 const CAUSES: { value: Cause; label: string }[] = [

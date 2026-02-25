@@ -1,4 +1,4 @@
-import { JobPosition } from "@/types";
+import { JobPosition } from "@/types/client/opportunities/opportunities-types";
 
 export const jobPositions: JobPosition[] = [
   // Featured Jobs

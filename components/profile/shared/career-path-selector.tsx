@@ -11,7 +11,7 @@ import {
 import { X } from "lucide-react";
 import { CareerPathCard } from "./career-path-card";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
-import { groupCareerPathsByFaction } from "@/lib/profile/profile-utils";
+import { groupCareerPathsByFaction } from "@/lib/profile-utils";
 
 interface CareerPathSelectorProps {
   type: 'primary' | 'secondary';

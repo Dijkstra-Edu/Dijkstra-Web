@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
-import { JOIN_PAGE } from "@/lib/constants";
+import { JOIN_PAGE } from "@/constants/constants";
 
 export default function QAGatePage() {
   const [username, setUsername] = useState("");

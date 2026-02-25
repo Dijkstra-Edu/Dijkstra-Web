@@ -27,18 +27,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { useAPIKeys, useCreateAPIKey, useRevokeAPIKey } from "@/hooks/api-keys/use-api-keys";
+import { useGetAllAPIKeysByGithubUsername, useCreateAPIKeyByGithubUsername, useRevokeAPIKeyByKeyId } from "@/hooks/api-keys/use-api-keys";
 import type { CreateAPIKey } from "@/types/server/dataforge/User/api-keys";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { ENV } from "@/lib/constants";
+import { ENV } from "@/constants/constants";
 import { ALL_ROLES } from "@/constants/roles";
 import { RoleMultiSelect } from "@/components/multiselects/role-multi-select";
 
-function APIKeysPage() {
-  const { data: apiKeys, isLoading, error } = useAPIKeys();
-  const createMutation = useCreateAPIKey();
-  const revokeMutation = useRevokeAPIKey();
+function APIKeysPage({ username }: { username: string }) {
+  const { data: apiKeys, isLoading, error } = useGetAllAPIKeysByGithubUsername(username);
+  const createMutation = useCreateAPIKeyByGithubUsername(username);
+  const revokeMutation = useRevokeAPIKeyByKeyId(username);
   const { data: session } = useSession();
 
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
@@ -65,7 +65,7 @@ function APIKeysPage() {
         roles: selectedRoles.length > 0 ? selectedRoles : null,
       };
 
-      const response = await createMutation.mutateAsync(data);
+      const response = await createMutation.mutateAsync({ data });
       setNewlyCreatedKey(response.key);
       setShowNewKey(true);
       setShowCreateDialog(false);
@@ -80,7 +80,7 @@ function APIKeysPage() {
 
   const handleRevokeKey = async (keyId: string) => {
     try {
-      await revokeMutation.mutateAsync(keyId);
+      await revokeMutation.mutateAsync();
       toast.success("API key revoked successfully");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to revoke API key");

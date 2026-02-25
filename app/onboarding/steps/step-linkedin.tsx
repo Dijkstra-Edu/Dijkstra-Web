@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSearchParams } from "next/navigation";
 import { StepIndicator } from "@/components/onboarding/step-indicator";
-import type { StepProps } from "@/types/onboarding";
+import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
 
 interface LinkedInStepProps extends StepProps {

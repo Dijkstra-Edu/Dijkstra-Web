@@ -20,10 +20,6 @@ import { CustomIcon, MultiSelect } from "./shared-components";
 import { CompanyAutoComplete } from "@/components/autocompletes/company-autocomplete";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import {
-  onboardUserMutation,
-  checkOnboardingStatusQuery,
-} from "@/server/dataforge/User/QueryOptions/user.queryOptions";
 import { Domain, Tools, Rank } from "@/types/server/dataforge/enums";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import {
@@ -32,8 +28,10 @@ import {
   SALARY_RANGES,
   formatTimeDisplay,
 } from "./shared-constants";
-import type { StepProps } from "@/types/onboarding";
+import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
+import { checkOnboardingStatus, submitOnboarding } from "@/services/onboarding/OnboardingService";
+import { OnboardUserRequest } from "@/types/server/dataforge/User/user";
 
 interface CareerStepProps extends StepProps {
   currentStep: number;
@@ -77,12 +75,15 @@ export function CareerStep({
 
   // Check onboarding status
   const { data: onboardingStatus, isLoading: isCheckingStatus } = useQuery({
-    ...checkOnboardingStatusQuery(session?.user?.login || ""),
+    queryKey: ['onboarding-status', session?.user?.login],
+    queryFn: () => checkOnboardingStatus(session?.user?.login || ""),
     enabled: !!session?.user?.login,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
   });
 
   const mutation = useMutation({
-    ...onboardUserMutation,
+    mutationFn: (data: OnboardUserRequest) => submitOnboarding(data),
     onSuccess: () => {
       updateFormData({
         primarySpecialization: localPrimarySpec,
@@ -113,9 +114,9 @@ export function CareerStep({
       console.error("LinkedIn or LeetCode username not found");
       return;
     }
-
     mutation.mutate({
       first_name: session?.user?.name?.split(" ")[0] || session?.user?.name,
+      access_token: (session?.user as any)?.access_token,
       middle_name: session?.user?.name?.split(" ")[1] || undefined,
       last_name: session?.user?.name?.split(" ")[2] || undefined,
       github_user_name: githubUsername,

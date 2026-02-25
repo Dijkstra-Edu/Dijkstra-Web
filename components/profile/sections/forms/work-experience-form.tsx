@@ -25,8 +25,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { workExperienceSchema, type WorkExperienceFormData } from "@/lib/profile/schemas";
-import { EMPLOYMENT_TYPE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/constants/enum-constants";
+import { workExperienceSchema, type WorkExperienceFormData } from "@/types/client/profile-section/schemas";
+import { EMPLOYMENT_TYPE_OPTIONS, WORK_LOCATION_TYPE_OPTIONS } from "@/types/enum-constants";
 import type { WorkExperienceData, EmploymentType, WorkLocationType, Domain, Tools, Location } from "@/types/client/profile-section/profile-sections";
 
 interface WorkExperienceFormProps {

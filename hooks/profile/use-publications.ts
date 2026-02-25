@@ -1,52 +1,57 @@
 // Custom hook for publications
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  publicationsQuery, 
-  addPublicationMutation, 
-  updatePublicationMutation, 
-  deletePublicationMutation 
-} from '@/lib/profile/query-options';
-import { profileQueryKeys } from '@/lib/profile/query-keys';
+import { getPublicationsByGithubUsername, addPublicationsByGithubUsername, updatePublicationsByPublicationId, deletePublicationsByPublicationId } from '@/services/profile/PublicationService';
+import { useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
+import { PublicationsData } from '@/types/client/profile-section/profile-sections';
 
-export function usePublications(userId: string) {
-  return useQuery(publicationsQuery(userId));
+export function usePublications(username: string) {
+  return useQuery(queryOptions({
+    queryKey: ['publications', username],
+    queryFn: () => getPublicationsByGithubUsername(username),
+    enabled: !!username,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+    gcTime: 1000 * 60 * 30, // keep data cached longer
+}));
 }
 
-export function useAddPublication() {
+export function useAddPublication(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...addPublicationMutation,
-    onSuccess: (_, { profileId }) => {
+    mutationFn: ({ data }: { data: Omit<PublicationsData, 'id' | 'createdAt' | 'updatedAt'> }) => {
+      return addPublicationsByGithubUsername(data);
+  },
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.publications.list(profileId) 
+        queryKey: ['publications', username] 
       });
     },
   });
 }
 
-export function useUpdatePublication() {
+export function useUpdatePublication(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...updatePublicationMutation,
-    onSuccess: (_, { profileId }) => {
+    mutationFn: ({ publicationId, data }: { publicationId: string; data: Partial<PublicationsData> }) => 
+      updatePublicationsByPublicationId(publicationId, data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.publications.list(profileId) 
+        queryKey: ['publications', username] 
       });
     },
   });
 }
 
-export function useDeletePublication() {
+export function useDeletePublication(username: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    ...deletePublicationMutation,
-    onSuccess: (_, { profileId }) => {
+    mutationFn: ({ publicationId }: { publicationId: string }) => 
+      deletePublicationsByPublicationId(publicationId),
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: profileQueryKeys.publications.list(profileId) 
+        queryKey: ['publications', username] 
       });
     },
   });

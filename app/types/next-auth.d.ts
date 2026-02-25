@@ -28,6 +28,7 @@ declare module "next-auth" {
       profile_id?: string;
       requires_onboarding?: boolean;
       roles?: string[];
+      access_token?: string;
     };
   }
 
@@ -75,5 +76,6 @@ declare module "next-auth/jwt" {
     profile_id?: string;
     requires_onboarding?: boolean;
     isDev?: boolean;
+    access_token?: string;
   }
 }

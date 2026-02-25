@@ -1,37 +1,32 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  listAPIKeysQuery,
-  getAPIKeyQuery,
-  createAPIKeyMutation,
-  revokeAPIKeyMutation,
-  updateAPIKeyMutation,
-} from "@/server/dataforge/API/QueryOptions/api-keys.queryOptions";
-import type { CreateAPIKey, UpdateAPIKey } from "@/types/server/dataforge/User/api-keys";
+import { useQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
+import type { APIKeyResponse, CreateAPIKey } from "@/types/server/dataforge/User/api-keys";
+import { createAPIKeyByGithubUsername, listAPIKeysByGithubUsername, revokeAPIKeyByKeyId } from "@/services/user/APIKeyService";
 
 /**
  * Hook to fetch all API keys
  */
-export function useAPIKeys() {
-  return useQuery(listAPIKeysQuery());
-}
-
-/**
- * Hook to fetch a specific API key
- */
-export function useAPIKey(keyId: string) {
-  return useQuery(getAPIKeyQuery(keyId));
+export function useGetAllAPIKeysByGithubUsername(username: string) {
+  return useQuery(
+    queryOptions({
+      queryKey: ["api-keys", "list", username],
+      queryFn: () => listAPIKeysByGithubUsername(username),
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
+    })
+  );
 }
 
 /**
  * Hook to create a new API key
  */
-export function useCreateAPIKey() {
+export function useCreateAPIKeyByGithubUsername(username: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    ...createAPIKeyMutation,
+    mutationFn: ({ data }: { data: CreateAPIKey }) =>
+      createAPIKeyByGithubUsername(username, data),
     onSuccess: () => {
       // Invalidate and refetch API keys list
       queryClient.invalidateQueries({ queryKey: ["api-keys"] });
@@ -42,31 +37,15 @@ export function useCreateAPIKey() {
 /**
  * Hook to revoke an API key
  */
-export function useRevokeAPIKey() {
+export function useRevokeAPIKeyByKeyId(keyId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    ...revokeAPIKeyMutation,
+    mutationFn: () => 
+      revokeAPIKeyByKeyId(keyId),
     onSuccess: () => {
       // Invalidate and refetch API keys list
       queryClient.invalidateQueries({ queryKey: ["api-keys"] });
     },
   });
 }
-
-/**
- * Hook to update an API key
- */
-export function useUpdateAPIKey() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    ...updateAPIKeyMutation,
-    onSuccess: (_, variables) => {
-      // Invalidate and refetch API keys list and specific key
-      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
-      queryClient.invalidateQueries({ queryKey: ["api-keys", variables.keyId] });
-    },
-  });
-}
-

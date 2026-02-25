@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Edit, Plus, GraduationCap, Trash2, Save, X } from "lucide-react"
 import { MonthPicker } from "@/components/ui/date-picker"
-import { InstitutionAutoComplete } from "./institution-autocomplete"
+import { InstitutionAutoComplete } from "./autocompletes/institution-autocomplete"
 interface Institution{
   name: string
   domain: string

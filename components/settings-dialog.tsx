@@ -1522,7 +1522,7 @@ export function SettingsDialog({
       case "Developer Settings":
         return <DeveloperSettingsPage />;
       case "API Keys":
-        return <APIKeysPage />;
+        return <APIKeysPage username={settings.username} />;
       case "Advanced":
         return <AdvancedPage />;
       default:

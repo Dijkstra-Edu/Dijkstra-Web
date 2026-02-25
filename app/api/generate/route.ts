@@ -8,10 +8,11 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { getGeminiApiKey } from "@/lib/base-urls-keys";
 
 // Initialize Gemini AI client
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
+  apiKey: getGeminiApiKey(),
 });
 
 // ============================================

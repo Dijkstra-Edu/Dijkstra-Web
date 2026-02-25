@@ -2,7 +2,7 @@
 
 import { CheckCircle } from "lucide-react";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
-import { ONBOARDING_STEPS_METADATA } from "@/constants/onboarding-steps";
+import { ONBOARDING_STEPS_METADATA } from "@/lib/onboarding-steps";
 
 interface CustomIconProps {
   iconType: string;

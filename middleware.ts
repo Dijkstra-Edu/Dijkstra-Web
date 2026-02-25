@@ -1,7 +1,7 @@
 // middleware.ts
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { ENV } from "./lib/constants";
+import { ENV } from "./constants/constants";
 
 export default withAuth(
   async function middleware(req) {
