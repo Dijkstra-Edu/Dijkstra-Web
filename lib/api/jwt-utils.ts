@@ -37,26 +37,21 @@ export async function getEncodedJWT(req: NextRequest): Promise<string | null> {
     iat: now,
     isDev: isDev,
   };
+  if (process.env.NEXTAUTH_ISSUER) {
+    tokenPayload.iss = process.env.NEXTAUTH_ISSUER;
+  }
+  if (process.env.NEXTAUTH_AUDIENCE) {
+    tokenPayload.aud = process.env.NEXTAUTH_AUDIENCE;
+  }
 
   // Sign the JWT using HS256 algorithm (not encrypt)
-  // This creates a signed JWT (JWS) that the backend can decode with jwt.decode()
   const secret = process.env.NEXTAUTH_SECRET;
   if (!secret) {
     console.error("[JWT] NEXTAUTH_SECRET is not set");
     return null;
   }
 
-  const encoded = jwt.sign(
-    tokenPayload,
-    secret,
-    {
-      algorithm: 'HS256',
-      // Note: issuer and audience are not set since backend has them as None
-      // If backend expects these, uncomment and set appropriate values:
-      // issuer: 'your-issuer',
-      // audience: 'your-audience',
-    }
-  );
+  const encoded = jwt.sign(tokenPayload, secret, { algorithm: "HS256" });
 
   // Decode the signed token to verify what was actually encoded
   try {
