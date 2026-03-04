@@ -60,10 +60,10 @@ const chartConfig = {
     color: "var(--destructive)",
   },
 } satisfies ChartConfig
-export function ChartAreaInteractive() {
+export function ChartAreaInteractive({ username }: { username: string }) {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("90d")
-  const { data = [], isLoading } = useFetchGithubCommitDataByTimeRange(timeRange)
+  const { data = [], isLoading } = useFetchGithubCommitDataByTimeRange(timeRange, username)
   React.useEffect(() => {
     if (isMobile) {
       setTimeRange("7d")

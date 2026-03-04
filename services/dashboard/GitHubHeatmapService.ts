@@ -1,48 +1,37 @@
-import { GITRIPPER_API_URLS } from "@/lib/api/url-builders";
 import { getDateRange } from "@/lib/utils";
 import { AggregatedCommits } from "@/types/server/gitripper/commit_data";
+import { apiCall } from "@/services/CoreApiService";
+
+/** Backend path for Gitripper commit data (used with apiCall so generic /api/[...path] proxies to Gitripper). */
+const GITRIPPER_COMMIT_PATH = "userCommitData";
 
 export async function getGithubCommitInformationByDates(
   startDate: string,
   endDate: string,
-  loginId: string
+  username: string
 ): Promise<{ date: string; Github: number }[]> {
+  const path = `${GITRIPPER_COMMIT_PATH}/${encodeURIComponent(username)}/${startDate}/${endDate}`;
+  console.log("Fetching commits by date:", path);
 
-  const url = GITRIPPER_API_URLS.getGithubCommitInformationByDatesUrl(startDate, endDate, loginId)
-  console.log("Fetching commits by date:", url)
+  const raw = await apiCall<AggregatedCommits>("gitripper", path);
+  const commits = raw?.commitsByDate ?? [];
 
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error("Failed to fetch GitHub commits")
-  }
-
-  const raw: AggregatedCommits = await res.json()
-  const commits = raw?.commitsByDate ?? []
-
-  return normalizeMissingDates(commits, startDate, endDate)
+  return normalizeMissingDates(commits, startDate, endDate);
 }
-
 
 export async function getGithubCommitInformation(
   timeRange: string,
-  loginId: string
+  username: string
 ): Promise<{ date: string; Github: number }[]> {
+  const { startTime, endTime } = getDateRange(timeRange);
+  const path = `${GITRIPPER_COMMIT_PATH}/${encodeURIComponent(username)}/${startTime}/${endTime}`;
+  console.log("Fetching commits:", path);
 
-  const { startTime, endTime } = getDateRange(timeRange)
+  const raw = await apiCall<AggregatedCommits>("gitripper", path);
+  console.log("Raw commit data:", raw);
+  const commits = raw?.commitsByDate ?? [];
 
-  const url = GITRIPPER_API_URLS.getGithubCommitInformationUrl(timeRange, loginId)
-  console.log("Fetching commits:", url)
-
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error("Failed to fetch GitHub commits")
-  }
-
-  const raw: AggregatedCommits = await res.json()
-  console.log("Raw commit data:", raw)
-  const commits = raw?.commitsByDate ?? []
-
-  return normalizeMissingDates(commits, startTime, endTime)
+  return normalizeMissingDates(commits, startTime, endTime);
 }
 
 function normalizeMissingDates(

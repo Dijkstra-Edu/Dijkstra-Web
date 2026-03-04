@@ -1,18 +1,8 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { DataTable } from "@/components/data-table";
-import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileData } from "@/components/profile-data";
-import Readme from "@/components/readme";
-import OpportunitiesPage from "@/components/opportunities/opportunities-page";
 import FellowshipsPage from "@/components/opportunities/fellowships-page";
 
 export default function Page() {

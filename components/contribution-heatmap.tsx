@@ -12,11 +12,11 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useFetchGithubCommitDataByDateRange } from "@/hooks/gitripper/use-fetch-commit-data";
 import { getYearRange } from "@/lib/utils";
 
-export function ContributionHeatmap() {
+export function ContributionHeatmap({ username }: { username: string }) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   type HeatmapValue = { date: Date; count?: number };
   const { startDate, endDate } = getYearRange(currentYear)
-  const { data, isLoading, isError } = useFetchGithubCommitDataByDateRange(startDate, endDate)
+  const { data, isLoading, isError } = useFetchGithubCommitDataByDateRange(startDate, endDate, username)
 
   const yearData: HeatmapValue[] =
   data?.map((d: any) => ({

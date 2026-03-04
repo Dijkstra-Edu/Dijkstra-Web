@@ -13,11 +13,14 @@ import { ProfileData } from "@/components/profile-data";
 import Readme from "@/components/readme";
 import Resume from "@/components/Resume and CV/resume";
 import { StudentDashboard } from "@/components/student-dashboard";
+import { useSession } from "next-auth/react";
 
 export default function Page() {
   const [data, setData] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [isResumeBuildingMode, setIsResumeBuildingMode] = useState(false);
+  const { data: session } = useSession();
+  const username = session?.user?.github_user_name || session?.user?.login || "";
 
   useEffect(() => {
     getCertificateData().then((fetchedData) => {
@@ -72,7 +75,7 @@ export default function Page() {
 
                 <TabsContent value="stats" className="space-y-4">
                   <SectionCards />
-                  <ChartAreaInteractive />
+                  <ChartAreaInteractive username={username} />
                   <div className="flex gap-4 min-h-0">
                     <div className="w-1/4 min-w-0 shrink-0">
                       <TasksForTheDayCard />
