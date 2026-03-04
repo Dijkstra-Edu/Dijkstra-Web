@@ -75,7 +75,6 @@ declare module "next-auth/jwt" {
     user_id?: string;
     profile_id?: string;
     requires_onboarding?: boolean;
-    isDev?: boolean;
     access_token?: string;
   }
 }

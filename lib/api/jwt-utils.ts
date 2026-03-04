@@ -2,8 +2,6 @@ import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import jwt from "jsonwebtoken";
 
-const isDev = process.env.ENVIRONMENT === "DEV";
-
 /**
  * Get the encoded NextAuth JWT token to send to backend
  * The backend expects a signed JWT token (HS256) with:
@@ -35,7 +33,6 @@ export async function getEncodedJWT(req: NextRequest): Promise<string | null> {
     // Add exp and iat explicitly (required for JWT)
     exp: now + maxAge,
     iat: now,
-    isDev: isDev,
   };
   if (process.env.NEXTAUTH_ISSUER) {
     tokenPayload.iss = process.env.NEXTAUTH_ISSUER;

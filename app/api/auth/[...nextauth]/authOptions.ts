@@ -4,8 +4,6 @@ import type { NextAuthOptions } from "next-auth";
 import { checkOnboardingStatus } from "@/services/onboarding/OnboardingService";
 import { getAuthDataByGithubUsername } from "@/services/user/UserService";
 
-const isDev = process.env.ENVIRONMENT === 'DEV';
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GitHub({
@@ -124,7 +122,6 @@ export const authOptions: NextAuthOptions = {
           updated_at: (profile as any).updated_at,
           organization: (profile as any).organization,
           hireable: (profile as any).hireable,
-          isDev: isDev,
           roles: [] as string[],
           access_token: account.access_token,
         };
@@ -141,7 +138,6 @@ export const authOptions: NextAuthOptions = {
             newToken.profile_id = authData.profile_id;
             newToken.github_user_name = githubUsername;
             newToken.requires_onboarding = false;
-            newToken.isDev = isDev;
           } else {
             // User not onboarded - set flag for redirect
             newToken.github_user_name = githubUsername;
@@ -182,7 +178,6 @@ export const authOptions: NextAuthOptions = {
             token.user_id = authData.user_id;
             token.profile_id = authData.profile_id;
             token.requires_onboarding = false;
-            token.isDev = isDev;
           } else {
             // User still not onboarded
             token.requires_onboarding = true;
