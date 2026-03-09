@@ -1,8 +1,7 @@
 // app/api/auth/[...nextauth]/authOptions.ts
 import GitHub from "next-auth/providers/github";
 import type { NextAuthOptions } from "next-auth";
-import { checkOnboardingStatus } from "@/services/onboarding/OnboardingService";
-import { getAuthDataByGithubUsername } from "@/services/user/UserService";
+import { checkOnboardingStatus, getAuthDataByGithubUsername } from "@/services/onboarding/DataForgeAuthHelperService";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -126,12 +125,10 @@ export const authOptions: NextAuthOptions = {
         
         try {
           // Check onboarding status first
-          const onboardingStatus = await checkOnboardingStatus(githubUsername);
-          
+          const onboardingStatus = await checkOnboardingStatus(githubUsername, true);
           if (onboardingStatus.onboarded) {
             // User is onboarded - fetch auth credentials
-            const authData = await getAuthDataByGithubUsername(githubUsername);
-            
+            const authData = await getAuthDataByGithubUsername(githubUsername, true);
             newToken.user_id = authData.user_id;
             newToken.profile_id = authData.profile_id;
             newToken.github_user_name = githubUsername;
@@ -167,12 +164,11 @@ export const authOptions: NextAuthOptions = {
       // This runs on every JWT callback invocation (session refresh)
       if (token.github_user_name) {
         try {
-          const onboardingStatus = await checkOnboardingStatus(token.github_user_name);
+          const onboardingStatus = await checkOnboardingStatus(token.github_user_name, true);
 
           if (onboardingStatus.onboarded) {
             // User is now onboarded - fetch auth credentials
-            const authData = await getAuthDataByGithubUsername(token.github_user_name);
-
+            const authData = await getAuthDataByGithubUsername(token.github_user_name, true);
             token.user_id = authData.user_id;
             token.profile_id = authData.profile_id;
             token.requires_onboarding = false;
