@@ -57,7 +57,6 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async session({ session, token, trigger }) {
-      console.log("Session callback invoked, token"+ JSON.stringify(token))
       if (session.user) {
         const u: any = session.user as any;
         // Always add GitHub fields if they exist in token (GitHub is primary auth)
@@ -102,7 +101,6 @@ export const authOptions: NextAuthOptions = {
       // LinkedIn OAuth flow stores data in 'linkedinData' cookie (30 days)
       // This keeps LinkedIn separate from GitHub auth (primary auth provider)
       // Handle GitHub login
-      console.log("JWT callback invoked, token: "+ JSON.stringify(token))
       if (profile && account?.provider === "github") {
         const githubUsername = (profile as any).login;
         // Create a new token with GitHub data
@@ -128,11 +126,9 @@ export const authOptions: NextAuthOptions = {
         try {
           // Check onboarding status first
           const onboardingStatus = await checkOnboardingStatus(githubUsername, true);
-          console.log("Onboarding status for", githubUsername, ":", onboardingStatus);
           if (onboardingStatus.onboarded) {
             // User is onboarded - fetch auth credentials
             const authData = await getAuthDataByGithubUsername(githubUsername, true);
-            console.log("Auth Data:"+ authData)
             newToken.user_id = authData.user_id;
             newToken.profile_id = authData.profile_id;
             newToken.github_user_name = githubUsername;
@@ -168,14 +164,11 @@ export const authOptions: NextAuthOptions = {
       // This runs on every JWT callback invocation (session refresh)
       if (token.github_user_name) {
         try {
-          console.log("Checking onboarding status")
           const onboardingStatus = await checkOnboardingStatus(token.github_user_name, true);
-          console.log("Onboarding statusss:", onboardingStatus.onboarded)
 
           if (onboardingStatus.onboarded) {
             // User is now onboarded - fetch auth credentials
             const authData = await getAuthDataByGithubUsername(token.github_user_name, true);
-            console.log("Auth Data:"+ JSON.stringify(authData))
             token.user_id = authData.user_id;
             token.profile_id = authData.profile_id;
             token.requires_onboarding = false;
