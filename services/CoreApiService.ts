@@ -49,8 +49,6 @@ export async function apiCall<T = unknown>(
   } else {
     url = `/api/${fullPath}`;
   }
-
-  console.log("URL:", url);
   const response = await fetch(url, {
     ...init,
     method,
