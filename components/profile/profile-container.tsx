@@ -50,9 +50,6 @@ export function ProfileContainer() {
       return newSet;
     });
   };
-
-  console.log("Session", session);
-
   return (
     <div className="max-w-8xl mx-auto space-y-6">
       {/* Header */}

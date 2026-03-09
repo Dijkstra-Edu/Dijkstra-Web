@@ -30,7 +30,7 @@ import {
 } from "./shared-constants";
 import type { StepProps } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/Zustand/onboarding-store";
-import { checkOnboardingStatus, submitOnboarding } from "@/services/onboarding/OnboardingService";
+import { checkOnboardingStatus, submitOnboarding } from "@/services/onboarding/DataForgeAuthHelperService";
 import { OnboardUserRequest } from "@/types/server/dataforge/User/user";
 
 interface CareerStepProps extends StepProps {

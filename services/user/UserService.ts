@@ -5,9 +5,6 @@ import type {
   GetUserBasicResponse,
   GetUserSideCardResponse,
 } from "@/types/server/dataforge/User/user";
-import type { GetPersonalDetailsResponse } from "@/types/server/dataforge/User/profile";
-import type { PersonalDetailsData } from "@/types/client/profile-section/profile-sections";
-import { transformPersonalDetails } from "@/services/profile/transformers/transformers";
 
 const USER_PATH = "Dijkstra/v1/u";
 
@@ -33,17 +30,5 @@ export async function getSideCardDetailsByGithubUsername(
   return apiCall<GetUserSideCardResponse>(
     "dataforge",
     `${USER_PATH}/card/${encodeURIComponent(username)}`
-  );
-}
-
-/**
- * Get Auth Data by GitHub username
- */
-export async function getAuthDataByGithubUsername(
-  username: string
-): Promise<GetAuthDataResponse> {
-  return apiCall<GetAuthDataResponse>(
-    "dataforge",
-    `${USER_PATH}/auth/${encodeURIComponent(username)}`
   );
 }

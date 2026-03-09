@@ -34,21 +34,23 @@ export type ApiServiceKey = "dataforge" | "gitripper" | "helios" | "archivist" |
 export async function apiCall<T = unknown>(
   service: ApiServiceKey,
   path: string | string[],
-  init?: RequestInit
+  init?: RequestInit,
+  isFromServer: boolean = false
 ): Promise<T> {
   const pathStr =
     typeof path === "string"
       ? path.replace(/^\/+|\/+$/g, "")
       : path.map((s) => String(s).replace(/^\/+|\/+$/g, "")).join("/");
   const fullPath = `${service}/${pathStr}`;
-  let url = `/api/${fullPath}`;
   const method = init?.method ?? "GET";
-  const base =
-  typeof window === "undefined"
-    ? process.env.NEXTAUTH_URL
-    : "";
+  let url = "";
+  if (isFromServer == true) { 
+    url = `${process.env.NEXT_PUBLIC_DATAFORGE_SERVICE_URL}/${pathStr}`;
+  } else {
+    url = `/api/${fullPath}`;
+  }
 
-  url = `${base}/api/${fullPath}`;
+  console.log("URL:", url);
   const response = await fetch(url, {
     ...init,
     method,
