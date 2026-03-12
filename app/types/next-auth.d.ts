@@ -27,6 +27,7 @@ declare module "next-auth" {
       user_id?: string;
       profile_id?: string;
       requires_onboarding?: boolean;
+      roles?: string[];
       access_token?: string;
     };
   }

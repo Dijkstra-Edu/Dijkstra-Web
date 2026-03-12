@@ -56,6 +56,7 @@ export interface GetAuthDataResponse {
   user_id: string;
   profile_id: string;
   github_user_name: string;
+  roles: string[];
 }
 
 export interface GetUserBasicResponse {

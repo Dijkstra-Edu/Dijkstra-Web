@@ -60,6 +60,18 @@ export function WaitlistSignup() {
           >
             Login
           </a>
+          <a
+            href="/dashboard"
+            className="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 font-medium hover:bg-gray-800 transition-colors duration-150"
+          >
+            Dashboard
+          </a>
+          <a
+            href="/api-key"
+            className="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 font-medium hover:bg-gray-800 transition-colors duration-150"
+          >
+            Generate API Key
+          </a>
         </div>
       </div>
 

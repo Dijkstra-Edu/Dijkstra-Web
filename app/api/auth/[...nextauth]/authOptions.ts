@@ -93,6 +93,7 @@ export const authOptions: NextAuthOptions = {
         u.user_id = (token as any).user_id;
         u.profile_id = (token as any).profile_id;
         u.requires_onboarding = (token as any).requires_onboarding;
+        u.roles = (token as any).roles || [];
         u.access_token = (token as any).access_token;
       }
       return session;
@@ -121,6 +122,7 @@ export const authOptions: NextAuthOptions = {
           updated_at: (profile as any).updated_at,
           organization: (profile as any).organization,
           hireable: (profile as any).hireable,
+          roles: [] as string[],
           access_token: account.access_token,
         };
         
@@ -131,7 +133,7 @@ export const authOptions: NextAuthOptions = {
           if (onboardingStatus.onboarded) {
             // User is onboarded - fetch auth credentials
             const authData = await getAuthDataByGithubUsername(githubUsername);
-            
+            newToken.roles = authData.roles;
             newToken.user_id = authData.user_id;
             newToken.profile_id = authData.profile_id;
             newToken.github_user_name = githubUsername;
@@ -172,7 +174,7 @@ export const authOptions: NextAuthOptions = {
           if (onboardingStatus.onboarded) {
             // User is now onboarded - fetch auth credentials
             const authData = await getAuthDataByGithubUsername(token.github_user_name);
-
+            token.roles = authData.roles;
             token.user_id = authData.user_id;
             token.profile_id = authData.profile_id;
             token.requires_onboarding = false;

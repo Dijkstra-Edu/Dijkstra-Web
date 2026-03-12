@@ -17,9 +17,6 @@ export const handleLogout = async (options: LogoutOptions = {}) => {
   } = options;
 
   try {
-    console.log("Starting logout process...");
-    console.log("Current cookies before clear:", document.cookie);
-   
     // Clearing the QA cookie (if it exists)
     const qaLogoutResponse = await fetch("/api/qa-logout", {
       method: "POST",
@@ -28,14 +25,10 @@ export const handleLogout = async (options: LogoutOptions = {}) => {
    
     if (qaLogoutResponse.ok) {
       const data = await qaLogoutResponse.json();
-      console.log("QA logout response:", data);
-      console.log("Current cookies after clear:", document.cookie);
     } else {
       console.warn("QA logout failed:", qaLogoutResponse.status);
     }
-   
-    console.log("Proceeding with NextAuth signout");
-   
+      
     // Sign out from NextAuth
     await signOut({
       callbackUrl,
