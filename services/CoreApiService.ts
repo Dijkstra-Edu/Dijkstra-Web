@@ -43,10 +43,7 @@ export async function apiCall<T = unknown>(
   const fullPath = `${service}/${pathStr}`;
   let url = `/api/${fullPath}`;
   const method = init?.method ?? "GET";
-  const base =
-  typeof window === "undefined"
-    ? process.env.NEXTAUTH_URL
-    : "";
+  const base = typeof window === "undefined" ? process.env.BETTER_AUTH_URL ?? "" : "";
 
   url = `${base}/api/${fullPath}`;
   const response = await fetch(url, {

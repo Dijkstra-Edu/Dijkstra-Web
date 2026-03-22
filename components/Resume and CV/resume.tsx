@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { authClient } from "@/lib/auth/auth-client";
 import { useQueryClient } from "@tanstack/react-query";
 import type { DocumentResponse } from '@/types/client/dashboard/document';
 import { ResourceSection } from "@/components/Resume and CV/resource-section";
@@ -28,8 +28,8 @@ const ResumeBuilderWrapper = ({
   template?: "deedy" | "row-based";
   documentType?: "resume" | "cv";
 }) => {
-  const { data: session } = useSession();
-  const githubUsername = session?.user?.github_user_name || "test_user_123"; // Fallback to test user
+  const { data: session } = authClient.useSession();
+  const githubUsername = session?.user?.username ?? "";
   
   const isCV = documentType === "cv";
   const docTypeLabel = isCV ? "CV" : "Resume";
@@ -58,7 +58,7 @@ const ResumeBuilderWrapper = ({
                 Editing: {resumeData.title}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {templateSubtitle} {session?.user?.github_user_name && `• ${session.user.github_user_name}`}
+                {templateSubtitle} {session?.user?.username && `• ${session.user.username}`}
               </p>
             </div>
           </div>
@@ -90,7 +90,7 @@ const Resume = ({
 }: {
   onResumeBuildingModeChange?: (isBuilding: boolean) => void;
 }) => {
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentResumeData, setCurrentResumeData] = useState<ResumeData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<
@@ -102,7 +102,7 @@ const Resume = ({
   const [savedResumes, setSavedResumes] = useState<SavedResumeData[]>([]);
   const queryClient = useQueryClient();
 
-  const githubUsername = session?.user?.github_user_name || "test_user_123";
+  const githubUsername = session?.user?.username ?? "";
 
   // Use centralized documents hook to fetch user documents
   const { data: docs } = useDocuments(githubUsername);

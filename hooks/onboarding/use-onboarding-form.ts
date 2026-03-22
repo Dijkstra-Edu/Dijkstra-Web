@@ -4,7 +4,6 @@ import type { OnboardingFormData } from "@/types/client/onboarding/onboarding";
 const INITIAL: OnboardingFormData = {
   gitSetup: null,
   cliKnowledge: null,
-  discordJoined: null,
   leetcodeHandle: "",
   linkedinHandle: "",
   primarySpecialization: "",

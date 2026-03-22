@@ -78,6 +78,8 @@ Whether you're interested in learning, contributing, or just exploring, **Dijkst
 - 🔐 [Login](http://localhost:3000/login)
 - 🆕 [Onboarding (Sign Up)](http://localhost:3000/login)
 
+**Authentication depends on PostgreSQL** (Better Auth). Follow [Development Setup](#development-setup) to configure `DIJKSTRA_WEB_DB_URL`, run `npm run auth:migrate`, and set the other environment variables before sign-in will work locally.
+
 More detailed onboarding guides, examples, and templates will be added soon. Stay tuned!
 
 # Development Setup
@@ -86,6 +88,7 @@ More detailed onboarding guides, examples, and templates will be added soon. Sta
 
 - Node.js (v18.14.2 or higher)  
 - npm, yarn, or pnpm  
+- **PostgreSQL** — required for [Better Auth](https://www.better-auth.com/). The app stores users, sessions, and OAuth account links in the database (see `lib/db/postgres.ts` and `lib/auth/auth.ts`). A managed service such as [Neon](https://neon.tech/) works well for local development and deployment.  
 - GitHub account (for OAuth authentication)  
 
 ---
@@ -115,7 +118,53 @@ pnpm install
 bun install
 ```
 
-Then run:
+### 3. Provision a PostgreSQL database
+
+Create an empty PostgreSQL database you can connect to with a standard connection string (TLS is typical for hosted providers).
+
+- **Neon (recommended for quick setup):** create a project, create a database, and copy the **connection string** from the Neon dashboard.  
+- **Docker / local Postgres:** create a role and database, then build a URL such as `postgresql://USER:PASSWORD@localhost:5432/dijkstra_web`.
+
+You will attach this URL to the app in the next step.
+
+### 4. Environment variables
+
+Create a `.env.local` file in the project root (Next.js loads it automatically). At minimum, authentication requires:
+
+| Variable | Purpose |
+|----------|---------|
+| `DIJKSTRA_WEB_DB_URL` | PostgreSQL connection string used by Better Auth (`lib/db/postgres.ts`). **Required** — the app will not start without it. |
+| `BETTER_AUTH_SECRET` | Secret for signing cookies and tokens. Use a long random string in development; use a secure value in production. |
+| `BETTER_AUTH_URL` | Public origin of this app (e.g. `http://localhost:3000` locally, or your deployed URL). Must match how users reach the site. |
+| `GITHUB_APP_CLIENT_ID` / `GITHUB_APP_CLIENT_SECRET` | GitHub App OAuth (see `lib/auth/auth.ts`). |
+| `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth. |
+| `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` | Discord OAuth. |
+
+> ⚠️ OAuth credential names and optional variables may evolve; check `lib/auth/auth.ts` for the authoritative list of `requireEnv` keys.
+
+Example fragment for local development:
+
+```env
+DIJKSTRA_WEB_DB_URL=postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require
+BETTER_AUTH_SECRET=your-long-random-secret
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+### 5. Database migrations (Better Auth)
+
+Apply the Better Auth schema to your database **once per environment** (new database, new machine, or after pulling changes that alter auth tables). The CLI reads your config at `lib/auth/auth.ts` and uses the same `DIJKSTRA_WEB_DB_URL` as the running app.
+
+From the project root (with `.env.local` present so `DIJKSTRA_WEB_DB_URL` is available):
+
+```bash
+npm run auth:migrate
+```
+
+This runs `npx @better-auth/cli@latest migrate --config ./lib/auth/auth.ts`. You can also invoke the CLI directly; see the [Better Auth CLI](https://www.better-auth.com/docs/concepts/cli) documentation for flags such as `--yes` to skip confirmation when automating.
+
+If the CLI does not pick up environment variables, export `DIJKSTRA_WEB_DB_URL` in your shell before running the command, or use a tool that loads `.env.local` explicitly.
+
+### 6. Run the development server
 
 ```bash
 npm run dev
@@ -129,43 +178,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-
-### 3. Environment Configuration (Under Review)
-
-> ⚠️ This section is currently being revised and may change.  
-> Please refer to the upcoming GitHub issue for finalized `.env` and OAuth setup instructions.
-
-You can still create a `.env.local` file for local testing, but values like `NEXTAUTH_SECRET`, `GITHUB_CLIENT_ID`, and others are under review.
-
-### 4. GitHub OAuth Setup (On Hold)
-
-> ⚠️ GitHub OAuth environment configuration is currently under review and may change.  
-> Full setup steps will be provided once finalized.
-
-In the meantime, you may explore the project using mock data or without authentication if supported.
-
-
-### 5. Restart the Development Server
-
-Stop the server (if running):
-
-```bash
-Ctrl + C
-```
-
-Then restart:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Now open [http://localhost:3000](http://localhost:3000) in your browser to view the Dijkstra Web Client.
+If you change `.env.local`, database settings, or auth configuration, stop the dev server (Ctrl+C) and run `npm run dev` again.
 
 ---
 
@@ -196,12 +209,13 @@ We welcome contributions from everyone, whether you're a first-time contributor 
 
 ### 🛠️ Local Development Setup
 
-> **Refer to the Development Setup section above for detailed instructions.**
+> **Refer to the [Development Setup](#development-setup) section above for detailed instructions** (including PostgreSQL, `.env.local`, and `npm run auth:migrate`).
 
 Make sure you’re using:
 
 - **Node.js ≥ v18.0.0**
 - **npm ≥ v9.0.0**
+- A running **PostgreSQL** database reachable via `DIJKSTRA_WEB_DB_URL`, with Better Auth tables applied via the migration step
 
 ### 🗃️ Working on a Feature or Bug
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-import { useSession } from "next-auth/react";
+import { authClient } from "@/lib/auth/auth-client";
 import {
   Dialog,
   DialogContent,
@@ -35,8 +35,8 @@ export default function AddResumeModal({
   const [selectedDocType, setSelectedDocType] = useState<"resume" | "cv">(
     documentType
   );
-  const { data: session } = useSession();
-  const githubUsername = session?.user?.github_user_name || "";
+  const { data: session, isPending } = authClient.useSession();
+  const githubUsername = session?.user?.username || "";
 
   const {
     data: userData,

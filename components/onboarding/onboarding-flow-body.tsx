@@ -23,6 +23,7 @@ import {
 import { CustomIcon } from "@/components/custom-icon";
 import { OnboardingCareerStep } from "@/components/onboarding/onboarding-career-step";
 import { cn } from "@/lib/utils";
+import { isValidLeetCodeUsername } from "@/lib/onboarding/leetcode-username";
 
 type UpdateForm = (updates: Partial<OnboardingFormData>) => void;
 interface OnboardingFlowBodyProps {
@@ -36,12 +37,6 @@ interface OnboardingFlowBodyProps {
   linkedinConnected: boolean;
   discordConnected: boolean;
   refreshLinkedAccounts: () => void;
-}
-
-function isValidLeetCodeUsername(value: string): boolean {
-  const normalized = value.trim();
-  if (normalized.length === 0) return false;
-  return /^[A-Za-z0-9_-]{3,20}$/.test(normalized);
 }
 
 /** Yes/No controls on the glass card: avoid `outline`’s bg-background (often invisible here); grey out the active choice. */

@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { updateOnboardingUserState } from "@/lib/onboarding/onboarding-auth";
-import { useOnboardingValidation } from "./use-onboarding-validation";
+import {
+  useOnboardingValidation,
+  type OAuthConnectionFlags,
+} from "./use-onboarding-validation";
+
+export type { OAuthConnectionFlags };
 import type { OnboardingFormData } from "@/types/client/onboarding/onboarding";
 import type { StepId } from "@/lib/onboarding/onboarding-steps";
 import { ONBOARDING_STEPS_METADATA } from "@/lib/onboarding/onboarding-steps";
@@ -16,7 +21,8 @@ export interface SessionUserFields {
 
 export function useOnboardingNavigation(
   formData: OnboardingFormData,
-  sessionFields: SessionUserFields | null
+  sessionFields: SessionUserFields | null,
+  oauth: OAuthConnectionFlags
 ) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,7 +32,7 @@ export function useOnboardingNavigation(
   const [currentStep, setCurrentStep] = useState(0);
 
   const { canProceed, errors: stepValidationErrors } =
-    useOnboardingValidation(formData, currentStep);
+    useOnboardingValidation(formData, currentStep, oauth);
 
   const completedSteps = useMemo((): StepId[] => {
     return ONBOARDING_STEPS_METADATA.filter(

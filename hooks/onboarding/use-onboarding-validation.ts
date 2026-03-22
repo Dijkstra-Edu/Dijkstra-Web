@@ -1,15 +1,12 @@
 import { useMemo } from "react";
 import type { OnboardingFormData } from "@/types/client/onboarding/onboarding";
-import { useOAuthAccounts } from "./use-oauth-accounts";
+import { isValidLeetCodeUsername } from "@/lib/onboarding/leetcode-username";
 
-/**
- * Validates LeetCode username format
- */
-function isValidLeetCodeUsername(value: string): boolean {
-  const normalized = value.trim();
-  if (normalized.length === 0) return false;
-  const pattern = /^[A-Za-z0-9_-]{3,20}$/;
-  return pattern.test(normalized);
+/** Passed from the parent so useOAuthAccounts runs once per page. */
+export interface OAuthConnectionFlags {
+  githubConnected: boolean;
+  linkedinConnected: boolean;
+  discordConnected: boolean;
 }
 
 /**
@@ -18,10 +15,10 @@ function isValidLeetCodeUsername(value: string): boolean {
  */
 export function useOnboardingValidation(
   formData: OnboardingFormData,
-  currentStep: number
+  currentStep: number,
+  oauth: OAuthConnectionFlags
 ) {
-  const { githubConnected, linkedinConnected, discordConnected } =
-    useOAuthAccounts();
+  const { githubConnected, linkedinConnected, discordConnected } = oauth;
 
   const validation = useMemo(() => {
     const errors: Record<number, string[]> = {};

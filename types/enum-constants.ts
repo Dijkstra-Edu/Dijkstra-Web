@@ -242,34 +242,6 @@ import type {
     DEGREE: DEGREE_OPTIONS,
     TEST_SCORE_TYPE: TEST_SCORE_TYPE_OPTIONS,
   } as const;
-  
-
-  /**
- * Shared constants and utilities for onboarding steps
- */
-
-export const TIME_OPTIONS = [
-  { value: 1, label: "1 month" },
-  { value: 2, label: "2 months" },
-  { value: 3, label: "3 months" },
-  { value: 4, label: "4 months" },
-  { value: 5, label: "5 months" },
-  { value: 6, label: "6 months" },
-  { value: 7, label: "7 months" },
-  { value: 8, label: "8 months" },
-  { value: 9, label: "9 months" },
-  { value: 10, label: "10 months" },
-  { value: 11, label: "11 months" },
-  { value: 12, label: "12 months" },
-  { value: 18, label: "18 months" },
-  { value: 24, label: "24 months" },
-  { value: 30, label: "30 months" },
-  { value: 36, label: "36 months" },
-  { value: 42, label: "42 months" },
-  { value: 48, label: "48 months" },
-  { value: 54, label: "54 months" },
-  { value: 60, label: "60 months (5 years)" },
-];
 
 export const SALARY_RANGES = [
   { value: "UNRANKED", label: "₹0 L (Unranked)" },

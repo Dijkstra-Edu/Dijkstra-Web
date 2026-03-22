@@ -38,7 +38,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { SettingsDialog } from "./settings-dialog";
 import { useState } from "react";

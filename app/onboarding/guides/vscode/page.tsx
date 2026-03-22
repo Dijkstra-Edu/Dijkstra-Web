@@ -1,554 +1,326 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useSearchParams } from "next/navigation"
-import { Suspense } from "react"
-import {
-  Code,
-  ArrowLeft,
-  CheckCircle,
-  ExternalLink,
-  Download,
-  Palette,
-  Terminal,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react"
+import { Code, CheckCircle, ExternalLink, Download, Palette, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import BackgroundPaths from "@/components/kokonutui/background-paths"
+import { OnboardingGuideShell } from "@/components/onboarding/onboarding-guide-shell"
 import { vscodeOnboardingInformation } from "@/data/onboarding-information"
 
-function VSCodeHelpContent() {
-  const searchParams = useSearchParams()
-  const returnStep = searchParams.get("step") || "3"
-  const [currentStep, setCurrentStep] = useState(0)
-  const [completedSteps, setCompletedSteps] = useState<number[]>([])
-  const steps = vscodeOnboardingInformation
-
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    }
-  }
-
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
-  }
-
-  const markStepComplete = (stepId: number) => {
-    if (!completedSteps.includes(stepId)) {
-      setCompletedSteps((prev) => [...prev, stepId])
-    }
-  }
-
-  const progress = (completedSteps.length / steps.length) * 100
-  const currentStepData = steps[currentStep]
-
+function VSCodeExtendedGuide({ returnStep }: { returnStep: string }) {
+  const continueHref = `/onboarding/?step=${returnStep}`
   return (
-    <BackgroundPaths title="VS Code Setup Guide" showButton={false}>
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            className="flex items-center gap-2 text-foreground hover:bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl"
-            asChild
-          >
-            <a href={`/onboarding/?step=${returnStep}`}>
-              <ArrowLeft className="w-4 h-4" />
-              Back to Onboarding
-            </a>
-          </Button>
-        </div>
-
-        {/* Progress Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl"
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Code className="w-6 h-6 text-white" />
+    <div className="space-y-8">
+      <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3">
+            <Code className="w-6 h-6" />
+            What is Visual Studio Code?
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            Visual Studio Code (VS Code) is a free, powerful code editor developed by Microsoft. It&apos;s lightweight,
+            fast, and packed with features that make coding more enjoyable and productive.
+          </p>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
+              <Download className="w-5 h-5 text-blue-500 mt-0.5" />
+              <div>
+                <h4 className="font-medium">Free & Open Source</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Completely free to use</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-foreground">VS Code Setup Progress</h2>
-              <p className="text-muted-foreground">Set up your development environment</p>
+            <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
+              <Palette className="w-5 h-5 text-purple-500 mt-0.5" />
+              <div>
+                <h4 className="font-medium">Customizable</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Themes and extensions</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
+              <Terminal className="w-5 h-5 text-green-500 mt-0.5" />
+              <div>
+                <h4 className="font-medium">Integrated Terminal</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Built-in command line</p>
+              </div>
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">
-                Progress: {completedSteps.length} of {steps.length} steps completed
-              </span>
-              <span className="text-muted-foreground">{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-        </motion.div>
+        </CardContent>
+      </Card>
 
-        {/* Main Tutorial Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-        >
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-2xl">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                      completedSteps.includes(currentStepData.id)
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-white/20 text-muted-foreground"
-                    }`}
+      <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
+        <CardHeader>
+          <CardTitle>Installing VS Code</CardTitle>
+          <CardDescription>Download and install VS Code for your operating system</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <Badge variant="secondary">Windows</Badge>
+            </h3>
+            <div className="space-y-3 pl-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  1
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Download VS Code from{" "}
+                  <a
+                    href="https://code.visualstudio.com"
+                    className="text-blue-500 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {completedSteps.includes(currentStepData.id) ? "✓" : currentStepData.id}
-                  </div>
-                  <div>
-                    <CardTitle className="text-foreground">
-                      Step {currentStepData.id} of {steps.length}: {currentStepData.title}
-                    </CardTitle>
-                    <CardDescription className="text-muted-foreground">{currentStepData.description}</CardDescription>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step Progress Indicator */}
-              <div className="flex items-center gap-2">
-                {steps.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-1 flex-1 rounded transition-all duration-300 ${
-                      index === currentStep ? "bg-primary" : index < currentStep ? "bg-primary/60" : "bg-white/20"
-                    }`}
-                  />
-                ))}
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Screenshot Area */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <div className="flex h-[380px] w-full items-center justify-center overflow-hidden rounded-lg">
-                  <img
-                    src={currentStepData.image || "/placeholder.svg"}
-                    alt={currentStepData.title}
-                    className="max-h-full max-w-full object-contain rounded-lg shadow-lg border border-white/20"
-                    onError={(e) => {
-                      e.currentTarget.src = `/placeholder.svg?height=300&width=600&text=VS+Code+Step+${currentStepData.id}+Screenshot`
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Step Details */}
-              <div className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed text-lg">{currentStepData.details}</p>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 justify-center">
-                  {currentStepData.link && (
-                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90" size="lg" asChild>
-                      <a href={currentStepData.link} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Open Link
-                      </a>
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => markStepComplete(currentStepData.id)}
-                    disabled={completedSteps.includes(currentStepData.id)}
-                    className="bg-white/10 border-white/20 text-foreground hover:bg-white/20"
-                  >
-                    {completedSteps.includes(currentStepData.id) ? "Completed ✓" : "Mark Complete"}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-
-            {/* Navigation Footer */}
-            <div className="border-t border-white/10 p-6">
-              <div className="flex justify-between items-center">
-                <Button
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={currentStep === 0}
-                  className="flex items-center gap-2 bg-white/10 border-white/20 text-foreground hover:bg-white/20"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous Step
-                </Button>
-
-                <div className="text-sm text-muted-foreground">
-                  {currentStep + 1} of {steps.length}
-                </div>
-
-                <Button
-                  onClick={nextStep}
-                  disabled={currentStep === steps.length - 1}
-                  className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  Next Step
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Completion Message */}
-        {completedSteps.length === steps.length && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-primary/10 backdrop-blur-xl border border-primary/20 rounded-3xl p-6 text-center shadow-2xl"
-          >
-            <h3 className="text-xl font-bold text-foreground mb-2">🎉 VS Code Mastery Achieved!</h3>
-            <p className="text-muted-foreground mb-4">
-              You've successfully set up VS Code with essential extensions and configurations! You're now ready to code
-              like a pro.
-            </p>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-              <a href={`/?step=${returnStep}`}>Continue Onboarding</a>
-            </Button>
-          </motion.div>
-        )}
-
-        {/* Comprehensive Guide Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="space-y-8"
-        >
-          {/* What is VS Code */}
-          <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <Code className="w-6 h-6" />
-                What is Visual Studio Code?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-300">
-                Visual Studio Code (VS Code) is a free, powerful code editor developed by Microsoft. It's lightweight,
-                fast, and packed with features that make coding more enjoyable and productive.
-              </p>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
-                  <Download className="w-5 h-5 text-blue-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium">Free & Open Source</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Completely free to use</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
-                  <Palette className="w-5 h-5 text-purple-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium">Customizable</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Themes and extensions</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3 p-4 bg-white/5 rounded-lg">
-                  <Terminal className="w-5 h-5 text-green-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium">Integrated Terminal</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Built-in command line</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Installation Guide */}
-          <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
-            <CardHeader>
-              <CardTitle>Installing VS Code</CardTitle>
-              <CardDescription>Download and install VS Code for your operating system</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Windows */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Badge variant="secondary">Windows</Badge>
-                </h3>
-                <div className="space-y-3 pl-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      1
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Download VS Code from{" "}
-                      <a
-                        href="https://code.visualstudio.com"
-                        className="text-blue-500 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        code.visualstudio.com
-                      </a>
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      2
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">Run the installer (.exe file)</p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      3
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Check "Add to PATH" during installation (recommended)
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* macOS */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Badge variant="secondary">macOS</Badge>
-                </h3>
-                <div className="space-y-3 pl-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      1
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Download VS Code from{" "}
-                      <a
-                        href="https://code.visualstudio.com"
-                        className="text-blue-500 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        code.visualstudio.com
-                      </a>
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      2
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">Open the downloaded .zip file</p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      3
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Drag Visual Studio Code to your Applications folder
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Linux */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Badge variant="secondary">Linux</Badge>
-                </h3>
-                <div className="space-y-3 pl-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      1
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Download the .deb (Ubuntu/Debian) or .rpm (CentOS/RHEL) package
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      2
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Install using your package manager or download the snap package
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
-                      3
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Alternative:{" "}
-                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                        sudo snap install --classic code
-                      </code>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Essential Extensions */}
-          <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
-            <CardHeader>
-              <CardTitle>Essential Extensions</CardTitle>
-              <CardDescription>Must-have extensions to supercharge your development workflow</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                {[
-                  {
-                    name: "Python",
-                    description: "Official Python extension with IntelliSense, linting, and debugging",
-                    category: "Language Support",
-                  },
-                  {
-                    name: "Prettier",
-                    description: "Code formatter that keeps your code clean and consistent",
-                    category: "Formatting",
-                  },
-                  {
-                    name: "GitLens",
-                    description: "Enhance Git capabilities with blame annotations and history",
-                    category: "Version Control",
-                  },
-                  {
-                    name: "Live Server",
-                    description: "Launch a local development server with live reload for web projects",
-                    category: "Web Development",
-                  },
-                  {
-                    name: "Bracket Pair Colorizer",
-                    description: "Color matching brackets to make code more readable",
-                    category: "Productivity",
-                  },
-                  {
-                    name: "Material Theme",
-                    description: "Beautiful theme to make your editor look great",
-                    category: "Themes",
-                  },
-                ].map((extension, index) => (
-                  <div key={index} className="p-4 bg-white/5 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-gray-900 dark:text-white">{extension.name}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {extension.category}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{extension.description}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  💡 <strong>How to install:</strong> Open VS Code → Click Extensions icon (Ctrl+Shift+X) → Search for
-                  extension name → Click Install
+                    code.visualstudio.com
+                  </a>
                 </p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Basic Configuration */}
-          <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
-            <CardHeader>
-              <CardTitle>Basic Configuration</CardTitle>
-              <CardDescription>Customize VS Code for a better development experience</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Auto Save</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    Go to File → Preferences → Settings → Search "auto save" → Set to "afterDelay"
-                  </p>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  2
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Font Size</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    Press Ctrl+, → Search "font size" → Adjust to your preference (usually 14-16)
-                  </p>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Theme</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    Press Ctrl+K, Ctrl+T → Choose a theme you like (Dark+ is the default)
-                  </p>
-                </div>
+                <p className="text-gray-600 dark:text-gray-300">Run the installer (.exe file)</p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Command Line Integration */}
-          <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
-            <CardHeader>
-              <CardTitle>Command Line Integration</CardTitle>
-              <CardDescription>Open VS Code from terminal</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-300">Learn these useful commands to work more efficiently:</p>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">code .</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open current directory in VS Code</p>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  3
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">code filename.py</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open specific file in VS Code</p>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">Ctrl+`</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open integrated terminal</p>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
-                  <code className="text-sm font-mono">Ctrl+Shift+P</code>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open command palette</p>
-                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Check &quot;Add to PATH&quot; during installation (recommended)
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Next Steps */}
-          <Card className="bg-linear-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-white/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-                Ready to Continue?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-300">
-                Once you've installed VS Code and set it up with some basic extensions, you're ready to join our Discord
-                community!
-              </p>
-              <div className="flex gap-4">
-                <Button className="flex-1" asChild>
-                  <a href="https://code.visualstudio.com" target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Download VS Code
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <Badge variant="secondary">macOS</Badge>
+            </h3>
+            <div className="space-y-3 pl-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  1
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Download VS Code from{" "}
+                  <a
+                    href="https://code.visualstudio.com"
+                    className="text-blue-500 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    code.visualstudio.com
                   </a>
-                </Button>
-                <Button variant="outline" className="flex-1 bg-transparent" asChild>
-                  <a href={`/?step=${returnStep}`}>Continue Onboarding</a>
-                </Button>
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-    </BackgroundPaths>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  2
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">Open the downloaded .zip file</p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  3
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Drag Visual Studio Code to your Applications folder
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <Badge variant="secondary">Linux</Badge>
+            </h3>
+            <div className="space-y-3 pl-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  1
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Download the .deb (Ubuntu/Debian) or .rpm (CentOS/RHEL) package
+                </p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  2
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Install using your package manager or download the snap package
+                </p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 mt-0.5">
+                  3
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Alternative:{" "}
+                  <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    sudo snap install --classic code
+                  </code>
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
+        <CardHeader>
+          <CardTitle>Essential Extensions</CardTitle>
+          <CardDescription>Must-have extensions to supercharge your development workflow</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              {
+                name: "Python",
+                description: "Official Python extension with IntelliSense, linting, and debugging",
+                category: "Language Support",
+              },
+              {
+                name: "Prettier",
+                description: "Code formatter that keeps your code clean and consistent",
+                category: "Formatting",
+              },
+              {
+                name: "GitLens",
+                description: "Enhance Git capabilities with blame annotations and history",
+                category: "Version Control",
+              },
+              {
+                name: "Live Server",
+                description: "Launch a local development server with live reload for web projects",
+                category: "Web Development",
+              },
+              {
+                name: "Bracket Pair Colorizer",
+                description: "Color matching brackets to make code more readable",
+                category: "Productivity",
+              },
+              {
+                name: "Material Theme",
+                description: "Beautiful theme to make your editor look great",
+                category: "Themes",
+              },
+            ].map((extension, index) => (
+              <div key={index} className="p-4 bg-white/5 rounded-lg space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-gray-900 dark:text-white">{extension.name}</h4>
+                  <Badge variant="outline" className="text-xs">
+                    {extension.category}
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{extension.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>How to install:</strong> Open VS Code, click Extensions (Ctrl+Shift+X), search for the extension
+              name, then Install.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
+        <CardHeader>
+          <CardTitle>Basic Configuration</CardTitle>
+          <CardDescription>Customize VS Code for a better development experience</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Auto Save</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                File → Preferences → Settings → search &quot;auto save&quot; → set to &quot;afterDelay&quot;
+              </p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Font Size</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                Press Ctrl+, → search &quot;font size&quot; → adjust (often 14–16)
+              </p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Theme</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                Press Ctrl+K, Ctrl+T → pick a theme (Dark+ is the default)
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20">
+        <CardHeader>
+          <CardTitle>Command Line Integration</CardTitle>
+          <CardDescription>Open VS Code from terminal</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">Useful shortcuts and commands:</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+              <code className="text-sm font-mono">code .</code>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open current directory in VS Code</p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+              <code className="text-sm font-mono">code filename.py</code>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Open a specific file</p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+              <code className="text-sm font-mono">{"Ctrl+`"}</code>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Toggle integrated terminal</p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+              <code className="text-sm font-mono">Ctrl+Shift+P</code>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Command palette</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-linear-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-white/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            Ready to Continue?
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            Once you&apos;ve installed VS Code and added a few extensions, you&apos;re ready to join our Discord
+            community.
+          </p>
+          <div className="flex gap-4 flex-wrap">
+            <Button className="flex-1 min-w-[140px]" asChild>
+              <a href="https://code.visualstudio.com" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Download VS Code
+              </a>
+            </Button>
+            <Button variant="outline" className="flex-1 min-w-[140px] bg-transparent" asChild>
+              <a href={continueHref}>Continue Onboarding</a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 
 export default function VSCodeHelpPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <VSCodeHelpContent />
-    </Suspense>
+    <OnboardingGuideShell
+      backgroundTitle="VS Code Guide"
+      steps={vscodeOnboardingInformation}
+      defaultReturnStep="3"
+      imagePlaceholderSlug="VS Code"
+      extendedGuide={({ returnStep }) => <VSCodeExtendedGuide returnStep={returnStep} />}
+    />
   )
 }

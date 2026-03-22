@@ -22,7 +22,7 @@ export const discordOnboardingInformation = [
       title: "How to join our Discord server",
       description: "Use our invite link to join the Dijkstra community",
       image: "/onboarding/discord-step3.png",
-      link: "https://discord.gg/dijkstra",
+      link: "https://discord.gg/Ct82yF3KAU",
       details:
         "Click our invite link to join the Dijkstra Discord server. You'll automatically be added to our community where you can ask questions, share projects, and connect with other learners.",
     },

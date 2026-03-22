@@ -38,12 +38,17 @@ export default function Page() {
   }, [session?.user]);
 
   const { formData, updateFields } = useOnboardingForm();
-  const {
-    githubConnected,
-    linkedinConnected,
-    discordConnected,
-    refreshLinkedAccounts,
-  } = useOAuthAccounts();
+  const { githubConnected, linkedinConnected, discordConnected, refreshLinkedAccounts } =
+    useOAuthAccounts();
+
+  const oauthFlags = useMemo(
+    () => ({
+      githubConnected,
+      linkedinConnected,
+      discordConnected,
+    }),
+    [githubConnected, linkedinConnected, discordConnected]
+  );
 
   const {
     showOnboarding,
@@ -55,7 +60,7 @@ export default function Page() {
     handleGetStarted,
     canProceed,
     stepValidationErrors,
-  } = useOnboardingNavigation(formData, sessionFields);
+  } = useOnboardingNavigation(formData, sessionFields, oauthFlags);
 
   useEffect(() => {
     if (isPending) return;
