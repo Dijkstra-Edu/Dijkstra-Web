@@ -22,7 +22,7 @@ export const useAddVolunteering = (username: string) => {
     }: {
       data: Omit<VolunteeringData, "id" | "createdAt" | "updatedAt">;
     }) => {
-      return addVolunteeringByGithubUsername(data); //call service -> Core API -> /api/
+      return addVolunteeringByGithubUsername(username, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

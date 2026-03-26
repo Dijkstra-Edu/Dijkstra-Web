@@ -28,7 +28,7 @@ export const useAddWorkExperienceMutation = (username: string) => {
     }: {
       data: Omit<WorkExperienceData, "id" | "createdAt" | "updatedAt">;
     }) => {
-      return addWorkExperienceByGithubUsername(data); //call service -> Core API -> /api/
+      return addWorkExperienceByGithubUsername(username, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

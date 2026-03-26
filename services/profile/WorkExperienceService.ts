@@ -27,9 +27,10 @@ export async function getWorkExperienceByGithubUsername(
  * Add Work Experience by GitHub username
  */
 export async function addWorkExperienceByGithubUsername(
+  username: string,
   data: Omit<WorkExperienceData, "id" | "createdAt" | "updatedAt">
 ): Promise<WorkExperienceData> {
-  const request = transformWorkExperienceToRequest(data);
+  const request = transformWorkExperienceToRequest(data, username);
   const response = await apiCall<GetWorkExperienceResponse>("dataforge", WP_PATH, {
     method: "POST",
     body: JSON.stringify(request),

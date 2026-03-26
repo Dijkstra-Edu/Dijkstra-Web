@@ -27,9 +27,10 @@ export async function getPublicationsByGithubUsername(
  * Add Publications by GitHub username
  */
 export async function addPublicationsByGithubUsername(
+  username: string,
   data: Omit<PublicationsData, "id" | "createdAt" | "updatedAt">
 ): Promise<PublicationsData> {
-  const request = transformPublicationsToRequest(data);
+  const request = transformPublicationsToRequest(data, username);
   const response = await apiCall<GetPublicationsResponse>("dataforge", WP_PATH, {
     method: "POST",
     body: JSON.stringify(request),

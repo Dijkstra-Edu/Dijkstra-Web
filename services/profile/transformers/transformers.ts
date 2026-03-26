@@ -1,5 +1,29 @@
 import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData, TestScoresData, VolunteeringData, ProjectsData} from "@/types/client/profile-section/profile-sections";
-import { GetEducationResponse, GetPersonalDetailsResponse, GetWorkExperienceResponse, UpdatePersonalDetailsRequest, GetCertificationsResponse, GetPublicationsResponse, GetTestScoresResponse, GetVolunteeringResponse, GetProjectResponse } from "../../../types/server/dataforge/User/profile";
+import {
+    CreateCertificationRequest,
+    CreateEducationRequest,
+    CreateProjectRequest,
+    CreatePublicationRequest,
+    CreateTestScoreRequest,
+    CreateVolunteeringRequest,
+    CreateWorkExperienceRequest,
+    GetCertificationsResponse,
+    GetEducationResponse,
+    GetPersonalDetailsResponse,
+    GetProjectResponse,
+    GetPublicationsResponse,
+    GetTestScoresResponse,
+    GetVolunteeringResponse,
+    GetWorkExperienceResponse,
+    UpdateCertificationRequest,
+    UpdateEducationRequest,
+    UpdatePersonalDetailsRequest,
+    UpdateProjectRequest,
+    UpdatePublicationRequest,
+    UpdateTestScoreRequest,
+    UpdateVolunteeringRequest,
+    UpdateWorkExperienceRequest,
+} from "../../../types/server/dataforge/User/profile";
 import { Degree, Domain, EmploymentType, Rank, SchoolType, Tools, WorkLocationType, CertificationType, TestScoreType, Cause } from "../../../types/server/dataforge/enums";
 import { UUID } from "crypto";
 
@@ -108,9 +132,12 @@ export function transformWorkExperience(workExperience: GetWorkExperienceRespons
     }
 }
 
-export function transformWorkExperienceToRequest(workExperience: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetWorkExperienceResponse, 'id'> {
+export function transformWorkExperienceToRequest(
+    workExperience: Omit<WorkExperienceData, 'id' | 'createdAt' | 'updatedAt'>,
+    username: string,
+): CreateWorkExperienceRequest {
     return {
-        profile_id: workExperience.profileId as UUID,
+        username,
         title: workExperience.title,
         employment_type: workExperience.employmentType as EmploymentType,
         domain: workExperience.domain as Domain[],
@@ -138,9 +165,10 @@ export function transformWorkExperienceToRequest(workExperience: Omit<WorkExperi
     }
 }
 
-export function transformWorkExperienceUpdateRequest(workExperience: Partial<WorkExperienceData>): Partial<GetWorkExperienceResponse> {
+export function transformWorkExperienceUpdateRequest(
+    workExperience: Partial<WorkExperienceData>,
+): Partial<UpdateWorkExperienceRequest> {
     return {
-        profile_id: workExperience.profileId as UUID,
         title: workExperience.title,
         employment_type: workExperience.employmentType as EmploymentType,
         domain: workExperience.domain as Domain[],
@@ -190,10 +218,12 @@ export function transformCertifications(certification: GetCertificationsResponse
     }
 }
 
-export function transformCertificationsToRequest(certification: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetCertificationsResponse, 'id'> {
+export function transformCertificationsToRequest(
+    certification: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'>,
+    username: string,
+): CreateCertificationRequest {
     return {
-          
-          profile_id: certification.profileId as UUID,        
+          username,
           name: certification.name, 
           type: certification.type as CertificationType,
           issuing_organization: certification.issuingOrganization,
@@ -206,9 +236,10 @@ export function transformCertificationsToRequest(certification: Omit<Certificati
     }
 }
 
-export function transformCertificationsUpdateRequest(certification: Partial<CertificationsData>): Partial<GetCertificationsResponse> {
+export function transformCertificationsUpdateRequest(
+    certification: Partial<CertificationsData>,
+): Partial<UpdateCertificationRequest> {
     return {
-          profile_id: certification.profileId as UUID,        
           name: certification.name, 
           type: certification.type as CertificationType,
           issuing_organization: certification.issuingOrganization,
@@ -259,9 +290,12 @@ export function transformEducation(education: GetEducationResponse): EducationDa
     }
 }
 
-export function transformEducationToRequest(education: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetEducationResponse, 'id'> {
+export function transformEducationToRequest(
+    education: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'>,
+    username: string,
+): CreateEducationRequest {
     return {
-        profile_id: education.profileId as UUID,
+        username,
         school_name: education.schoolName,
         school_logo_url: education.schoolLogoUrl,
         school_type: education.schoolType as SchoolType,
@@ -290,9 +324,10 @@ export function transformEducationToRequest(education: Omit<EducationData, 'id' 
     }
 }
 
-export function transformEducationUpdateRequest(education: Partial<EducationData>): Partial<GetEducationResponse> {
+export function transformEducationUpdateRequest(
+    education: Partial<EducationData>,
+): Partial<UpdateEducationRequest> {
     return {
-        profile_id: education.profileId as UUID,
         school_name: education.schoolName,
         school_logo_url: education.schoolLogoUrl,
         school_type: education.schoolType as SchoolType,
@@ -340,9 +375,12 @@ export function transformPublications(publication: GetPublicationsResponse): Pub
     }
 }
 
-export function transformPublicationsToRequest(publication: Omit<PublicationsData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetPublicationsResponse, 'id' | 'created_at' | 'updated_at'> {
+export function transformPublicationsToRequest(
+    publication: Omit<PublicationsData, 'id' | 'createdAt' | 'updatedAt'>,
+    username: string,
+): CreatePublicationRequest {
     return {
-        profile_id: publication.profileId as UUID,
+        username,
         title: publication.title,
         authors: publication.authors,
         publication_date: publication.publicationDate,
@@ -354,9 +392,10 @@ export function transformPublicationsToRequest(publication: Omit<PublicationsDat
     }
 }
 
-export function transformPublicationsUpdateRequest(publication: Partial<PublicationsData>): Partial<GetPublicationsResponse> {
+export function transformPublicationsUpdateRequest(
+    publication: Partial<PublicationsData>,
+): Partial<UpdatePublicationRequest> {
     return {
-        profile_id: publication.profileId as UUID,
         title: publication.title,
         authors: publication.authors,
         publication_date: publication.publicationDate,
@@ -384,9 +423,12 @@ export function transformTestScores(testScore: GetTestScoresResponse): TestScore
     }
 }
 
-export function transformTestScoresToRequest(testScore: Omit<TestScoresData, 'id' | 'createdAt' | 'updatedAt'>): Omit<GetTestScoresResponse, 'id' | 'created_at' | 'updated_at'> {
+export function transformTestScoresToRequest(
+    testScore: Omit<TestScoresData, 'id' | 'createdAt' | 'updatedAt'>,
+    username: string,
+): CreateTestScoreRequest {
     return {
-        profile_id: testScore.profileId as UUID,
+        username,
         title: testScore.title,
         type: testScore.type as TestScoreType,
         score: testScore.score,
@@ -395,9 +437,10 @@ export function transformTestScoresToRequest(testScore: Omit<TestScoresData, 'id
     }
 }
 
-export function transformTestScoresUpdateRequest(testScore: Partial<TestScoresData>): Partial<GetTestScoresResponse> {
+export function transformTestScoresUpdateRequest(
+    testScore: Partial<TestScoresData>,
+): Partial<UpdateTestScoreRequest> {
     return {
-        profile_id: testScore.profileId as UUID,
         title: testScore.title,
         type: testScore.type as TestScoreType,
         score: testScore.score,
@@ -427,9 +470,12 @@ export function transformVolunteering(volunteering: GetVolunteeringResponse): Vo
     };
 }
 
-export function transformVolunteeringToRequest(volunteering: Omit<VolunteeringData, "id" | "createdAt" | "updatedAt">): Omit<GetVolunteeringResponse, "id"> {
+export function transformVolunteeringToRequest(
+    volunteering: Omit<VolunteeringData, "id" | "createdAt" | "updatedAt">,
+    username: string,
+): CreateVolunteeringRequest {
     return {
-        profile_id: volunteering.profileId as UUID,
+        username,
         organization: volunteering.organization,
         role: volunteering.role,
         cause: volunteering.cause as Cause,
@@ -442,9 +488,10 @@ export function transformVolunteeringToRequest(volunteering: Omit<VolunteeringDa
     };
 }
 
-export function transformVolunteeringUpdateRequest(volunteering: Partial<VolunteeringData>): Partial<GetVolunteeringResponse> {
+export function transformVolunteeringUpdateRequest(
+    volunteering: Partial<VolunteeringData>,
+): Partial<UpdateVolunteeringRequest> {
     return {
-        profile_id: volunteering.profileId as UUID,
         organization: volunteering.organization,
         role: volunteering.role,
         cause: volunteering.cause as Cause | undefined,
@@ -495,9 +542,12 @@ export function transformProject(project: GetProjectResponse): ProjectsData {
     };
 }
 
-export function transformProjectToRequest(project: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">): Omit<GetProjectResponse, "id"> {
+export function transformProjectToRequest(
+    project: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">,
+    username: string,
+): CreateProjectRequest {
     return {
-        profile_id: project.profileId as UUID,
+        username,
         name: project.name,
         organization: project.organization,
         owner: project.owner,
@@ -527,9 +577,10 @@ export function transformProjectToRequest(project: Omit<ProjectsData, "id" | "cr
     };
 }
 
-export function transformProjectUpdateRequest(project: Partial<ProjectsData>): Partial<GetProjectResponse> {
+export function transformProjectUpdateRequest(
+    project: Partial<ProjectsData>,
+): Partial<UpdateProjectRequest> {
     return {
-        profile_id: project.profileId as UUID,
         name: project.name,
         organization: project.organization,
         owner: project.owner,

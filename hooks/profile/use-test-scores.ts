@@ -28,7 +28,7 @@ export const useAddTestScore = (username: string) => {
     }: {
       data: Omit<TestScoresData, "id" | "createdAt" | "updatedAt">;
     }) => {
-      return addTestScoresByGithubUsername(data);
+      return addTestScoresByGithubUsername(username, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

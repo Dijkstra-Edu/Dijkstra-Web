@@ -27,9 +27,10 @@ export async function getProjectsByGithubUsername(
  * Add Project by GitHub username
  */
 export async function addProjectByGithubUsername(
+  username: string,
   data: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">
 ): Promise<ProjectsData> {
-  const request = transformProjectToRequest(data);
+  const request = transformProjectToRequest(data, username);
   const response = await apiCall<GetProjectResponse>("dataforge", WP_PATH, {
     method: "POST",
     body: JSON.stringify(request),

@@ -27,9 +27,10 @@ export async function getVolunteeringByGithubUsername(
  * Add Volunteering by GitHub username
  */
 export async function addVolunteeringByGithubUsername(
+  username: string,
   data: Omit<VolunteeringData, "id" | "createdAt" | "updatedAt">
 ): Promise<VolunteeringData> {
-  const request = transformVolunteeringToRequest(data);
+  const request = transformVolunteeringToRequest(data, username);
   const response = await apiCall<GetVolunteeringResponse>("dataforge", WP_PATH, {
     method: "POST",
     body: JSON.stringify(request),

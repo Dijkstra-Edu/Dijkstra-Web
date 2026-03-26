@@ -27,9 +27,10 @@ export async function getCertificationsByGithubUsername(
  * Add Certifications by GitHub username
  */
 export async function addCertificationsByGithubUsername(
+  username: string,
   data: Omit<CertificationsData, "id" | "createdAt" | "updatedAt">
 ): Promise<CertificationsData> {
-  const request = transformCertificationsToRequest(data);
+  const request = transformCertificationsToRequest(data, username);
   const response = await apiCall<GetCertificationsResponse>("dataforge", WP_PATH, {
     method: "POST",
     body: JSON.stringify(request),

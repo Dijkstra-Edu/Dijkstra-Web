@@ -27,9 +27,10 @@ export async function getEducationByGithubUsername(
  * Add Education by GitHub username
  */
 export async function addEducationByGithubUsername(
+  username: string,
   data: Omit<EducationData, "id" | "createdAt" | "updatedAt">
 ): Promise<EducationData> {
-  const request = transformEducationToRequest(data);
+  const request = transformEducationToRequest(data, username);
   const response = await apiCall<GetEducationResponse>("dataforge", WP_PATH, {
     method: "POST",
     body: JSON.stringify(request),

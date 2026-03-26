@@ -19,7 +19,7 @@ export function useAddPublication(username: string) {
   
   return useMutation({
     mutationFn: ({ data }: { data: Omit<PublicationsData, 'id' | 'createdAt' | 'updatedAt'> }) => {
-      return addPublicationsByGithubUsername(data);
+      return addPublicationsByGithubUsername(username, data);
   },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
