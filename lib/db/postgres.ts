@@ -1,5 +1,4 @@
-import { Pool } from "@neondatabase/serverless";
-
+import { Pool } from "pg";
 const connectionString = process.env.DIJKSTRA_WEB_DB_URL;
 
 if (!connectionString) {

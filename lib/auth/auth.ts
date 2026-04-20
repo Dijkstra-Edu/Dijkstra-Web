@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { authPgPool } from "../db/postgres";
+import { customSession } from "better-auth/plugins";
+import { headers } from "next/headers";
 
 function requireEnv(key: string): string {
     const value = process.env[key];
@@ -65,5 +67,21 @@ export const auth = betterAuth({
       permissions: 2048 | 16384,
     },
   },
-  plugins: [nextCookies()],
+  plugins: [nextCookies(),
+    customSession(async ({ user, session }) => {
+          const authToken: string = (await auth.api.getAccessToken({
+                  body: {
+                    providerId: "github",
+                  },
+                  headers: await headers() 
+          })).accessToken;
+          return {
+                user: {
+                    ...user,
+                    access_token: authToken,
+                },
+                session
+            };
+        }),
+  ],
 });
