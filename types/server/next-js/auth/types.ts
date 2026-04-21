@@ -5,3 +5,8 @@ export type GithubAccountDto = {
   accessTokenExpiresAt: Date
   refreshTokenExpiresAt: Date
 }
+
+export type GithubAccessTokenDto = {
+  accessToken: string
+  expiresAt: Date
+}

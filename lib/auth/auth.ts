@@ -67,21 +67,5 @@ export const auth = betterAuth({
       permissions: 2048 | 16384,
     },
   },
-  plugins: [nextCookies(),
-    customSession(async ({ user, session }) => {
-          const authToken: string = (await auth.api.getAccessToken({
-                  body: {
-                    providerId: "github",
-                  },
-                  headers: await headers() 
-          })).accessToken;
-          return {
-                user: {
-                    ...user,
-                    access_token: authToken,
-                },
-                session
-            };
-        }),
-  ],
+  plugins: [nextCookies()],
 });

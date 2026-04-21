@@ -10,7 +10,7 @@ export async function getAuthTokenForGithubAccountController(request: NextReques
       );
     }
     const authToken = await getAuthTokenForGithubAccount(accountId);
-    return NextResponse.json({ authToken }, { status: 200 });
+    return NextResponse.json(authToken, { status: 200 });
   } catch (error) {
     console.error("Error fetching GitHub auth token:", error);
     return NextResponse.json(

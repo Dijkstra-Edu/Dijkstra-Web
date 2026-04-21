@@ -1,11 +1,12 @@
+import { GithubAccessTokenDto } from "@/types/server/next-js/auth/types";
 import { getGithubAccount, updateRefreshedGithubAuthToken } from "../Repository/AuthDataRepository";
 import { GITHUB_OAUTH_URL } from "@/constants/constants";
 
 //TODO: Implement locking to prevent race conditions
 export async function getAuthTokenForGithubAccount(
   accountId: string
-): Promise<string | null> {
-  console.log("Fetching GitHub auth token for accoun", accountId);
+): Promise<GithubAccessTokenDto | null> {
+  console.log("Fetching GitHub auth token for account", accountId);
   const githubAccount = await getGithubAccount(accountId);
   if (!githubAccount?.refreshTokenExpiresAt ||
     githubAccount.refreshTokenExpiresAt < new Date()) {
@@ -32,13 +33,16 @@ export async function getAuthTokenForGithubAccount(
       console.log("Response status:", res.status);
       if (res.ok && !data.error) {
         // If the request was successful, return the new access token
-        await updateRefreshedGithubAuthToken(accountId, data.access_token, data.expires_in, data.refresh_token, data.refresh_token_expires_in);
-        return data.access_token;
+        const updatedGithubAccount = await updateRefreshedGithubAuthToken(accountId, data.access_token, data.expires_in, data.refresh_token, data.refresh_token_expires_in);
+        if(updatedGithubAccount == null) {
+          throw new Error("Unable to refresh access token");
+        }
+        return { accessToken: updatedGithubAccount.accessToken, expiresAt: updatedGithubAccount.accessTokenExpiresAt } as GithubAccessTokenDto;
       } else {
           // If the request failed, throw an error
           throw new Error("Unable to refresh access token");
         }
   }
-    return githubAccount ? githubAccount.accessToken : null;
+    return githubAccount ?  { accessToken: githubAccount.accessToken, expiresAt: githubAccount.accessTokenExpiresAt } as GithubAccessTokenDto : null;
 }
    
