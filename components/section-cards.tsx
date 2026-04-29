@@ -33,6 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { API_URLS } from "@/lib/api/url-builders";
 import type { LeetCodeStatisticsResponse } from "@/types/client/dashboard/leetcode-statistics";
 import { getPersonalDetailsByGithubUsername } from "@/services/profile/PersonalDetailsService";
+import { useFetchLeetCodeData } from "@/hooks/leetcode/use-fetch-leetcode-data";
 
 const chartConfig2 = {
   easy: {
@@ -257,18 +258,7 @@ export function SectionCards() {
   }));
   const leetcodeUsername = personalDetails?.leetcodeUserName?.trim() ?? "";
 
-  const { data: statsResponse, isLoading: statsLoading, error: statsError } = useQuery({
-    queryKey: ["leetcode-statistics", leetcodeUsername],
-    queryFn: async (): Promise<LeetCodeStatisticsResponse> => {
-      const res = await fetch(API_URLS.getLeetcodeStatisticsUrl(leetcodeUsername));
-      if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-      return res.json();
-    },
-    enabled: !!leetcodeUsername,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
-  });
-
+  const { data: statsResponse, isLoading: statsLoading, error: statsError } = useFetchLeetCodeData(leetcodeUsername);
   const pieData = transformStatsToPieData(statsResponse);
   const { easy, medium, hard, total: totalProblems } = getLeetcodeTotals(statsResponse);
   const contestRanking = statsResponse?.leetcode?.contestRanking;

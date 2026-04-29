@@ -18,18 +18,12 @@ const INTERNAL_SERVICE_BASE_URLS: Record<string, () => string> = {
   archivist: getArchivistBaseUrl,
 }
 
-function getBaseUrlForInternalService(service: string): string | null {
-  const getter = INTERNAL_SERVICE_BASE_URLS[service]
-  if (!getter) return null
-  try {
-    return getter().replace(/\/+$/, '')
-  } catch {
-    return null
-  }
+function getBaseUrlForInternalService(): string | null {
+  return process.env['NEXT_PUBLIC_HODOR_URL']?.replace(/\/+$/, '') || null
 }
 
 async function proxyToBackend(req: NextRequest, path: string[]) {
-  const session = await auth.api.getSession({
+    const session = await auth.api.getSession({
     headers: {
       cookie: req.headers.get("cookie") || "",
     },
@@ -38,38 +32,8 @@ async function proxyToBackend(req: NextRequest, path: string[]) {
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-
-  const tokenData = await auth.api.getAccessToken({
-    body: {
-      providerId: "github",
-      userId: session.user.id,
-    },
-    headers: {
-      cookie: req.headers.get("cookie") || "",
-    },
-  })
-
-  if (!tokenData?.accessToken) {
-    return NextResponse.json({ error: "No GitHub access token" }, { status: 401 })
-  }
-
-  const [service, ...backendPathSegments] = path
-  if (!service || backendPathSegments.length === 0) {
-    return NextResponse.json(
-      { error: 'Path must be <service>/<backend-path> (e.g. dataforge/Dijkstra/v1/wp/username)' },
-      { status: 400 }
-    )
-  }
-
-  const baseUrl = getBaseUrlForInternalService(service)
-  if (!baseUrl) {
-    return NextResponse.json(
-      { error: `Unknown or unconfigured service: ${service}` },
-      { status: 400 }
-    )
-  }
-
-  const backendPath = backendPathSegments.join('/')
+  const baseUrl = getBaseUrlForInternalService()
+  const backendPath = path.join('/')
   const url = new URL(backendPath, baseUrl + '/')
   url.search = new URL(req.url).search
 
@@ -77,7 +41,7 @@ async function proxyToBackend(req: NextRequest, path: string[]) {
     method: req.method,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${tokenData.accessToken}`,
+      'sessionId': session.session.id,
       'X-Internal-Secret': process.env.INTERNAL_API_SECRET!,
     },
     body: req.method !== 'GET' && req.method !== 'DELETE'
