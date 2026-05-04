@@ -34,6 +34,7 @@ import { API_URLS } from "@/lib/api/url-builders";
 import type { LeetCodeStatisticsResponse } from "@/types/client/dashboard/leetcode-statistics";
 import { getPersonalDetailsByGithubUsername } from "@/services/profile/PersonalDetailsService";
 import { useFetchLeetCodeData } from "@/hooks/leetcode/use-fetch-leetcode-data";
+import { getLatestContributions } from "@/services/dashboard/GithubDataFetchService";
 
 const chartConfig2 = {
   easy: {
@@ -80,32 +81,7 @@ type GitHubContributionGroup =
   | { type: "org"; name: string; logoUrl: string; repos: string[] }
   | { type: "user"; name: string; logoUrl: string; repos: string[] };
 
-const githubRecentContributionsDummy: GitHubContributionGroup[] = [
-  {
-    type: "org",
-    name: "Dijkstra",
-    logoUrl: "https://avatars.githubusercontent.com/u/134374171?s=400&u=ac12c70099539da0d44144baa85ef1cd1dd09f42&v=4",
-    repos: ["dijkstra-web", "dataforge"],
-  },
-  {
-    type: "org",
-    name: "Auto-Mp3",
-    logoUrl: "https://avatars.githubusercontent.com/u/146825113?s=400&u=15b4826d3f2f36cd2e5ca5cd5395e796068059c5&v=4",
-    repos: ["backend-services", "internal-tooling"],
-  },
-  {
-    type: "org",
-    name: "Epic Games",
-    logoUrl: "https://avatars.githubusercontent.com/u/6615685?s=200&v=4",
-    repos: ["open-source-library"],
-  },
-  {
-    type: "user",
-    name: "Your repos",
-    logoUrl: "https://avatars.githubusercontent.com/u/70965472?v=4",
-    repos: ["my-side-project"],
-  },
-];
+
 
 const chartConfigGitHub = {
   value: { label: "Activity %", color: GITHUB_RADAR_GREEN },
@@ -256,6 +232,12 @@ export function SectionCards() {
     staleTime: 1000 * 60 * 5, // avoid instant refetch
     gcTime: 1000 * 60 * 30, // keep data cached longer
   }));
+  const { data: githubRecentContributions } = useQuery(queryOptions({
+    queryKey: ['github-recent-contributions', githubUsername],
+    queryFn: () => getLatestContributions(githubUsername),
+    enabled: !!githubUsername,
+    staleTime: 1000 * 60 * 5, // avoid instant refetch
+  }));
   const leetcodeUsername = personalDetails?.leetcodeUserName?.trim() ?? "";
 
   const { data: statsResponse, isLoading: statsLoading, error: statsError } = useFetchLeetCodeData(leetcodeUsername);
@@ -361,28 +343,30 @@ export function SectionCards() {
                 Recent contributions
               </p>
               <ul className="flex flex-col gap-4">
-                {githubRecentContributionsDummy.map((group, i) => (
+                {githubRecentContributions?.map((group, i) => (
                   <li key={i} className="flex gap-3">
                     <div className="shrink-0">
                       <img
-                        src={group.logoUrl}
-                        alt={group.name}
+                        src={group.ownerAvatarUrl}
+                        alt={group.owner}
                         className={
-                          group.type === "org"
-                            ? "h-8 w-8 rounded-md border border-border object-cover"
-                            : "h-8 w-8 rounded-full border border-border object-cover"
+                          // group.type === "org" // Hardcoding this for now.
+                            // ? "h-8 w-8 rounded-md border border-border object-cover" :
+                             "h-8 w-8 rounded-full border border-border object-cover"
                         }
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground">{group.name}</p>
+                      <p className="text-xs font-medium text-muted-foreground">{group.owner}</p>
                       <ul className="mt-1.5 border-l border-muted-foreground/40 pl-2.5 flex flex-col">
-                        {group.repos.map((repo, j) => (
+                        {group.repositoryNames.map((repo, j) => (
                           <li
                             key={j}
                             className="relative flex items-center py-0.5 pl-3 text-sm font-medium before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-muted-foreground/50 before:content-['']"
                           >
-                            {repo}
+                           <span className="leading-tight">
+                              {repo.length > 10 ? `${repo.substring(0, 15)}...` : repo}
+                            </span>
                           </li>
                         ))}
                       </ul>
