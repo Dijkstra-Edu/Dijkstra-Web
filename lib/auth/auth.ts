@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { authPgPool } from "../db/postgres";
+import { customSession } from "better-auth/plugins";
+import { headers } from "next/headers";
 
 function requireEnv(key: string): string {
     const value = process.env[key];

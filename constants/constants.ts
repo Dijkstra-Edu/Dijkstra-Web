@@ -5,3 +5,4 @@ export const TEAMNAMES = process.env.TEAM_NAMES;
 export const ORG = process.env.ORG;
 export const JOIN_PAGE = process.env.NEXT_PUBLIC_JOINING_PAGE_URL || "https://github.com/Dijkstra-Edu";
 export const DOMAIN = process.env.DOMAIN;
+export const GITHUB_OAUTH_URL = "https://github.com/login/oauth/access_token";

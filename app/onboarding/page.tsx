@@ -7,7 +7,7 @@ import { StepNavigation } from "@/components/onboarding/step-navigation";
 import { useOnboardingForm } from "@/hooks/onboarding/use-onboarding-form";
 import { useOnboardingNavigation } from "@/hooks/onboarding/use-onboarding-navigation";
 import { authClient } from "@/lib/auth/auth-client";
-import { WelcomeStep } from "@/app/onboarding/Steps/step-welcome";
+import { WelcomeStep } from "@/app/onboarding/steps/step-welcome";
 import { OnboardingFlowBody } from "@/components/onboarding/onboarding-flow-body";
 import { useOAuthAccounts } from "@/hooks/onboarding/use-oauth-accounts";
 
