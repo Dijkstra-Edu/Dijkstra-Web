@@ -47,29 +47,32 @@ export function useFetchAllTimeGithubStats(
   return useQuery({
           queryKey: ["github-all-time-stats", username],
           queryFn: async () => {
-        const stats = await getAllTimeGithubStats(username);
+            const stats = await getAllTimeGithubStats(username);
+            const githubActivityRadar = [
+              { subject: "Commits", value: stats.totalCommits },
+              { subject: "Pull requests", value: stats.totalPullRequests },
+              { subject: "Issues", value: stats.totalIssues },
+              { subject: "Code review", value: stats.totalCodeReviews },
+            ];
 
-        const githubActivityRadar = [
-          { subject: "Commits", value: stats.totalCommits, fullMark: 100 },
-          { subject: "Pull requests", value: stats.totalPullRequests, fullMark: 100 },
-          { subject: "Issues", value: stats.totalIssues, fullMark: 100 },
-          { subject: "Code review", value: stats.totalCodeReviews, fullMark: 100 },
-        ];
-        const githubActivityRadarMax = Math.max(
-          ...githubActivityRadar.map((d) => d.value),
-          1
-        );
-        const githubActivityRadarScaled = githubActivityRadar.map((d) => ({
-          ...d,
-          value: Math.round((d.value / githubActivityRadarMax) * 100),
-          fullMark: 100,
-        }));
+            const total = githubActivityRadar.reduce(
+              (sum, item) => sum + item.value,
+              0
+            );
 
-        return {
-          githubActivityRadarScaled: githubActivityRadarScaled,
-          githubAllTimeStats: stats,
-          githubActivityRadar: githubActivityRadar
-        };
+            const githubActivityRadarScaled = githubActivityRadar.map((d) => ({
+              ...d,
+              value:
+                total === 0
+                  ? 0
+                  : Math.round((d.value / total) * 100),
+              fullMark: total,
+            }));
+
+            return {
+              githubActivityRadarScaled,
+              githubAllTimeStats: stats,
+            };
     },
     enabled: !!username,
     staleTime: 1000 * 60 * 5,
