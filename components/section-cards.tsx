@@ -30,10 +30,10 @@ import {
 } from "@/components/ui/chart";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { API_URLS } from "@/lib/api/url-builders";
 import type { LeetCodeStatisticsResponse } from "@/types/client/dashboard/leetcode-statistics";
 import { getPersonalDetailsByGithubUsername } from "@/services/profile/PersonalDetailsService";
 import { useFetchLeetCodeData } from "@/hooks/leetcode/use-fetch-leetcode-data";
+import { useFetchAllTimeGithubStats, useFetchLatestContributions } from "@/hooks/gitripper/use-fetch-github-data";
 
 const chartConfig2 = {
   easy: {
@@ -53,60 +53,6 @@ const chartConfig2 = {
 //TODO: Dummy Data, integrate with Gitripper
 // GitHub activity: radar chart (percentages). Chart scale: max value = 100 so the highest axis reaches the edge.
 const GITHUB_RADAR_GREEN = "#22c55e";
-
-const githubActivityRadarDummy = [
-  { subject: "Commits", value: 59, fullMark: 100 },
-  { subject: "Pull requests", value: 8, fullMark: 100 },
-  { subject: "Issues", value: 16, fullMark: 100 },
-  { subject: "Code review", value: 17, fullMark: 100 },
-];
-
-const githubActivityRadarMax = Math.max(...githubActivityRadarDummy.map((d) => d.value), 1);
-const githubActivityRadarScaled = githubActivityRadarDummy.map((d) => ({
-  ...d,
-  value: Math.round((d.value / githubActivityRadarMax) * 100),
-  fullMark: 100,
-}));
-
-const githubTotalsDummy = {
-  totalLines: 28450,
-  totalCommits: 342,
-  totalPullRequests: 89,
-  totalIssues: 56,
-};
-
-// Contributions grouped by org (square logo) or user (circle logo)
-type GitHubContributionGroup =
-  | { type: "org"; name: string; logoUrl: string; repos: string[] }
-  | { type: "user"; name: string; logoUrl: string; repos: string[] };
-
-const githubRecentContributionsDummy: GitHubContributionGroup[] = [
-  {
-    type: "org",
-    name: "Dijkstra",
-    logoUrl: "https://avatars.githubusercontent.com/u/134374171?s=400&u=ac12c70099539da0d44144baa85ef1cd1dd09f42&v=4",
-    repos: ["dijkstra-web", "dataforge"],
-  },
-  {
-    type: "org",
-    name: "Auto-Mp3",
-    logoUrl: "https://avatars.githubusercontent.com/u/146825113?s=400&u=15b4826d3f2f36cd2e5ca5cd5395e796068059c5&v=4",
-    repos: ["backend-services", "internal-tooling"],
-  },
-  {
-    type: "org",
-    name: "Epic Games",
-    logoUrl: "https://avatars.githubusercontent.com/u/6615685?s=200&v=4",
-    repos: ["open-source-library"],
-  },
-  {
-    type: "user",
-    name: "Your repos",
-    logoUrl: "https://avatars.githubusercontent.com/u/70965472?v=4",
-    repos: ["my-side-project"],
-  },
-];
-
 const chartConfigGitHub = {
   value: { label: "Activity %", color: GITHUB_RADAR_GREEN },
 } satisfies ChartConfig;
@@ -256,6 +202,14 @@ export function SectionCards() {
     staleTime: 1000 * 60 * 5, // avoid instant refetch
     gcTime: 1000 * 60 * 30, // keep data cached longer
   }));
+  const { data: githubRecentContributions } = useFetchLatestContributions(githubUsername)
+  const {
+    data: {
+      githubActivityRadarScaled,
+      githubActivityRadar,
+      githubAllTimeStats,
+    } = {},
+  } = useFetchAllTimeGithubStats(githubUsername);
   const leetcodeUsername = personalDetails?.leetcodeUserName?.trim() ?? "";
 
   const { data: statsResponse, isLoading: statsLoading, error: statsError } = useFetchLeetCodeData(leetcodeUsername);
@@ -290,7 +244,7 @@ export function SectionCards() {
                     <PolarAngleAxis
                       dataKey="subject"
                       tick={({ x, y, textAnchor, index, ...props }) => {
-                        const point = githubActivityRadarDummy[index];
+                        const point = githubActivityRadar?.[index];
                         const pct = point?.value ?? 0;
                         const subject = point?.subject ?? "";
                         return (
@@ -301,7 +255,7 @@ export function SectionCards() {
                             className="fill-muted-foreground text-xs"
                             {...props}
                           >
-                            <tspan className="font-medium fill-foreground">{pct}%</tspan>
+                            {/* <tspan className="font-medium fill-foreground">{pct}%</tspan> */}
                             <tspan dx={4}>{subject}</tspan>
                           </text>
                         );
@@ -331,25 +285,25 @@ export function SectionCards() {
                   <div>
                     <span className="text-muted-foreground">Lines</span>
                     <p className="font-semibold tabular-nums">
-                      {githubTotalsDummy.totalLines.toLocaleString()}
+                      {githubAllTimeStats?.totalLines.toLocaleString()}
                     </p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Commits</span>
                     <p className="font-semibold tabular-nums">
-                      {githubTotalsDummy.totalCommits.toLocaleString()}
+                      {githubAllTimeStats?.totalCommits.toLocaleString()}
                     </p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Pull requests</span>
                     <p className="font-semibold tabular-nums">
-                      {githubTotalsDummy.totalPullRequests.toLocaleString()}
+                      {githubAllTimeStats?.totalPullRequests.toLocaleString()}
                     </p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Issues</span>
                     <p className="font-semibold tabular-nums">
-                      {githubTotalsDummy.totalIssues.toLocaleString()}
+                      {githubAllTimeStats?.totalIssues.toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -361,28 +315,30 @@ export function SectionCards() {
                 Recent contributions
               </p>
               <ul className="flex flex-col gap-4">
-                {githubRecentContributionsDummy.map((group, i) => (
+                {githubRecentContributions?.map((group, i) => (
                   <li key={i} className="flex gap-3">
                     <div className="shrink-0">
                       <img
-                        src={group.logoUrl}
-                        alt={group.name}
+                        src={group.ownerAvatarUrl}
+                        alt={group.owner}
                         className={
-                          group.type === "org"
-                            ? "h-8 w-8 rounded-md border border-border object-cover"
-                            : "h-8 w-8 rounded-full border border-border object-cover"
+                          // group.type === "org" // Hardcoding this for now.
+                            // ? "h-8 w-8 rounded-md border border-border object-cover" :
+                             "h-8 w-8 rounded-full border border-border object-cover"
                         }
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-muted-foreground">{group.name}</p>
+                      <p className="text-xs font-medium text-muted-foreground">{group.owner}</p>
                       <ul className="mt-1.5 border-l border-muted-foreground/40 pl-2.5 flex flex-col">
-                        {group.repos.map((repo, j) => (
+                        {group.repositoryNames.map((repo, j) => (
                           <li
                             key={j}
                             className="relative flex items-center py-0.5 pl-3 text-sm font-medium before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-muted-foreground/50 before:content-['']"
                           >
-                            {repo}
+                           <span className="leading-tight">
+                              {repo.length > 10 ? `${repo.substring(0, 15)}...` : repo}
+                            </span>
                           </li>
                         ))}
                       </ul>

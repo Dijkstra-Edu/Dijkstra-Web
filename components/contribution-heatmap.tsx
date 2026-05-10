@@ -9,7 +9,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import type ReactCalendarHeatmapNS from "react-calendar-heatmap";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import { useFetchGithubCommitDataByDateRange } from "@/hooks/gitripper/use-fetch-commit-data";
+import { useFetchGithubCommitDataByDateRange } from "@/hooks/gitripper/use-fetch-github-data";
 import { getYearRange } from "@/lib/utils";
 
 export function ContributionHeatmap({ username }: { username: string }) {
