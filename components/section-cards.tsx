@@ -206,7 +206,6 @@ export function SectionCards() {
   const {
     data: {
       githubActivityRadarScaled,
-      githubActivityRadar,
       githubAllTimeStats,
     } = {},
   } = useFetchAllTimeGithubStats(githubUsername);
@@ -244,7 +243,7 @@ export function SectionCards() {
                     <PolarAngleAxis
                       dataKey="subject"
                       tick={({ x, y, textAnchor, index, ...props }) => {
-                        const point = githubActivityRadar?.[index];
+                        const point = githubActivityRadarScaled?.[index];
                         const pct = point?.value ?? 0;
                         const subject = point?.subject ?? "";
                         return (
@@ -255,7 +254,7 @@ export function SectionCards() {
                             className="fill-muted-foreground text-xs"
                             {...props}
                           >
-                            {/* <tspan className="font-medium fill-foreground">{pct}%</tspan> */}
+                            <tspan className="font-medium fill-foreground">{pct}%</tspan>
                             <tspan dx={4}>{subject}</tspan>
                           </text>
                         );
