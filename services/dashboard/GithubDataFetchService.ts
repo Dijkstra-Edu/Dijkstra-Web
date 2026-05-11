@@ -3,6 +3,7 @@ import { AggregatedCommits } from "@/types/server/gitripper/commit_data";
 import { apiCall } from "@/services/CoreApiService";
 import { OwnerRepositoryContributionDto } from "@/types/server/gitripper/repo_contribution";
 import { GithubStatDto } from "@/types/server/gitripper/all_time_stats";
+import { GithubProfileDto } from "@/types/server/gitripper/profile";
 
 /** Backend path for Gitripper commit data (used with apiCall so generic /api/[...path] proxies to Gitripper). */
 const GITRIPPER_COMMIT_PATH = "userCommitData";
@@ -15,6 +16,16 @@ export async function getLatestContributions(
   const raw = await apiCall<OwnerRepositoryContributionDto[]>("gitripper", path);
   return raw;
 }
+
+export async function getGithubProfileInfo(
+  username: string
+): Promise<GithubProfileDto> {
+  const path = `${encodeURIComponent(username)}/profile/info`;
+  console.log("Fetching GitHub profile info:", path);
+  const raw = await apiCall<GithubProfileDto>("gitripper", path);
+  return raw;
+}
+
 
 export async function getAllTimeGithubStats(
   username: string

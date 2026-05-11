@@ -36,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Domain, Rank } from "@/types/server/dataforge/enums";
 import { getSideCardDetailsByGithubUsername } from "@/services/user/UserService";
 import { authClient } from "@/lib/auth/auth-client";
+import { useFetchGithubProfileData } from "@/hooks/gitripper/use-fetch-github-data";
 
 // Utility function to get rank image path
 const getRankImagePath = (rank: Rank): string => { 
@@ -102,6 +103,8 @@ export function ProfileData() {
       gcTime: 1000 * 60 * 30, // keep data cached longer
     }),
   );
+
+  const {data: githubProfileStats} = useFetchGithubProfileData(githubUsername);
 
   // Primary career path from user data with fallback
   const primaryPath: CareerPathKey = (userData?.primary_specialization as CareerPathKey) || "FULLSTACK";
@@ -195,15 +198,15 @@ export function ProfileData() {
 
           <div className="flex justify-center gap-8 mt-4 text-sm">
             <div className="text-center">
-              <p className="font-semibold">{user.followers ?? 0}</p>
+              <p className="font-semibold">{githubProfileStats?.followersCount ?? 0}</p>
               <p className="text-muted-foreground">Followers</p>
             </div>
             <div className="text-center">
-              <p className="font-semibold">{user.following ?? 0}</p>
+              <p className="font-semibold">{githubProfileStats?.followingCount ?? 0}</p>
               <p className="text-muted-foreground">Following</p>
             </div>
             <div className="text-center">
-              <p className="font-semibold">{user.public_repos ?? 0}</p>
+              <p className="font-semibold">{githubProfileStats?.repositoriesOwned ?? 0}</p>
               <p className="text-muted-foreground">Repos</p>
             </div>
           </div>
