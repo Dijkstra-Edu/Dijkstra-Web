@@ -3,10 +3,9 @@ import {
   getAllTimeGithubStats,
   getGithubCommitInformation,
   getGithubCommitInformationByDates,
+  getGithubProfileInfo,
   getLatestContributions,
 } from "@/services/dashboard/GithubDataFetchService";
-import { get } from "http";
-import { github } from "better-auth";
 
 export function useFetchGithubCommitDataByTimeRange(timeRange: string, username: string) {
   return useQuery({
@@ -74,6 +73,17 @@ export function useFetchAllTimeGithubStats(
               githubAllTimeStats: stats,
             };
     },
+    enabled: !!username,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useFetchGithubProfileData(
+  username: string
+) {
+  return useQuery({
+    queryKey: ["github-profile-info", username],
+    queryFn: async () => getGithubProfileInfo(username),
     enabled: !!username,
     staleTime: 1000 * 60 * 5,
   });
