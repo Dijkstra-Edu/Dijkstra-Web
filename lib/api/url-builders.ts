@@ -11,9 +11,7 @@ export const API_URLS = {
     )}${allData ? "?all_data=true" : ""}`,
 
   getLeetcodeStatisticsUrl: (leetcodeUsername: string) =>
-    `${
-      API_ENDPOINTS.DATAFORGE_API
-    }/Dijkstra/v1/statistics/lc/${encodeURIComponent(leetcodeUsername)}`,
+    `/Dijkstra/v1/statistics/lc/${encodeURIComponent(leetcodeUsername)}`,
 
     //Dashboard - Profile Operations
     

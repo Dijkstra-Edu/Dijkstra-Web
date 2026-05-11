@@ -28,7 +28,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
-import { useFetchGithubCommitDataByTimeRange } from "@/hooks/gitripper/use-fetch-commit-data"
+import { useFetchGithubCommitDataByTimeRange } from "@/hooks/gitripper/use-fetch-github-data"
 
 export const description = "An interactive area chart"
 const chartConfig = {

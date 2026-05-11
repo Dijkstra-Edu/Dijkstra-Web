@@ -1,6 +1,6 @@
 import { authPgPool } from "@/lib/db/postgres";
 
-export type SqlParam = string | number | boolean | null;
+export type SqlParam = string | number | boolean | Date | null;
 
 export async function queryNextJsDb<T = unknown>(
   sql: string,
