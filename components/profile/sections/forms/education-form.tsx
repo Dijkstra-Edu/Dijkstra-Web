@@ -397,18 +397,18 @@ export function EducationForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>CGPA (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        max="4" 
-                        placeholder="3.8"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="1" 
+                          min="1" 
+                          max="10" 
+                          placeholder="3.8"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
                   </FormItem>
                 )}
               />
@@ -735,9 +735,9 @@ export function EducationForm({
                       <FormControl>
                         <Input 
                           type="number" 
-                          step="0.01" 
-                          min="0" 
-                          max="4" 
+                          step="1" 
+                          min="1" 
+                          max="10" 
                           placeholder="3.8"
                           {...field}
                           onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
