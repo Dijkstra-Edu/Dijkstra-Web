@@ -21,7 +21,7 @@ export function useAddCertification(username: string) {
   
   return useMutation({
     mutationFn: ({ data }: { data: Omit<CertificationsData, 'id' | 'createdAt' | 'updatedAt'> }) => {
-      return addCertificationsByGithubUsername(data);
+      return addCertificationsByGithubUsername(username, data);
   },
     onSuccess: () => {
       queryClient.invalidateQueries({ 

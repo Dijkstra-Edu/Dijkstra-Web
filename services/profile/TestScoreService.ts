@@ -27,9 +27,10 @@ export async function getTestScoresByGithubUsername(
  * Add Test Score by GitHub username
  */
 export async function addTestScoresByGithubUsername(
+  username: string,
   data: Omit<TestScoresData, "id" | "createdAt" | "updatedAt">
 ): Promise<TestScoresData> {
-  const request = transformTestScoresToRequest(data);
+  const request = transformTestScoresToRequest(data, username);
   const response = await apiCall<GetTestScoresResponse>(
     "dataforge",
     TEST_SCORES_PATH,

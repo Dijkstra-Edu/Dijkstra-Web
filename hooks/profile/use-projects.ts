@@ -22,7 +22,7 @@ export const useAddProject = (username: string) => {
     }: {
       data: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">;
     }) => {
-      return addProjectByGithubUsername(data); //call service -> Core API -> /api/
+      return addProjectByGithubUsername(username, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

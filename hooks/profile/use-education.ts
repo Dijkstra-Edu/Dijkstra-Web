@@ -21,7 +21,7 @@ export function useAddEducation(username: string) {
   
   return useMutation({
     mutationFn: ({ data }: { data: Omit<EducationData, 'id' | 'createdAt' | 'updatedAt'> }) => {
-      return addEducationByGithubUsername(data);
+      return addEducationByGithubUsername(username, data);
   },
     onSuccess: () => {
       queryClient.invalidateQueries({ 

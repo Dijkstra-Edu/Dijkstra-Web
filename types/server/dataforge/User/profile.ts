@@ -10,6 +10,15 @@ export interface GetLocationResponse {
     longitude: number
 }
 
+export interface CreateLocationRequest {
+    id?: UUID
+    city: string
+    state?: string | null
+    country: string
+    longitude?: number | null
+    latitude?: number | null
+}
+
 export interface GetPersonalDetailsResponse {
     first_name?: string
     middle_name?: string
@@ -72,6 +81,7 @@ export interface UpdatePersonalDetailsRequest {
 
 export interface GetWorkExperienceResponse {
     id: UUID
+    username: string
     profile_id: UUID
     title: string
     employment_type: EmploymentType
@@ -93,10 +103,61 @@ export interface GetWorkExperienceResponse {
     time_spent_multiplier?: number
     work_done_multiplier?: number
     tools_used?: Tools[]
+    created_at?: string
+    updated_at?: string
+}
+
+export interface CreateWorkExperienceRequest {
+    username: string
+    title: string
+    employment_type: EmploymentType
+    domain?: Domain[]
+    company_name: string
+    company_logo?: string
+    currently_working: boolean
+    location?: CreateLocationRequest
+    location_type: WorkLocationType
+    start_date_month: number
+    start_date_year: number
+    end_date_month?: number
+    end_date_year?: number
+    description_general: string
+    description_detailed?: string
+    description_less?: string
+    work_done?: string
+    company_score?: number
+    time_spent_multiplier?: number
+    work_done_multiplier?: number
+    tools_used?: Tools[]
+}
+
+/** PUT body — matches backend `UpdateWorkExperience` */
+export interface UpdateWorkExperienceRequest {
+    title?: string
+    employment_type?: EmploymentType
+    domain?: Domain[]
+    company_name?: string
+    company_logo?: string
+    currently_working?: boolean
+    location?: CreateLocationRequest
+    location_type?: WorkLocationType
+    start_date_month?: number
+    start_date_year?: number
+    end_date_month?: number
+    end_date_year?: number
+    description_general?: string
+    description_detailed?: string
+    description_less?: string
+    work_done?: string
+    company_score?: number
+    time_spent_multiplier?: number
+    work_done_multiplier?: number
+    tools_used?: Tools[]
 }
 
 export interface GetEducationResponse {
     id: UUID
+    username?: string
     profile_id: UUID
     school_name: string
     school_logo_url?: string
@@ -114,12 +175,61 @@ export interface GetEducationResponse {
     description_detailed?: string
     description_less?: string
     work_done?: string
+    school_score_multiplier?: number
+    cgpa?: number
+    tools_used?: Tools[]
+    created_at?: string
+    updated_at?: string
+}
+
+export interface CreateEducationRequest {
+    username: string
+    school_name: string
+    school_logo_url?: string
+    school_type: SchoolType
+    degree: Degree
+    course_field_name: string
+    currently_studying: boolean
+    location?: CreateLocationRequest
+    location_type: WorkLocationType
+    start_date_month: number
+    start_date_year: number
+    end_date_month?: number
+    end_date_year?: number
+    description_general: string
+    description_detailed?: string
+    description_less?: string
+    work_done?: string
+    school_score_multiplier?: number
+    cgpa?: number
+    tools_used?: Tools[]
+}
+
+export interface UpdateEducationRequest {
+    school_name?: string
+    school_logo_url?: string
+    school_type?: SchoolType
+    degree?: Degree
+    course_field_name?: string
+    currently_studying?: boolean
+    location?: CreateLocationRequest
+    location_type?: WorkLocationType
+    start_date_month?: number
+    start_date_year?: number
+    end_date_month?: number
+    end_date_year?: number
+    description_general?: string
+    description_detailed?: string
+    description_less?: string
+    work_done?: string
+    school_score_multiplier?: number
     cgpa?: number
     tools_used?: Tools[]
 }
 
 export interface GetCertificationsResponse {
     id:string
+    username?: string
     profile_id: UUID 
     name: string 
     type: CertificationType 
@@ -130,10 +240,38 @@ export interface GetCertificationsResponse {
     credential_url: string
     tools?: Tools[]
     issuing_organization_logo?: string
+    created_at?: string
+    updated_at?: string
+}
+
+export interface CreateCertificationRequest {
+    username: string
+    name: string
+    type: CertificationType
+    issuing_organization: string
+    issue_date: string
+    expiry_date?: string
+    credential_id: string
+    credential_url: string
+    tools?: Tools[]
+    issuing_organization_logo?: string
+}
+
+export interface UpdateCertificationRequest {
+    name?: string
+    type?: CertificationType
+    issuing_organization?: string
+    issue_date?: string
+    expiry_date?: string
+    credential_id?: string
+    credential_url?: string
+    tools?: Tools[]
+    issuing_organization_logo?: string
 }
 
 export interface GetPublicationsResponse {
     id: UUID
+    username?: string
     profile_id: UUID
     title: string
     publisher: string
@@ -147,8 +285,32 @@ export interface GetPublicationsResponse {
     updated_at: string
 }
 
+export interface CreatePublicationRequest {
+    username: string
+    title: string
+    publisher: string
+    authors: string[]
+    publication_date: string
+    publication_url: string
+    description: string
+    tools?: Tools[]
+    publisher_logo?: string
+}
+
+export interface UpdatePublicationRequest {
+    title?: string
+    publisher?: string
+    authors?: string[]
+    publication_date?: string
+    publication_url?: string
+    description?: string
+    tools?: Tools[]
+    publisher_logo?: string
+}
+
 export interface GetTestScoresResponse {
     id: UUID
+    username?: string
     profile_id: UUID
     title: string
     type: TestScoreType
@@ -159,8 +321,26 @@ export interface GetTestScoresResponse {
     updated_at: string
 }
 
+export interface CreateTestScoreRequest {
+    username: string
+    title: string
+    type: TestScoreType
+    score: string
+    test_date: string
+    description?: string
+}
+
+export interface UpdateTestScoreRequest {
+    title?: string
+    type?: TestScoreType
+    score?: string
+    test_date?: string
+    description?: string
+}
+
 export interface GetVolunteeringResponse {
     id: UUID
+    username?: string
     profile_id: UUID
     organization: string
     organization_logo?: string
@@ -171,10 +351,38 @@ export interface GetVolunteeringResponse {
     currently_volunteering: boolean
     description?: string
     tools?: Tools[]
+    created_at?: string
+    updated_at?: string
+}
+
+export interface CreateVolunteeringRequest {
+    username: string
+    organization: string
+    role: string
+    cause: Cause
+    start_date: string
+    end_date?: string
+    currently_volunteering: boolean
+    description?: string
+    tools?: Tools[]
+    organization_logo?: string
+}
+
+export interface UpdateVolunteeringRequest {
+    organization?: string
+    role?: string
+    cause?: Cause
+    start_date?: string
+    end_date?: string
+    currently_volunteering?: boolean
+    description?: string
+    tools?: Tools[]
+    organization_logo?: string
 }
 
 export interface GetProjectResponse {
     id: UUID
+    username?: string
     profile_id: UUID
     name: string
     organization?: string
@@ -202,4 +410,65 @@ export interface GetProjectResponse {
     complexity_rating?: number
     testing_framework_present: boolean
     testing_framework?: string
+    created_at?: string
+    updated_at?: string
+}
+
+export interface CreateProjectRequest {
+    username: string
+    name: string
+    organization?: string
+    owner: string
+    private: boolean
+    github_stars: number
+    github_about?: string
+    github_open_issues: number
+    github_forks: number
+    description: string
+    domain: Domain
+    topics?: string[]
+    tools: Tools[]
+    readme: boolean
+    license: boolean
+    landing_page: boolean
+    landing_page_link?: string
+    docs_page: boolean
+    docs_page_link?: string
+    own_domain_name: boolean
+    domain_name?: string
+    total_lines_contributed?: number
+    improper_uploads?: boolean
+    complexity_rating?: number
+    testing_framework_present: boolean
+    testing_framework?: string
+    project_organization_logo?: string
+}
+
+export interface UpdateProjectRequest {
+    name?: string
+    organization?: string
+    owner?: string
+    private?: boolean
+    github_stars?: number
+    github_about?: string
+    github_open_issues?: number
+    github_forks?: number
+    description?: string
+    domain?: Domain
+    topics?: string[]
+    tools?: Tools[]
+    readme?: boolean
+    license?: boolean
+    landing_page?: boolean
+    landing_page_link?: string
+    docs_page?: boolean
+    docs_page_link?: string
+    own_domain_name?: boolean
+    domain_name?: string
+    total_lines_contributed?: number
+    improper_uploads?: boolean
+    complexity_rating?: number
+    testing_framework_present?: boolean
+    testing_framework?: string
+    project_organization_logo?: string
 }
