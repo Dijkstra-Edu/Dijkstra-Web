@@ -33,10 +33,11 @@ import {
 } from "@tabler/icons-react";
 import { CAREER_PATHS, type CareerPathKey } from "@/data/career-paths";
 import { Badge } from "@/components/ui/badge";
-import { Domain, Rank } from "@/types/server/dataforge/enums";
+import { Rank } from "@/types/server/dataforge/enums";
 import { getSideCardDetailsByGithubUsername } from "@/services/user/UserService";
 import { authClient } from "@/lib/auth/auth-client";
 import { useFetchGithubProfileData } from "@/hooks/gitripper/use-fetch-github-data";
+import { useFetchUserRank } from "@/hooks/helios/use-fetch-user-rank";
 
 // Utility function to get rank image path
 const getRankImagePath = (rank: Rank): string => { 
@@ -52,37 +53,11 @@ const formatRankDisplay = (rank: Rank): string => {
 const getRankColor = (rank: Rank): string => {
   const rankColors: Record<Rank, string> = {
     [Rank.UNRANKED]: "text-gray-500",
-    [Rank.IRON_1]: "text-gray-400",
-    [Rank.IRON_2]: "text-gray-400", 
-    [Rank.IRON_3]: "text-gray-400",
-    [Rank.BRONZE_1]: "text-amber-600",
-    [Rank.BRONZE_2]: "text-amber-600",
-    [Rank.BRONZE_3]: "text-amber-600",
-    [Rank.SILVER_1]: "text-gray-300",
-    [Rank.SILVER_2]: "text-gray-300",
-    [Rank.SILVER_3]: "text-gray-300",
-    [Rank.GOLD_1]: "text-yellow-500",
-    [Rank.GOLD_2]: "text-yellow-500",
-    [Rank.GOLD_3]: "text-yellow-500",
-    [Rank.PLATINUM_1]: "text-blue-300",
-    [Rank.PLATINUM_2]: "text-blue-300",
-    [Rank.PLATINUM_3]: "text-blue-300",
-    [Rank.DIAMOND_1]: "text-cyan-400",
-    [Rank.DIAMOND_2]: "text-cyan-400",
-    [Rank.DIAMOND_3]: "text-cyan-400",
-    [Rank.EMERALD_1]: "text-green-400",
-    [Rank.EMERALD_2]: "text-green-400",
-    [Rank.EMERALD_3]: "text-green-400",
-    [Rank.LAPIS_1]: "text-blue-400",
-    [Rank.LAPIS_2]: "text-blue-400",
-    [Rank.LAPIS_3]: "text-blue-400",
-    [Rank.QUARTZ_1]: "text-purple-400",
-    [Rank.QUARTZ_2]: "text-purple-400",
-    [Rank.QUARTZ_3]: "text-purple-400",
-    [Rank.SAPHIRE_1]: "text-blue-500",
-    [Rank.SAPHIRE_2]: "text-blue-500",
-    [Rank.SAPHIRE_3]: "text-blue-500",
-    [Rank.OBSIDIAN]: "text-gray-800",
+    [Rank.BRONZE]: "text-amber-600",
+    [Rank.SILVER]: "text-gray-300",
+    [Rank.GOLD]: "text-yellow-500",
+    [Rank.PLATINUM]: "text-blue-300",
+    [Rank.DIAMOND]: "text-cyan-400",
   };
   
   return rankColors[rank] || "text-gray-500";
@@ -105,11 +80,11 @@ export function ProfileData() {
   );
 
   const {data: githubProfileStats} = useFetchGithubProfileData(githubUsername);
-
+  const {data: userRankData} = useFetchUserRank(githubUsername);
   // Primary career path from user data with fallback
   const primaryPath: CareerPathKey = (userData?.primary_specialization as CareerPathKey) || "FULLSTACK";
   const path = CAREER_PATHS[primaryPath];
-
+  const rank: Rank = userRankData?.tier || Rank.UNRANKED;
   // Loading skeleton component
   if (isLoading) {
     return (
@@ -216,7 +191,7 @@ export function ProfileData() {
           {/* Rank Column */}
           <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-lg min-h-[180px]">
             <Image
-              src={userData?.rank ? getRankImagePath(userData.rank) : "/Ranks/UNRANKED.png"}
+              src={getRankImagePath(rank || Rank.UNRANKED)}
               alt="Rank Badge"
               width={80}
               height={80}
@@ -226,8 +201,8 @@ export function ProfileData() {
                 e.currentTarget.src = "/Ranks/UNRANKED.png";
               }}
             />
-            <span className={`text-sm font-bold text-center ${userData?.rank ? getRankColor(userData.rank) : "text-gray-500"}`}>
-              {userData?.rank ? formatRankDisplay(userData.rank) : "UNRANKED"}
+            <span className={`text-sm font-bold text-center ${userData?.rank ? getRankColor(rank) : "text-gray-500"}`}>
+              {formatRankDisplay(rank) || "UNRANKED"}
             </span>
             <span className="text-xs text-muted-foreground mt-1">Rank</span>
           </div>
