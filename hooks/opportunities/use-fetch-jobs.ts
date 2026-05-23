@@ -34,7 +34,7 @@ export function useFetchJobsFiltered(titleFilter?: string, locationFilter?: stri
     queryFn: async () => {
         const params = new Map();
         params.set("limit", limit); // TODO: This is an issue with caching fix it later, we want to cache by category but if we set a limit here it will always return 20 results and if we change the limit it will create a new cache entry
-        params.set("page", page);
+        params.set("skip", page);
         if (titleFilter) {
             params.set("title", titleFilter);
         }
