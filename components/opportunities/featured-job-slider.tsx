@@ -38,9 +38,9 @@ import {
   UsersIcon,
   CalendarIcon,
 } from "lucide-react";
-import { jobPositions } from "@/data/job-data";
 import ProjectDetails from "../project-details";
 import { ScrollArea } from "../ui/scroll-area";
+import { useFetchJobsByCategory } from "@/hooks/opportunities/use-fetch-jobs";
 
 interface JobPosition {
   id: string;
@@ -90,23 +90,10 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
     }, [api, ref]);
 
     // Filter jobs based on category
-    const filteredJobs = React.useMemo(() => {
-      switch (category) {
-        case "featured":
-          return jobPositions.filter((job) => job.featured);
-        case "engineering":
-          return jobPositions.filter((job) =>
-            job.department.toLowerCase().includes("engineering")
-          );
-        case "remote":
-          return jobPositions.filter((job) => job.locationType === "remote");
-        default:
-          return jobPositions.slice(0, 6);
-      }
-    }, [category]);
-
+    const {data: filteredJobs = []} = useFetchJobsByCategory(category);
     // Calculate days ago from date
     const getDaysAgo = (dateString: string) => {
+      if(dateString === "") return "Unknown";
       const postDate = new Date(dateString);
       const today = new Date();
       const diffTime = Math.abs(today.getTime() - postDate.getTime());
@@ -200,7 +187,7 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
           <CarouselContent className="-ml-2 md:-ml-4">
             {filteredJobs.map((job) => {
               const highlightDetails = job.highlight
-                ? getHighlightDetails(job.highlight)
+                ? getHighlightDetails(job.highlight as JobPosition["highlight"])
                 : null;
 
               return (
@@ -269,7 +256,7 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
                                 variant="outline"
                                 className="ml-auto text-xs"
                               >
-                                {formatLocationType(job.locationType)}
+                                {formatLocationType(job.locationType || "N/A")}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-2">
@@ -279,17 +266,19 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
                                 variant="outline"
                                 className="ml-auto text-xs"
                               >
-                                {formatEmploymentType(job.employmentType)}
+                                {formatEmploymentType(job.employmentType || "N/A")}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-2">
                               <DollarSignIcon className="text-muted-foreground h-4 w-4" />
-                              <span className="text-sm">{job.salary}</span>
+                              <span className="text-sm">
+                                {job.salary}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <CalendarIcon className="text-muted-foreground h-4 w-4" />
                               <span className="text-sm">
-                                Posted {getDaysAgo(job.postedDate)}
+                                Posted {getDaysAgo(job.postedDate || "")}
                               </span>
                             </div>
                           </div>
@@ -303,7 +292,7 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
                               Perks & Benefits:
                             </p>
                             <div className="flex flex-wrap gap-1.5">
-                              {job.perks.slice(0, 3).map((perk, index) => (
+                              {(job.perks || []).slice(0, 3).map((perk, index) => (
                                 <Badge
                                   variant="secondary"
                                   key={index}
@@ -312,9 +301,9 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
                                   {perk}
                                 </Badge>
                               ))}
-                              {job.perks.length > 3 && (
+                              {(job.perks || []).length > 3 && (
                                 <Badge variant="outline" className="text-xs">
-                                  +{job.perks.length - 3} more
+                                  +{(job.perks || []).length - 3} more
                                 </Badge>
                               )}
                             </div>

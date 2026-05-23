@@ -47,3 +47,20 @@ export const formatTimeDisplay = (months: number): string => {
   return `${years} year${years !== 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
 };
 
+
+export function buildPathWithParams(
+  basePath: string,
+  params?: Map<string, string>
+): string {
+  if (!params || params.size === 0) {
+    return basePath;
+  }
+
+  const searchParams = new URLSearchParams();
+
+  params.forEach((value, key) => {
+    searchParams.append(key, value);
+  });
+
+  return `${basePath}?${searchParams.toString()}`;
+}

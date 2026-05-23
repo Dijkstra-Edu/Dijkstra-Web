@@ -3,26 +3,13 @@
 // External: /api/<service>/<path> → handleExternalService (configured in lib/api/external-services.ts).
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/auth'
-import {
-  getArchivistBaseUrl,
-  getDataForgeBaseUrl,
-  getGitripperBaseUrl,
-  getHeliosBaseUrl,
-} from '@/lib/base-urls-keys'
 import { getExternalServiceConfig, isExternalServiceKey } from '@/lib/api/external-services-config'
-
-const INTERNAL_SERVICE_BASE_URLS: Record<string, () => string> = {
-  dataforge: getDataForgeBaseUrl,
-  gitripper: getGitripperBaseUrl,
-  helios: getHeliosBaseUrl,
-  archivist: getArchivistBaseUrl,
-}
 
 function getBaseUrlForInternalService(): string | null {
   return process.env['NEXT_PUBLIC_HODOR_URL']?.replace(/\/+$/, '') || null
 }
 
-async function proxyToBackend(req: NextRequest, path: string[]) {
+async function proxyToBackend(req: NextRequest, path: string){
     const session = await auth.api.getSession({
     headers: {
       cookie: req.headers.get("cookie") || "",
@@ -33,10 +20,9 @@ async function proxyToBackend(req: NextRequest, path: string[]) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const baseUrl = getBaseUrlForInternalService()
-  const backendPath = path.join('/')
+  const backendPath = path.replace(/^\/+|\/+$/g, '') // Remove leading/trailing slashes
   const url = new URL(backendPath, baseUrl + '/')
   url.search = new URL(req.url).search
-
   const res = await fetch(url.toString(), {
     method: req.method,
     headers: {
@@ -66,8 +52,8 @@ async function proxyToBackend(req: NextRequest, path: string[]) {
 }
 
 /** Handle external services via config (lib/api/external-services.ts). Does not use proxyToBackend or session. */
-async function handleExternalService(req: NextRequest, path: string[]): Promise<NextResponse> {
-  const [service, ...segments] = path
+async function handleExternalService(req: NextRequest, path: string): Promise<NextResponse> {
+  const [service, ...segments] = path.split('/')
   if (!service || segments.length === 0) {
     return NextResponse.json(
       { error: 'Path must be <service>/<path> (e.g. logo-dev/search)' },
@@ -125,43 +111,47 @@ function isExternalService(path: string[]): boolean {
   return path.length > 0 && isExternalServiceKey(path[0])
 }
 
-// Next.js 15: params is a Promise
-export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const { path } = await params
+async function buildPathAndForwardRequest(req: NextRequest,  { params }: { params: Promise<{ path: string[] }> }){
+   const { path } = await params;
+
+  // Extract query params
+  const searchParams = req.nextUrl.searchParams;
+
+  // Rebuild query string
+  const queryString = searchParams.toString();
+
+  // Append query string to path if present
+  const fullPath =
+    queryString.length > 0
+      ? `${path.join("/")}?${queryString}`
+      : path.join("/");
+
   if (isExternalService(path)) {
-    return handleExternalService(req, path)
+    return handleExternalService(req, fullPath);
   }
-  return proxyToBackend(req, path)
+
+  return proxyToBackend(req, fullPath);
+}
+// Next.js 15: params is a Promise
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
+) {
+  return buildPathAndForwardRequest(req, { params })
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const { path } = await params
-  if (isExternalService(path)) {
-    return handleExternalService(req, path)
-  }
-  return proxyToBackend(req, path)
+   return buildPathAndForwardRequest(req, { params })
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const { path } = await params
-  if (isExternalService(path)) {
-    return handleExternalService(req, path)
-  }
-  return proxyToBackend(req, path)
+   return buildPathAndForwardRequest(req, { params })
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const { path } = await params
-  if (isExternalService(path)) {
-    return handleExternalService(req, path)
-  }
-  return proxyToBackend(req, path)
+   return buildPathAndForwardRequest(req, { params })
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const { path } = await params
-  if (isExternalService(path)) {
-    return handleExternalService(req, path)
-  }
-  return proxyToBackend(req, path)
+   return buildPathAndForwardRequest(req, { params })
 }

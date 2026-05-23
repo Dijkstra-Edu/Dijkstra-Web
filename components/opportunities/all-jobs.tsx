@@ -1,5 +1,4 @@
 "use client";
-import { Suspense } from "react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,8 +43,9 @@ import {
   XIcon,
 } from "lucide-react";
 // import Image from "next/image";
-import { jobPositions } from "@/data/job-data";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useFetchJobsByCategory, useFetchJobsFiltered } from "@/hooks/opportunities/use-fetch-jobs";
+import { useFetchJobFilterHelpers } from "@/hooks/opportunities/use-fetch-job-filter-helpers";
 
 const JOBS_PER_PAGE = 12;
 
@@ -170,29 +170,8 @@ function AllJobsContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-
   // Get unique filter options
-  const filterOptions = useMemo(() => {
-    const locations = [...new Set(jobPositions.map((job) => job.location))];
-    const departments = [...new Set(jobPositions.map((job) => job.department))];
-    const locationTypes = [
-      ...new Set(jobPositions.map((job) => job.locationType)),
-    ];
-    const employmentTypes = [
-      ...new Set(jobPositions.map((job) => job.employmentType)),
-    ];
-    const experienceLevels = [
-      ...new Set(jobPositions.map((job) => job.experienceLevel)),
-    ];
-
-    return {
-      locations,
-      departments,
-      locationTypes,
-      employmentTypes,
-      experienceLevels,
-    };
-  }, []);
+  const {data: filterOptions = {departments: [], locationTypes: [], employmentTypes: [], experienceLevels: [], locations: [] }} = useFetchJobFilterHelpers();
 
   // Initialize state with URL parameters
   const [searchTerm, setSearchTerm] = useState("");
@@ -214,51 +193,35 @@ function AllJobsContent() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter jobs based on search and filters
-  const filteredJobs = useMemo(() => {
-    return jobPositions.filter((job) => {
-      const matchesSearch =
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const { data } = useFetchJobsFiltered(
+    searchTerm.toLowerCase(),
+    locationFilter !== "all"
+      ? locationFilter
+      : undefined,
 
-      const matchesLocation =
-        locationFilter === "all" || job.location === locationFilter;
-      const matchesDepartment =
-        departmentFilter === "all" || job.department === departmentFilter;
-      const matchesLocationType =
-        locationTypeFilter === "all" || job.locationType === locationTypeFilter;
-      const matchesEmploymentType =
-        employmentTypeFilter === "all" ||
-        job.employmentType === employmentTypeFilter;
-      const matchesExperienceLevel =
-        experienceLevelFilter === "all" ||
-        job.experienceLevel === experienceLevelFilter;
+    departmentFilter !== "all"
+      ? departmentFilter
+      : undefined,
 
-      return (
-        matchesSearch &&
-        matchesLocation &&
-        matchesDepartment &&
-        matchesLocationType &&
-        matchesEmploymentType &&
-        matchesExperienceLevel
-      );
-    });
-  }, [
-    searchTerm,
-    locationFilter,
-    departmentFilter,
-    locationTypeFilter,
-    employmentTypeFilter,
-    experienceLevelFilter,
-  ]);
+    locationTypeFilter !== "all"
+      ? locationTypeFilter
+      : undefined,
 
-  // Paginate jobs
-  const paginatedJobs = useMemo(() => {
-    const startIndex = (currentPage - 1) * JOBS_PER_PAGE;
-    return filteredJobs.slice(startIndex, startIndex + JOBS_PER_PAGE);
-  }, [filteredJobs, currentPage]);
+    employmentTypeFilter !== "all"
+      ? employmentTypeFilter
+      : undefined,
 
-  const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
+    experienceLevelFilter !== "all"
+      ? experienceLevelFilter
+      : undefined,
+
+    JOBS_PER_PAGE.toString(),
+    currentPage.toString()
+  )
+
+  const [paginatedJobs = [], totalJobs = 0] = data ?? []
+
+  const totalPages = Math.ceil(totalJobs / JOBS_PER_PAGE);
 
   // Generate dynamic header based on active filters
   const getPageHeader = () => {
@@ -284,7 +247,7 @@ function AllJobsContent() {
     if (activeFilters.length === 0) {
       return {
         title: "All Job Positions",
-        description: `Showing ${filteredJobs.length} of ${jobPositions.length} positions`,
+        description: `Showing ${paginatedJobs.length} of ${totalJobs} positions`,
       };
     }
 
@@ -302,7 +265,7 @@ function AllJobsContent() {
 
     return {
       title,
-      description: `Showing ${filteredJobs.length} ${activeFilters
+      description: `Showing ${paginatedJobs.length} ${activeFilters
         .join(" ")
         .toLowerCase()} positions`,
     };
