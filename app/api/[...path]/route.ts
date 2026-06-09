@@ -10,32 +10,7 @@ function getBaseUrlForInternalService(): string | null {
 }
 
 async function proxyToBackend(req: NextRequest, path: string){
-    const session = await auth.api.getSession({
-    headers: {
-      cookie: req.headers.get("cookie") || "",
-    },
-  })
-
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const baseUrl = getBaseUrlForInternalService()
-  const backendPath = path.replace(/^\/+|\/+$/g, '') // Remove leading/trailing slashes
-  const url = new URL(backendPath, baseUrl + '/')
-  url.search = new URL(req.url).search
-  const res = await fetch(url.toString(), {
-    method: req.method,
-    headers: {
-      'Content-Type': 'application/json',
-      'sessionId': session.session.id,
-      'X-Internal-Secret': process.env.INTERNAL_API_SECRET!,
-    },
-    body: req.method !== 'GET' && req.method !== 'DELETE'
-      ? await req.text()
-      : undefined,
-    cache: 'no-store',
-  })
-
+  const res = await proxyToBackendAndGetResp(req, path);
   if (res.status === 401) {
     return NextResponse.json({ error: 'Session expired' }, { status: 401 })
   }
@@ -49,6 +24,69 @@ async function proxyToBackend(req: NextRequest, path: string){
     typeof data === 'string' ? { message: data } : data,
     { status: res.status }
   )
+}
+
+async function proxyToBackendAndGetResp( req: NextRequest, path: string) {
+  const session = await auth.api.getSession({
+    headers: {
+      cookie: req.headers.get("cookie") || "",
+    },
+  });
+
+  if (!session?.user) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const baseUrl = getBaseUrlForInternalService();
+  const backendPath = path.replace(/^\/+|\/+$/g, "");
+  const url = new URL(backendPath, `${baseUrl}/`);
+  url.search = new URL(req.url).search;
+  return await fetch(url.toString(), {
+    method: req.method,
+    headers: {
+      "Content-Type": "application/json",
+      sessionId: session.session.id,
+      "X-Internal-Secret": process.env.INTERNAL_API_SECRET!,
+    },
+    body:
+      req.method !== "GET" && req.method !== "DELETE"
+        ? await req.text()
+        : undefined,
+    cache: "no-store",
+  });
+}
+
+export async function proxyToBackendStream(
+  req: NextRequest,
+  path: string
+): Promise<Response> {
+  const backendRes = await proxyToBackendAndGetResp(req, path);
+
+  if (backendRes.status === 401) {
+    return NextResponse.json(
+      { error: "Session expired" },
+      { status: 401 }
+    );
+  }
+
+  const headers = new Headers();
+
+  // Forward important headers
+  for (const [key, value] of backendRes.headers.entries()) {
+    headers.set(key, value);
+  }
+
+  // Helpful for SSE / LLM streaming
+  headers.set("Cache-Control", "no-cache");
+
+  return new Response(backendRes.body, {
+    status: backendRes.status,
+    statusText: backendRes.statusText,
+    headers,
+  });
 }
 
 /** Handle external services via config (lib/api/external-services.ts). Does not use proxyToBackend or session. */
@@ -128,6 +166,11 @@ async function buildPathAndForwardRequest(req: NextRequest,  { params }: { param
 
   if (isExternalService(path)) {
     return handleExternalService(req, fullPath);
+  }
+  console.log("PATH:"+path)
+  if(path.some(p => p.includes("stream"))){
+    console.log("HERE")
+    return proxyToBackendStream(req, fullPath);
   }
 
   return proxyToBackend(req, fullPath);

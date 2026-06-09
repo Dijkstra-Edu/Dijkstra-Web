@@ -41,6 +41,7 @@ import { getDataForgeBaseUrl } from "@/lib/base-urls-keys";
 import { getArchivistBaseUrl } from "@/lib/base-urls-keys";
 import { getGitripperBaseUrl } from "@/lib/base-urls-keys";
 import { getHeliosBaseUrl } from "@/lib/base-urls-keys";
+import { apiCall } from "@/services/CoreApiService";
 
 // Service types for API status checks
 export type ServiceType = 'DIJKSTRA_GPT' | 'ARCHIVIST' | 'GITRIPPER' | 'DATAFORGE' | 'HELIOS';
@@ -80,8 +81,8 @@ export function SiteHeader({ title, services }: { title: string; services?: Serv
   const healthEndpoints: Record<ServiceType, () => Promise<boolean>> = {
     DIJKSTRA_GPT: async () => {
       try {
-        const response = await callGemini("test");
-        return !!response;
+        apiCall("dijkstra-intelligence", "/health/ping");
+        return true
       } catch {
         return false;
       }

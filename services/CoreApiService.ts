@@ -16,16 +16,16 @@ export interface ApiErrorBody {
 
 /**
  * Service keys that the API route uses to resolve the backend base URL.
- * Must match the keys in app/api/[...path]/route.ts (dataforge, gitripper, helios, archivist).
+ * Must match the keys in app/api/[...path]/route.ts (dataforge, gitripper, helios, archivist, dijkstra-intelligence).
  */
-export type ApiServiceKey = "dataforge" | "gitripper" | "helios" | "archivist" | "logo-dev" | "nominatim" | "gemini";
+export type ApiServiceKey = "dataforge" | "gitripper" | "helios" | "archivist" | "logo-dev" | "nominatim" | "gemini" | "dijkstra-intelligence";
 
 /**
  * Generic client that calls the Next.js API route at /api/[...path], which proxies
  * to the backend for the given service. The route uses the first path segment (service)
  * to resolve the backend base URL.
  *
- * @param service - Which backend to call (dataforge, gitripper, helios, archivist)
+ * @param service - Which backend to call (dataforge, gitripper, helios, archivist, dijkstra-intelligence)
  * @param path - Backend path as string (e.g. "Dijkstra/v1/wp/username") or segments (e.g. ["Dijkstra", "v1", "wp", id])
  * @param init - Standard fetch RequestInit (method, body, headers)
  * @returns Parsed JSON response as T
@@ -70,4 +70,63 @@ export async function apiCall<T = unknown>(
   }
 
   return data as T;
+}
+
+export async function* apiCallStream(
+  service: ApiServiceKey,
+  path: string | string[],
+  init?: RequestInit
+): AsyncGenerator<string> {
+  const pathStr =
+    typeof path === "string"
+      ? path.replace(/^\/+|\/+$/g, "")
+      : path.map((s) => String(s).replace(/^\/+|\/+$/g, "")).join("/");
+
+  const fullPath = `${service}/${pathStr}`;
+
+  const base =
+    typeof window === "undefined"
+      ? process.env.BETTER_AUTH_URL ?? ""
+      : "";
+
+  const url = `${base}/api/${fullPath}`;
+
+  const response = await fetch(url, {
+    ...init,
+    method: init?.method ?? "GET",
+    headers: {
+      Accept: "text/plain",
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+
+  if (!response.body) {
+    throw new Error("Response body is null");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+      const chunk = decoder.decode(value, {
+        stream: true,
+      });
+      yield chunk;
+    }
+  } finally {
+    reader.releaseLock();
+  }
 }
