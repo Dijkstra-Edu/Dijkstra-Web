@@ -38,11 +38,12 @@ import {
   MoreVertical,
 } from "lucide-react";
 
-// API client for Gemini AI communication
-import { callGemini } from "@/lib/geminiClient";
-
 // Toast notification system
 import { toast } from "sonner";
+import {useAddMessageStream, useCreateChatSession, useDeleteChatSession, useEditChatSessionTitle, useFetchChatSessions, useFetchMessagesForChat, useRegenerateAssistantResponse } from "@/hooks/dijkstra-intelligence/use-dijkstra-intelligence";
+import { authClient } from "@/lib/auth/auth-client";
+import { Conversation } from "@/types/server/dijkstra-intelligence/Conversation";
+import { getMessages } from "@/services/dashboard/DijkstraIntelligenceClientService";
 
 // ============================================
 // TYPE DEFINITIONS
@@ -55,13 +56,6 @@ type Message = {
   files?: File[];
 };
 
-type ChatSession = {
-  id: string;
-  title: string;
-  messages: Message[];
-  createdAt: Date;
-  updatedAt: Date;
-};
 
 // ============================================
 // MAIN COMPONENT
@@ -70,11 +64,18 @@ export default function DijkstraGPT() {
   // ============================================
   // STATE MANAGEMENT
   // ============================================
+  const { data: session, isPending } = authClient.useSession();
+  const username = session?.user?.username ?? "";
   const [prompt, setPrompt] = useState<string>("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const {data: chatSessions = []} = useFetchChatSessions(username);
+  const addChatSession = useCreateChatSession(username);
+  const updateChatSessionTitle = useEditChatSessionTitle(username);
+  const deleteChatSession = useDeleteChatSession(username);
+  const { sendMessageStreaming } = useAddMessageStream(username);
+  const { regenerateAssistantResponseStreaming } = useRegenerateAssistantResponse();
+  const [currentSessionId, setCurrentSessionId] = useState<string>();
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
@@ -91,10 +92,9 @@ export default function DijkstraGPT() {
   const cancelGenerationRef = useRef<boolean>(false);
 
   // computed
-  const currentSession = chatSessions.find((session) => session.id === currentSessionId);
-  const messages = currentSession?.messages || [];
+  const currentSession = chatSessions.find((s) => s.id === currentSessionId) || null;
+  const {data: messages = []} = useFetchMessagesForChat(currentSessionId ?? "");
   const hasMessages = messages.length > 0;
-
   // ============================================
   // EFFECTS
   // ============================================
@@ -138,70 +138,41 @@ export default function DijkstraGPT() {
 
   // Initialize with a default session on mount
   useEffect(() => {
-    const initialSession: ChatSession = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setChatSessions([initialSession]);
-    setCurrentSessionId(initialSession.id);
-  }, []);
-
-  // Check API status on mount
-  useEffect(() => {
-    checkApiStatus();
-  }, []);
+    if (!currentSessionId && chatSessions.length > 0) {
+      setCurrentSessionId(
+        chatSessions[chatSessions.length - 1].id
+      );
+    }
+  }, [chatSessions, currentSessionId]);
 
   // ============================================
   // SESSION MANAGEMENT
   // ============================================
   const createNewChat = (): void => {
-    const newSession: ChatSession = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setChatSessions((prev) => [newSession, ...prev]);
-    setCurrentSessionId(newSession.id);
+    addChatSession.mutate({setCurrentSessionId});
     setPrompt("");
     setUploadedFiles([]);
     setIsLoading(false);
     cancelGenerationRef.current = false;
+    setCurrentSessionId(chatSessions[chatSessions.length -1].id)
     toast.success("New chat created");
   };
 
-  const updateSessionTitle = (sessionId: string, firstMessage: string): void => {
-    setChatSessions((prev) =>
-      prev.map((session) => {
-        if (session.id === sessionId && session.title === "New Chat") {
-          return {
-            ...session,
-            title: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : ""),
-            updatedAt: new Date(),
-          };
-        }
-        return session;
-      })
-    );
-  };
-
   const deleteSession = (sessionId: string): void => {
+    console.log("Attempting to delete session:", sessionId);
     if (!confirm("Are you sure you want to delete this chat?")) return;
-
-    setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    deleteChatSession.mutate({ sessionId: sessionId });
     if (currentSessionId === sessionId) {
       const remaining = chatSessions.filter((s) => s.id !== sessionId);
-      setCurrentSessionId(remaining.length > 0 ? remaining[0].id : null);
+      setCurrentSessionId(remaining.length > 0 ? remaining[remaining.length - 1].id : "");
     }
     toast.success("Chat deleted");
+
   };
 
-  const downloadSession = (session: ChatSession): void => {
-    const dataStr = JSON.stringify(session, null, 2);
+  const downloadSession = async (session: Conversation): Promise<void> => {
+    const messagesToDownload = session.id == currentSessionId ? messages : await getMessages(session.id);
+    const dataStr = JSON.stringify(messagesToDownload, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
@@ -222,13 +193,7 @@ export default function DijkstraGPT() {
 
   const saveRename = (): void => {
     if (editingSessionId && editingTitle.trim()) {
-      setChatSessions((prev) =>
-        prev.map((session) =>
-          session.id === editingSessionId
-            ? { ...session, title: editingTitle.trim(), updatedAt: new Date() }
-            : session
-        )
-      );
+      updateChatSessionTitle.mutate({ sessionId: editingSessionId, title: editingTitle.trim() });
       toast.success("Chat renamed");
     }
     setEditingSessionId(null);
@@ -239,7 +204,7 @@ export default function DijkstraGPT() {
     const session = chatSessions.find((s) => s.id === sessionId);
     if (!session) return;
 
-    const shareText = `${session.title}\n\n${session.messages
+    const shareText = `${session.title}\n\n${messages
       .map((m) => `${m.role === "user" ? "You" : "Assistant"}: ${m.content}`)
       .join("\n\n")}`;
 
@@ -260,39 +225,8 @@ export default function DijkstraGPT() {
   };
 
   const addMessage = (message: Message): void => {
-    setChatSessions((prev) =>
-      prev.map((session) => {
-        if (session.id === currentSessionId) {
-          return {
-            ...session,
-            messages: [...session.messages, message],
-            updatedAt: new Date(),
-          };
-        }
-        return session;
-      })
-    );
+      sendMessageStreaming(currentSessionId || "", message.content, setIsLoading);
   };
-
-  // ============================================
-  // API STATUS CHECK
-  // ============================================
-  const checkApiStatus = async (): Promise<void> => {
-    try {
-      const response = await callGemini("test");
-      if (response) {
-        setApiStatus("active");
-        console.log("✅ API key is active");
-      } else {
-        setApiStatus("inactive");
-        console.log("❌ API key is not configured or invalid");
-      }
-    } catch (error) {
-      setApiStatus("inactive");
-      console.error("❌ API check failed:", error);
-    }
-  };
-
   // ============================================
   // FILE HANDLING
   // ============================================
@@ -341,166 +275,52 @@ export default function DijkstraGPT() {
     }
   };
 
-  const updateAssistantContent = (
-    sessionId: string | null,
-    messageId: string,
-    newContent: string
-  ) => {
-    if (!sessionId) return;
-    setChatSessions((prev) =>
-      prev.map((session) => {
-        if (session.id !== sessionId) return session;
-        return {
-          ...session,
-          messages: session.messages.map((m) =>
-            m.id === messageId ? { ...m, content: newContent } : m
-          ),
-          updatedAt: new Date(),
-        };
-      })
-    );
-  };
-
-  // ============================================
-  // STREAMING + CANCEL
-  // ============================================
-  const streamGeminiResponse = async (
-    promptText: string,
-    sessionId: string,
-    assistantMessageId: string
-  ) => {
-    try {
-      const res: any = await callGemini(promptText);
-
-      // ReadableStream (true streaming)
-      if (res && res.body && typeof res.body.getReader === "function") {
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let done = false;
-        let accumulated = "";
-
-        while (!done) {
-          if (cancelGenerationRef.current) {
-            updateAssistantContent(
-              sessionId,
-              assistantMessageId,
-              accumulated || "⚠ Generation stopped by user."
-            );
-            return accumulated;
-          }
-
-          const { value, done: d } = await reader.read();
-          if (value) {
-            accumulated += decoder.decode(value, { stream: true });
-            updateAssistantContent(sessionId, assistantMessageId, accumulated);
-          }
-          done = !!d;
-        }
-        updateAssistantContent(sessionId, assistantMessageId, accumulated);
-        return accumulated;
-      }
-
-      // Simple string
-      if (typeof res === "string") {
-        const full = res;
-        let i = 0;
-        while (i <= full.length) {
-          if (cancelGenerationRef.current) {
-            updateAssistantContent(
-              sessionId,
-              assistantMessageId,
-              full.slice(0, i) || "⚠ Generation stopped by user."
-            );
-            return full.slice(0, i);
-          }
-          await new Promise((r) => setTimeout(r, 12));
-          i += Math.ceil(Math.random() * 3);
-          const chunk = full.slice(0, i);
-          updateAssistantContent(sessionId, assistantMessageId, chunk);
-        }
-        updateAssistantContent(sessionId, assistantMessageId, full);
-        return full;
-      }
-
-      // Object with `.text`
-      if (res && typeof res === "object" && typeof res.text === "string") {
-        const text = res.text;
-        let i = 0;
-        while (i <= text.length) {
-          if (cancelGenerationRef.current) {
-            updateAssistantContent(
-              sessionId,
-              assistantMessageId,
-              text.slice(0, i) || "⚠ Generation stopped by user."
-            );
-            return text.slice(0, i);
-          }
-          await new Promise((r) => setTimeout(r, 12));
-          i += Math.ceil(Math.random() * 4);
-          updateAssistantContent(sessionId, assistantMessageId, text.slice(0, i));
-        }
-        updateAssistantContent(sessionId, assistantMessageId, text);
-        return text;
-      }
-
-      const fallback = String(res);
-      updateAssistantContent(sessionId, assistantMessageId, fallback);
-      return fallback;
-    } catch (error) {
-      if (cancelGenerationRef.current) {
-        updateAssistantContent(sessionId, assistantMessageId, "⚠ Generation stopped by user.");
-        return;
-      }
-      const errStr = "⚠ Error: " + String(error);
-      updateAssistantContent(sessionId, assistantMessageId, errStr);
-      throw error;
-    }
-  };
-
   // ============================================
   // REGENERATE (delete old assistant, new one)
 // ============================================
   const handleRegenerate = async (assistantMessageId: string): Promise<void> => {
-    const session = chatSessions.find((s) => s.id === currentSessionId);
-    if (!session) return;
 
-    const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
-    if (idx <= 0) return;
-
-    const userMsg = session.messages[idx - 1];
-    if (!userMsg || userMsg.role !== "user") return;
-
-    // Remove old assistant message
-    setChatSessions((prev) =>
-      prev.map((s) =>
-        s.id === currentSessionId
-          ? { ...s, messages: s.messages.filter((m) => m.id !== assistantMessageId) }
-          : s
-      )
-    );
-
-    cancelGenerationRef.current = false;
+    // TODO: Add this functionality
     setIsLoading(true);
+    regenerateAssistantResponseStreaming(assistantMessageId, currentSessionId || "", setIsLoading);
 
-    // New assistant bubble
-    const newAssistantMessage: Message = {
-      id: (Date.now() + 2).toString(),
-      role: "assistant",
-      content: "",
-      timestamp: new Date(),
-    };
-    addMessage(newAssistantMessage);
+    // const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
+    // if (idx <= 0) return;
 
-    try {
-      await streamGeminiResponse(userMsg.content, currentSessionId!, newAssistantMessage.id);
-      toast.success("Response regenerated");
-    } catch (error) {
-      if (!cancelGenerationRef.current) {
-        toast.error("Failed to regenerate: " + String(error));
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    // const userMsg = session.messages[idx - 1];
+    // if (!userMsg || userMsg.role !== "user") return;
+
+    // // Remove old assistant message
+    // setChatSessions((prev) =>
+    //   prev.map((s) =>
+    //     s.id === currentSessionId
+    //       ? { ...s, messages: s.messages.filter((m) => m.id !== assistantMessageId) }
+    //       : s
+    //   )
+    // );
+
+    // cancelGenerationRef.current = false;
+    // setIsLoading(true);
+
+    // // New assistant bubble
+    // const newAssistantMessage: Message = {
+    //   id: (Date.now() + 2).toString(),
+    //   role: "assistant",
+    //   content: "",
+    //   timestamp: new Date(),
+    // };
+    // addMessage(newAssistantMessage);
+
+    // try {
+    //   await streamGeminiResponse(userMsg.content, currentSessionId!, newAssistantMessage.id);
+    //   toast.success("Response regenerated");
+    // } catch (error) {
+    //   if (!cancelGenerationRef.current) {
+    //     toast.error("Failed to regenerate: " + String(error));
+    //   }
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   const shareMessage = async (content: string): Promise<void> => {
@@ -534,7 +354,6 @@ export default function DijkstraGPT() {
 
     const currentPrompt = prompt;
     const currentFiles = [...uploadedFiles];
-
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -547,35 +366,6 @@ export default function DijkstraGPT() {
     setPrompt("");
     setUploadedFiles([]);
     setIsLoading(true);
-
-    if (currentSession && currentSession.messages.length === 0) {
-      updateSessionTitle(currentSessionId!, currentPrompt);
-    }
-
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: "",
-      timestamp: new Date(),
-    };
-    addMessage(assistantMessage);
-
-    try {
-      await streamGeminiResponse(currentPrompt, currentSessionId!, assistantMessage.id);
-    } catch (error) {
-      if (!cancelGenerationRef.current) {
-        const errorMessage: Message = {
-          id: (Date.now() + 3).toString(),
-          role: "assistant",
-          content: "⚠ Error: " + String(error),
-          timestamp: new Date(),
-        };
-        updateAssistantContent(currentSessionId, assistantMessage.id, errorMessage.content);
-        toast.error("Failed to get response");
-      }
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent): void => {
@@ -597,10 +387,10 @@ export default function DijkstraGPT() {
   // ============================================
   const filteredSessions = chatSessions.filter(
     (session) =>
-      session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      session.messages.some((msg) =>
-        msg.content.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      session.title.toLowerCase().includes(searchQuery.toLowerCase()) 
+    //  || session.messages.some((msg) => TODO: Add this functionaltiy via API
+    //     msg.content.toLowerCase().includes(searchQuery.toLowerCase())
+  
   );
 
   // ============================================

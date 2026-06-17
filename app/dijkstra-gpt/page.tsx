@@ -3,7 +3,7 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import ChatInterface from "@/components/dijkstra-gpt";
+import ChatInterface from "@/components/dijkstra-gpt-new";
 
 export default function Page() {
   return (
