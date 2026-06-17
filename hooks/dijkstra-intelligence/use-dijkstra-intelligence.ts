@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addMessage, addMessageStream, createChatSession, deleteChatSesssion, editChatSessionTitle, getChatSessions, getMessages } from "@/services/dashboard/DijkstraIntelligenceClientService";
+import {addMessageStream, createChatSession, deleteChatSesssion, editChatSessionTitle, getChatSessions, getMessages, regenerateAssistantResponse } from "@/services/dashboard/DijkstraIntelligenceClientService";
 import { Message } from "@/types/client/dashboard/dijkstra-gpt";
 
 
@@ -113,7 +113,7 @@ export function useAddMessageStream(username: string) {
           ["chat-messages", sessionId],
           (old: Message[] = []) =>
             old.map(msg =>
-              msg.id === assistantMessageId
+             (msg.id === assistantMessageId || msg.id === true_assistant_message_id)
                 ? {
                     ...msg,
                     id: true_assistant_message_id,
@@ -150,6 +150,67 @@ export function useEditChatSessionTitle(username: string) {
       });
     },
   });
+}
+
+
+export function useRegenerateAssistantResponse() {
+  const queryClient = useQueryClient();
+
+  const regenerateAssistantResponseStreaming = async (
+    messageId: string,
+    sessionId: string,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    const originalContent = queryClient.getQueryData<Message[]>(["chat-messages", sessionId])?.find(msg => msg.id === messageId)?.content || "";
+    queryClient.setQueryData(
+          ["chat-messages", sessionId],
+          (old: Message[] = []) =>
+            old.map(msg =>
+             (msg.id === messageId)
+                ? {
+                    ...msg,
+                    content: "Dijkstra is thinking...",
+                  }
+                : msg
+            )
+        );
+    try {
+      let fullResponse = "";
+      for await (var chunk of regenerateAssistantResponse(messageId)) {
+        fullResponse += chunk;
+        queryClient.setQueryData(
+          ["chat-messages", sessionId],
+          (old: Message[] = []) =>
+            old.map(msg =>
+             (msg.id === messageId)
+                ? {
+                    ...msg,
+                    content: fullResponse,
+                  }
+                : msg
+            )
+        );
+      }
+      setIsLoading(false);
+    } catch (error) {
+      queryClient.setQueryData(
+          ["chat-messages", sessionId],
+          (old: Message[] = []) =>
+            old.map(msg =>
+             (msg.id === messageId)
+                ? {
+                    ...msg,
+                    content: originalContent,
+                  }
+                : msg
+            )
+        );
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  return { regenerateAssistantResponseStreaming };
 }
 
 export function useDeleteChatSession(username: string) {

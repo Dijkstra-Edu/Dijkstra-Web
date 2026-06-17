@@ -75,6 +75,19 @@ export async function* addMessageStream(
   );
 }
 
+export async function* regenerateAssistantResponse(
+ messageId: string,
+): AsyncGenerator<string> {
+  yield* apiCallStream(
+    "dijkstra-intelligence",
+    `ai/chat/${messageId}/regenerate/streaming`,
+    {
+      method: "PUT"
+    }
+  );
+}
+
+
 
 export async function editChatSessionTitle(
   sessionId: string,

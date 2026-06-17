@@ -40,7 +40,7 @@ import {
 
 // Toast notification system
 import { toast } from "sonner";
-import {useAddMessageStream, useCreateChatSession, useDeleteChatSession, useEditChatSessionTitle, useFetchChatSessions, useFetchMessagesForChat } from "@/hooks/dijkstra-intelligence/use-dijkstra-intelligence";
+import {useAddMessageStream, useCreateChatSession, useDeleteChatSession, useEditChatSessionTitle, useFetchChatSessions, useFetchMessagesForChat, useRegenerateAssistantResponse } from "@/hooks/dijkstra-intelligence/use-dijkstra-intelligence";
 import { authClient } from "@/lib/auth/auth-client";
 import { Conversation } from "@/types/server/dijkstra-intelligence/Conversation";
 import { getMessages } from "@/services/dashboard/DijkstraIntelligenceClientService";
@@ -56,13 +56,6 @@ type Message = {
   files?: File[];
 };
 
-type ChatSession = {
-  id: string;
-  title: string;
-  messages: Message[];
-  createdAt: Date;
-  updatedAt: Date;
-};
 
 // ============================================
 // MAIN COMPONENT
@@ -81,6 +74,7 @@ export default function DijkstraGPT() {
   const updateChatSessionTitle = useEditChatSessionTitle(username);
   const deleteChatSession = useDeleteChatSession(username);
   const { sendMessageStreaming } = useAddMessageStream(username);
+  const { regenerateAssistantResponseStreaming } = useRegenerateAssistantResponse();
   const [currentSessionId, setCurrentSessionId] = useState<string>();
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -287,8 +281,8 @@ export default function DijkstraGPT() {
   const handleRegenerate = async (assistantMessageId: string): Promise<void> => {
 
     // TODO: Add this functionality
-    // const session = chatSessions.find((s) => s.id === currentSessionId);
-    // if (!session) return;
+    setIsLoading(true);
+    regenerateAssistantResponseStreaming(assistantMessageId, currentSessionId || "", setIsLoading);
 
     // const idx = session.messages.findIndex((m) => m.id === assistantMessageId);
     // if (idx <= 0) return;
