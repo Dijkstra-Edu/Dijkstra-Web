@@ -8,7 +8,8 @@ export function useFetchChatSessions(username: string) {
     queryKey: ["conversations", username],
     queryFn: async () => {
         const sessions = await getChatSessions(username);
-        if (!sessions) {
+        console.log("Number of sessions:"+sessions.length)
+        if (!sessions || sessions.length == 0) {
             return [await createChatSession(username)];
         }
         return sessions;
@@ -33,10 +34,12 @@ export function useFetchMessagesForChat(sessionId: string) {
 
 export function useCreateChatSession(username: string) {
   const queryClient = useQueryClient();
-  
   return useMutation({
-    mutationFn: () => {
-      return createChatSession(username);
+    mutationFn: async ({setCurrentSessionId} : {setCurrentSessionId: React.Dispatch<React.SetStateAction<string | undefined>> }) => {
+
+      const newChatSession =  await createChatSession(username);
+      setCurrentSessionId(newChatSession['id'])
+      return newChatSession
   },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
@@ -86,13 +89,26 @@ export function useAddMessageStream(username: string) {
     let fullResponse = "";
 
     try {
-      for await (const chunk of addMessageStream(
+      let read_message_id = false
+      let true_assistant_message_id: string;
+      for await (var chunk of addMessageStream(
         username,
         sessionId,
         messageContent
       )) {
+        if (!read_message_id) {
+          const match = chunk.match(/^message_id:([^\n]+)\n/);
+         if (match) {
+            const messageId = match[1];
+            chunk = chunk.slice(match[0].length);
+
+            console.log(messageId);
+            console.log(chunk);
+            true_assistant_message_id = messageId;
+            read_message_id = true;
+          }
+        }
         fullResponse += chunk;
-        console.log("Full response:", fullResponse);
         queryClient.setQueryData(
           ["chat-messages", sessionId],
           (old: Message[] = []) =>
@@ -100,6 +116,7 @@ export function useAddMessageStream(username: string) {
               msg.id === assistantMessageId
                 ? {
                     ...msg,
+                    id: true_assistant_message_id,
                     content: fullResponse,
                   }
                 : msg

@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import {useAddMessageStream, useCreateChatSession, useDeleteChatSession, useEditChatSessionTitle, useFetchChatSessions, useFetchMessagesForChat } from "@/hooks/dijkstra-intelligence/use-dijkstra-intelligence";
 import { authClient } from "@/lib/auth/auth-client";
 import { Conversation } from "@/types/server/dijkstra-intelligence/Conversation";
+import { getMessages } from "@/services/dashboard/DijkstraIntelligenceClientService";
 
 // ============================================
 // TYPE DEFINITIONS
@@ -154,11 +155,12 @@ export default function DijkstraGPT() {
   // SESSION MANAGEMENT
   // ============================================
   const createNewChat = (): void => {
-    addChatSession.mutate();
+    addChatSession.mutate({setCurrentSessionId});
     setPrompt("");
     setUploadedFiles([]);
     setIsLoading(false);
     cancelGenerationRef.current = false;
+    setCurrentSessionId(chatSessions[chatSessions.length -1].id)
     toast.success("New chat created");
   };
 
@@ -174,18 +176,17 @@ export default function DijkstraGPT() {
 
   };
 
-  const downloadSession = (session: Conversation): void => {
-    //TODO : add functionality later
-
-    // const dataStr = JSON.stringify(session, null, 2);
-    // const dataBlob = new Blob([dataStr], { type: "application/json" });
-    // const url = URL.createObjectURL(dataBlob);
-    // const link = document.createElement("a");
-    // link.href = url;
-    // link.download = `${session.title}_${Date.now()}.json`;
-    // link.click();
-    // URL.revokeObjectURL(url);
-    // toast.success("Chat downloaded");
+  const downloadSession = async (session: Conversation): Promise<void> => {
+    const messagesToDownload = session.id == currentSessionId ? messages : await getMessages(session.id);
+    const dataStr = JSON.stringify(messagesToDownload, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${session.title}_${Date.now()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Chat downloaded");
   };
 
   const renameSession = (sessionId: string): void => {
