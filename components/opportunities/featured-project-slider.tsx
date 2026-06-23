@@ -29,6 +29,7 @@ import {
 import { projects } from "@/data/project-data"
 import { ScrollArea } from "../ui/scroll-area"
 import ProjectDetails from "../project-details"
+import { useFetchProjectsByCategory } from "@/hooks/opportunities/use-fetch-projects"
 
 interface FeaturedProjectSliderProps {
   category?: string
@@ -60,12 +61,7 @@ const FeaturedProjectSlider = React.forwardRef<CarouselApi, FeaturedProjectSlide
     }, [api, ref])
 
     // Filter projects based on category
-    const filteredProjects = React.useMemo(() => {
-      if (category === "featured") {
-        return projects.filter((project) => project.featured)
-      }
-      return projects.slice(0, 6)
-    }, [category])
+     const {data: filteredProjects = []} = useFetchProjectsByCategory(category);
 
     // Format numbers for display
     const formatNumber = (num: number) => {

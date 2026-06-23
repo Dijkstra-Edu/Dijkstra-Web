@@ -2,7 +2,6 @@
 
 import type React from "react";
 
-import Image from "next/image";
 import {
   ExternalLink,
   Calendar,
@@ -34,6 +33,10 @@ import {
   isProject,
   isJobPosition,
 } from "../types/client/opportunities/opportunities-types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+
 
 interface DetailPageProps {
   item: DetailItem;
@@ -638,51 +641,17 @@ export default function ProjectDetails({
 
               {config.tabs.readme && (
                 <TabsContent value="readme" className="space-y-6 mt-8">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-6">
-                      {isProject(item) ? "README.md" : "Additional Details"}
-                    </h2>
-                    <div className="bg-muted border border-border rounded-lg p-6 font-mono text-sm">
-                      <div className="space-y-4">
-                        <div>
-                          <h1 className="text-xl font-bold text-foreground mb-2">
-                            # {item.title}
-                          </h1>
-                          <p className="text-muted-foreground">
-                            {item.description}
-                          </p>
-                        </div>
-
-                        {isProject(item) && (
-                          <>
-                            <div>
-                              <h2 className="text-lg font-semibold text-foreground mb-2">
-                                ## Installation
-                              </h2>
-                              <div className="bg-background rounded p-3 text-chart-1">
-                                <p>git clone {item.repository}</p>
-                                <p>cd {item.title.toLowerCase()}</p>
-                                <p>npm install</p>
-                              </div>
-                            </div>
-
-                            <div>
-                              <h2 className="text-lg font-semibold text-foreground mb-2">
-                                ## License
-                              </h2>
-                              <p className="text-muted-foreground">
-                                {item.license} License - see LICENSE file for
-                                details.
-                              </p>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                  <div className="prose max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}>
+                      {isProject(item)
+                        ? item.readme ?? "No README available."
+                        : "No additional details provided."}
+                    </ReactMarkdown>
                   </div>
                 </TabsContent>
               )}
-            </Tabs>
+            </Tabs>``
           </div>
         </div>
       </div>
