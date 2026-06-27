@@ -44,8 +44,8 @@ import {
 } from "lucide-react";
 // import Image from "next/image";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useFetchJobsByCategory, useFetchJobsFiltered } from "@/hooks/opportunities/use-fetch-jobs";
-import { useFetchJobFilterHelpers } from "@/hooks/opportunities/use-fetch-job-filter-helpers";
+import { useFetchJobsByCategory, useFetchJobsFiltered } from "@/hooks/opportunities/jobs/use-fetch-jobs";
+import { useFetchJobFilterHelpers } from "@/hooks/opportunities/jobs/use-fetch-job-filter-helpers";
 
 const JOBS_PER_PAGE = 12;
 

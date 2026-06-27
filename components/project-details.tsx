@@ -2,7 +2,6 @@
 
 import type React from "react";
 
-import Image from "next/image";
 import {
   ExternalLink,
   Calendar,
@@ -34,6 +33,12 @@ import {
   isProject,
   isJobPosition,
 } from "../types/client/opportunities/opportunities-types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { useFetchProjectReadme } from "@/hooks/opportunities/projects/use-fetch-project-readme";
+import { useFetchProjectOpenIssues } from "@/hooks/opportunities/projects/use-fetch-open-issues";
+import { formatDistanceToNow } from "date-fns";
 
 interface DetailPageProps {
   item: DetailItem;
@@ -54,7 +59,8 @@ export default function ProjectDetails({
 }: DetailPageProps) {
   const defaultHeroImage = item.heroImage;
   const project = item as Project; // Declare project variable
-
+  const { data: readme } = useFetchProjectReadme(project);
+  const { data: issues=[] } = useFetchProjectOpenIssues(project);
   const renderSidebarContent = () => {
     if (isFellowship(item)) {
       return renderFellowshipSidebar(item);
@@ -595,33 +601,54 @@ export default function ProjectDetails({
                 <TabsContent value="issues" className="space-y-6 mt-8">
                   <div>
                     <h2 className="text-2xl font-bold mb-6">Open Issues</h2>
+
                     <div className="space-y-4">
-                      <div className="border border-border rounded-lg p-4 hover:border-accent transition-colors bg-card">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-medium text-card-foreground">
-                            Performance issues with large datasets
-                          </h3>
-                          <Badge
-                            variant="outline"
-                            className="border-red-500 text-red-400"
+                      {issues.length === 0 ? (
+                        <p className="text-muted-foreground">No open issues.</p>
+                      ) : (
+                        issues.map((issue, index) => (
+                          <div
+                            key={index}
+                            className="border border-border rounded-lg p-4 hover:border-accent transition-colors bg-card"
                           >
-                            High Priority
-                          </Badge>
-                        </div>
-                        <p className="text-muted-foreground text-sm mb-2">
-                          Application becomes slow when processing datasets
-                          larger than 10MB
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>Opened 2 days ago</span>
-                          <span>•</span>
-                          <span>15 comments</span>
-                        </div>
-                      </div>
+                            <div className="flex items-start justify-between mb-2 gap-4">
+                              <h3 className="font-medium text-card-foreground">
+                                {issue.title}
+                              </h3>
+
+                              <div className="flex flex-wrap gap-2 justify-end">
+                                {issue.tags.map((tag) => (
+                                  <Badge key={tag} variant="outline">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+
+                            <p className="text-muted-foreground text-sm mb-3 line-clamp-3">
+                              {issue.description}
+                            </p>
+
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>
+                                Opened{" "}
+                               {formatDistanceToNow(new Date(issue.createdAt), { addSuffix: true })}
+                              </span>
+                              <span>•</span>
+                              <span>
+                                {issue.nComments} comment
+                                {issue.nComments !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </TabsContent>
               )}
+
+
 
               {isFellowship(item) && config.tabs.requirements && (
                 <TabsContent value="requirements" className="space-y-6 mt-8">
@@ -635,54 +662,19 @@ export default function ProjectDetails({
                   </div>
                 </TabsContent>
               )}
-
               {config.tabs.readme && (
                 <TabsContent value="readme" className="space-y-6 mt-8">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-6">
-                      {isProject(item) ? "README.md" : "Additional Details"}
-                    </h2>
-                    <div className="bg-muted border border-border rounded-lg p-6 font-mono text-sm">
-                      <div className="space-y-4">
-                        <div>
-                          <h1 className="text-xl font-bold text-foreground mb-2">
-                            # {item.title}
-                          </h1>
-                          <p className="text-muted-foreground">
-                            {item.description}
-                          </p>
-                        </div>
-
-                        {isProject(item) && (
-                          <>
-                            <div>
-                              <h2 className="text-lg font-semibold text-foreground mb-2">
-                                ## Installation
-                              </h2>
-                              <div className="bg-background rounded p-3 text-chart-1">
-                                <p>git clone {item.repository}</p>
-                                <p>cd {item.title.toLowerCase()}</p>
-                                <p>npm install</p>
-                              </div>
-                            </div>
-
-                            <div>
-                              <h2 className="text-lg font-semibold text-foreground mb-2">
-                                ## License
-                              </h2>
-                              <p className="text-muted-foreground">
-                                {item.license} License - see LICENSE file for
-                                details.
-                              </p>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                  <div className="prose max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}>
+                      {isProject(item)
+                        ? readme ?? "No README available."
+                        : "No additional details provided."}
+                    </ReactMarkdown>
                   </div>
                 </TabsContent>
               )}
-            </Tabs>
+            </Tabs>``
           </div>
         </div>
       </div>

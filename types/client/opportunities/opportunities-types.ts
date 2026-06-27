@@ -45,6 +45,7 @@ export interface Project extends BaseDetailItem {
   issuesCount: number
   contributorsCount: number
   license: string
+  readme: string
 }
 
 // Job interface

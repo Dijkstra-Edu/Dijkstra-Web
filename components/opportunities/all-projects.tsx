@@ -43,11 +43,11 @@ import {
   ExternalLinkIcon,
   EyeIcon,
 } from "lucide-react";
-import Image from "next/image";
-import { projects } from "@/data/project-data";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useFetchProjectFilterHelpers } from "@/hooks/opportunities/projects/use-fetch-project-filter-helpers";
+import { useFetchProjectsFiltered } from "@/hooks/opportunities/projects/use-fetch-projects";
 
-const PROJECTS_PER_PAGE = 12;
+const PROJECTS_PER_PAGE = 20;
 
 // Helper functions
 const formatNumber = (num: number) => {
@@ -167,23 +167,7 @@ function AllProjectsContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Get unique filter options
-  const filterOptions = useMemo(() => {
-    const languages = [...new Set(projects.map((project) => project.language))];
-    const categories = [
-      ...new Set(projects.map((project) => project.category)),
-    ];
-    const difficulties = [
-      ...new Set(projects.map((project) => project.difficulty)),
-    ];
-    const licenses = [...new Set(projects.map((project) => project.license))];
-
-    return {
-      languages,
-      categories,
-      difficulties,
-      licenses,
-    };
-  }, []);
+const {data: filterOptions = {languages: [], categories: [], difficulties: [], licenses: [] }} = useFetchProjectFilterHelpers();
 
   // Initialize state with URL parameters
   const [searchTerm, setSearchTerm] = useState("");
@@ -202,48 +186,30 @@ function AllProjectsContent() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter projects based on search and filters
-  const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
-      const matchesSearch =
-        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.topics.some((topic) =>
-          topic.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+  const { data } = useFetchProjectsFiltered(
+    searchTerm.toLowerCase(),
+    languageFilter !== "all"
+      ? languageFilter
+      : undefined,
 
-      const matchesLanguage =
-        languageFilter === "all" || project.language === languageFilter;
-      const matchesCategory =
-        categoryFilter === "all" || project.category === categoryFilter;
-      const matchesDifficulty =
-        difficultyFilter === "all" || project.difficulty === difficultyFilter;
-      const matchesLicense =
-        licenseFilter === "all" || project.license === licenseFilter;
+    categoryFilter !== "all"
+      ? categoryFilter
+      : undefined,
 
-      return (
-        matchesSearch &&
-        matchesLanguage &&
-        matchesCategory &&
-        matchesDifficulty &&
-        matchesLicense
-      );
-    });
-  }, [
-    searchTerm,
-    languageFilter,
-    categoryFilter,
-    difficultyFilter,
-    licenseFilter,
-  ]);
+    difficultyFilter !== "all"
+      ? difficultyFilter
+      : undefined,
 
-  // Paginate projects
-  const paginatedProjects = useMemo(() => {
-    const startIndex = (currentPage - 1) * PROJECTS_PER_PAGE;
-    return filteredProjects.slice(startIndex, startIndex + PROJECTS_PER_PAGE);
-  }, [filteredProjects, currentPage]);
+    licenseFilter !== "all"
+      ? licenseFilter
+      : undefined,
+    PROJECTS_PER_PAGE.toString(),
+    currentPage.toString()
+  )
 
-  const totalPages = Math.ceil(filteredProjects.length / PROJECTS_PER_PAGE);
+  const [paginatedProjects = [], totalProjects = 0] = data ?? []
+
+  const totalPages = Math.ceil(totalProjects / PROJECTS_PER_PAGE);
 
   // Generate dynamic header based on active filters
   const getPageHeader = () => {
@@ -257,7 +223,7 @@ function AllProjectsContent() {
     if (activeFilters.length === 0) {
       return {
         title: "All Open Source Projects",
-        description: `Showing ${filteredProjects.length} of ${projects.length} projects`,
+        description: `Showing ${paginatedProjects.length} of ${totalProjects} projects`,
       };
     }
 
@@ -275,7 +241,7 @@ function AllProjectsContent() {
 
     return {
       title,
-      description: `Showing ${filteredProjects.length} ${activeFilters
+      description: `Showing ${paginatedProjects.length} ${activeFilters
         .join(" ")
         .toLowerCase()} projects`,
     };
@@ -609,7 +575,7 @@ function AllProjectsContent() {
                       </Button>
                       <Button size="sm" className="w-1/2" asChild>
                         <a
-                          href={`https://github.com/${project.repository}`}
+                          href={`${project.repository}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
