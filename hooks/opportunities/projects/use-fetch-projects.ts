@@ -1,6 +1,4 @@
-import { Projects } from "@/components/projects";
 import { getProjects } from "@/services/dashboard/ProjectsService";
-import { Difficulty } from "@/types/server/dataforge/enums";
 import { useQuery } from "@tanstack/react-query";
 
 export function useFetchProjectsByCategory( category?: string, limit: string = "20") {
@@ -9,7 +7,6 @@ export function useFetchProjectsByCategory( category?: string, limit: string = "
     queryFn: async () => {
         const params = new Map();
         params.set("limit", limit); // TODO: This is an issue with caching fix it later, we want to cache by category but if we set a limit here it will always return 20 results and if we change the limit it will create a new cache entry
-        params.set("enrich_readme",true)
         if (category == "featured") {
             params.set("featured", "true");
         } else if (category){

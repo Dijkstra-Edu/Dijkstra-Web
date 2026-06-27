@@ -44,8 +44,8 @@ import {
   EyeIcon,
 } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useFetchProjectFilterHelpers } from "@/hooks/opportunities/use-fetch-project-filter-helpers";
-import { useFetchProjectsFiltered } from "@/hooks/opportunities/use-fetch-projects";
+import { useFetchProjectFilterHelpers } from "@/hooks/opportunities/projects/use-fetch-project-filter-helpers";
+import { useFetchProjectsFiltered } from "@/hooks/opportunities/projects/use-fetch-projects";
 
 const PROJECTS_PER_PAGE = 20;
 
@@ -575,7 +575,7 @@ const {data: filterOptions = {languages: [], categories: [], difficulties: [], l
                       </Button>
                       <Button size="sm" className="w-1/2" asChild>
                         <a
-                          href={`https://github.com/${project.repository}`}
+                          href={`${project.repository}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

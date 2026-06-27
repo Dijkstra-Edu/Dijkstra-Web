@@ -4,6 +4,8 @@ import { buildPathWithParams } from "@/lib/utils";
 
 import { PaginatedProject, ProjectDto, ProjectFilterHelpers, ProjectFilterHelpersResponseDto } from "@/types/server/dataforge/OSProject/project";
 import { Difficulty } from "@/types/server/dataforge/enums";
+import { Readme } from "@/types/server/dataforge/OSProject/readme";
+import { Issue } from "@/types/server/dataforge/OSProject/issue";
 
 export async function getProjects(params: Map<string, string>): Promise<[Project[], number]> {
   const path = buildPathWithParams(`Dijkstra/v1/projects/opportunities`, params);
@@ -25,14 +27,36 @@ export async function getProjectFilterHelpers(): Promise<ProjectFilterHelpers> {
   return result;
 }
 
-    const convertToFilterHelpers = (response: ProjectFilterHelpersResponseDto): ProjectFilterHelpers => {
-        return {
-            languages: response.languages,
-            difficulties: response.difficulties.map(formatDifficulty),
-            categories: response.categories,
-            licenses: response.licenses
-        }
+export async function getProjectReadme(repositoryUrl: string): Promise<string> {
+  const parts = repositoryUrl.split('/')
+  const repoOwner = parts[parts.length-2]
+  const repoName =  parts[parts.length-1]
+  const path = `repo/${repoOwner}/${repoName}/readme`;
+  console.log("Fetching project  readme:", path);
+  const raw = await apiCall<Readme>("gitripper", path);
+  console.log("Raw readme resp:"+raw.content)
+  return raw.content
+}
+
+export async function getProjectIssues(repositoryUrl: string): Promise<Issue[]> {
+  const parts = repositoryUrl.split('/')
+  const repoOwner = parts[parts.length-2]
+  const repoName =  parts[parts.length-1]
+  const path = `repo/${repoOwner}/${repoName}/issues`;
+  console.log("Fetching project open issues:", path);
+  const raw = await apiCall<Issue[]>("gitripper", path);
+  console.log("Raw issues response:"+raw)
+  return raw
+}
+
+const convertToFilterHelpers = (response: ProjectFilterHelpersResponseDto): ProjectFilterHelpers => {
+    return {
+        languages: response.languages,
+        difficulties: response.difficulties.map(formatDifficulty),
+        categories: response.categories,
+        licenses: response.licenses
     }
+}
 
 
 

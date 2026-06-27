@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import ProjectDetails from "../project-details";
 import { ScrollArea } from "../ui/scroll-area";
-import { useFetchJobsByCategory } from "@/hooks/opportunities/use-fetch-jobs";
+import { useFetchJobsByCategory } from "@/hooks/opportunities/jobs/use-fetch-jobs";
 
 interface JobPosition {
   id: string;
