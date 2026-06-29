@@ -203,8 +203,8 @@ const {data: filterOptions = {languages: [], categories: [], difficulties: [], l
     licenseFilter !== "all"
       ? licenseFilter
       : undefined,
-    PROJECTS_PER_PAGE.toString(),
-    currentPage.toString()
+    PROJECTS_PER_PAGE,
+    currentPage
   )
 
   const [paginatedProjects = [], totalProjects = 0] = data ?? []

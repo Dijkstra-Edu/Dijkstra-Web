@@ -28,13 +28,13 @@ export function useFetchJobsByCategory(category?: string, limit: string = "20") 
   });
 }
 
-export function useFetchJobsFiltered(titleFilter?: string, locationFilter?: string, departmentFilter?: string, locationTypeFilter?: string, employmentTypeFilter?: string, experienceLevelFilter?: string, limit: string = "20", page: string = "1") {
+export function useFetchJobsFiltered(titleFilter?: string, locationFilter?: string, departmentFilter?: string, locationTypeFilter?: string, employmentTypeFilter?: string, experienceLevelFilter?: string, limit: number = 12, page: number = 1) {
   return useQuery({
     queryKey: ["jobs", titleFilter, locationFilter, departmentFilter, locationTypeFilter, employmentTypeFilter, experienceLevelFilter, limit, page],
     queryFn: async () => {
         const params = new Map();
         params.set("limit", limit); // TODO: This is an issue with caching fix it later, we want to cache by category but if we set a limit here it will always return 20 results and if we change the limit it will create a new cache entry
-        params.set("skip", page);
+        params.set("skip", (page-1)*limit);
         if (titleFilter) {
             params.set("title", titleFilter);
         }

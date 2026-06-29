@@ -100,7 +100,7 @@ export default function ProjectDetails({
         </h3>
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
-          <p className="text-lg font-medium">{fellowship.duration}</p>
+          <p className="text-lg font-medium">{fellowship.duration} weeks</p>
         </div>
       </div>
 

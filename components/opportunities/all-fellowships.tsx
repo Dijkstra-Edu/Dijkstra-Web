@@ -1,5 +1,4 @@
 "use client";
-import { Suspense } from "react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +55,8 @@ import { fellowships } from "@/data/fellowship-data";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { ScrollArea } from "../ui/scroll-area";
 import ProjectDetails from "../project-details";
+import { useFetchFellowshipFilterHelpers } from "@/hooks/opportunities/fellowships/use-fetch-fellowships-filter-helpers";
+import { useFetchFellowshipsByCategory, useFetchFellowshipsFiltered } from "@/hooks/opportunities/fellowships/use-fetch-fellowships";
 
 const FELLOWSHIPS_PER_PAGE = 12;
 
@@ -170,27 +171,7 @@ function AllFellowshipsContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Get unique filter options
-  const filterOptions = useMemo(() => {
-    const organizations = [
-      ...new Set(fellowships.map((fellowship) => fellowship.organization)),
-    ];
-    const categories = [
-      ...new Set(fellowships.map((fellowship) => fellowship.category)),
-    ];
-    const locationTypes = [
-      ...new Set(fellowships.map((fellowship) => fellowship.locationType)),
-    ];
-    const durations = [
-      ...new Set(fellowships.map((fellowship) => fellowship.duration)),
-    ];
-
-    return {
-      organizations,
-      categories,
-      locationTypes,
-      durations,
-    };
-  }, []);
+  const {data: filterOptions = {organizations: [], categories: [], locationTypes: [], durations: []}} = useFetchFellowshipFilterHelpers();
 
   // Initialize state with URL parameters
   const [searchTerm, setSearchTerm] = useState("");
@@ -209,54 +190,20 @@ function AllFellowshipsContent() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter fellowships based on search and filters
-  const filteredFellowships = useMemo(() => {
-    return fellowships.filter((fellowship) => {
-      const matchesSearch =
-        fellowship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fellowship.organization
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        fellowship.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesOrganization =
-        organizationFilter === "all" ||
-        fellowship.organization === organizationFilter;
-      const matchesCategory =
-        categoryFilter === "all" || fellowship.category === categoryFilter;
-      const matchesLocationType =
-        locationTypeFilter === "all" ||
-        fellowship.locationType === locationTypeFilter;
-      const matchesDuration =
-        durationFilter === "all" || fellowship.duration === durationFilter;
+  const { data } = useFetchFellowshipsFiltered(
+    searchTerm.toLowerCase(),
+    organizationFilter != 'all' ? organizationFilter : undefined,
+    durationFilter  != 'all' ? durationFilter : undefined,
+    locationTypeFilter  != 'all' ? locationTypeFilter : undefined,
+    categoryFilter  != 'all' ? categoryFilter : undefined,
+    FELLOWSHIPS_PER_PAGE,
+    currentPage
+  )
 
-      return (
-        matchesSearch &&
-        matchesOrganization &&
-        matchesCategory &&
-        matchesLocationType &&
-        matchesDuration
-      );
-    });
-  }, [
-    searchTerm,
-    organizationFilter,
-    categoryFilter,
-    locationTypeFilter,
-    durationFilter,
-  ]);
+  const [paginatedFellowships = [], totalFellowships = 0] = data ?? []
 
-  // Paginate fellowships
-  const paginatedFellowships = useMemo(() => {
-    const startIndex = (currentPage - 1) * FELLOWSHIPS_PER_PAGE;
-    return filteredFellowships.slice(
-      startIndex,
-      startIndex + FELLOWSHIPS_PER_PAGE
-    );
-  }, [filteredFellowships, currentPage]);
-
-  const totalPages = Math.ceil(
-    filteredFellowships.length / FELLOWSHIPS_PER_PAGE
-  );
+  const totalPages = Math.ceil(totalFellowships / FELLOWSHIPS_PER_PAGE);
 
   // Generate dynamic header based on active filters
   const getPageHeader = () => {
@@ -270,7 +217,7 @@ function AllFellowshipsContent() {
     if (activeFilters.length === 0) {
       return {
         title: "All Fellowship Programs",
-        description: `Showing ${filteredFellowships.length} of ${fellowships.length} fellowships`,
+        description: `Showing ${paginatedFellowships.length} of ${totalFellowships} fellowships`,
       };
     }
 
@@ -288,7 +235,7 @@ function AllFellowshipsContent() {
 
     return {
       title,
-      description: `Showing ${filteredFellowships.length} ${activeFilters
+      description: `Showing ${paginatedFellowships.length} ${activeFilters
         .join(" ")
         .toLowerCase()} fellowships`,
     };
@@ -455,7 +402,7 @@ function AllFellowshipsContent() {
                   <SelectItem value="all">All Durations</SelectItem>
                   {filterOptions.durations.map((duration) => (
                     <SelectItem key={duration} value={duration}>
-                      {duration}
+                      {duration} weeks
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -565,7 +512,7 @@ function AllFellowshipsContent() {
                             <div className="flex items-center gap-2">
                               <ClockIcon className="h-4 w-4 text-muted-foreground" />
                               <span className="text-sm">
-                                {fellowship.duration}
+                                {fellowship.duration} weeks
                               </span>
                               <Badge
                                 variant="outline"
