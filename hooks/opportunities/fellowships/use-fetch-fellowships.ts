@@ -33,7 +33,7 @@ export function useFetchFellowshipsFiltered(titleFilter?: string, organizationFi
             params.set("title", titleFilter);
         }
         if (organizationFilter) {
-            params.set("location", organizationFilter);
+            params.set("organization", organizationFilter);
         }
         if (durationFilter) {
             params.set("duration", durationFilter);

@@ -34,6 +34,7 @@ import {
   isJobPosition,
 } from "../types/client/opportunities/opportunities-types";
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { useFetchProjectReadme } from "@/hooks/opportunities/projects/use-fetch-project-readme";
@@ -353,6 +354,13 @@ export default function ProjectDetails({
     return "Learn More";
   };
 
+   const getActionButtonLink = () => {
+    if (isFellowship(item)) return "";
+    if (isProject(item)) return item.repository;
+    if (isJobPosition(item)) return "";
+    return "Learn More";
+  };
+
   const getHighlightText = () => {
     if (item.highlight === "new") return "New";
     if (item.highlight === "trending") return "Trending";
@@ -514,14 +522,17 @@ export default function ProjectDetails({
         <div className="lg:w-72 p-4 md:p-6 border-r border-border">
           <div className="space-y-6">
             {renderSidebarContent()}
-
-            <Button
-              variant="outline"
-              className="w-full justify-between border-border text-foreground hover:bg-accent hover:text-accent-foreground bg-transparent"
+          <Button asChild>
+            <Link
+              href={getActionButtonLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full justify-between"
             >
               {getActionButtonText()}
               <ExternalLink className="w-4 h-4" />
-            </Button>
+            </Link>
+          </Button>
           </div>
         </div>
 
