@@ -215,8 +215,8 @@ function AllJobsContent() {
       ? experienceLevelFilter
       : undefined,
 
-    JOBS_PER_PAGE.toString(),
-    currentPage.toString()
+    JOBS_PER_PAGE,
+    currentPage
   )
 
   const [paginatedJobs = [], totalJobs = 0] = data ?? []

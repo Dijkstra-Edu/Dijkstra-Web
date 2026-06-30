@@ -38,9 +38,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { fellowships } from "@/data/fellowship-data";
 import { ScrollArea } from "../ui/scroll-area";
 import ProjectDetails from "../project-details";
+import { useFetchFellowshipsByCategory, useFetchFellowshipsFiltered } from "@/hooks/opportunities/fellowships/use-fetch-fellowships";
 
 interface FeaturedFellowshipSliderProps {
   category?: string;
@@ -74,12 +74,8 @@ const FeaturedFellowshipSlider = React.forwardRef<
   }, [api, ref]);
 
   // Filter fellowships based on category
-  const filteredFellowships = React.useMemo(() => {
-    if (category === "featured") {
-      return fellowships.filter((fellowship) => fellowship.featured);
-    }
-    return fellowships.slice(0, 6);
-  }, [category]);
+
+  const {data: filteredFellowships = []} = useFetchFellowshipsByCategory(category);
 
   // Calculate days until deadline
   const getDaysUntilDeadline = (deadlineString: string) => {
@@ -209,7 +205,7 @@ const FeaturedFellowshipSlider = React.forwardRef<
                           <div className="flex items-center gap-2">
                             <ClockIcon className="text-muted-foreground h-4 w-4" />
                             <span className="text-sm">
-                              {fellowship.duration}
+                              {fellowship.duration} weeks
                             </span>
                             <Badge
                               variant="outline"
