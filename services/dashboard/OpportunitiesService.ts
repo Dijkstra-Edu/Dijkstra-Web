@@ -113,5 +113,6 @@ const convertToJobPosition = (job: JobPositionDto): JobPosition => {
     ),
 
     perks: job.perks ?? [],
+    applicationUrl: job.application_url ?? ""
   };
 };

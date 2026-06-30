@@ -41,6 +41,7 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import ProjectDetails from "../project-details";
 import { useFetchFellowshipsByCategory, useFetchFellowshipsFiltered } from "@/hooks/opportunities/fellowships/use-fetch-fellowships";
+import Link from "next/link";
 
 interface FeaturedFellowshipSliderProps {
   category?: string;
@@ -278,9 +279,15 @@ const FeaturedFellowshipSlider = React.forwardRef<
                           <BookmarkIcon className="mr-1 h-4 w-4" />
                           Save
                         </Button>
-                        <Button size="sm" className="w-1/2">
-                          Apply Now
-                        </Button>
+                       <Button asChild size="sm" className="w-1/2">
+                            <Link
+                              href={fellowship.applicationUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Apply Now
+                            </Link>
+                          </Button>
                       </CardFooter>
                     </Card>
                   </DialogTrigger>

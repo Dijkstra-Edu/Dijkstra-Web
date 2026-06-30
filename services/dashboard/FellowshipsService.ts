@@ -63,5 +63,6 @@ const convertToFellowships = (fellowship: FellowshipDto): Fellowship => {
   benefits: fellowship.benefits ?? [],
   requirements: fellowship.requirements ?? [],
   technologies: fellowship.technologies ?? [],
+  applicationUrl: fellowship.application_url ?? ""
 };
 };

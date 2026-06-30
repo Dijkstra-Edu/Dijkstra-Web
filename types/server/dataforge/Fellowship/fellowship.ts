@@ -24,6 +24,7 @@ export type FellowshipDto = {
   benefits?: string[];
   requirements?: string[];
   technologies?: string[];
+  application_url?: string;
   created_at: string;
   updated_at: string;
 };
