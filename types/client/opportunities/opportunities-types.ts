@@ -30,7 +30,8 @@ export interface Fellowship extends BaseDetailItem {
   benefits: string[]
   requirements: string[]
   technologies: string[]
-  highlight: "new" | "trending" | "competitive" | "popular" | undefined
+  highlight: "new" | "trending" | "competitive" | "popular" | undefined,
+  applicationUrl: string
 }
 
 // Project interface
@@ -60,6 +61,7 @@ export interface JobPosition extends BaseDetailItem {
   salary: string
   perks: string[]
   highlight: "new" | "trending" | "competitive" | "popular" | undefined
+  applicationUrl: string
 }
 
 // Union type for all possible items

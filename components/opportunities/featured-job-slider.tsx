@@ -37,10 +37,12 @@ import {
   BarChartIcon,
   UsersIcon,
   CalendarIcon,
+  ExternalLink,
 } from "lucide-react";
 import ProjectDetails from "../project-details";
 import { ScrollArea } from "../ui/scroll-area";
 import { useFetchJobsByCategory } from "@/hooks/opportunities/jobs/use-fetch-jobs";
+import Link from "next/link";
 
 interface JobPosition {
   id: string;
@@ -173,6 +175,7 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
           return null;
       }
     };
+    console.log(filteredJobs)
 
     return (
       <div className="w-full">
@@ -318,8 +321,14 @@ const FeaturedJobSlider = React.forwardRef<CarouselApi, FeaturedJobSliderProps>(
                             <BookmarkIcon className="mr-1 h-4 w-4" />
                             Save
                           </Button>
-                          <Button size="sm" className="w-1/2">
-                            Apply Now
+                         <Button asChild size="sm" className="w-1/2">
+                            <Link
+                              href={job.applicationUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Apply Now
+                            </Link>
                           </Button>
                         </CardFooter>
                       </Card>

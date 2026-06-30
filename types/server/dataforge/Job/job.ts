@@ -28,7 +28,8 @@ export type JobPositionDto = {
     organization: string,
     createdAt: string,
     updatedAt: string,
-    technologies?: string[]
+    technologies?: string[],
+    application_url?: string
 }
 
 export type JobFilterHelpersResponseDto = {

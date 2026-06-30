@@ -355,9 +355,9 @@ export default function ProjectDetails({
   };
 
    const getActionButtonLink = () => {
-    if (isFellowship(item)) return "";
+    if (isFellowship(item)) return item.applicationUrl ?? "";
     if (isProject(item)) return item.repository;
-    if (isJobPosition(item)) return "";
+    if (isJobPosition(item)) return item.applicationUrl ?? "";
     return "Learn More";
   };
 
