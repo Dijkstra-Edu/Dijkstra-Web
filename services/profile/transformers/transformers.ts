@@ -1,4 +1,4 @@
-import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData, TestScoresData, VolunteeringData, ProjectsData} from "@/types/client/profile-section/profile-sections";
+import { EducationData, PersonalDetailsData, WorkExperienceData , CertificationsData, PublicationsData, TestScoresData, VolunteeringData, CreateProjectsData, ReadProjectsData} from "@/types/client/profile-section/profile-sections";
 import {
     CreateCertificationRequest,
     CreateEducationRequest,
@@ -505,107 +505,82 @@ export function transformVolunteeringUpdateRequest(
 }
 
 // Project transformers
-export function transformProjectArray(projectArray: GetProjectResponse[]): ProjectsData[] {
-    return projectArray.map((p) => transformProject(p));
+export function transformProjectArrayForRead(projectArray: GetProjectResponse[]): ReadProjectsData[] {
+    return projectArray.map((p) => transformProjectForRead(p));
 }
 
-export function transformProject(project: GetProjectResponse): ProjectsData {
+export function transformProjectForWriteOps(project: GetProjectResponse): CreateProjectsData {
     return {
         id: project.id,
+        username: project.username,
         profileId: project.profile_id,
         name: project.name,
-        organization: project.organization,
-        owner: project.owner,
-        private: project.private,
+        description: project.description,
+        domain: project.domain as ReadProjectsData["domain"],
+        topics: project.topics,
+        tools: project.tools as Tools[],
+        landingPageLink: project.landing_page_link,
+        docsPageLink: project.docs_page_link,
+        githubRepoUrl: project.github_repo_url,
+        projectLogo: project.project_organization_logo ?? undefined
+    };
+}
+
+export function transformProjectForRead(project: GetProjectResponse): ReadProjectsData {
+    const repoAnalysis = new Map(
+        Object.entries(project.repo_analysis ?? {})
+        );
+    return {
+        id: project.id,
+        username: project.username,
+        profileId: project.profile_id,
+        name: project.name,
         githubStars: project.github_stars,
-        githubAbout: project.github_about,
         githubOpenIssues: project.github_open_issues,
         githubForks: project.github_forks,
         description: project.description,
-        domain: project.domain as ProjectsData["domain"],
+        domain: project.domain as ReadProjectsData["domain"],
         topics: project.topics,
         tools: project.tools as Tools[],
-        readme: project.readme,
-        license: project.license,
-        landingPage: project.landing_page,
+        repoAnalysis: project.repo_analysis,
         landingPageLink: project.landing_page_link,
-        docsPage: project.docs_page,
         docsPageLink: project.docs_page_link,
-        ownDomainName: project.own_domain_name,
         domainName: project.domain_name,
-        totalLinesContributed: project.total_lines_contributed,
-        improperUploads: project.improper_uploads,
-        complexityRating: project.complexity_rating,
-        testingFrameworkPresent: project.testing_framework_present,
-        testingFramework: project.testing_framework,
-        projectOrganizationLogo: project.project_organization_logo,
+        totalLinesContributed: project.total_lines_contributed ? project.total_lines_contributed : 0,
+        projectLogo: project.project_organization_logo,
+        repo_quality_grade: Number(repoAnalysis?.get("final_grade")) ?? undefined,
+        githubRepoUrl: project.github_repo_url
     };
 }
 
 export function transformProjectToRequest(
-    project: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">,
+    project: Omit<CreateProjectsData, "id" | "createdAt" | "updatedAt">,
     username: string,
 ): CreateProjectRequest {
     return {
         username,
         name: project.name,
-        organization: project.organization,
-        owner: project.owner,
-        private: project.private,
-        github_stars: project.githubStars,
-        github_about: project.githubAbout,
-        github_open_issues: project.githubOpenIssues,
-        github_forks: project.githubForks,
         description: project.description,
         domain: project.domain as GetProjectResponse["domain"],
         topics: project.topics,
         tools: project.tools as Tools[],
-        readme: project.readme,
-        license: project.license,
-        landing_page: project.landingPage,
         landing_page_link: project.landingPageLink,
-        docs_page: project.docsPage,
         docs_page_link: project.docsPageLink,
-        own_domain_name: project.ownDomainName,
-        domain_name: project.domainName,
-        total_lines_contributed: project.totalLinesContributed,
-        improper_uploads: project.improperUploads,
-        complexity_rating: project.complexityRating,
-        testing_framework_present: project.testingFrameworkPresent,
-        testing_framework: project.testingFramework,
-        project_organization_logo: project.projectOrganizationLogo,
+        github_repo_url: project.githubRepoUrl
     };
 }
 
 export function transformProjectUpdateRequest(
-    project: Partial<ProjectsData>,
+    project: Partial<CreateProjectsData>,
 ): Partial<UpdateProjectRequest> {
     return {
         name: project.name,
-        organization: project.organization,
-        owner: project.owner,
-        private: project.private,
-        github_stars: project.githubStars,
-        github_about: project.githubAbout,
-        github_open_issues: project.githubOpenIssues,
-        github_forks: project.githubForks,
         description: project.description,
         domain: project.domain as GetProjectResponse["domain"],
         topics: project.topics,
         tools: project.tools as Tools[],
-        readme: project.readme,
-        license: project.license,
-        landing_page: project.landingPage,
         landing_page_link: project.landingPageLink,
-        docs_page: project.docsPage,
         docs_page_link: project.docsPageLink,
-        own_domain_name: project.ownDomainName,
-        domain_name: project.domainName,
-        total_lines_contributed: project.totalLinesContributed,
-        improper_uploads: project.improperUploads,
-        complexity_rating: project.complexityRating,
-        testing_framework_present: project.testingFrameworkPresent,
-        testing_framework: project.testingFramework,
-        project_organization_logo: project.projectOrganizationLogo,
+        github_repo_url: project.githubRepoUrl
     };
 }

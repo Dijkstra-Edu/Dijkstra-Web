@@ -12,7 +12,6 @@ export async function getLatestContributions(
   username: string
 ): Promise<OwnerRepositoryContributionDto[]> {
   const path = `${encodeURIComponent(username)}/contributions/latest?count=5`;
-  console.log("Fetching latest contributions:", path);
   const raw = await apiCall<OwnerRepositoryContributionDto[]>("gitripper", path);
   return raw;
 }
@@ -21,7 +20,6 @@ export async function getGithubProfileInfo(
   username: string
 ): Promise<GithubProfileDto> {
   const path = `${encodeURIComponent(username)}/profile/info`;
-  console.log("Fetching GitHub profile info:", path);
   const raw = await apiCall<GithubProfileDto>("gitripper", path);
   return raw;
 }
@@ -31,7 +29,6 @@ export async function getAllTimeGithubStats(
   username: string
 ): Promise<GithubStatDto> {
   const path = `${encodeURIComponent(username)}/stats/counts`;
-  console.log("Fetching all-time stats:", path);
   const raw = await apiCall<GithubStatDto>("gitripper", path);
   return raw;
 }
@@ -42,8 +39,6 @@ export async function getGithubCommitInformationByDates(
   username: string
 ): Promise<{ date: string; Github: number }[]> {
   const path = `${GITRIPPER_COMMIT_PATH}/${encodeURIComponent(username)}/${startDate}/${endDate}`;
-  console.log("Fetching commits by date:", path);
-
   const raw = await apiCall<AggregatedCommits>("gitripper", path);
   const commits = raw?.commitsByDate ?? [];
 
@@ -56,10 +51,7 @@ export async function getGithubCommitInformation(
 ): Promise<{ date: string; Github: number }[]> {
   const { startTime, endTime } = getDateRange(timeRange);
   const path = `${GITRIPPER_COMMIT_PATH}/${encodeURIComponent(username)}/${startTime}/${endTime}`;
-  console.log("Fetching commits:", path);
-
   const raw = await apiCall<AggregatedCommits>("gitripper", path);
-  console.log("Raw commit data:", raw);
   const commits = raw?.commitsByDate ?? [];
 
   return normalizeMissingDates(commits, startTime, endTime);

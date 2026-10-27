@@ -6,8 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+
 import {
   Select,
   SelectContent,
@@ -27,7 +26,7 @@ import { Edit, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { projectsSchema, type ProjectsFormData } from "@/types/client/profile-section/schemas";
 import { parseSkillsString } from "@/lib/profile-utils";
-import type { ProjectsData, Domain, Tools } from "@/types/client/profile-section/profile-sections";
+import type { CreateProjectsData, Domain, Tools } from "@/types/client/profile-section/profile-sections";
 
 const DOMAINS: { value: Domain; label: string }[] = [
   { value: "FRONTEND", label: "Frontend" },
@@ -52,9 +51,9 @@ const TESTING_FRAMEWORKS = [
 ];
 
 interface ProjectsFormProps {
-  projects: ProjectsData[];
-  onAdd: (data: Omit<ProjectsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
-  onUpdate: (data: { id: string; data: Partial<ProjectsData> }) => void;
+  projects: CreateProjectsData[];
+  onAdd: (data: Omit<CreateProjectsData, 'id' | 'profileId' | 'createdAt' | 'updatedAt'>) => void;
+  onUpdate: (data: { id: string; data: Partial<CreateProjectsData> }) => void;
   onDelete: (id: string) => void;
   isAdding: boolean;
   isUpdating: boolean;
@@ -79,30 +78,13 @@ export function ProjectsForm({
     resolver: zodResolver(projectsSchema),
     defaultValues: {
       name: "",
-      organization: "Personal",
-      owner: "",
-      private: false,
-      githubStars: 0,
-      githubAbout: "",
-      githubOpenIssues: 0,
-      githubForks: 0,
       description: "",
       domain: "FULLSTACK" as Domain,
       topics: [],
       tools: [],
-      readme: true,
-      license: true,
-      landingPage: false,
       landingPageLink: "",
-      docsPage: false,
       docsPageLink: "",
-      ownDomainName: false,
-      totalLinesContributed: 0,
-      improperUploads: false,
-      complexityRating: 5,
-      testingFrameworkPresent: false,
-      testingFramework: "Jest",
-      projectOrganizationLogo: "",
+      githubRepoUrl:  ""
     },
   });
 
@@ -112,6 +94,7 @@ export function ProjectsForm({
 
   const onSubmit = (data: ProjectsFormData) => {
     try {
+      console.log("Adding new project:"+data)
       onAdd({
         ...data,
         domain: data.domain as Domain,
@@ -144,34 +127,17 @@ export function ProjectsForm({
     }
   };
 
-  const handleEdit = (project: ProjectsData) => {
+  const handleEdit = (project: CreateProjectsData) => {
     setEditingId(project.id);
     editForm.reset({
       name: project.name,
-      organization: project.organization,
-      owner: project.owner,
-      private: project.private,
-      githubStars: project.githubStars,
-      githubAbout: project.githubAbout,
-      githubOpenIssues: project.githubOpenIssues,
-      githubForks: project.githubForks,
       description: project.description,
       domain: project.domain,
       topics: project.topics,
       tools: project.tools,
-      readme: project.readme,
-      license: project.license,
-      landingPage: project.landingPage,
       landingPageLink: project.landingPageLink,
-      docsPage: project.docsPage,
       docsPageLink: project.docsPageLink,
-      ownDomainName: project.ownDomainName,
-      totalLinesContributed: project.totalLinesContributed,
-      improperUploads: project.improperUploads,
-      complexityRating: project.complexityRating,
-      testingFrameworkPresent: project.testingFrameworkPresent,
-      testingFramework: project.testingFramework,
-      projectOrganizationLogo: project.projectOrganizationLogo,
+      githubRepoUrl: project.githubRepoUrl
     });
   };
 
@@ -209,7 +175,15 @@ export function ProjectsForm({
         <div className="border rounded-lg p-4 space-y-4">
           <h4 className="font-medium">Add New Project</h4>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form  onSubmit={form.handleSubmit(
+                  (data) => {
+                    console.log("Form submitted successfully:", data);
+                    onSubmit(data);
+                  },
+                  (errors) => {
+                    console.log("Form validation failed:", errors);
+                  }
+                )} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -224,38 +198,8 @@ export function ProjectsForm({
                     </FormItem>
                   )}
                 />
-                
-                <FormField
-                  control={form.control}
-                  name="owner"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub Owner</FormLabel>
-                      <FormControl>
-                        <Input placeholder="yourusername" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="organization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Organization</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Personal, University, Company" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
+              <FormField
                   control={form.control}
                   name="domain"
                   render={({ field }) => (
@@ -279,21 +223,9 @@ export function ProjectsForm({
                     </FormItem>
                   )}
                 />
+                
               </div>
 
-              <FormField
-                control={form.control}
-                name="githubAbout"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>GitHub Description</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Brief description for GitHub" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
@@ -313,6 +245,7 @@ export function ProjectsForm({
                 )}
               />
 
+              {/*TODO: @Johnny make this a nice smooth list selection */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -351,65 +284,6 @@ export function ProjectsForm({
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="githubStars"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub Stars</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="githubForks"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub Forks</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="complexityRating"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Complexity Rating (1-10)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="1" 
-                          max="10"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 5)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -441,80 +315,24 @@ export function ProjectsForm({
                 />
               </div>
 
-              {/* Checkboxes */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="readme"
+                  name="githubRepoUrl"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormItem>
+                      <FormLabel>Github Repository Link</FormLabel>
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Input placeholder="https://github.com/OWNER/REPO" {...field} />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Has README</FormLabel>
-                      </div>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
-                
-                <FormField
-                  control={form.control}
-                  name="license"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Has License</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="landingPage"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Has Landing Page</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="docsPage"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Has Documentation</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+              
               </div>
+
+              {/* Checkboxes */}  
 
               <div className="flex gap-2">
                 <Button type="submit" disabled={isAdding}>
@@ -613,10 +431,10 @@ export function ProjectsForm({
             // Display Mode
             <div className="space-y-3">
               <div className="flex justify-between items-start">
-                <div>
+                {/* <div>
                   <h5 className="font-medium">{project.name}</h5>
                   <p className="text-sm text-muted-foreground">{project.githubAbout}</p>
-                </div>
+                </div> */}
                 <div className="flex gap-2">
                   <Button
                     size="sm"

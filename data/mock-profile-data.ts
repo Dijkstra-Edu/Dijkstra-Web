@@ -3,7 +3,7 @@ import type {
   WorkExperienceData,
   SkillsData,
   EducationData,
-  ProjectsData,
+  CreateProjectsData,
   CertificationsData,
   PublicationsData,
   VolunteeringData,
@@ -324,7 +324,7 @@ export const mockEducation: EducationData[] = [
 ];
 
 // Mock Projects Data - matches Projects table
-export const mockProjects: ProjectsData[] = [
+export const mockProjects: CreateProjectsData[] = [
   {
     id: "proj_001",
     profileId: "profile_001",

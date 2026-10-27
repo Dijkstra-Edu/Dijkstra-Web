@@ -171,7 +171,7 @@ export interface ProjectResponse {
   domain_name?: string;
   total_lines_contributed?: number;
   improper_uploads?: boolean;
-  complexity_rating?: number;
+  repo_analysis?: Map<string, unknown>;
   testing_framework_present: boolean;
   testing_framework?: string;
 }

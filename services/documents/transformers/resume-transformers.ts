@@ -249,7 +249,7 @@ function transformProject(proj: ProjectResponse): Project {
     domain_name: proj.domain_name,
     total_lines_contributed: proj.total_lines_contributed || 0,
     improper_uploads: proj.improper_uploads || false,
-    complexity_rating: proj.complexity_rating || 0,
+    complexity_rating: proj.repo_analysis ? Number(proj.repo_analysis.get('final_grade')) : 0,
     testing_framework_present: proj.testing_framework_present,
     testing_framework: proj.testing_framework,
   };

@@ -167,9 +167,7 @@ async function buildPathAndForwardRequest(req: NextRequest,  { params }: { param
   if (isExternalService(path)) {
     return handleExternalService(req, fullPath);
   }
-  console.log("PATH:"+path)
   if(path.some(p => p.includes("stream"))){
-    console.log("HERE")
     return proxyToBackendStream(req, fullPath);
   }
 
