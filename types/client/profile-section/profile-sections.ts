@@ -178,36 +178,42 @@ export interface EducationData {
 }
 
 // Projects - matches Projects table
-export interface ProjectsData {
+export interface CreateProjectsData {
+  username?: string;
   id: string;
   profileId: string;
-
   name: string;
-  organization?: string;
-  owner: string; // GitHub username
-  private: boolean;
-  githubStars: number;
-  githubAbout?: string;
-  githubOpenIssues: number;
-  githubForks: number;
   description: string;
   domain: Domain;
   topics: string[];
   tools: Tools[];
-  readme: boolean;
-  license: boolean;
-  landingPage: boolean;
   landingPageLink?: string;
-  docsPage: boolean;
   docsPageLink?: string;
-  ownDomainName: boolean;
+  githubRepoUrl: string;
+  projectLogo?: string;
+}
+
+export interface ReadProjectsData {
+  id: string;
+  username: string;
+  profileId: string;
+  name: string;
+  description: string;
+  domain: Domain;
+  topics: string[];
+  tools: Tools[];
+  landingPageLink?: string;
+  docsPageLink?: string;
   domainName?: string;
+  githubRepoUrl: string;
+  projectLogo?: string;
+  repoAnalysis?: Object;
+  githubStars?: number;
+  githubAbout?: string;
+  githubOpenIssues?: number;
+  githubForks?: number;
   totalLinesContributed?: number;
-  improperUploads?: boolean;
-  complexityRating?: number;
-  testingFrameworkPresent: boolean;
-  testingFramework?: string;
-  projectOrganizationLogo?: string;
+  repo_quality_grade?:number;
 }
 
 // Certifications - matches Certifications table

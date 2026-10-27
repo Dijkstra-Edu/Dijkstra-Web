@@ -1,6 +1,6 @@
 // Custom hook for volunteering
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ProjectsData } from "@/types/client/profile-section/profile-sections";
+import { CreateProjectsData } from "@/types/client/profile-section/profile-sections";
 import { addProjectByGithubUsername, deleteProjectByProjectId, getProjectsByGithubUsername, updateProjectByProjectId } from "@/services/profile/ProjectService";
 
 export const useGetProjects = (username: string) => {
@@ -20,7 +20,7 @@ export const useAddProject = (username: string) => {
     mutationFn: ({
       data,
     }: {
-      data: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">;
+      data: Omit<CreateProjectsData, "id" | "createdAt" | "updatedAt">;
     }) => {
       return addProjectByGithubUsername(username, data);
     },
@@ -41,8 +41,9 @@ export const useUpdateProject = (username: string) => {
       data,
     }: {
       projectId: string;
-      data: Partial<ProjectsData>;
+      data: Partial<CreateProjectsData>;
     }) => {
+
       return updateProjectByProjectId(projectId, data); //call service -> Core API -> /api/
     },
     onSuccess: () => {

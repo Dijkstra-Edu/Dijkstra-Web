@@ -1,10 +1,11 @@
 import {
-  transformProject,
-  transformProjectArray,
+  transformProjectForRead,
+  transformProjectArrayForRead,
   transformProjectToRequest,
   transformProjectUpdateRequest,
+  transformProjectForWriteOps,
 } from "./transformers/transformers";
-import { ProjectsData } from "@/types/client/profile-section/profile-sections";
+import { CreateProjectsData, ReadProjectsData } from "@/types/client/profile-section/profile-sections";
 import { GetProjectResponse } from "@/types/server/dataforge/User/profile";
 import { apiCall } from "@/services/CoreApiService";
 
@@ -15,12 +16,15 @@ const WP_PATH = "Dijkstra/v1/projects";
  */
 export async function getProjectsByGithubUsername(
   username: string
-): Promise<ProjectsData[]> {
+): Promise<ReadProjectsData[]> {
   const response = await apiCall<GetProjectResponse[]>(
     "dataforge",
     `${WP_PATH}/${encodeURIComponent(username)}`
   );
-  return transformProjectArray(response);
+  const transformedResponse =  transformProjectArrayForRead(response);
+  console.log("Printing transformed response");
+  console.log(transformedResponse);
+  return transformedResponse;
 }
 
 /**
@@ -28,14 +32,14 @@ export async function getProjectsByGithubUsername(
  */
 export async function addProjectByGithubUsername(
   username: string,
-  data: Omit<ProjectsData, "id" | "createdAt" | "updatedAt">
-): Promise<ProjectsData> {
+  data: Omit<CreateProjectsData, "id" | "createdAt" | "updatedAt">
+): Promise<CreateProjectsData> {
   const request = transformProjectToRequest(data, username);
   const response = await apiCall<GetProjectResponse>("dataforge", WP_PATH, {
     method: "POST",
     body: JSON.stringify(request),
   });
-  return transformProject(response);
+  return transformProjectForWriteOps(response);
 }
 
 /**
@@ -43,8 +47,8 @@ export async function addProjectByGithubUsername(
  */
 export async function updateProjectByProjectId(
   projectId: string,
-  data: Partial<ProjectsData>
-): Promise<ProjectsData> {
+  data: Partial<CreateProjectsData>,
+): Promise<CreateProjectsData> {
   const request = transformProjectUpdateRequest(data);
   const response = await apiCall<GetProjectResponse>(
     "dataforge",
@@ -54,7 +58,7 @@ export async function updateProjectByProjectId(
       body: JSON.stringify(request),
     }
   );
-  return transformProject(response);
+  return transformProjectForWriteOps(response);
 }
 
 /**

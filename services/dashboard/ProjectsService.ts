@@ -8,7 +8,7 @@ import { Readme } from "@/types/server/dataforge/OSProject/readme";
 import { Issue } from "@/types/server/dataforge/OSProject/issue";
 
 export async function getProjects(params: Map<string, string>): Promise<[Project[], number]> {
-  const path = buildPathWithParams(`Dijkstra/v1/projects/opportunities`, params);
+  const path = buildPathWithParams(`Dijkstra/v1/opportunities/projects`, params);
   console.log("Fetching project listings:", path);
   const raw = await apiCall<PaginatedProject>("dataforge", path);
   const result = raw.projects.map(convertToProject);
@@ -18,7 +18,7 @@ console.log("Fetching project listings for params:", params);
 }
 
 export async function getProjectFilterHelpers(): Promise<ProjectFilterHelpers> {
-  const path = `Dijkstra/v1/projects/opportunities/filter_helpers`;
+  const path = `Dijkstra/v1/opportunities/projects/filter_helpers`;
   console.log("Fetching project filter helpers:", path);
   const raw = await apiCall<ProjectFilterHelpersResponseDto>("dataforge", path);
   console.log("Raw project filter helpers response:", raw);
@@ -32,9 +32,7 @@ export async function getProjectReadme(repositoryUrl: string): Promise<string> {
   const repoOwner = parts[parts.length-2]
   const repoName =  parts[parts.length-1]
   const path = `repo/${repoOwner}/${repoName}/readme`;
-  console.log("Fetching project  readme:", path);
   const raw = await apiCall<Readme>("gitripper", path);
-  console.log("Raw readme resp:"+raw.content)
   return raw.content
 }
 
@@ -43,9 +41,7 @@ export async function getProjectIssues(repositoryUrl: string): Promise<Issue[]> 
   const repoOwner = parts[parts.length-2]
   const repoName =  parts[parts.length-1]
   const path = `repo/${repoOwner}/${repoName}/issues`;
-  console.log("Fetching project open issues:", path);
   const raw = await apiCall<Issue[]>("gitripper", path);
-  console.log("Raw issues response:"+raw)
   return raw
 }
 

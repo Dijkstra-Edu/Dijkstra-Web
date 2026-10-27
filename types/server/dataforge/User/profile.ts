@@ -382,7 +382,7 @@ export interface UpdateVolunteeringRequest {
 
 export interface GetProjectResponse {
     id: UUID
-    username?: string
+    username: string
     profile_id: UUID
     name: string
     organization?: string
@@ -412,63 +412,30 @@ export interface GetProjectResponse {
     testing_framework?: string
     created_at?: string
     updated_at?: string
+    repo_analysis?: Object  
+    github_repo_url: string
 }
 
 export interface CreateProjectRequest {
-    username: string
-    name: string
-    organization?: string
-    owner: string
-    private: boolean
-    github_stars: number
-    github_about?: string
-    github_open_issues: number
-    github_forks: number
-    description: string
-    domain: Domain
-    topics?: string[]
-    tools: Tools[]
-    readme: boolean
-    license: boolean
-    landing_page: boolean
-    landing_page_link?: string
-    docs_page: boolean
-    docs_page_link?: string
-    own_domain_name: boolean
-    domain_name?: string
-    total_lines_contributed?: number
-    improper_uploads?: boolean
-    complexity_rating?: number
-    testing_framework_present: boolean
-    testing_framework?: string
-    project_organization_logo?: string
+    username: string;
+    name: string;
+    description: string;
+    github_repo_url: string;
+    domain: Domain;
+    topics?: string[];
+    tools: Tools[];
+    landing_page_link?: string;
+    docs_page_link?: string;
 }
 
 export interface UpdateProjectRequest {
-    name?: string
-    organization?: string
-    owner?: string
-    private?: boolean
-    github_stars?: number
-    github_about?: string
-    github_open_issues?: number
-    github_forks?: number
-    description?: string
-    domain?: Domain
-    topics?: string[]
-    tools?: Tools[]
-    readme?: boolean
-    license?: boolean
-    landing_page?: boolean
-    landing_page_link?: string
-    docs_page?: boolean
-    docs_page_link?: string
-    own_domain_name?: boolean
-    domain_name?: string
-    total_lines_contributed?: number
-    improper_uploads?: boolean
-    complexity_rating?: number
-    testing_framework_present?: boolean
-    testing_framework?: string
-    project_organization_logo?: string
+    username: string;
+    name: string;
+    description: string;
+    github_repo_url: string;
+    domain: Domain;
+    topics?: string[];
+    tools: Tools[];
+    landing_page_link?: string;
+    docs_page_link?: string;
 }

@@ -124,30 +124,13 @@ export type EducationFormData = z.infer<typeof educationSchema>;
 // Projects schema (mapped to database fields)
 export const projectsSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
-  organization: z.string().min(1, 'Organization is required'),
-  owner: z.string().min(1, 'Owner is required'),
-  private: z.boolean(),
-  githubStars: z.number().min(0, 'Stars cannot be negative'),
-  githubAbout: z.string().min(1, 'GitHub description is required'),
-  githubOpenIssues: z.number().min(0, 'Open issues cannot be negative'),
-  githubForks: z.number().min(0, 'Forks cannot be negative'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   domain: z.string().min(1, 'Domain is required'),
   topics: z.array(z.string()).min(1, 'At least one topic is required'),
   tools: z.array(z.string()).min(1, 'At least one tool is required'),
-  readme: z.boolean(),
-  license: z.boolean(),
-  landingPage: z.boolean(),
   landingPageLink: z.string().url().optional().or(z.literal('')),
-  docsPage: z.boolean(),
   docsPageLink: z.string().url().optional().or(z.literal('')),
-  ownDomainName: z.boolean(),
-  totalLinesContributed: z.number().min(0, 'Lines of code cannot be negative'),
-  improperUploads: z.boolean(),
-  complexityRating: z.number().min(1).max(10, 'Complexity rating must be between 1 and 10'),
-  testingFrameworkPresent: z.boolean(),
-  testingFramework: z.string().optional(),
-  projectOrganizationLogo: z.string().optional(),
+  githubRepoUrl: z.string()
 });
 
 // Form data type (without system fields)
